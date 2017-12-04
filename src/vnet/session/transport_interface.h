@@ -22,43 +22,42 @@
 /*
  * Transport protocol virtual function table
  */
-typedef struct _transport_proto_vft
-{
-  /*
-   * Setup
-   */
-  u32 (*bind) (u32 session_index, transport_endpoint_t * lcl);
-  u32 (*unbind) (u32);
-  int (*open) (transport_endpoint_t * rmt);
-  void (*close) (u32 conn_index, u32 thread_index);
-  void (*cleanup) (u32 conn_index, u32 thread_index);
+typedef struct _transport_proto_vft {
+    /*
+     * Setup
+     */
+    u32 (*bind) (u32 session_index, transport_endpoint_t * lcl);
+    u32 (*unbind) (u32);
+    int (*open) (transport_endpoint_t * rmt);
+    void (*close) (u32 conn_index, u32 thread_index);
+    void (*cleanup) (u32 conn_index, u32 thread_index);
 
-  /*
-   * Transmission
-   */
+    /*
+     * Transmission
+     */
     u32 (*push_header) (transport_connection_t * tconn, vlib_buffer_t * b);
     u16 (*send_mss) (transport_connection_t * tc);
     u32 (*send_space) (transport_connection_t * tc);
     u32 (*tx_fifo_offset) (transport_connection_t * tc);
 
-  /*
-   * Connection retrieval
-   */
-  transport_connection_t *(*get_connection) (u32 conn_idx, u32 thread_idx);
-  transport_connection_t *(*get_listener) (u32 conn_index);
-  transport_connection_t *(*get_half_open) (u32 conn_index);
+    /*
+     * Connection retrieval
+     */
+    transport_connection_t *(*get_connection) (u32 conn_idx, u32 thread_idx);
+    transport_connection_t *(*get_listener) (u32 conn_index);
+    transport_connection_t *(*get_half_open) (u32 conn_index);
 
-  /*
-   * Format
-   */
-  u8 *(*format_connection) (u8 * s, va_list * args);
-  u8 *(*format_listener) (u8 * s, va_list * args);
-  u8 *(*format_half_open) (u8 * s, va_list * args);
+    /*
+     * Format
+     */
+    u8 *(*format_connection) (u8 * s, va_list * args);
+    u8 *(*format_listener) (u8 * s, va_list * args);
+    u8 *(*format_half_open) (u8 * s, va_list * args);
 } transport_proto_vft_t;
 
 void transport_register_protocol (transport_proto_t transport_proto,
-				  u8 is_ip4,
-				  const transport_proto_vft_t * vft);
+                                  u8 is_ip4,
+                                  const transport_proto_vft_t * vft);
 transport_proto_vft_t *transport_protocol_get_vft (u8 session_type);
 
 #endif /* SRC_VNET_SESSION_TRANSPORT_INTERFACE_H_ */

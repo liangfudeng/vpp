@@ -57,14 +57,14 @@
 #endif
 
 /* r1 r2 link condition+vsave regs 14-31 fp regs 14-31 vector regs 20-31 */
-#define CLIB_ARCH_LONGJMP_REGS				\
-  (/* r1 lr cr vrsave */				\
-   4							\
-   /* gp */						\
-   + (31 - 14 + 1)					\
-   /* fp */						\
-   + (sizeof (f64) / sizeof (uword)) * (31 - 14 + 1)	\
-   /* vector regs */					\
+#define CLIB_ARCH_LONGJMP_REGS              \
+  (/* r1 lr cr vrsave */                \
+   4                            \
+   /* gp */                     \
+   + (31 - 14 + 1)                  \
+   /* fp */                     \
+   + (sizeof (f64) / sizeof (uword)) * (31 - 14 + 1)    \
+   /* vector regs */                    \
    + (16 / sizeof (uword)) * CLIB_POWERPC_ALTIVEC_N_REGS)
 
 #elif defined(__SPU__)
@@ -97,9 +97,8 @@
 #error "unknown machine"
 #endif
 
-typedef struct
-{
-  uword regs[CLIB_ARCH_LONGJMP_REGS];
+typedef struct {
+    uword regs[CLIB_ARCH_LONGJMP_REGS];
 } clib_longjmp_t __attribute__ ((aligned (16)));
 
 /* Return given value to saved context. */
@@ -111,7 +110,7 @@ uword clib_setjmp (clib_longjmp_t * save, uword return_value_not_taken);
 
 /* Call function on given stack. */
 uword clib_calljmp (uword (*func) (uword func_arg),
-		    uword func_arg, void *stack);
+                    uword func_arg, void *stack);
 
 #endif /* included_clib_longjmp_h */
 

@@ -24,8 +24,7 @@
 #include <vnet/dpo/dpo.h>
 #include <vnet/ip/ip6.h>
 
-typedef struct l3_proxy_dpo_t_
-{
+typedef struct l3_proxy_dpo_t_ {
     /**
      * The Software interface index on which traffic is l3_proxyd
      */

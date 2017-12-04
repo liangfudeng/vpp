@@ -33,7 +33,7 @@
 
 #include <vlibmemory/vl_memory_msg_enum.h>
 
-#define vl_typedefs		/* define message structures */
+#define vl_typedefs     /* define message structures */
 #include <vlibmemory/vl_memory_api_h.h>
 #undef vl_typedefs
 
@@ -51,127 +51,121 @@
 static void
 vl_api_sockclnt_create_reply_t_handler (vl_api_sockclnt_create_reply_t * mp)
 {
-  vl_api_registration_t *rp = socket_main.current_rp;
+    vl_api_registration_t *rp = socket_main.current_rp;
 
-  rp->server_handle = mp->handle;
-  rp->server_index = mp->index;
+    rp->server_handle = mp->handle;
+    rp->server_index = mp->index;
 }
 
 static void
 vl_api_sockclnt_delete_reply_t_handler (vl_api_sockclnt_delete_reply_t * mp)
 {
-  clib_file_main_t *fm = &file_main;
-  clib_file_t *uf = socket_main.current_uf;
-  vl_api_registration_t *rp = socket_main.current_rp;
+    clib_file_main_t *fm = &file_main;
+    clib_file_t *uf = socket_main.current_uf;
+    vl_api_registration_t *rp = socket_main.current_rp;
 
-  clib_file_del (fm, uf);
-  vl_free_socket_registration_index (rp->vl_api_registration_pool_index);
+    clib_file_del (fm, uf);
+    vl_free_socket_registration_index (rp->vl_api_registration_pool_index);
 }
 
 u32
 sockclnt_open_index (char *client_name, char *hostname, int port)
 {
-  vl_api_registration_t *rp;
-  clib_file_main_t *fm = &file_main;
-  clib_file_t template = { 0 };
-  int sockfd;
-  int one = 1;
-  int rv;
-  struct sockaddr_in serv_addr;
-  struct hostent *server;
-  vl_api_sockclnt_create_t *mp;
-  char my_hostname[64];
+    vl_api_registration_t *rp;
+    clib_file_main_t *fm = &file_main;
+    clib_file_t template = { 0 };
+    int sockfd;
+    int one = 1;
+    int rv;
+    struct sockaddr_in serv_addr;
+    struct hostent *server;
+    vl_api_sockclnt_create_t *mp;
+    char my_hostname[64];
 
-  server = gethostbyname (hostname);
-  if (server == NULL)
-    {
-      clib_warning ("Couldn't translate server name %s", hostname);
-      return ~0;
+    server = gethostbyname (hostname);
+    if (server == NULL) {
+        clib_warning ("Couldn't translate server name %s", hostname);
+        return ~0;
     }
 
-  /* Set up non-blocking server socket on CLIENT_API_SERVER_PORT */
-  sockfd = socket (AF_INET, SOCK_STREAM, 0);
+    /* Set up non-blocking server socket on CLIENT_API_SERVER_PORT */
+    sockfd = socket (AF_INET, SOCK_STREAM, 0);
 
-  if (sockfd < 0)
-    {
-      clib_unix_warning ("socket");
-      return ~0;
+    if (sockfd < 0) {
+        clib_unix_warning ("socket");
+        return ~0;
     }
 
-  bzero ((char *) &serv_addr, sizeof (serv_addr));
-  serv_addr.sin_family = AF_INET;
-  bcopy ((char *) server->h_addr,
-	 (char *) &serv_addr.sin_addr.s_addr, server->h_length);
-  serv_addr.sin_port = htons (port);
+    bzero ((char *) &serv_addr, sizeof (serv_addr));
+    serv_addr.sin_family = AF_INET;
+    bcopy ((char *) server->h_addr,
+           (char *) &serv_addr.sin_addr.s_addr, server->h_length);
+    serv_addr.sin_port = htons (port);
 
-  if (connect (sockfd, (const void *) &serv_addr, sizeof (serv_addr)) < 0)
-    {
-      clib_unix_warning ("Connect failure to (%s, %d)", hostname, port);
-      close (sockfd);
-      return ~0;
+    if (connect (sockfd, (const void *) &serv_addr, sizeof (serv_addr)) < 0) {
+        clib_unix_warning ("Connect failure to (%s, %d)", hostname, port);
+        close (sockfd);
+        return ~0;
     }
 
-  rv = ioctl (sockfd, FIONBIO, &one);
-  if (rv < 0)
-    {
-      clib_unix_warning ("FIONBIO");
-      close (sockfd);
-      return ~0;
+    rv = ioctl (sockfd, FIONBIO, &one);
+    if (rv < 0) {
+        clib_unix_warning ("FIONBIO");
+        close (sockfd);
+        return ~0;
     }
 
-  pool_get (socket_main.registration_pool, rp);
-  memset (rp, 0, sizeof (*rp));
-  rp->registration_type = REGISTRATION_TYPE_SOCKET_CLIENT;
-  rp->vl_api_registration_pool_index = rp - socket_main.registration_pool;
+    pool_get (socket_main.registration_pool, rp);
+    memset (rp, 0, sizeof (*rp));
+    rp->registration_type = REGISTRATION_TYPE_SOCKET_CLIENT;
+    rp->vl_api_registration_pool_index = rp - socket_main.registration_pool;
 
-  template.read_function = vl_socket_read_ready;
-  template.write_function = vl_socket_write_ready;
-  template.file_descriptor = sockfd;
-  template.private_data = rp - socket_main.registration_pool;
+    template.read_function = vl_socket_read_ready;
+    template.write_function = vl_socket_write_ready;
+    template.file_descriptor = sockfd;
+    template.private_data = rp - socket_main.registration_pool;
 
-  rp->clib_file_index = clib_file_add (fm, &template);
-  rp->name = format (0, "%s:%d", hostname, port);
+    rp->clib_file_index = clib_file_add (fm, &template);
+    rp->name = format (0, "%s:%d", hostname, port);
 
-  mp = vl_msg_api_alloc (sizeof (*mp));
-  mp->_vl_msg_id = ntohs (VL_API_SOCKCLNT_CREATE);
-  mp->context = rp - socket_main.registration_pool;
+    mp = vl_msg_api_alloc (sizeof (*mp));
+    mp->_vl_msg_id = ntohs (VL_API_SOCKCLNT_CREATE);
+    mp->context = rp - socket_main.registration_pool;
 
-  if (gethostname (my_hostname, sizeof (my_hostname)) < 0)
-    {
-      clib_unix_warning ("gethostname");
-      strncpy (my_hostname, "unknown!", sizeof (my_hostname) - 1);
+    if (gethostname (my_hostname, sizeof (my_hostname)) < 0) {
+        clib_unix_warning ("gethostname");
+        strncpy (my_hostname, "unknown!", sizeof (my_hostname) - 1);
     }
-  strncpy ((char *) mp->name, my_hostname, sizeof (mp->name) - 1);
+    strncpy ((char *) mp->name, my_hostname, sizeof (mp->name) - 1);
 
-  vl_msg_api_send (rp, (u8 *) mp);
-  return rp - socket_main.registration_pool;
+    vl_msg_api_send (rp, (u8 *) mp);
+    return rp - socket_main.registration_pool;
 }
 
 void
 sockclnt_close_index (u32 index)
 {
-  vl_api_sockclnt_delete_t *mp;
-  vl_api_registration_t *rp;
+    vl_api_sockclnt_delete_t *mp;
+    vl_api_registration_t *rp;
 
-  /* Don't crash / assert if fed garbage */
-  if (pool_is_free_index (socket_main.registration_pool, index))
-    {
-      clib_warning ("registration_pool index %d already free", index);
-      return;
+    /* Don't crash / assert if fed garbage */
+    if (pool_is_free_index (socket_main.registration_pool, index)) {
+        clib_warning ("registration_pool index %d already free", index);
+        return;
     }
-  rp = pool_elt_at_index (socket_main.registration_pool, index);
+    rp = pool_elt_at_index (socket_main.registration_pool, index);
 
-  mp = vl_msg_api_alloc (sizeof (*mp));
-  mp->_vl_msg_id = ntohs (VL_API_SOCKCLNT_DELETE);
-  mp->handle = rp->server_handle;
-  mp->index = rp->server_index;
-  vl_msg_api_send (rp, (u8 *) mp);
+    mp = vl_msg_api_alloc (sizeof (*mp));
+    mp->_vl_msg_id = ntohs (VL_API_SOCKCLNT_DELETE);
+    mp->handle = rp->server_handle;
+    mp->index = rp->server_index;
+    vl_msg_api_send (rp, (u8 *) mp);
 }
 
 vl_api_registration_t *
 sockclnt_get_registration (u32 index)
 {
-  return pool_elt_at_index (socket_main.registration_pool, index);
+    return pool_elt_at_index (socket_main.registration_pool, index);
 }
 
 /*
@@ -193,9 +187,9 @@ sockclnt_vlib_api_init (vlib_main_t * vm)
                            vl_api_##n##_t_endian,               \
                            vl_api_##n##_t_print,                \
                            sizeof(vl_api_##n##_t), 1);
-  foreach_sockclnt_api_msg;
+    foreach_sockclnt_api_msg;
 #undef _
-  return 0;
+    return 0;
 }
 
 VLIB_API_INIT_FUNCTION (sockclnt_vlib_api_init);

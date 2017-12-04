@@ -83,9 +83,9 @@ extern int fcntl (int __fd, int __cmd, ...);
    __THROW.  */
 extern int
 select (int __nfds, fd_set * __restrict __readfds,
-	fd_set * __restrict __writefds,
-	fd_set * __restrict __exceptfds,
-	struct timeval *__restrict __timeout);
+        fd_set * __restrict __writefds,
+        fd_set * __restrict __exceptfds,
+        struct timeval *__restrict __timeout);
 
 #ifdef __USE_XOPEN2K
 /* Same as above only that the TIMEOUT value is given with higher
@@ -96,10 +96,10 @@ select (int __nfds, fd_set * __restrict __readfds,
    __THROW.  */
 extern int
 pselect (int __nfds, fd_set * __restrict __readfds,
-	 fd_set * __restrict __writefds,
-	 fd_set * __restrict __exceptfds,
-	 const struct timespec *__restrict __timeout,
-	 const __sigset_t * __restrict __sigmask);
+         fd_set * __restrict __writefds,
+         fd_set * __restrict __exceptfds,
+         const struct timespec *__restrict __timeout,
+         const __sigset_t * __restrict __sigmask);
 #endif
 
 
@@ -154,7 +154,7 @@ getpeername (int __fd, __SOCKADDR_ARG __addr, socklen_t * __restrict __len);
 extern ssize_t send (int __fd, const void *__buf, size_t __n, int __flags);
 
 extern ssize_t sendfile (int __out_fd, int __in_fd, off_t * __offset,
-			 size_t __len);
+                         size_t __len);
 
 /* Read N bytes into BUF from socket FD.
    Returns the number read or -1 for errors.
@@ -170,7 +170,7 @@ extern ssize_t recv (int __fd, void *__buf, size_t __n, int __flags);
    __THROW.  */
 extern ssize_t
 sendto (int __fd, const void *__buf, size_t __n,
-	int __flags, __CONST_SOCKADDR_ARG __addr, socklen_t __addr_len);
+        int __flags, __CONST_SOCKADDR_ARG __addr, socklen_t __addr_len);
 
 /* Read N bytes into BUF through socket FD.
    If ADDR is not NULL, fill in *ADDR_LEN bytes of it with tha address of
@@ -181,8 +181,8 @@ sendto (int __fd, const void *__buf, size_t __n,
    __THROW.  */
 extern ssize_t
 recvfrom (int __fd, void *__restrict __buf,
-	  size_t __n, int __flags,
-	  __SOCKADDR_ARG __addr, socklen_t * __restrict __addr_len);
+          size_t __n, int __flags,
+          __SOCKADDR_ARG __addr, socklen_t * __restrict __addr_len);
 
 /* Send a message described MESSAGE on socket FD.
    Returns the number of bytes sent, or -1 for errors.
@@ -200,7 +200,7 @@ sendmsg (int __fd, const struct msghdr *__message, int __flags);
    __THROW.  */
 extern int
 sendmmsg (int __fd, struct mmsghdr *__vmessages,
-	  unsigned int __vlen, int __flags);
+          unsigned int __vlen, int __flags);
 #endif
 
 /* Receive a message as described by MESSAGE from socket FD.
@@ -218,7 +218,7 @@ extern ssize_t recvmsg (int __fd, struct msghdr *__message, int __flags);
    __THROW.  */
 extern int
 recvmmsg (int __fd, struct mmsghdr *__vmessages,
-	  unsigned int __vlen, int __flags, struct timespec *__tmo);
+          unsigned int __vlen, int __flags, struct timespec *__tmo);
 #endif
 
 
@@ -227,14 +227,14 @@ recvmmsg (int __fd, struct mmsghdr *__vmessages,
    actual length.  Returns 0 on success, -1 for errors.  */
 extern int __THROW
 getsockopt (int __fd, int __level, int __optname,
-	    void *__restrict __optval, socklen_t * __restrict __optlen);
+            void *__restrict __optval, socklen_t * __restrict __optlen);
 
 /* Set socket FD's option OPTNAME at protocol level LEVEL
    to *OPTVAL (which is OPTLEN bytes long).
    Returns 0 on success, -1 for errors.  */
 extern int __THROW
 setsockopt (int __fd, int __level, int __optname,
-	    const void *__optval, socklen_t __optlen);
+            const void *__optval, socklen_t __optlen);
 
 /* Prepare to accept connections on socket FD.
    N connection requests will be queued before further requests are refused.
@@ -256,10 +256,10 @@ accept (int __fd, __SOCKADDR_ARG __addr, socklen_t * __restrict __addr_len);
 
    This function is a cancellation point and therefore not marked with
    __THROW.  */
-     /* TBD: implemented later */
+/* TBD: implemented later */
 extern int
 accept4 (int __fd, __SOCKADDR_ARG __addr,
-	 socklen_t * __restrict __addr_len, int __flags);
+         socklen_t * __restrict __addr_len, int __flags);
 
 /* Shut down all or part of the connection open on socket FD.
    HOW determines what to shut down:
@@ -308,7 +308,7 @@ epoll_ctl (int __epfd, int __op, int __fd, struct epoll_event *__event);
    __THROW.  */
 extern int
 epoll_wait (int __epfd, struct epoll_event *__events,
-	    int __maxevents, int __timeout);
+            int __maxevents, int __timeout);
 
 /* Same as epoll_wait, but the thread's signal mask is temporarily
    and atomically replaced with the one provided as parameter.
@@ -317,7 +317,7 @@ epoll_wait (int __epfd, struct epoll_event *__events,
    __THROW.  */
 extern int
 epoll_pwait (int __epfd, struct epoll_event *__events,
-	     int __maxevents, int __timeout, const __sigset_t * __ss);
+             int __maxevents, int __timeout, const __sigset_t * __ss);
 
 /* Poll the file descriptors described by the NFDS structures starting at
    FDS.  If TIMEOUT is nonzero and not -1, allow TIMEOUT milliseconds for
@@ -337,7 +337,7 @@ extern int poll (struct pollfd *__fds, nfds_t __nfds, int __timeout);
    This function is a cancellation point and therefore not marked with
    __THROW.  */
 extern int ppoll (struct pollfd *__fds, nfds_t __nfds,
-		  const struct timespec *__timeout, const __sigset_t * __ss);
+                  const struct timespec *__timeout, const __sigset_t * __ss);
 #endif
 
 

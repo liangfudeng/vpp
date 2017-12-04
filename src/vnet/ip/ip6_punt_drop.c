@@ -36,17 +36,17 @@ ip_punt_policer_t ip6_punt_policer_cfg;
 
 static char *ip6_punt_policer_error_strings[] = {
 #define _(sym,string) string,
-  foreach_ip_punt_policer_error
+    foreach_ip_punt_policer_error
 #undef _
 };
 
 static uword
 ip6_punt_policer (vlib_main_t * vm,
-		  vlib_node_runtime_t * node, vlib_frame_t * frame)
+                  vlib_node_runtime_t * node, vlib_frame_t * frame)
 {
-  return (ip_punt_policer (vm, node, frame,
-			   vnet_feat_arc_ip6_punt.feature_arc_index,
-			   ip6_punt_policer_cfg.policer_index));
+    return (ip_punt_policer (vm, node, frame,
+                             vnet_feat_arc_ip6_punt.feature_arc_index,
+                             ip6_punt_policer_cfg.policer_index));
 }
 
 
@@ -80,22 +80,22 @@ VNET_FEATURE_INIT (ip6_punt_policer_node, static) = {
 static uword
 ip6_drop (vlib_main_t * vm, vlib_node_runtime_t * node, vlib_frame_t * frame)
 {
-  if (node->flags & VLIB_NODE_FLAG_TRACE)
-    ip6_forward_next_trace (vm, node, frame, VLIB_TX);
+    if (node->flags & VLIB_NODE_FLAG_TRACE)
+        ip6_forward_next_trace (vm, node, frame, VLIB_TX);
 
-  return ip_drop_or_punt (vm, node, frame,
-			  vnet_feat_arc_ip6_drop.feature_arc_index);
+    return ip_drop_or_punt (vm, node, frame,
+                            vnet_feat_arc_ip6_drop.feature_arc_index);
 
 }
 
 static uword
 ip6_punt (vlib_main_t * vm, vlib_node_runtime_t * node, vlib_frame_t * frame)
 {
-  if (node->flags & VLIB_NODE_FLAG_TRACE)
-    ip6_forward_next_trace (vm, node, frame, VLIB_TX);
+    if (node->flags & VLIB_NODE_FLAG_TRACE)
+        ip6_forward_next_trace (vm, node, frame, VLIB_TX);
 
-  return ip_drop_or_punt (vm, node, frame,
-			  vnet_feat_arc_ip6_punt.feature_arc_index);
+    return ip_drop_or_punt (vm, node, frame,
+                            vnet_feat_arc_ip6_punt.feature_arc_index);
 }
 
 /* *INDENT-OFF* */
@@ -210,36 +210,35 @@ VLIB_CLI_COMMAND (ip6_punt_policer_command, static) =
 /* *INDENT-ON* */
 
 ip_punt_redirect_t ip6_punt_redirect_cfg = {
-  .any_rx_sw_if_index = {
-			 .tx_sw_if_index = ~0,
-			 }
-  ,
+    .any_rx_sw_if_index = {
+        .tx_sw_if_index = ~0,
+    }
+    ,
 };
 
 #define foreach_ip6_punt_redirect_error         \
 _(DROP, "ip6 punt redirect drop")
 
-typedef enum
-{
+typedef enum {
 #define _(sym,str) IP6_PUNT_REDIRECT_ERROR_##sym,
-  foreach_ip6_punt_redirect_error
+    foreach_ip6_punt_redirect_error
 #undef _
     IP6_PUNT_REDIRECT_N_ERROR,
 } ip6_punt_redirect_error_t;
 
 static char *ip6_punt_redirect_error_strings[] = {
 #define _(sym,string) string,
-  foreach_ip6_punt_redirect_error
+    foreach_ip6_punt_redirect_error
 #undef _
 };
 
 static uword
 ip6_punt_redirect (vlib_main_t * vm,
-		   vlib_node_runtime_t * node, vlib_frame_t * frame)
+                   vlib_node_runtime_t * node, vlib_frame_t * frame)
 {
-  return (ip_punt_redirect (vm, node, frame,
-			    vnet_feat_arc_ip6_punt.feature_arc_index,
-			    &ip6_punt_redirect_cfg));
+    return (ip_punt_redirect (vm, node, frame,
+                              vnet_feat_arc_ip6_punt.feature_arc_index,
+                              &ip6_punt_redirect_cfg));
 }
 
 /* *INDENT-OFF* */
@@ -272,80 +271,78 @@ VNET_FEATURE_INIT (ip6_punt_redirect_node, static) = {
 
 void
 ip6_punt_redirect_add (u32 rx_sw_if_index,
-		       u32 tx_sw_if_index, ip46_address_t * nh)
+                       u32 tx_sw_if_index, ip46_address_t * nh)
 {
-  ip_punt_redirect_rx_t rx = {
-    .tx_sw_if_index = tx_sw_if_index,
-    .nh = *nh,
-  };
+    ip_punt_redirect_rx_t rx = {
+        .tx_sw_if_index = tx_sw_if_index,
+        .nh = *nh,
+    };
 
-  ip_punt_redirect_add (&ip6_punt_redirect_cfg,
-			rx_sw_if_index, &rx, FIB_PROTOCOL_IP6, VNET_LINK_IP6);
+    ip_punt_redirect_add (&ip6_punt_redirect_cfg,
+                          rx_sw_if_index, &rx, FIB_PROTOCOL_IP6, VNET_LINK_IP6);
 
-  vnet_feature_enable_disable ("ip6-punt", "ip6-punt-redirect", 0, 1, 0, 0);
+    vnet_feature_enable_disable ("ip6-punt", "ip6-punt-redirect", 0, 1, 0, 0);
 }
 
 void
 ip6_punt_redirect_del (u32 rx_sw_if_index)
 {
-  vnet_feature_enable_disable ("ip6-punt", "ip6-punt-redirect", 0, 0, 0, 0);
+    vnet_feature_enable_disable ("ip6-punt", "ip6-punt-redirect", 0, 0, 0, 0);
 
-  ip_punt_redirect_del (&ip6_punt_redirect_cfg, rx_sw_if_index);
+    ip_punt_redirect_del (&ip6_punt_redirect_cfg, rx_sw_if_index);
 }
 
 static clib_error_t *
 ip6_punt_redirect_cmd (vlib_main_t * vm,
-		       unformat_input_t * main_input,
-		       vlib_cli_command_t * cmd)
+                       unformat_input_t * main_input,
+                       vlib_cli_command_t * cmd)
 {
-  unformat_input_t _line_input, *line_input = &_line_input;
-  clib_error_t *error = 0;
-  u32 rx_sw_if_index;
-  u32 tx_sw_if_index;
-  ip46_address_t nh;
-  vnet_main_t *vnm;
-  u8 is_add;
+    unformat_input_t _line_input, *line_input = &_line_input;
+    clib_error_t *error = 0;
+    u32 rx_sw_if_index;
+    u32 tx_sw_if_index;
+    ip46_address_t nh;
+    vnet_main_t *vnm;
+    u8 is_add;
 
-  is_add = 1;
-  vnm = vnet_get_main ();
+    is_add = 1;
+    vnm = vnet_get_main ();
 
-  if (!unformat_user (main_input, unformat_line_input, line_input))
-    return 0;
+    if (!unformat_user (main_input, unformat_line_input, line_input))
+        return 0;
 
-  while (unformat_check_input (line_input) != UNFORMAT_END_OF_INPUT)
-    {
-      if (unformat (line_input, "del"))
-	is_add = 0;
-      else if (unformat (line_input, "add"))
-	is_add = 1;
-      else if (unformat (line_input, "rx all"))
-	rx_sw_if_index = ~0;
-      else if (unformat (line_input, "rx %U",
-			 unformat_vnet_sw_interface, vnm, &rx_sw_if_index))
-	;
-      else if (unformat (line_input, "via %U %U",
-			 unformat_ip6_address,
-			 &nh.ip6,
-			 unformat_vnet_sw_interface, vnm, &tx_sw_if_index))
-	;
-      else if (unformat (line_input, "via %U",
-			 unformat_vnet_sw_interface, vnm, &tx_sw_if_index))
-	memset (&nh, 0, sizeof (nh));
-      else
-	{
-	  error = unformat_parse_error (line_input);
-	  goto done;
-	}
+    while (unformat_check_input (line_input) != UNFORMAT_END_OF_INPUT) {
+        if (unformat (line_input, "del"))
+            is_add = 0;
+        else if (unformat (line_input, "add"))
+            is_add = 1;
+        else if (unformat (line_input, "rx all"))
+            rx_sw_if_index = ~0;
+        else if (unformat (line_input, "rx %U",
+                           unformat_vnet_sw_interface, vnm, &rx_sw_if_index))
+            ;
+        else if (unformat (line_input, "via %U %U",
+                           unformat_ip6_address,
+                           &nh.ip6,
+                           unformat_vnet_sw_interface, vnm, &tx_sw_if_index))
+            ;
+        else if (unformat (line_input, "via %U",
+                           unformat_vnet_sw_interface, vnm, &tx_sw_if_index))
+            memset (&nh, 0, sizeof (nh));
+        else {
+            error = unformat_parse_error (line_input);
+            goto done;
+        }
     }
 
-  if (is_add)
-    ip6_punt_redirect_add (rx_sw_if_index, tx_sw_if_index, &nh);
-  else
-    ip6_punt_redirect_del (rx_sw_if_index);
+    if (is_add)
+        ip6_punt_redirect_add (rx_sw_if_index, tx_sw_if_index, &nh);
+    else
+        ip6_punt_redirect_del (rx_sw_if_index);
 
 done:
-  unformat_free (line_input);
-  return (error);
+    unformat_free (line_input);
+    return (error);
 }
 
 /*?
@@ -364,12 +361,12 @@ VLIB_CLI_COMMAND (ip6_punt_redirect_command, static) =
 
 static clib_error_t *
 ip6_punt_redirect_show_cmd (vlib_main_t * vm,
-			    unformat_input_t * main_input,
-			    vlib_cli_command_t * cmd)
+                            unformat_input_t * main_input,
+                            vlib_cli_command_t * cmd)
 {
-  vlib_cli_output (vm, "%U", format_ip_punt_redirect, &ip6_punt_redirect_cfg);
+    vlib_cli_output (vm, "%U", format_ip_punt_redirect, &ip6_punt_redirect_cfg);
 
-  return (NULL);
+    return (NULL);
 }
 
 /*?

@@ -20,217 +20,219 @@
 
 #include "vom/enum_base.hpp"
 
-namespace VOM {
-/**
- * Types belonging to Routing
- */
-
-/**
- * An L3 protocol can be used to construct a prefix that is used
- * to match packets are part of a route.
- */
-class l3_proto_t : public enum_base<l3_proto_t>
+namespace VOM
 {
-public:
-  const static l3_proto_t IPV4;
-  const static l3_proto_t IPV6;
-  const static l3_proto_t MPLS;
+    /**
+     * Types belonging to Routing
+     */
 
-  bool is_ipv4();
-  bool is_ipv6();
+    /**
+     * An L3 protocol can be used to construct a prefix that is used
+     * to match packets are part of a route.
+     */
+    class l3_proto_t : public enum_base<l3_proto_t>
+    {
+    public:
+        const static l3_proto_t IPV4;
+        const static l3_proto_t IPV6;
+        const static l3_proto_t MPLS;
 
-  static const l3_proto_t& from_address(const boost::asio::ip::address& addr);
+        bool is_ipv4();
+        bool is_ipv6();
 
-private:
-  /**
-   * Private constructor taking the value and the string name
-   */
-  l3_proto_t(int v, const std::string& s);
-};
+        static const l3_proto_t& from_address(const boost::asio::ip::address& addr);
 
-/**
- * A next-hop protocol describes the protocol of a peer to which packets
- * are sent after matching a route.
- */
-class nh_proto_t : public enum_base<nh_proto_t>
-{
-public:
-  const static nh_proto_t IPV4;
-  const static nh_proto_t IPV6;
-  const static nh_proto_t MPLS;
-  const static nh_proto_t ETHERNET;
+    private:
+        /**
+         * Private constructor taking the value and the string name
+         */
+        l3_proto_t(int v, const std::string& s);
+    };
 
-  static const nh_proto_t& from_address(const boost::asio::ip::address& addr);
+    /**
+     * A next-hop protocol describes the protocol of a peer to which packets
+     * are sent after matching a route.
+     */
+    class nh_proto_t : public enum_base<nh_proto_t>
+    {
+    public:
+        const static nh_proto_t IPV4;
+        const static nh_proto_t IPV6;
+        const static nh_proto_t MPLS;
+        const static nh_proto_t ETHERNET;
 
-private:
-  /**
-   * Private constructor taking the value and the string name
-   */
-  nh_proto_t(int v, const std::string& s);
-};
+        static const nh_proto_t& from_address(const boost::asio::ip::address& addr);
 
-namespace route {
-/**
- * type def the table-id
- */
-typedef uint32_t table_id_t;
+    private:
+        /**
+         * Private constructor taking the value and the string name
+         */
+        nh_proto_t(int v, const std::string& s);
+    };
 
-/**
- * The table-id for the default table
- */
-const static table_id_t DEFAULT_TABLE = 0;
+    namespace route
+    {
+        /**
+         * type def the table-id
+         */
+        typedef uint32_t table_id_t;
 
-/**
- * A prefix defintion. Address + length
- */
-class prefix_t
-{
-public:
-  /**
-   * Default Constructor - creates ::/0
-   */
-  prefix_t();
-  /**
-   * Constructor with address and length
-   */
-  prefix_t(const boost::asio::ip::address& addr, uint8_t len);
-  /**
-   * Constructor with just the address, this creates a
-   * host prefix
-   */
-  prefix_t(const boost::asio::ip::address& addr);
+        /**
+         * The table-id for the default table
+         */
+        const static table_id_t DEFAULT_TABLE = 0;
 
-  /**
-   * Constructor with string and length
-   */
-  prefix_t(const std::string& s, uint8_t len);
-  /**
-   * Copy Constructor
-   */
-  prefix_t(const prefix_t&);
-  /**
-   * Constructor with VPP API prefix representation
-   */
-  prefix_t(uint8_t is_ip6, uint8_t* addr, uint8_t len);
-  /**
-   * Destructor
-   */
-  ~prefix_t();
+        /**
+         * A prefix defintion. Address + length
+         */
+        class prefix_t
+        {
+        public:
+            /**
+             * Default Constructor - creates ::/0
+             */
+            prefix_t();
+            /**
+             * Constructor with address and length
+             */
+            prefix_t(const boost::asio::ip::address& addr, uint8_t len);
+            /**
+             * Constructor with just the address, this creates a
+             * host prefix
+             */
+            prefix_t(const boost::asio::ip::address& addr);
 
-  /**
-   * Get the address
-   */
-  const boost::asio::ip::address& address() const;
+            /**
+             * Constructor with string and length
+             */
+            prefix_t(const std::string& s, uint8_t len);
+            /**
+             * Copy Constructor
+             */
+            prefix_t(const prefix_t&);
+            /**
+             * Constructor with VPP API prefix representation
+             */
+            prefix_t(uint8_t is_ip6, uint8_t* addr, uint8_t len);
+            /**
+             * Destructor
+             */
+            ~prefix_t();
 
-  /**
-   * Get the network mask width
-   */
-  uint8_t mask_width() const;
+            /**
+             * Get the address
+             */
+            const boost::asio::ip::address& address() const;
 
-  /**
-   * Assignement
-   */
-  prefix_t& operator=(const prefix_t&);
+            /**
+             * Get the network mask width
+             */
+            uint8_t mask_width() const;
 
-  /**
-   * Less than operator
-   */
-  bool operator<(const prefix_t& o) const;
+            /**
+             * Assignement
+             */
+            prefix_t& operator=(const prefix_t&);
 
-  /**
-   * equals operator
-   */
-  bool operator==(const prefix_t& o) const;
+            /**
+             * Less than operator
+             */
+            bool operator<(const prefix_t& o) const;
 
-  /**
-   * not equal opartor
-   */
-  bool operator!=(const prefix_t& o) const;
+            /**
+             * equals operator
+             */
+            bool operator==(const prefix_t& o) const;
 
-  /**
-   * convert to string format for debug purposes
-   */
-  std::string to_string() const;
+            /**
+             * not equal opartor
+             */
+            bool operator!=(const prefix_t& o) const;
 
-  /**
-   * The all Zeros prefix
-   */
-  const static prefix_t ZERO;
+            /**
+             * convert to string format for debug purposes
+             */
+            std::string to_string() const;
 
-  /**
-   * The all Zeros v6 prefix
-   */
-  const static prefix_t ZEROv6;
+            /**
+             * The all Zeros prefix
+             */
+            const static prefix_t ZERO;
 
-  /**
-   * Convert the prefix into VPP API parameters
-   */
-  void to_vpp(uint8_t* is_ip6, uint8_t* addr, uint8_t* len) const;
+            /**
+             * The all Zeros v6 prefix
+             */
+            const static prefix_t ZEROv6;
 
-  /**
-   * Return a address representation of the mask, e.g. 255.255.0.0
-   */
-  boost::asio::ip::address_v4 mask() const;
+            /**
+             * Convert the prefix into VPP API parameters
+             */
+            void to_vpp(uint8_t* is_ip6, uint8_t* addr, uint8_t* len) const;
 
-  /**
-   * get the lowest address in the prefix
-   */
-  boost::asio::ip::address_v4 low() const;
+            /**
+             * Return a address representation of the mask, e.g. 255.255.0.0
+             */
+            boost::asio::ip::address_v4 mask() const;
 
-  /**
-   * Get the highest address in the prefix
-   */
-  boost::asio::ip::address_v4 high() const;
+            /**
+             * get the lowest address in the prefix
+             */
+            boost::asio::ip::address_v4 low() const;
 
-  /**
-   * Get the L3 protocol
-   */
-  l3_proto_t l3_proto() const;
+            /**
+             * Get the highest address in the prefix
+             */
+            boost::asio::ip::address_v4 high() const;
 
-private:
-  /**
-   * The address
-   */
-  boost::asio::ip::address m_addr;
+            /**
+             * Get the L3 protocol
+             */
+            l3_proto_t l3_proto() const;
 
-  /**
-   * The prefix length
-   */
-  uint8_t m_len;
-};
-};
+        private:
+            /**
+             * The address
+             */
+            boost::asio::ip::address m_addr;
 
-boost::asio::ip::address_v4 operator|(const boost::asio::ip::address_v4& addr1,
-                                      const boost::asio::ip::address_v4& addr2);
+            /**
+             * The prefix length
+             */
+            uint8_t m_len;
+        };
+    };
 
-boost::asio::ip::address_v4 operator&(const boost::asio::ip::address_v4& addr1,
-                                      const boost::asio::ip::address_v4& addr2);
+    boost::asio::ip::address_v4 operator|(const boost::asio::ip::address_v4& addr1,
+                                          const boost::asio::ip::address_v4& addr2);
 
-boost::asio::ip::address_v4 operator~(const boost::asio::ip::address_v4& addr1);
+    boost::asio::ip::address_v4 operator&(const boost::asio::ip::address_v4& addr1,
+                                          const boost::asio::ip::address_v4& addr2);
 
-/**
- * Ostream printer for prefix_t
- */
-std::ostream& operator<<(std::ostream& os, const route::prefix_t& pfx);
+    boost::asio::ip::address_v4 operator~(const boost::asio::ip::address_v4& addr1);
 
-/**
- * Convert a boost address into a VPP bytes string
- */
-void to_bytes(const boost::asio::ip::address& addr,
-              uint8_t* is_ip6,
-              uint8_t* array);
-void to_bytes(const boost::asio::ip::address_v4& addr, uint8_t* array);
-void to_bytes(const boost::asio::ip::address_v6& addr, uint8_t* array);
+    /**
+     * Ostream printer for prefix_t
+     */
+    std::ostream& operator<<(std::ostream& os, const route::prefix_t& pfx);
 
-/**
- * Get the prefix mask length of a host route from the boost address
- */
-uint32_t mask_width(const boost::asio::ip::address& addr);
+    /**
+     * Convert a boost address into a VPP bytes string
+     */
+    void to_bytes(const boost::asio::ip::address& addr,
+                  uint8_t* is_ip6,
+                  uint8_t* array);
+    void to_bytes(const boost::asio::ip::address_v4& addr, uint8_t* array);
+    void to_bytes(const boost::asio::ip::address_v6& addr, uint8_t* array);
 
-/**
- * Convert a VPP byte stinrg into a boost addresss
- */
-boost::asio::ip::address from_bytes(uint8_t is_ip6, uint8_t* array);
+    /**
+     * Get the prefix mask length of a host route from the boost address
+     */
+    uint32_t mask_width(const boost::asio::ip::address& addr);
+
+    /**
+     * Convert a VPP byte stinrg into a boost addresss
+     */
+    boost::asio::ip::address from_bytes(uint8_t is_ip6, uint8_t* array);
 };
 
 /*

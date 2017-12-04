@@ -94,252 +94,244 @@ determined a perfect hash for the whole set of keys.
 static void
 init_keys_direct_u32 (phash_main_t * pm)
 {
-  int n_keys_left, b_mask, a_shift;
-  u32 seed;
-  phash_key_t *k;
+    int n_keys_left, b_mask, a_shift;
+    u32 seed;
+    phash_key_t *k;
 
-  seed = pm->hash_seed;
-  b_mask = (1 << pm->b_bits) - 1;
-  a_shift = BITS (seed) - pm->a_bits;
+    seed = pm->hash_seed;
+    b_mask = (1 << pm->b_bits) - 1;
+    a_shift = BITS (seed) - pm->a_bits;
 
-  k = pm->keys;
-  n_keys_left = vec_len (pm->keys);
+    k = pm->keys;
+    n_keys_left = vec_len (pm->keys);
 
-  while (n_keys_left >= 2)
-    {
-      u32 x0, y0, z0;
-      u32 x1, y1, z1;
+    while (n_keys_left >= 2) {
+        u32 x0, y0, z0;
+        u32 x1, y1, z1;
 
-      x0 = y0 = z0 = seed;
-      x1 = y1 = z1 = seed;
-      x0 += (u32) k[0].key;
-      x1 += (u32) k[1].key;
+        x0 = y0 = z0 = seed;
+        x1 = y1 = z1 = seed;
+        x0 += (u32) k[0].key;
+        x1 += (u32) k[1].key;
 
-      hash_mix32 (x0, y0, z0);
-      hash_mix32 (x1, y1, z1);
+        hash_mix32 (x0, y0, z0);
+        hash_mix32 (x1, y1, z1);
 
-      k[0].b = z0 & b_mask;
-      k[1].b = z1 & b_mask;
-      k[0].a = z0 >> a_shift;
-      k[1].a = z1 >> a_shift;
-      if (PREDICT_FALSE (a_shift >= BITS (z0)))
-	k[0].a = k[1].a = 0;
+        k[0].b = z0 & b_mask;
+        k[1].b = z1 & b_mask;
+        k[0].a = z0 >> a_shift;
+        k[1].a = z1 >> a_shift;
+        if (PREDICT_FALSE (a_shift >= BITS (z0)))
+            k[0].a = k[1].a = 0;
 
-      k += 2;
-      n_keys_left -= 2;
+        k += 2;
+        n_keys_left -= 2;
     }
 
-  if (n_keys_left >= 1)
-    {
-      u32 x0, y0, z0;
+    if (n_keys_left >= 1) {
+        u32 x0, y0, z0;
 
-      x0 = y0 = z0 = seed;
-      x0 += k[0].key;
+        x0 = y0 = z0 = seed;
+        x0 += k[0].key;
 
-      hash_mix32 (x0, y0, z0);
+        hash_mix32 (x0, y0, z0);
 
-      k[0].b = z0 & b_mask;
-      k[0].a = z0 >> a_shift;
-      if (PREDICT_FALSE (a_shift >= BITS (z0)))
-	k[0].a = 0;
+        k[0].b = z0 & b_mask;
+        k[0].a = z0 >> a_shift;
+        if (PREDICT_FALSE (a_shift >= BITS (z0)))
+            k[0].a = 0;
 
-      k += 1;
-      n_keys_left -= 1;
+        k += 1;
+        n_keys_left -= 1;
     }
 }
 
 static void
 init_keys_direct_u64 (phash_main_t * pm)
 {
-  int n_keys_left, b_mask, a_shift;
-  u64 seed;
-  phash_key_t *k;
+    int n_keys_left, b_mask, a_shift;
+    u64 seed;
+    phash_key_t *k;
 
-  seed = pm->hash_seed;
-  b_mask = (1 << pm->b_bits) - 1;
-  a_shift = BITS (seed) - pm->a_bits;
+    seed = pm->hash_seed;
+    b_mask = (1 << pm->b_bits) - 1;
+    a_shift = BITS (seed) - pm->a_bits;
 
-  k = pm->keys;
-  n_keys_left = vec_len (pm->keys);
+    k = pm->keys;
+    n_keys_left = vec_len (pm->keys);
 
-  while (n_keys_left >= 2)
-    {
-      u64 x0, y0, z0;
-      u64 x1, y1, z1;
+    while (n_keys_left >= 2) {
+        u64 x0, y0, z0;
+        u64 x1, y1, z1;
 
-      x0 = y0 = z0 = seed;
-      x1 = y1 = z1 = seed;
-      x0 += (u64) k[0].key;
-      x1 += (u64) k[1].key;
+        x0 = y0 = z0 = seed;
+        x1 = y1 = z1 = seed;
+        x0 += (u64) k[0].key;
+        x1 += (u64) k[1].key;
 
-      hash_mix64 (x0, y0, z0);
-      hash_mix64 (x1, y1, z1);
+        hash_mix64 (x0, y0, z0);
+        hash_mix64 (x1, y1, z1);
 
-      k[0].b = z0 & b_mask;
-      k[1].b = z1 & b_mask;
-      k[0].a = z0 >> a_shift;
-      k[1].a = z1 >> a_shift;
-      if (PREDICT_FALSE (a_shift >= BITS (z0)))
-	k[0].a = k[1].a = 0;
+        k[0].b = z0 & b_mask;
+        k[1].b = z1 & b_mask;
+        k[0].a = z0 >> a_shift;
+        k[1].a = z1 >> a_shift;
+        if (PREDICT_FALSE (a_shift >= BITS (z0)))
+            k[0].a = k[1].a = 0;
 
-      k += 2;
-      n_keys_left -= 2;
+        k += 2;
+        n_keys_left -= 2;
     }
 
-  if (n_keys_left >= 1)
-    {
-      u64 x0, y0, z0;
+    if (n_keys_left >= 1) {
+        u64 x0, y0, z0;
 
-      x0 = y0 = z0 = seed;
-      x0 += k[0].key;
+        x0 = y0 = z0 = seed;
+        x0 += k[0].key;
 
-      hash_mix64 (x0, y0, z0);
+        hash_mix64 (x0, y0, z0);
 
-      k[0].b = z0 & b_mask;
-      k[0].a = z0 >> a_shift;
-      if (PREDICT_FALSE (a_shift >= BITS (z0)))
-	k[0].a = 0;
+        k[0].b = z0 & b_mask;
+        k[0].a = z0 >> a_shift;
+        if (PREDICT_FALSE (a_shift >= BITS (z0)))
+            k[0].a = 0;
 
-      k += 1;
-      n_keys_left -= 1;
+        k += 1;
+        n_keys_left -= 1;
     }
 }
 
 static void
 init_keys_indirect_u32 (phash_main_t * pm)
 {
-  int n_keys_left, b_mask, a_shift;
-  u32 seed;
-  phash_key_t *k;
+    int n_keys_left, b_mask, a_shift;
+    u32 seed;
+    phash_key_t *k;
 
-  seed = pm->hash_seed;
-  b_mask = (1 << pm->b_bits) - 1;
-  a_shift = BITS (seed) - pm->a_bits;
+    seed = pm->hash_seed;
+    b_mask = (1 << pm->b_bits) - 1;
+    a_shift = BITS (seed) - pm->a_bits;
 
-  k = pm->keys;
-  n_keys_left = vec_len (pm->keys);
+    k = pm->keys;
+    n_keys_left = vec_len (pm->keys);
 
-  while (n_keys_left >= 2)
-    {
-      u32 xyz[6];
-      u32 x0, y0, z0;
-      u32 x1, y1, z1;
+    while (n_keys_left >= 2) {
+        u32 xyz[6];
+        u32 x0, y0, z0;
+        u32 x1, y1, z1;
 
-      pm->key_seed2 (pm->private, k[0].key, k[1].key, &xyz);
+        pm->key_seed2 (pm->private, k[0].key, k[1].key, &xyz);
 
-      x0 = y0 = z0 = seed;
-      x1 = y1 = z1 = seed;
-      x0 += xyz[0];
-      y0 += xyz[1];
-      z0 += xyz[2];
-      x1 += xyz[3];
-      y1 += xyz[4];
-      z1 += xyz[5];
+        x0 = y0 = z0 = seed;
+        x1 = y1 = z1 = seed;
+        x0 += xyz[0];
+        y0 += xyz[1];
+        z0 += xyz[2];
+        x1 += xyz[3];
+        y1 += xyz[4];
+        z1 += xyz[5];
 
-      hash_mix32 (x0, y0, z0);
-      hash_mix32 (x1, y1, z1);
+        hash_mix32 (x0, y0, z0);
+        hash_mix32 (x1, y1, z1);
 
-      k[0].b = z0 & b_mask;
-      k[1].b = z1 & b_mask;
-      k[0].a = z0 >> a_shift;
-      k[1].a = z1 >> a_shift;
-      if (PREDICT_FALSE (a_shift >= BITS (z0)))
-	k[0].a = k[1].a = 0;
+        k[0].b = z0 & b_mask;
+        k[1].b = z1 & b_mask;
+        k[0].a = z0 >> a_shift;
+        k[1].a = z1 >> a_shift;
+        if (PREDICT_FALSE (a_shift >= BITS (z0)))
+            k[0].a = k[1].a = 0;
 
-      k += 2;
-      n_keys_left -= 2;
+        k += 2;
+        n_keys_left -= 2;
     }
 
-  if (n_keys_left >= 1)
-    {
-      u32 xyz[3];
-      u32 x0, y0, z0;
+    if (n_keys_left >= 1) {
+        u32 xyz[3];
+        u32 x0, y0, z0;
 
-      pm->key_seed1 (pm->private, k[0].key, &xyz);
+        pm->key_seed1 (pm->private, k[0].key, &xyz);
 
-      x0 = y0 = z0 = seed;
-      x0 += xyz[0];
-      y0 += xyz[1];
-      z0 += xyz[2];
+        x0 = y0 = z0 = seed;
+        x0 += xyz[0];
+        y0 += xyz[1];
+        z0 += xyz[2];
 
-      hash_mix32 (x0, y0, z0);
+        hash_mix32 (x0, y0, z0);
 
-      k[0].b = z0 & b_mask;
-      k[0].a = z0 >> a_shift;
-      if (PREDICT_FALSE (a_shift >= BITS (z0)))
-	k[0].a = 0;
+        k[0].b = z0 & b_mask;
+        k[0].a = z0 >> a_shift;
+        if (PREDICT_FALSE (a_shift >= BITS (z0)))
+            k[0].a = 0;
 
-      k += 1;
-      n_keys_left -= 1;
+        k += 1;
+        n_keys_left -= 1;
     }
 }
 
 static void
 init_keys_indirect_u64 (phash_main_t * pm)
 {
-  int n_keys_left, b_mask, a_shift;
-  u64 seed;
-  phash_key_t *k;
+    int n_keys_left, b_mask, a_shift;
+    u64 seed;
+    phash_key_t *k;
 
-  seed = pm->hash_seed;
-  b_mask = (1 << pm->b_bits) - 1;
-  a_shift = BITS (seed) - pm->a_bits;
+    seed = pm->hash_seed;
+    b_mask = (1 << pm->b_bits) - 1;
+    a_shift = BITS (seed) - pm->a_bits;
 
-  k = pm->keys;
-  n_keys_left = vec_len (pm->keys);
+    k = pm->keys;
+    n_keys_left = vec_len (pm->keys);
 
-  while (n_keys_left >= 2)
-    {
-      u64 xyz[6];
-      u64 x0, y0, z0;
-      u64 x1, y1, z1;
+    while (n_keys_left >= 2) {
+        u64 xyz[6];
+        u64 x0, y0, z0;
+        u64 x1, y1, z1;
 
-      pm->key_seed2 (pm->private, k[0].key, k[1].key, &xyz);
+        pm->key_seed2 (pm->private, k[0].key, k[1].key, &xyz);
 
-      x0 = y0 = z0 = seed;
-      x1 = y1 = z1 = seed;
-      x0 += xyz[0];
-      y0 += xyz[1];
-      z0 += xyz[2];
-      x1 += xyz[3];
-      y1 += xyz[4];
-      z1 += xyz[5];
+        x0 = y0 = z0 = seed;
+        x1 = y1 = z1 = seed;
+        x0 += xyz[0];
+        y0 += xyz[1];
+        z0 += xyz[2];
+        x1 += xyz[3];
+        y1 += xyz[4];
+        z1 += xyz[5];
 
-      hash_mix64 (x0, y0, z0);
-      hash_mix64 (x1, y1, z1);
+        hash_mix64 (x0, y0, z0);
+        hash_mix64 (x1, y1, z1);
 
-      k[0].b = z0 & b_mask;
-      k[1].b = z1 & b_mask;
-      k[0].a = z0 >> a_shift;
-      k[1].a = z1 >> a_shift;
-      if (PREDICT_FALSE (a_shift >= BITS (z0)))
-	k[0].a = k[1].a = 0;
+        k[0].b = z0 & b_mask;
+        k[1].b = z1 & b_mask;
+        k[0].a = z0 >> a_shift;
+        k[1].a = z1 >> a_shift;
+        if (PREDICT_FALSE (a_shift >= BITS (z0)))
+            k[0].a = k[1].a = 0;
 
-      k += 2;
-      n_keys_left -= 2;
+        k += 2;
+        n_keys_left -= 2;
     }
 
-  if (n_keys_left >= 1)
-    {
-      u64 xyz[3];
-      u64 x0, y0, z0;
+    if (n_keys_left >= 1) {
+        u64 xyz[3];
+        u64 x0, y0, z0;
 
-      pm->key_seed1 (pm->private, k[0].key, &xyz);
+        pm->key_seed1 (pm->private, k[0].key, &xyz);
 
-      x0 = y0 = z0 = seed;
-      x0 += xyz[0];
-      y0 += xyz[1];
-      z0 += xyz[2];
+        x0 = y0 = z0 = seed;
+        x0 += xyz[0];
+        y0 += xyz[1];
+        z0 += xyz[2];
 
-      hash_mix64 (x0, y0, z0);
+        hash_mix64 (x0, y0, z0);
 
-      k[0].b = z0 & b_mask;
-      k[0].a = z0 >> a_shift;
-      if (PREDICT_FALSE (a_shift >= BITS (z0)))
-	k[0].a = 0;
+        k[0].b = z0 & b_mask;
+        k[0].a = z0 >> a_shift;
+        if (PREDICT_FALSE (a_shift >= BITS (z0)))
+            k[0].a = 0;
 
-      k += 1;
-      n_keys_left -= 1;
+        k += 1;
+        n_keys_left -= 1;
     }
 }
 
@@ -350,125 +342,113 @@ init_keys_indirect_u64 (phash_main_t * pm)
 static int
 init_tabb (phash_main_t * pm)
 {
-  int no_collisions;
-  phash_tabb_t *tb;
-  phash_key_t *k, *l;
+    int no_collisions;
+    phash_tabb_t *tb;
+    phash_key_t *k, *l;
 
-  if (pm->key_seed1)
-    {
-      if (pm->flags & PHASH_FLAG_MIX64)
-	init_keys_indirect_u64 (pm);
-      else
-	init_keys_indirect_u32 (pm);
-    }
-  else
-    {
-      if (pm->flags & PHASH_FLAG_MIX64)
-	init_keys_direct_u64 (pm);
-      else
-	init_keys_direct_u32 (pm);
+    if (pm->key_seed1) {
+        if (pm->flags & PHASH_FLAG_MIX64)
+            init_keys_indirect_u64 (pm);
+        else
+            init_keys_indirect_u32 (pm);
+    } else {
+        if (pm->flags & PHASH_FLAG_MIX64)
+            init_keys_direct_u64 (pm);
+        else
+            init_keys_direct_u32 (pm);
     }
 
-  if (!pm->tabb)
-    vec_resize (pm->tabb, 1 << pm->b_bits);
-  else
-    vec_foreach (tb, pm->tabb) phash_tabb_free (tb);
+    if (!pm->tabb)
+        vec_resize (pm->tabb, 1 << pm->b_bits);
+    else
+        vec_foreach (tb, pm->tabb) phash_tabb_free (tb);
 
-  /* Two keys with the same (a,b) guarantees a collision */
-  no_collisions = 1;
-  vec_foreach (k, pm->keys)
-  {
-    u32 i, *ki;
+    /* Two keys with the same (a,b) guarantees a collision */
+    no_collisions = 1;
+    vec_foreach (k, pm->keys) {
+        u32 i, *ki;
 
-    tb = pm->tabb + k->b;
-    ki = tb->keys;
-    for (i = 0; i < vec_len (ki); i++)
-      {
-	l = pm->keys + ki[i];
-	if (k->a == l->a)
-	  {
-	    /* Given keys are supposed to be unique. */
-	    if (pm->key_is_equal
-		&& pm->key_is_equal (pm->private, l->key, k->key))
-	      clib_error ("duplicate keys");
-	    no_collisions = 0;
-	    goto done;
-	  }
-      }
+        tb = pm->tabb + k->b;
+        ki = tb->keys;
+        for (i = 0; i < vec_len (ki); i++) {
+            l = pm->keys + ki[i];
+            if (k->a == l->a) {
+                /* Given keys are supposed to be unique. */
+                if (pm->key_is_equal
+                    && pm->key_is_equal (pm->private, l->key, k->key))
+                    clib_error ("duplicate keys");
+                no_collisions = 0;
+                goto done;
+            }
+        }
 
-    vec_add1 (tb->keys, k - pm->keys);
-  }
+        vec_add1 (tb->keys, k - pm->keys);
+    }
 
 done:
-  return no_collisions;
+    return no_collisions;
 }
 
 /* Try to apply an augmenting list */
 static int
 apply (phash_main_t * pm, u32 tail, u32 rollback)
 {
-  phash_key_t *k;
-  phash_tabb_t *pb;
-  phash_tabq_t *q_child, *q_parent;
-  u32 ki, i, hash, child, parent;
-  u32 stabb;			/* scramble[tab[b]] */
-  int no_collision;
+    phash_key_t *k;
+    phash_tabb_t *pb;
+    phash_tabq_t *q_child, *q_parent;
+    u32 ki, i, hash, child, parent;
+    u32 stabb;            /* scramble[tab[b]] */
+    int no_collision;
 
-  no_collision = 1;
+    no_collision = 1;
 
-  /* Walk from child to parent until root is reached. */
-  for (child = tail - 1; child; child = parent)
-    {
-      q_child = &pm->tabq[child];
-      parent = q_child->parent_q;
-      q_parent = &pm->tabq[parent];
+    /* Walk from child to parent until root is reached. */
+    for (child = tail - 1; child; child = parent) {
+        q_child = &pm->tabq[child];
+        parent = q_child->parent_q;
+        q_parent = &pm->tabq[parent];
 
-      /* find parent's list of siblings */
-      ASSERT (q_parent->b_q < vec_len (pm->tabb));
-      pb = pm->tabb + q_parent->b_q;
+        /* find parent's list of siblings */
+        ASSERT (q_parent->b_q < vec_len (pm->tabb));
+        pb = pm->tabb + q_parent->b_q;
 
-      /* erase old hash values */
-      stabb = pm->scramble[pb->val_b];
-      for (i = 0; i < vec_len (pb->keys); i++)
-	{
-	  ki = pb->keys[i];
-	  k = pm->keys + ki;
-	  hash = k->a ^ stabb;
+        /* erase old hash values */
+        stabb = pm->scramble[pb->val_b];
+        for (i = 0; i < vec_len (pb->keys); i++) {
+            ki = pb->keys[i];
+            k = pm->keys + ki;
+            hash = k->a ^ stabb;
 
-	  /* Erase hash for all of child's siblings. */
-	  if (ki == pm->tabh[hash])
-	    pm->tabh[hash] = ~0;
-	}
+            /* Erase hash for all of child's siblings. */
+            if (ki == pm->tabh[hash])
+                pm->tabh[hash] = ~0;
+        }
 
-      /* change pb->val_b, which will change the hashes of all parent siblings */
-      pb->val_b = rollback ? q_child->oldval_q : q_child->newval_q;
+        /* change pb->val_b, which will change the hashes of all parent siblings */
+        pb->val_b = rollback ? q_child->oldval_q : q_child->newval_q;
 
-      /* set new hash values */
-      stabb = pm->scramble[pb->val_b];
-      for (i = 0; i < vec_len (pb->keys); i++)
-	{
-	  ki = pb->keys[i];
-	  k = pm->keys + ki;
+        /* set new hash values */
+        stabb = pm->scramble[pb->val_b];
+        for (i = 0; i < vec_len (pb->keys); i++) {
+            ki = pb->keys[i];
+            k = pm->keys + ki;
 
-	  hash = k->a ^ stabb;
-	  if (rollback)
-	    {
-	      if (parent == 0)
-		continue;	/* root never had a hash */
-	    }
-	  else if (pm->tabh[hash] != ~0)
-	    {
-	      /* Very rare case: roll back any changes. */
-	      apply (pm, tail, /* rollback changes */ 1);
-	      no_collision = 0;
-	      goto done;
-	    }
-	  pm->tabh[hash] = ki;
-	}
+            hash = k->a ^ stabb;
+            if (rollback) {
+                if (parent == 0)
+                    continue;   /* root never had a hash */
+            } else if (pm->tabh[hash] != ~0) {
+                /* Very rare case: roll back any changes. */
+                apply (pm, tail, /* rollback changes */ 1);
+                no_collision = 0;
+                goto done;
+            }
+            pm->tabh[hash] = ki;
+        }
     }
 
 done:
-  return no_collision;
+    return no_collision;
 }
 
 
@@ -496,89 +476,82 @@ high_water: a value higher than any now in tabb[].water_b.
 static int
 augment (phash_main_t * pm, u32 b_root, u32 high_water)
 {
-  u32 q;			/* current position walking through the queue */
-  u32 tail;			/* tail of the queue.  0 is the head of the queue. */
-  phash_tabb_t *tb_parent, *tb_child, *tb_hit;
-  phash_key_t *k_parent, *k_child;
-  u32 v, v_limit;		/* possible value for myb->val_b */
-  u32 i, ki, hash;
+    u32 q;            /* current position walking through the queue */
+    u32 tail;         /* tail of the queue.  0 is the head of the queue. */
+    phash_tabb_t *tb_parent, *tb_child, *tb_hit;
+    phash_key_t *k_parent, *k_child;
+    u32 v, v_limit;       /* possible value for myb->val_b */
+    u32 i, ki, hash;
 
-  v_limit =
-    1 << ((pm->flags & PHASH_FLAG_USE_SCRAMBLE) ? pm->s_bits : BITS (u8));
+    v_limit =
+        1 << ((pm->flags & PHASH_FLAG_USE_SCRAMBLE) ? pm->s_bits : BITS (u8));
 
-  /* Initialize the root of the spanning tree. */
-  pm->tabq[0].b_q = b_root;
-  tail = 1;
+    /* Initialize the root of the spanning tree. */
+    pm->tabq[0].b_q = b_root;
+    tail = 1;
 
-  /* construct the spanning tree by walking the queue, add children to tail */
-  for (q = 0; q < tail; q++)
-    {
-      if ((pm->flags & PHASH_FLAG_FAST_MODE)
-	  && !(pm->flags & PHASH_FLAG_MINIMAL) && q == 1)
-	break;			/* don't do transitive closure */
+    /* construct the spanning tree by walking the queue, add children to tail */
+    for (q = 0; q < tail; q++) {
+        if ((pm->flags & PHASH_FLAG_FAST_MODE)
+            && !(pm->flags & PHASH_FLAG_MINIMAL) && q == 1)
+            break;          /* don't do transitive closure */
 
-      tb_parent = pm->tabb + pm->tabq[q].b_q;	/* the b for this node */
+        tb_parent = pm->tabb + pm->tabq[q].b_q;   /* the b for this node */
 
-      for (v = 0; v < v_limit; v++)
-	{
-	  tb_child = 0;
+        for (v = 0; v < v_limit; v++) {
+            tb_child = 0;
 
-	  for (i = 0; i < vec_len (tb_parent->keys); i++)
-	    {
-	      ki = tb_parent->keys[i];
-	      k_parent = pm->keys + ki;
+            for (i = 0; i < vec_len (tb_parent->keys); i++) {
+                ki = tb_parent->keys[i];
+                k_parent = pm->keys + ki;
 
-	      hash = k_parent->a ^ pm->scramble[v];
-	      if (hash >= pm->hash_max)
-		goto try_next_v;	/* hash code out of bounds => we can't use this v */
+                hash = k_parent->a ^ pm->scramble[v];
+                if (hash >= pm->hash_max)
+                    goto try_next_v;    /* hash code out of bounds => we can't use this v */
 
-	      ki = pm->tabh[hash];
-	      if (ki == ~0)
-		continue;
+                ki = pm->tabh[hash];
+                if (ki == ~0)
+                    continue;
 
-	      k_child = pm->keys + ki;
-	      tb_hit = pm->tabb + k_child->b;
+                k_child = pm->keys + ki;
+                tb_hit = pm->tabb + k_child->b;
 
-	      if (tb_child)
-		{
-		  /* Hit at most one child b. */
-		  if (tb_child == tb_hit)
-		    goto try_next_v;
-		}
-	      else
-		{
-		  /* Remember this as child b. */
-		  tb_child = tb_hit;
-		  if (tb_hit->water_b == high_water)
-		    goto try_next_v;	/* already explored */
-		}
-	    }
+                if (tb_child) {
+                    /* Hit at most one child b. */
+                    if (tb_child == tb_hit)
+                        goto try_next_v;
+                } else {
+                    /* Remember this as child b. */
+                    tb_child = tb_hit;
+                    if (tb_hit->water_b == high_water)
+                        goto try_next_v;    /* already explored */
+                }
+            }
 
-	  /* tb_parent with v has either one or zero collisions. */
+            /* tb_parent with v has either one or zero collisions. */
 
-	  /* add childb to the queue of reachable things */
-	  if (tb_child)
-	    tb_child->water_b = high_water;
-	  pm->tabq[tail].b_q = tb_child ? tb_child - pm->tabb : ~0;
-	  pm->tabq[tail].newval_q = v;	/* how to make parent (myb) use this hash */
-	  pm->tabq[tail].oldval_q = tb_parent->val_b;	/* need this for rollback */
-	  pm->tabq[tail].parent_q = q;
-	  ++tail;
+            /* add childb to the queue of reachable things */
+            if (tb_child)
+                tb_child->water_b = high_water;
+            pm->tabq[tail].b_q = tb_child ? tb_child - pm->tabb : ~0;
+            pm->tabq[tail].newval_q = v;  /* how to make parent (myb) use this hash */
+            pm->tabq[tail].oldval_q = tb_parent->val_b;   /* need this for rollback */
+            pm->tabq[tail].parent_q = q;
+            ++tail;
 
-	  /* Found a v with no collisions? */
-	  if (!tb_child)
-	    {
-	      /* Try to apply the augmenting path. */
-	      if (apply (pm, tail, /* rollback */ 0))
-		return 1;	/* success, item was added to the perfect hash */
-	      --tail;		/* don't know how to handle such a child! */
-	    }
+            /* Found a v with no collisions? */
+            if (!tb_child) {
+                /* Try to apply the augmenting path. */
+                if (apply (pm, tail, /* rollback */ 0))
+                    return 1;   /* success, item was added to the perfect hash */
+                --tail;       /* don't know how to handle such a child! */
+            }
 
-	try_next_v:
-	  ;
-	}
+        try_next_v:
+            ;
+        }
     }
-  return 0;
+    return 0;
 }
 
 
@@ -587,43 +560,42 @@ static phash_tabb_t *sort_tabb;
 static int
 phash_tabb_compare (void *a1, void *a2)
 {
-  u32 *b1 = a1;
-  u32 *b2 = a2;
-  phash_tabb_t *tb1, *tb2;
+    u32 *b1 = a1;
+    u32 *b2 = a2;
+    phash_tabb_t *tb1, *tb2;
 
-  tb1 = sort_tabb + b1[0];
-  tb2 = sort_tabb + b2[0];
+    tb1 = sort_tabb + b1[0];
+    tb2 = sort_tabb + b2[0];
 
-  return ((int) vec_len (tb2->keys) - (int) vec_len (tb1->keys));
+    return ((int) vec_len (tb2->keys) - (int) vec_len (tb1->keys));
 }
 
 /* find a mapping that makes this a perfect hash */
 static int
 perfect (phash_main_t * pm)
 {
-  u32 i;
+    u32 i;
 
-  /* clear any state from previous attempts */
-  if (vec_bytes (pm->tabh))
-    memset (pm->tabh, ~0, vec_bytes (pm->tabh));
+    /* clear any state from previous attempts */
+    if (vec_bytes (pm->tabh))
+        memset (pm->tabh, ~0, vec_bytes (pm->tabh));
 
-  vec_validate (pm->tabb_sort, vec_len (pm->tabb) - 1);
-  for (i = 0; i < vec_len (pm->tabb_sort); i++)
-    pm->tabb_sort[i] = i;
+    vec_validate (pm->tabb_sort, vec_len (pm->tabb) - 1);
+    for (i = 0; i < vec_len (pm->tabb_sort); i++)
+        pm->tabb_sort[i] = i;
 
-  sort_tabb = pm->tabb;
+    sort_tabb = pm->tabb;
 
-  vec_sort_with_function (pm->tabb_sort, phash_tabb_compare);
+    vec_sort_with_function (pm->tabb_sort, phash_tabb_compare);
 
-  /* In descending order by number of keys, map all *b*s */
-  for (i = 0; i < vec_len (pm->tabb_sort); i++)
-    {
-      if (!augment (pm, pm->tabb_sort[i], i + 1))
-	return 0;
+    /* In descending order by number of keys, map all *b*s */
+    for (i = 0; i < vec_len (pm->tabb_sort); i++) {
+        if (!augment (pm, pm->tabb_sort[i], i + 1))
+            return 0;
     }
 
-  /* Success!  We found a perfect hash of all keys into 0..nkeys-1. */
-  return 1;
+    /* Success!  We found a perfect hash of all keys into 0..nkeys-1. */
+    return 1;
 }
 
 
@@ -664,124 +636,113 @@ perfect (phash_main_t * pm)
 static void
 guess_initial_parameters (phash_main_t * pm)
 {
-  u32 s_bits, s_max, a_max, b_max, n_keys;
-  int is_minimal, is_fast_mode;
-  const u32 b_max_use_scramble_threshold = 4096;
+    u32 s_bits, s_max, a_max, b_max, n_keys;
+    int is_minimal, is_fast_mode;
+    const u32 b_max_use_scramble_threshold = 4096;
 
-  is_minimal = (pm->flags & PHASH_FLAG_MINIMAL) != 0;
-  is_fast_mode = (pm->flags & PHASH_FLAG_FAST_MODE) != 0;
+    is_minimal = (pm->flags & PHASH_FLAG_MINIMAL) != 0;
+    is_fast_mode = (pm->flags & PHASH_FLAG_FAST_MODE) != 0;
 
-  n_keys = vec_len (pm->keys);
-  s_bits = max_log2 (n_keys);
-  s_max = 1 << s_bits;
-  a_max = 0;
+    n_keys = vec_len (pm->keys);
+    s_bits = max_log2 (n_keys);
+    s_max = 1 << s_bits;
+    a_max = 0;
 
-  if (is_minimal)
-    {
-      switch (s_bits)
-	{
-	case 0:
-	  a_max = 1;
-	  b_max = 1;
-	case 1:
-	case 2:
-	case 3:
-	case 4:
-	case 5:
-	case 6:
-	case 7:
-	case 8:
-	  /*
-	   * Was: a_max = is_minimal ? s_max / 2 : s_max;
-	   * However, we know that is_minimal must be true, so the
-	   * if-arm of the ternary expression is always executed.
-	   */
-	  a_max = s_max / 2;
-	  b_max = s_max / 2;
-	  break;
-	case 9:
-	case 10:
-	case 11:
-	case 12:
-	case 13:
-	case 14:
-	case 15:
-	case 16:
-	case 17:
-	  if (is_fast_mode)
-	    {
-	      a_max = s_max / 2;
-	      b_max = s_max / 4;
-	    }
-	  else if (s_max / 4 < b_max_use_scramble_threshold)
-	    {
-	      if (n_keys <= s_max * 0.52)
-		a_max = b_max = s_max / 8;
-	      else
-		a_max = b_max = s_max / 4;
-	    }
-	  else
-	    {
-	      a_max = ((n_keys <= s_max * (5.0 / 8.0)) ? s_max / 8 :
-		       (n_keys <=
-			s_max * (3.0 / 4.0)) ? s_max / 4 : s_max / 2);
-	      b_max = s_max / 4;	/* always give the small size a shot */
-	    }
-	  break;
-	case 18:
-	  if (is_fast_mode)
-	    a_max = b_max = s_max / 2;
-	  else
-	    {
-	      a_max = s_max / 8;	/* never require the multiword hash */
-	      b_max = (n_keys <= s_max * (5.0 / 8.0)) ? s_max / 4 : s_max / 2;
-	    }
-	  break;
-	case 19:
-	case 20:
-	  a_max = (n_keys <= s_max * (5.0 / 8.0)) ? s_max / 8 : s_max / 2;
-	  b_max = (n_keys <= s_max * (5.0 / 8.0)) ? s_max / 4 : s_max / 2;
-	  break;
-	default:
-	  /* Just find a hash as quick as possible.
-	     We'll be thrashing virtual memory at this size. */
-	  a_max = b_max = s_max / 2;
-	  break;
-	}
-    }
-  else
-    {
-      /* Non-minimal perfect hash. */
-      if (is_fast_mode && n_keys > s_max * 0.8)
-	{
-	  s_max *= 2;
-	  s_bits += 1;
-	}
+    if (is_minimal) {
+        switch (s_bits) {
+            case 0:
+                a_max = 1;
+                b_max = 1;
+            case 1:
+            case 2:
+            case 3:
+            case 4:
+            case 5:
+            case 6:
+            case 7:
+            case 8:
+                /*
+                 * Was: a_max = is_minimal ? s_max / 2 : s_max;
+                 * However, we know that is_minimal must be true, so the
+                 * if-arm of the ternary expression is always executed.
+                 */
+                a_max = s_max / 2;
+                b_max = s_max / 2;
+                break;
+            case 9:
+            case 10:
+            case 11:
+            case 12:
+            case 13:
+            case 14:
+            case 15:
+            case 16:
+            case 17:
+                if (is_fast_mode) {
+                    a_max = s_max / 2;
+                    b_max = s_max / 4;
+                } else if (s_max / 4 < b_max_use_scramble_threshold) {
+                    if (n_keys <= s_max * 0.52)
+                        a_max = b_max = s_max / 8;
+                    else
+                        a_max = b_max = s_max / 4;
+                } else {
+                    a_max = ((n_keys <= s_max * (5.0 / 8.0)) ? s_max / 8 :
+                             (n_keys <=
+                              s_max * (3.0 / 4.0)) ? s_max / 4 : s_max / 2);
+                    b_max = s_max / 4;    /* always give the small size a shot */
+                }
+                break;
+            case 18:
+                if (is_fast_mode)
+                    a_max = b_max = s_max / 2;
+                else {
+                    a_max = s_max / 8;    /* never require the multiword hash */
+                    b_max = (n_keys <= s_max * (5.0 / 8.0)) ? s_max / 4 : s_max / 2;
+                }
+                break;
+            case 19:
+            case 20:
+                a_max = (n_keys <= s_max * (5.0 / 8.0)) ? s_max / 8 : s_max / 2;
+                b_max = (n_keys <= s_max * (5.0 / 8.0)) ? s_max / 4 : s_max / 2;
+                break;
+            default:
+                /* Just find a hash as quick as possible.
+                   We'll be thrashing virtual memory at this size. */
+                a_max = b_max = s_max / 2;
+                break;
+        }
+    } else {
+        /* Non-minimal perfect hash. */
+        if (is_fast_mode && n_keys > s_max * 0.8) {
+            s_max *= 2;
+            s_bits += 1;
+        }
 
-      if (s_max / 4 <= (1 << 14))
-	b_max = ((n_keys <= s_max * 0.56) ? s_max / 32 :
-		 (n_keys <= s_max * 0.74) ? s_max / 16 : s_max / 8);
-      else
-	b_max = ((n_keys <= s_max * 0.6) ? s_max / 16 :
-		 (n_keys <= s_max * 0.8) ? s_max / 8 : s_max / 4);
+        if (s_max / 4 <= (1 << 14))
+            b_max = ((n_keys <= s_max * 0.56) ? s_max / 32 :
+                     (n_keys <= s_max * 0.74) ? s_max / 16 : s_max / 8);
+        else
+            b_max = ((n_keys <= s_max * 0.6) ? s_max / 16 :
+                     (n_keys <= s_max * 0.8) ? s_max / 8 : s_max / 4);
 
-      if (is_fast_mode && b_max < s_max / 8)
-	b_max = s_max / 8;
+        if (is_fast_mode && b_max < s_max / 8)
+            b_max = s_max / 8;
 
-      if (a_max < 1)
-	a_max = 1;
-      if (b_max < 1)
-	b_max = 1;
+        if (a_max < 1)
+            a_max = 1;
+        if (b_max < 1)
+            b_max = 1;
     }
 
-  ASSERT (s_max == (1 << s_bits));
-  ASSERT (is_pow2 (a_max));
-  ASSERT (is_pow2 (b_max));
-  pm->s_bits = s_bits;
-  pm->a_bits = min_log2 (a_max);
-  pm->b_bits = min_log2 (b_max);
-  if (b_max >= b_max_use_scramble_threshold)
-    pm->flags |= PHASH_FLAG_USE_SCRAMBLE;
+    ASSERT (s_max == (1 << s_bits));
+    ASSERT (is_pow2 (a_max));
+    ASSERT (is_pow2 (b_max));
+    pm->s_bits = s_bits;
+    pm->a_bits = min_log2 (a_max);
+    pm->b_bits = min_log2 (b_max);
+    if (b_max >= b_max_use_scramble_threshold)
+        pm->flags |= PHASH_FLAG_USE_SCRAMBLE;
 }
 
 /* compute p(x), where p is a permutation of 0..(1<<nbits)-1 */
@@ -789,223 +750,205 @@ guess_initial_parameters (phash_main_t * pm)
 always_inline u32
 scramble_permute (u32 x, u32 nbits)
 {
-  int i;
-  int mask = (1 << nbits) - 1;
-  int const2 = 1 + nbits / 2;
-  int const3 = 1 + nbits / 3;
-  int const4 = 1 + nbits / 4;
-  int const5 = 1 + nbits / 5;
-  for (i = 0; i < 20; i++)
-    {
-      x = (x + (x << const2)) & mask;
-      x = (x ^ (x >> const3));
-      x = (x + (x << const4)) & mask;
-      x = (x ^ (x >> const5));
+    int i;
+    int mask = (1 << nbits) - 1;
+    int const2 = 1 + nbits / 2;
+    int const3 = 1 + nbits / 3;
+    int const4 = 1 + nbits / 4;
+    int const5 = 1 + nbits / 5;
+    for (i = 0; i < 20; i++) {
+        x = (x + (x << const2)) & mask;
+        x = (x ^ (x >> const3));
+        x = (x + (x << const4)) & mask;
+        x = (x ^ (x >> const5));
     }
-  return x;
+    return x;
 }
 
 /* initialize scramble[] with distinct random values in 0..smax-1 */
 static void
 scramble_init (phash_main_t * pm)
 {
-  u32 i;
+    u32 i;
 
-  /* fill scramble[] with distinct random integers in 0..smax-1 */
-  vec_validate (pm->scramble, (1 << (pm->s_bits < 8 ? 8 : pm->s_bits)) - 1);
-  for (i = 0; i < vec_len (pm->scramble); i++)
-    pm->scramble[i] = scramble_permute (i, pm->s_bits);
+    /* fill scramble[] with distinct random integers in 0..smax-1 */
+    vec_validate (pm->scramble, (1 << (pm->s_bits < 8 ? 8 : pm->s_bits)) - 1);
+    for (i = 0; i < vec_len (pm->scramble); i++)
+        pm->scramble[i] = scramble_permute (i, pm->s_bits);
 }
 
 /* Try to find a perfect hash function. */
 clib_error_t *
 phash_find_perfect_hash (phash_main_t * pm)
 {
-  clib_error_t *error = 0;
-  u32 max_a_bits, n_tries_this_a_b, want_minimal;
+    clib_error_t *error = 0;
+    u32 max_a_bits, n_tries_this_a_b, want_minimal;
 
-  /* guess initial values for s_max, a_max and b_max */
-  guess_initial_parameters (pm);
+    /* guess initial values for s_max, a_max and b_max */
+    guess_initial_parameters (pm);
 
-  want_minimal = pm->flags & PHASH_FLAG_MINIMAL;
+    want_minimal = pm->flags & PHASH_FLAG_MINIMAL;
 
 new_s:
-  if (pm->b_bits == 0)
-    pm->a_bits = pm->s_bits;
+    if (pm->b_bits == 0)
+        pm->a_bits = pm->s_bits;
 
-  max_a_bits = pm->s_bits - want_minimal;
-  if (max_a_bits < 1)
-    max_a_bits = 1;
+    max_a_bits = pm->s_bits - want_minimal;
+    if (max_a_bits < 1)
+        max_a_bits = 1;
 
-  pm->hash_max = want_minimal ? vec_len (pm->keys) : (1 << pm->s_bits);
+    pm->hash_max = want_minimal ? vec_len (pm->keys) : (1 << pm->s_bits);
 
-  scramble_init (pm);
+    scramble_init (pm);
 
-  /* Allocate working memory. */
-  vec_free (pm->tabh);
-  vec_validate_init_empty (pm->tabh, pm->hash_max - 1, ~0);
-  vec_free (pm->tabq);
-  vec_validate (pm->tabq, 1 << pm->b_bits);
+    /* Allocate working memory. */
+    vec_free (pm->tabh);
+    vec_validate_init_empty (pm->tabh, pm->hash_max - 1, ~0);
+    vec_free (pm->tabq);
+    vec_validate (pm->tabq, 1 << pm->b_bits);
 
-  /* Actually find the perfect hash */
-  n_tries_this_a_b = 0;
-  while (1)
-    {
-      /* Choose random hash seeds until keys become unique. */
-      pm->hash_seed = random_u64 (&pm->random_seed);
-      pm->n_seed_trials++;
-      if (init_tabb (pm))
-	{
-	  /* Found unique (A, B). */
+    /* Actually find the perfect hash */
+    n_tries_this_a_b = 0;
+    while (1) {
+        /* Choose random hash seeds until keys become unique. */
+        pm->hash_seed = random_u64 (&pm->random_seed);
+        pm->n_seed_trials++;
+        if (init_tabb (pm)) {
+            /* Found unique (A, B). */
 
-	  /* Hash may already be perfect. */
-	  if (pm->b_bits == 0)
-	    goto done;
+            /* Hash may already be perfect. */
+            if (pm->b_bits == 0)
+                goto done;
 
-	  pm->n_perfect_calls++;
-	  if (perfect (pm))
-	    goto done;
+            pm->n_perfect_calls++;
+            if (perfect (pm))
+                goto done;
 
-	  goto increase_b;
-	}
+            goto increase_b;
+        }
 
-      /* Keep trying with different seed value. */
-      n_tries_this_a_b++;
-      if (n_tries_this_a_b < 2048)
-	continue;
+        /* Keep trying with different seed value. */
+        n_tries_this_a_b++;
+        if (n_tries_this_a_b < 2048)
+            continue;
 
-      /* Try to put more bits in (A,B) to make distinct (A,B) more likely */
-      if (pm->a_bits < max_a_bits)
-	pm->a_bits++;
-      else if (pm->b_bits < pm->s_bits)
-	{
-	increase_b:
-	  vec_resize (pm->tabb, vec_len (pm->tabb));
-	  vec_resize (pm->tabq, vec_len (pm->tabq));
-	  pm->b_bits++;
-	}
-      else
-	{
-	  /* Can't increase (A, B) any more, so try increasing S. */
-	  goto new_s;
-	}
+        /* Try to put more bits in (A,B) to make distinct (A,B) more likely */
+        if (pm->a_bits < max_a_bits)
+            pm->a_bits++;
+        else if (pm->b_bits < pm->s_bits) {
+        increase_b:
+            vec_resize (pm->tabb, vec_len (pm->tabb));
+            vec_resize (pm->tabq, vec_len (pm->tabq));
+            pm->b_bits++;
+        } else {
+            /* Can't increase (A, B) any more, so try increasing S. */
+            goto new_s;
+        }
     }
 
 done:
-  /* Construct mapping table for hash lookups. */
-  if (!error)
-    {
-      u32 b, v;
+    /* Construct mapping table for hash lookups. */
+    if (!error) {
+        u32 b, v;
 
-      pm->a_shift = ((pm->flags & PHASH_FLAG_MIX64) ? 64 : 32) - pm->a_bits;
-      pm->b_mask = (1 << pm->b_bits) - 1;
+        pm->a_shift = ((pm->flags & PHASH_FLAG_MIX64) ? 64 : 32) - pm->a_bits;
+        pm->b_mask = (1 << pm->b_bits) - 1;
 
-      vec_resize (pm->tab, vec_len (pm->tabb));
-      for (b = 0; b < vec_len (pm->tabb); b++)
-	{
-	  v = pm->tabb[b].val_b;
+        vec_resize (pm->tab, vec_len (pm->tabb));
+        for (b = 0; b < vec_len (pm->tabb); b++) {
+            v = pm->tabb[b].val_b;
 
-	  /* Apply scramble now for small enough value of b_bits. */
-	  if (!(pm->flags & PHASH_FLAG_USE_SCRAMBLE))
-	    v = pm->scramble[v];
+            /* Apply scramble now for small enough value of b_bits. */
+            if (!(pm->flags & PHASH_FLAG_USE_SCRAMBLE))
+                v = pm->scramble[v];
 
-	  pm->tab[b] = v;
-	}
+            pm->tab[b] = v;
+        }
     }
 
-  /* Free working memory. */
-  phash_main_free_working_memory (pm);
+    /* Free working memory. */
+    phash_main_free_working_memory (pm);
 
-  return error;
+    return error;
 }
 
 /* Slow hash computation for general keys. */
 uword
 phash_hash_slow (phash_main_t * pm, uword key)
 {
-  u32 a, b, v;
+    u32 a, b, v;
 
-  if (pm->flags & PHASH_FLAG_MIX64)
-    {
-      u64 x0, y0, z0;
+    if (pm->flags & PHASH_FLAG_MIX64) {
+        u64 x0, y0, z0;
 
-      x0 = y0 = z0 = pm->hash_seed;
+        x0 = y0 = z0 = pm->hash_seed;
 
-      if (pm->key_seed1)
-	{
-	  u64 xyz[3];
-	  pm->key_seed1 (pm->private, key, &xyz);
-	  x0 += xyz[0];
-	  y0 += xyz[1];
-	  z0 += xyz[2];
-	}
-      else
-	x0 += key;
+        if (pm->key_seed1) {
+            u64 xyz[3];
+            pm->key_seed1 (pm->private, key, &xyz);
+            x0 += xyz[0];
+            y0 += xyz[1];
+            z0 += xyz[2];
+        } else
+            x0 += key;
 
-      hash_mix64 (x0, y0, z0);
+        hash_mix64 (x0, y0, z0);
 
-      a = z0 >> pm->a_shift;
-      b = z0 & pm->b_mask;
-    }
-  else
-    {
-      u32 x0, y0, z0;
+        a = z0 >> pm->a_shift;
+        b = z0 & pm->b_mask;
+    } else {
+        u32 x0, y0, z0;
 
-      x0 = y0 = z0 = pm->hash_seed;
+        x0 = y0 = z0 = pm->hash_seed;
 
-      if (pm->key_seed1)
-	{
-	  u32 xyz[3];
-	  pm->key_seed1 (pm->private, key, &xyz);
-	  x0 += xyz[0];
-	  y0 += xyz[1];
-	  z0 += xyz[2];
-	}
-      else
-	x0 += key;
+        if (pm->key_seed1) {
+            u32 xyz[3];
+            pm->key_seed1 (pm->private, key, &xyz);
+            x0 += xyz[0];
+            y0 += xyz[1];
+            z0 += xyz[2];
+        } else
+            x0 += key;
 
-      hash_mix32 (x0, y0, z0);
+        hash_mix32 (x0, y0, z0);
 
-      a = z0 >> pm->a_shift;
-      b = z0 & pm->b_mask;
+        a = z0 >> pm->a_shift;
+        b = z0 & pm->b_mask;
     }
 
-  v = pm->tab[b];
-  if (pm->flags & PHASH_FLAG_USE_SCRAMBLE)
-    v = pm->scramble[v];
-  return a ^ v;
+    v = pm->tab[b];
+    if (pm->flags & PHASH_FLAG_USE_SCRAMBLE)
+        v = pm->scramble[v];
+    return a ^ v;
 }
 
 /* Verify that perfect hash is perfect. */
 clib_error_t *
 phash_validate (phash_main_t * pm)
 {
-  phash_key_t *k;
-  uword *unique_bitmap = 0;
-  clib_error_t *error = 0;
+    phash_key_t *k;
+    uword *unique_bitmap = 0;
+    clib_error_t *error = 0;
 
-  vec_foreach (k, pm->keys)
-  {
-    uword h = phash_hash_slow (pm, k->key);
+    vec_foreach (k, pm->keys) {
+        uword h = phash_hash_slow (pm, k->key);
 
-    if (h >= pm->hash_max)
-      {
-	error = clib_error_return (0, "hash out of range %wd", h);
-	goto done;
-      }
+        if (h >= pm->hash_max) {
+            error = clib_error_return (0, "hash out of range %wd", h);
+            goto done;
+        }
 
-    if (clib_bitmap_get (unique_bitmap, h))
-      {
-	error = clib_error_return (0, "hash non-unique");
-	goto done;
-      }
+        if (clib_bitmap_get (unique_bitmap, h)) {
+            error = clib_error_return (0, "hash non-unique");
+            goto done;
+        }
 
-    unique_bitmap = clib_bitmap_ori (unique_bitmap, h);
-  }
+        unique_bitmap = clib_bitmap_ori (unique_bitmap, h);
+    }
 
 done:
-  clib_bitmap_free (unique_bitmap);
-  return error;
+    clib_bitmap_free (unique_bitmap);
+    return error;
 }
 
 /*

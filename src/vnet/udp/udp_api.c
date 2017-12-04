@@ -21,11 +21,11 @@
 
 #include <vnet/vnet_msg_enum.h>
 
-#define vl_typedefs		/* define message structures */
+#define vl_typedefs     /* define message structures */
 #include <vnet/vnet_all_api_h.h>
 #undef vl_typedefs
 
-#define vl_endianfun		/* define message structures */
+#define vl_endianfun        /* define message structures */
 #include <vnet/vnet_all_api_h.h>
 #undef vl_endianfun
 
@@ -44,50 +44,47 @@ _(UDP_ENCAP_DUMP, udp_encap_dump)
 
 static void
 send_udp_encap_details (const udp_encap_t * ue,
-			unix_shared_memory_queue_t * q, u32 context)
+                        unix_shared_memory_queue_t * q, u32 context)
 {
-  vl_api_udp_encap_details_t *mp;
-  fib_table_t *fib_table;
+    vl_api_udp_encap_details_t *mp;
+    fib_table_t *fib_table;
 
-  mp = vl_msg_api_alloc (sizeof (*mp));
-  memset (mp, 0, sizeof (*mp));
-  mp->_vl_msg_id = ntohs (VL_API_UDP_ENCAP_DETAILS);
-  mp->context = context;
+    mp = vl_msg_api_alloc (sizeof (*mp));
+    memset (mp, 0, sizeof (*mp));
+    mp->_vl_msg_id = ntohs (VL_API_UDP_ENCAP_DETAILS);
+    mp->context = context;
 
-  mp->is_ip6 = (ue->ue_ip_proto == FIB_PROTOCOL_IP6);
+    mp->is_ip6 = (ue->ue_ip_proto == FIB_PROTOCOL_IP6);
 
-  if (FIB_PROTOCOL_IP4 == ue->ue_ip_proto)
-    {
-      clib_memcpy (mp->src_ip, &ue->ue_hdrs.ip4.ue_ip4.src_address, 4);
-      clib_memcpy (mp->dst_ip, &ue->ue_hdrs.ip4.ue_ip4.dst_address, 4);
-      mp->src_port = htons (ue->ue_hdrs.ip4.ue_udp.src_port);
-      mp->dst_port = htons (ue->ue_hdrs.ip4.ue_udp.dst_port);
-    }
-  else
-    {
-      clib_memcpy (mp->src_ip, &ue->ue_hdrs.ip6.ue_ip6.src_address, 16);
-      clib_memcpy (mp->dst_ip, &ue->ue_hdrs.ip6.ue_ip6.dst_address, 16);
-      mp->src_port = htons (ue->ue_hdrs.ip6.ue_udp.src_port);
-      mp->dst_port = htons (ue->ue_hdrs.ip6.ue_udp.dst_port);
+    if (FIB_PROTOCOL_IP4 == ue->ue_ip_proto) {
+        clib_memcpy (mp->src_ip, &ue->ue_hdrs.ip4.ue_ip4.src_address, 4);
+        clib_memcpy (mp->dst_ip, &ue->ue_hdrs.ip4.ue_ip4.dst_address, 4);
+        mp->src_port = htons (ue->ue_hdrs.ip4.ue_udp.src_port);
+        mp->dst_port = htons (ue->ue_hdrs.ip4.ue_udp.dst_port);
+    } else {
+        clib_memcpy (mp->src_ip, &ue->ue_hdrs.ip6.ue_ip6.src_address, 16);
+        clib_memcpy (mp->dst_ip, &ue->ue_hdrs.ip6.ue_ip6.dst_address, 16);
+        mp->src_port = htons (ue->ue_hdrs.ip6.ue_udp.src_port);
+        mp->dst_port = htons (ue->ue_hdrs.ip6.ue_udp.dst_port);
     }
 
-  fib_table = fib_table_get (ue->ue_fib_index, ue->ue_ip_proto);
-  mp->table_id = htonl (fib_table->ft_table_id);
-  mp->id = htonl (ue->ue_id);
+    fib_table = fib_table_get (ue->ue_fib_index, ue->ue_ip_proto);
+    mp->table_id = htonl (fib_table->ft_table_id);
+    mp->id = htonl (ue->ue_id);
 
-  vl_msg_api_send_shmem (q, (u8 *) & mp);
+    vl_msg_api_send_shmem (q, (u8 *) & mp);
 }
 
 static void
 vl_api_udp_encap_dump_t_handler (vl_api_udp_encap_dump_t * mp,
-				 vlib_main_t * vm)
+                                 vlib_main_t * vm)
 {
-  unix_shared_memory_queue_t *q;
-  udp_encap_t *ue;
+    unix_shared_memory_queue_t *q;
+    udp_encap_t *ue;
 
-  q = vl_api_client_index_to_input_queue (mp->client_index);
-  if (q == 0)
-    return;
+    q = vl_api_client_index_to_input_queue (mp->client_index);
+    if (q == 0)
+        return;
 
   /* *INDENT-OFF* */
   pool_foreach(ue, udp_encap_pool,

@@ -46,15 +46,14 @@
 #include <vppinfra/error.h>
 #include <vppinfra/format.h>
 
-typedef struct _socket_t
-{
-  /* File descriptor. */
-  i32 fd;
+typedef struct _socket_t {
+    /* File descriptor. */
+    i32 fd;
 
-  /* Config string for socket HOST:PORT or just HOST. */
-  char *config;
+    /* Config string for socket HOST:PORT or just HOST. */
+    char *config;
 
-  u32 flags;
+    u32 flags;
 #define CLIB_SOCKET_F_IS_SERVER (1 << 0)
 #define CLIB_SOCKET_F_IS_CLIENT (0 << 0)
 #define CLIB_SOCKET_F_RX_END_OF_FILE (1 << 2)
@@ -64,28 +63,28 @@ typedef struct _socket_t
 #define CLIB_SOCKET_F_PASSCRED  (1 << 6)
 
 
-  /* Transmit buffer.  Holds data waiting to be written. */
-  u8 *tx_buffer;
+    /* Transmit buffer.  Holds data waiting to be written. */
+    u8 *tx_buffer;
 
-  /* Receive buffer.  Holds data read from socket. */
-  u8 *rx_buffer;
+    /* Receive buffer.  Holds data read from socket. */
+    u8 *rx_buffer;
 
-  /* Peer socket we are connected to. */
-  struct sockaddr_in peer;
+    /* Peer socket we are connected to. */
+    struct sockaddr_in peer;
 
-  /* Credentials, populated if CLIB_SOCKET_F_PASSCRED is set */
-  pid_t pid;
-  uid_t uid;
-  gid_t gid;
+    /* Credentials, populated if CLIB_SOCKET_F_PASSCRED is set */
+    pid_t pid;
+    uid_t uid;
+    gid_t gid;
 
-  clib_error_t *(*write_func) (struct _socket_t * sock);
-  clib_error_t *(*read_func) (struct _socket_t * sock, int min_bytes);
-  clib_error_t *(*close_func) (struct _socket_t * sock);
-  clib_error_t *(*recvmsg_func) (struct _socket_t * s, void *msg, int msglen,
-				 int fds[], int num_fds);
-  clib_error_t *(*sendmsg_func) (struct _socket_t * s, void *msg, int msglen,
-				 int fds[], int num_fds);
-  uword private_data;
+    clib_error_t *(*write_func) (struct _socket_t * sock);
+    clib_error_t *(*read_func) (struct _socket_t * sock, int min_bytes);
+    clib_error_t *(*close_func) (struct _socket_t * sock);
+    clib_error_t *(*recvmsg_func) (struct _socket_t * s, void *msg, int msglen,
+                                   int fds[], int num_fds);
+    clib_error_t *(*sendmsg_func) (struct _socket_t * s, void *msg, int msglen,
+                                   int fds[], int num_fds);
+    uword private_data;
 } clib_socket_t;
 
 /* socket config format is host:port.
@@ -94,89 +93,89 @@ typedef struct _socket_t
 clib_error_t *clib_socket_init (clib_socket_t * socket);
 
 clib_error_t *clib_socket_accept (clib_socket_t * server,
-				  clib_socket_t * client);
+                                  clib_socket_t * client);
 
 always_inline uword
 clib_socket_is_server (clib_socket_t * sock)
 {
-  return (sock->flags & CLIB_SOCKET_F_IS_SERVER) != 0;
+    return (sock->flags & CLIB_SOCKET_F_IS_SERVER) != 0;
 }
 
 always_inline uword
 clib_socket_is_client (clib_socket_t * s)
 {
-  return !clib_socket_is_server (s);
+    return !clib_socket_is_server (s);
 }
 
 always_inline uword
 clib_socket_is_connected (clib_socket_t * sock)
 {
-  return sock->fd > 0;
+    return sock->fd > 0;
 }
 
 
 always_inline int
 clib_socket_rx_end_of_file (clib_socket_t * s)
 {
-  return s->flags & CLIB_SOCKET_F_RX_END_OF_FILE;
+    return s->flags & CLIB_SOCKET_F_RX_END_OF_FILE;
 }
 
 always_inline void *
 clib_socket_tx_add (clib_socket_t * s, int n_bytes)
 {
-  u8 *result;
-  vec_add2 (s->tx_buffer, result, n_bytes);
-  return result;
+    u8 *result;
+    vec_add2 (s->tx_buffer, result, n_bytes);
+    return result;
 }
 
 always_inline void
 clib_socket_tx_add_va_formatted (clib_socket_t * s, char *fmt, va_list * va)
 {
-  s->tx_buffer = va_format (s->tx_buffer, fmt, va);
+    s->tx_buffer = va_format (s->tx_buffer, fmt, va);
 }
 
 always_inline clib_error_t *
 clib_socket_tx (clib_socket_t * s)
 {
-  return s->write_func (s);
+    return s->write_func (s);
 }
 
 always_inline clib_error_t *
 clib_socket_rx (clib_socket_t * s, int n_bytes)
 {
-  return s->read_func (s, n_bytes);
+    return s->read_func (s, n_bytes);
 }
 
 always_inline clib_error_t *
 clib_socket_sendmsg (clib_socket_t * s, void *msg, int msglen,
-		     int fds[], int num_fds)
+                     int fds[], int num_fds)
 {
-  return s->sendmsg_func (s, msg, msglen, fds, num_fds);
+    return s->sendmsg_func (s, msg, msglen, fds, num_fds);
 }
 
 always_inline clib_error_t *
 clib_socket_recvmsg (clib_socket_t * s, void *msg, int msglen,
-		     int fds[], int num_fds)
+                     int fds[], int num_fds)
 {
-  return s->recvmsg_func (s, msg, msglen, fds, num_fds);
+    return s->recvmsg_func (s, msg, msglen, fds, num_fds);
 }
 
 always_inline void
 clib_socket_free (clib_socket_t * s)
 {
-  vec_free (s->tx_buffer);
-  vec_free (s->rx_buffer);
-  if (clib_mem_is_heap_object (s->config))
-    vec_free (s->config);
-  memset (s, 0, sizeof (s[0]));
+    vec_free (s->tx_buffer);
+    vec_free (s->rx_buffer);
+    if (clib_mem_is_heap_object (s->config))
+        vec_free (s->config);
+    memset (s, 0, sizeof (s[0]));
 }
 
 always_inline clib_error_t *
 clib_socket_close (clib_socket_t * sock)
 {
-  clib_error_t *err;
-  err = (*sock->close_func) (sock);
-  return err;
+    clib_error_t *err;
+    err = (*sock->close_func) (sock);
+    return err;
 }
 
 void clib_socket_tx_add_formatted (clib_socket_t * s, char *fmt, ...);

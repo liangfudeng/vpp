@@ -40,23 +40,22 @@
 
 /** Maplog log file header segment. In a separate file */
 
-typedef struct
-{
-  u8 maplog_major_version;	/**< library major version number */
-  u8 maplog_minor_version;	/**< library minor version number */
-  u8 maplog_patch_version;	/**< library patch version number */
-  u8 pad;
-  u32 application_id;		/**< application identifier */
-  u8 application_major_version;	/**< application major version number */
-  u8 application_minor_version;	/**< application minor version number */
-  u8 application_patch_version;	/**< application patch version number */
-  u8 pad2;
-  u32 record_size_in_cachelines; /**< record size in cache lines */
-  u32 cacheline_size;		 /**< cache line size  */
-  u64 file_size_in_records;	 /**< file size in records */
-  u64 number_of_records;	 /**< number of records in entire log  */
-  u64 number_of_files;		 /**< number of files in entire log  */
-  u8 file_basename[256];	 /**< file basename  */
+typedef struct {
+    u8 maplog_major_version;  /**< library major version number */
+    u8 maplog_minor_version;  /**< library minor version number */
+    u8 maplog_patch_version;  /**< library patch version number */
+    u8 pad;
+    u32 application_id;       /**< application identifier */
+    u8 application_major_version; /**< application major version number */
+    u8 application_minor_version; /**< application minor version number */
+    u8 application_patch_version; /**< application patch version number */
+    u8 pad2;
+    u32 record_size_in_cachelines; /**< record size in cache lines */
+    u32 cacheline_size;        /**< cache line size  */
+    u64 file_size_in_records;  /**< file size in records */
+    u64 number_of_records;     /**< number of records in entire log  */
+    u64 number_of_files;       /**< number of files in entire log  */
+    u8 file_basename[256];     /**< file basename  */
 } clib_maplog_header_t;
 
 #define MAPLOG_MAJOR_VERSION 1
@@ -65,43 +64,41 @@ typedef struct
 
 /** Process-private main data structure */
 
-typedef struct
-{
-  CLIB_CACHE_LINE_ALIGN_MARK (cacheline1);
-  /** rw cache line: atomic ticket-counter, file index */
-  volatile u64 next_record_index;
-  /** file size in records, rounded to a power of two */
-  u64 file_size_in_records;
-  u32 log2_file_size_in_records; /**< lg file size in records */
-  volatile u32 current_file_index; /**< current file index */
-  volatile u32 flags;		   /**< flags, currently just "init" or not  */
+typedef struct {
+    CLIB_CACHE_LINE_ALIGN_MARK (cacheline1);
+    /** rw cache line: atomic ticket-counter, file index */
+    volatile u64 next_record_index;
+    /** file size in records, rounded to a power of two */
+    u64 file_size_in_records;
+    u32 log2_file_size_in_records; /**< lg file size in records */
+    volatile u32 current_file_index; /**< current file index */
+    volatile u32 flags;          /**< flags, currently just "init" or not  */
 
-  /* read-mostly cache line: size parameters, file names, etc. */
+    /* read-mostly cache line: size parameters, file names, etc. */
     CLIB_CACHE_LINE_ALIGN_MARK (cacheline2);
-  u32 record_size_in_cachelines; /**< record size in cache lines */
+    u32 record_size_in_cachelines; /**< record size in cache lines */
 
-  /* double-buffered mmap'ed logfiles */
-  volatile u8 *file_baseva[2];	/**< active segment base addresses */
-  u8 *filenames[2];		/**< active segment file names  */
-  /* vector not c-string */
-  u8 *file_basename;		/**< basename, e.g. "/tmp/mylog" */
-  u8 *header_filename;		/**< log header file name */
+    /* double-buffered mmap'ed logfiles */
+    volatile u8 *file_baseva[2];  /**< active segment base addresses */
+    u8 *filenames[2];     /**< active segment file names  */
+    /* vector not c-string */
+    u8 *file_basename;        /**< basename, e.g. "/tmp/mylog" */
+    u8 *header_filename;      /**< log header file name */
 } clib_maplog_main_t;
 
 /* flag bits */
-#define CLIB_MAPLOG_FLAG_INIT 	(1<<0)
+#define CLIB_MAPLOG_FLAG_INIT   (1<<0)
 
 /** log initialization structure */
-typedef struct
-{
-  clib_maplog_main_t *mm;	/**< pointer to the main structure */
-  char *file_basename;		/**< file base name  */
-  u64 file_size_in_bytes;	/**< file size in bytes */
-  u32 record_size_in_bytes;	/**< record size in bytes */
-  u32 application_id;		/**< application identifier */
-  u8 application_major_version;	/**< applcation major version number */
-  u8 application_minor_version;	/**< applcation minor version number */
-  u8 application_patch_version;	/**< applcation patch version number */
+typedef struct {
+    clib_maplog_main_t *mm;   /**< pointer to the main structure */
+    char *file_basename;      /**< file base name  */
+    u64 file_size_in_bytes;   /**< file size in bytes */
+    u32 record_size_in_bytes; /**< record size in bytes */
+    u32 application_id;       /**< application identifier */
+    u8 application_major_version; /**< applcation major version number */
+    u8 application_minor_version; /**< applcation minor version number */
+    u8 application_patch_version; /**< applcation patch version number */
 } clib_maplog_init_args_t;
 
 /* function prototypes */
@@ -113,7 +110,7 @@ int clib_maplog_process (char *file_basename, void *fp_arg);
 format_function_t format_maplog_header;
 
 u8 *_clib_maplog_get_entry_slowpath (clib_maplog_main_t * mm,
-				     u64 my_record_index);
+                                     u64 my_record_index);
 
 /**
  * @brief Obtain a log entry pointer
@@ -128,28 +125,27 @@ u8 *_clib_maplog_get_entry_slowpath (clib_maplog_main_t * mm,
 static inline void *
 clib_maplog_get_entry (clib_maplog_main_t * mm)
 {
-  u64 my_record_index;
-  u8 *rv;
+    u64 my_record_index;
+    u8 *rv;
 
-  ASSERT (mm->flags & CLIB_MAPLOG_FLAG_INIT);
+    ASSERT (mm->flags & CLIB_MAPLOG_FLAG_INIT);
 
-  my_record_index = __sync_fetch_and_add (&mm->next_record_index, 1);
+    my_record_index = __sync_fetch_and_add (&mm->next_record_index, 1);
 
-  /* Time to unmap and create a new logfile? */
-  if (PREDICT_FALSE ((my_record_index & (mm->file_size_in_records - 1)) == 0))
-    {
-      /* Yes, but not the very first time... (;-)... */
-      if (my_record_index)
-	return _clib_maplog_get_entry_slowpath (mm, my_record_index);
-      /* FALLTHROUGH */
+    /* Time to unmap and create a new logfile? */
+    if (PREDICT_FALSE ((my_record_index & (mm->file_size_in_records - 1)) == 0)) {
+        /* Yes, but not the very first time... (;-)... */
+        if (my_record_index)
+            return _clib_maplog_get_entry_slowpath (mm, my_record_index);
+        /* FALLTHROUGH */
     }
 
-  rv = (u8 *)
-    mm->file_baseva[(my_record_index >> mm->log2_file_size_in_records) & 1] +
-    (my_record_index & (mm->file_size_in_records - 1))
-    * mm->record_size_in_cachelines * CLIB_CACHE_LINE_BYTES;
+    rv = (u8 *)
+         mm->file_baseva[(my_record_index >> mm->log2_file_size_in_records) & 1] +
+         (my_record_index & (mm->file_size_in_records - 1))
+         * mm->record_size_in_cachelines * CLIB_CACHE_LINE_BYTES;
 
-  return rv;
+    return rv;
 }
 
 #endif /* __included_maplog_h__ */

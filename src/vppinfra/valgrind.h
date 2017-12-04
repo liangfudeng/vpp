@@ -176,9 +176,8 @@
 
 #if defined(PLAT_x86_linux)  ||  defined(PLAT_x86_darwin)
 
-typedef struct
-{
-  unsigned int nraddr;		/* where's the code? */
+typedef struct {
+    unsigned int nraddr;      /* where's the code? */
 }
 OrigFn;
 
@@ -230,9 +229,8 @@ OrigFn;
 
 #if defined(PLAT_amd64_linux)  ||  defined(PLAT_amd64_darwin)
 
-typedef struct
-{
-  unsigned long long int nraddr;	/* where's the code? */
+typedef struct {
+    unsigned long long int nraddr;    /* where's the code? */
 }
 OrigFn;
 
@@ -284,9 +282,8 @@ OrigFn;
 
 #if defined(PLAT_ppc32_linux)
 
-typedef struct
-{
-  unsigned int nraddr;		/* where's the code? */
+typedef struct {
+    unsigned int nraddr;      /* where's the code? */
 }
 OrigFn;
 
@@ -344,10 +341,9 @@ OrigFn;
 
 #if defined(PLAT_ppc64_linux)
 
-typedef struct
-{
-  unsigned long long int nraddr;	/* where's the code? */
-  unsigned long long int r2;	/* what tocptr do we need? */
+typedef struct {
+    unsigned long long int nraddr;    /* where's the code? */
+    unsigned long long int r2;    /* what tocptr do we need? */
 }
 OrigFn;
 
@@ -410,10 +406,9 @@ OrigFn;
 
 #if defined(PLAT_ppc32_aix5)
 
-typedef struct
-{
-  unsigned int nraddr;		/* where's the code? */
-  unsigned int r2;		/* what tocptr do we need? */
+typedef struct {
+    unsigned int nraddr;      /* where's the code? */
+    unsigned int r2;      /* what tocptr do we need? */
 }
 OrigFn;
 
@@ -482,10 +477,9 @@ OrigFn;
 
 #if defined(PLAT_ppc64_aix5)
 
-typedef struct
-{
-  unsigned long long int nraddr;	/* where's the code? */
-  unsigned long long int r2;	/* what tocptr do we need? */
+typedef struct {
+    unsigned long long int nraddr;    /* where's the code? */
+    unsigned long long int r2;    /* what tocptr do we need? */
 }
 OrigFn;
 
@@ -3605,54 +3599,54 @@ OrigFn;
    This enum comprises an ABI exported by Valgrind to programs
    which use client requests.  DO NOT CHANGE THE ORDER OF THESE
    ENTRIES, NOR DELETE ANY -- add new ones at the end. */
-typedef enum
-{ VG_USERREQ__RUNNING_ON_VALGRIND = 0x1001,
-  VG_USERREQ__DISCARD_TRANSLATIONS = 0x1002,
+typedef enum {
+    VG_USERREQ__RUNNING_ON_VALGRIND = 0x1001,
+    VG_USERREQ__DISCARD_TRANSLATIONS = 0x1002,
 
-  /* These allow any function to be called from the simulated
-     CPU but run on the real CPU.  Nb: the first arg passed to
-     the function is always the ThreadId of the running
-     thread!  So CLIENT_CALL0 actually requires a 1 arg
-     function, etc. */
-  VG_USERREQ__CLIENT_CALL0 = 0x1101,
-  VG_USERREQ__CLIENT_CALL1 = 0x1102,
-  VG_USERREQ__CLIENT_CALL2 = 0x1103,
-  VG_USERREQ__CLIENT_CALL3 = 0x1104,
+    /* These allow any function to be called from the simulated
+       CPU but run on the real CPU.  Nb: the first arg passed to
+       the function is always the ThreadId of the running
+       thread!  So CLIENT_CALL0 actually requires a 1 arg
+       function, etc. */
+    VG_USERREQ__CLIENT_CALL0 = 0x1101,
+    VG_USERREQ__CLIENT_CALL1 = 0x1102,
+    VG_USERREQ__CLIENT_CALL2 = 0x1103,
+    VG_USERREQ__CLIENT_CALL3 = 0x1104,
 
-  /* Can be useful in regression testing suites -- eg. can
-     send Valgrind's output to /dev/null and still count
-     errors. */
-  VG_USERREQ__COUNT_ERRORS = 0x1201,
+    /* Can be useful in regression testing suites -- eg. can
+       send Valgrind's output to /dev/null and still count
+       errors. */
+    VG_USERREQ__COUNT_ERRORS = 0x1201,
 
-  /* These are useful and can be interpreted by any tool that
-     tracks malloc() et al, by using vg_replace_malloc.c. */
-  VG_USERREQ__MALLOCLIKE_BLOCK = 0x1301,
-  VG_USERREQ__FREELIKE_BLOCK = 0x1302,
-  /* Memory pool support. */
-  VG_USERREQ__CREATE_MEMPOOL = 0x1303,
-  VG_USERREQ__DESTROY_MEMPOOL = 0x1304,
-  VG_USERREQ__MEMPOOL_ALLOC = 0x1305,
-  VG_USERREQ__MEMPOOL_FREE = 0x1306,
-  VG_USERREQ__MEMPOOL_TRIM = 0x1307,
-  VG_USERREQ__MOVE_MEMPOOL = 0x1308,
-  VG_USERREQ__MEMPOOL_CHANGE = 0x1309,
-  VG_USERREQ__MEMPOOL_EXISTS = 0x130a,
+    /* These are useful and can be interpreted by any tool that
+       tracks malloc() et al, by using vg_replace_malloc.c. */
+    VG_USERREQ__MALLOCLIKE_BLOCK = 0x1301,
+    VG_USERREQ__FREELIKE_BLOCK = 0x1302,
+    /* Memory pool support. */
+    VG_USERREQ__CREATE_MEMPOOL = 0x1303,
+    VG_USERREQ__DESTROY_MEMPOOL = 0x1304,
+    VG_USERREQ__MEMPOOL_ALLOC = 0x1305,
+    VG_USERREQ__MEMPOOL_FREE = 0x1306,
+    VG_USERREQ__MEMPOOL_TRIM = 0x1307,
+    VG_USERREQ__MOVE_MEMPOOL = 0x1308,
+    VG_USERREQ__MEMPOOL_CHANGE = 0x1309,
+    VG_USERREQ__MEMPOOL_EXISTS = 0x130a,
 
-  /* Allow printfs to valgrind log. */
-  VG_USERREQ__PRINTF = 0x1401,
-  VG_USERREQ__PRINTF_BACKTRACE = 0x1402,
+    /* Allow printfs to valgrind log. */
+    VG_USERREQ__PRINTF = 0x1401,
+    VG_USERREQ__PRINTF_BACKTRACE = 0x1402,
 
-  /* Stack support. */
-  VG_USERREQ__STACK_REGISTER = 0x1501,
-  VG_USERREQ__STACK_DEREGISTER = 0x1502,
-  VG_USERREQ__STACK_CHANGE = 0x1503,
+    /* Stack support. */
+    VG_USERREQ__STACK_REGISTER = 0x1501,
+    VG_USERREQ__STACK_DEREGISTER = 0x1502,
+    VG_USERREQ__STACK_CHANGE = 0x1503,
 
-  /* Wine support */
-  VG_USERREQ__LOAD_PDB_DEBUGINFO = 0x1601
+    /* Wine support */
+    VG_USERREQ__LOAD_PDB_DEBUGINFO = 0x1601
 } Vg_ClientRequest;
 
 #if !defined(__GNUC__)
-#define __extension__		/* */
+#define __extension__       /* */
 #endif
 
 /* Returns the number of Valgrinds this code is running under.  That
@@ -3695,33 +3689,33 @@ typedef enum
 /* Modern GCC will optimize the static routine out if unused,
    and unused attribute will shut down warnings about it.  */
 static int VALGRIND_PRINTF (const char *format, ...)
-  __attribute__ ((format (__printf__, 1, 2), __unused__));
+__attribute__ ((format (__printf__, 1, 2), __unused__));
 static int
 VALGRIND_PRINTF (const char *format, ...)
 {
-  unsigned long _qzz_res;
-  va_list vargs;
-  va_start (vargs, format);
-  VALGRIND_DO_CLIENT_REQUEST (_qzz_res, 0, VG_USERREQ__PRINTF,
-			      (unsigned long) format, (unsigned long) vargs,
-			      0, 0, 0);
-  va_end (vargs);
-  return (int) _qzz_res;
+    unsigned long _qzz_res;
+    va_list vargs;
+    va_start (vargs, format);
+    VALGRIND_DO_CLIENT_REQUEST (_qzz_res, 0, VG_USERREQ__PRINTF,
+                                (unsigned long) format, (unsigned long) vargs,
+                                0, 0, 0);
+    va_end (vargs);
+    return (int) _qzz_res;
 }
 
 static int VALGRIND_PRINTF_BACKTRACE (const char *format, ...)
-  __attribute__ ((format (__printf__, 1, 2), __unused__));
+__attribute__ ((format (__printf__, 1, 2), __unused__));
 static int
 VALGRIND_PRINTF_BACKTRACE (const char *format, ...)
 {
-  unsigned long _qzz_res;
-  va_list vargs;
-  va_start (vargs, format);
-  VALGRIND_DO_CLIENT_REQUEST (_qzz_res, 0, VG_USERREQ__PRINTF_BACKTRACE,
-			      (unsigned long) format, (unsigned long) vargs,
-			      0, 0, 0);
-  va_end (vargs);
-  return (int) _qzz_res;
+    unsigned long _qzz_res;
+    va_list vargs;
+    va_start (vargs, format);
+    VALGRIND_DO_CLIENT_REQUEST (_qzz_res, 0, VG_USERREQ__PRINTF_BACKTRACE,
+                                (unsigned long) format, (unsigned long) vargs,
+                                0, 0, 0);
+    va_end (vargs);
+    return (int) _qzz_res;
 }
 
 #endif /* NVALGRIND */
@@ -3891,23 +3885,23 @@ VALGRIND_PRINTF_BACKTRACE (const char *format, ...)
 
    Ignored if addr == 0.
 */
-#define VALGRIND_MALLOCLIKE_BLOCK(addr, sizeB, rzB, is_zeroed)	\
-   {unsigned int _qzz_res;					\
-    VALGRIND_DO_CLIENT_REQUEST(_qzz_res, 0,			\
-                               VG_USERREQ__MALLOCLIKE_BLOCK,	\
-                               addr, sizeB, rzB, is_zeroed, 0);	\
-    (void) _qzz_res; /* compiler warning */			\
+#define VALGRIND_MALLOCLIKE_BLOCK(addr, sizeB, rzB, is_zeroed)  \
+   {unsigned int _qzz_res;                  \
+    VALGRIND_DO_CLIENT_REQUEST(_qzz_res, 0,         \
+                               VG_USERREQ__MALLOCLIKE_BLOCK,    \
+                               addr, sizeB, rzB, is_zeroed, 0); \
+    (void) _qzz_res; /* compiler warning */         \
    }
 
 /* See the comment for VALGRIND_MALLOCLIKE_BLOCK for details.
    Ignored if addr == 0.
 */
-#define VALGRIND_FREELIKE_BLOCK(addr, rzB)			\
-   {unsigned int _qzz_res;					\
-    VALGRIND_DO_CLIENT_REQUEST(_qzz_res, 0,			\
-                               VG_USERREQ__FREELIKE_BLOCK,	\
-                               addr, rzB, 0, 0, 0);		\
-    (void) _qzz_res; /* compiler warning */			\
+#define VALGRIND_FREELIKE_BLOCK(addr, rzB)          \
+   {unsigned int _qzz_res;                  \
+    VALGRIND_DO_CLIENT_REQUEST(_qzz_res, 0,         \
+                               VG_USERREQ__FREELIKE_BLOCK,  \
+                               addr, rzB, 0, 0, 0);     \
+    (void) _qzz_res; /* compiler warning */         \
    }
 
 /* Create a memory pool. */

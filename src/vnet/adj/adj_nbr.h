@@ -15,7 +15,7 @@
 /**
  * @brief
  * Neighbour Adjacency sub-type. These adjs represent an L3 peer on a
- * connected link. 
+ * connected link.
  */
 
 #ifndef __ADJ_NBR_H__
@@ -45,9 +45,9 @@
  *  The interface on which the peer resides
  */
 extern adj_index_t adj_nbr_add_or_lock(fib_protocol_t nh_proto,
-				       vnet_link_t link_type,
-				       const ip46_address_t *nh_addr,
-				       u32 sw_if_index);
+                                       vnet_link_t link_type,
+                                       const ip46_address_t *nh_addr,
+                                       u32 sw_if_index);
 
 /**
  * @brief
@@ -71,16 +71,15 @@ extern adj_index_t adj_nbr_add_or_lock(fib_protocol_t nh_proto,
  *  The rewrite to prepend to packets
  */
 extern adj_index_t adj_nbr_add_or_lock_w_rewrite(fib_protocol_t nh_proto,
-						 vnet_link_t link_type,
-						 const ip46_address_t *nh_addr,
-						 u32 sw_if_index,
-						 u8 *rewrite);
+        vnet_link_t link_type,
+        const ip46_address_t *nh_addr,
+        u32 sw_if_index,
+        u8 *rewrite);
 /**
  * @brief When adding a rewrite to an adjacency these are flags that
  * apply to that rewrite
  */
-typedef enum adj_nbr_rewrite_flag_t_
-{
+typedef enum adj_nbr_rewrite_flag_t_ {
     ADJ_NBR_REWRITE_FLAG_NONE,
 
     /**
@@ -109,8 +108,8 @@ typedef enum adj_nbr_rewrite_flag_t_
  *  The new rewrite
  */
 extern void adj_nbr_update_rewrite(adj_index_t adj_index,
-				   adj_nbr_rewrite_flag_t flags,
-				   u8 *rewrite);
+                                   adj_nbr_rewrite_flag_t flags,
+                                   u8 *rewrite);
 
 /**
  * @brief
@@ -128,18 +127,18 @@ extern u8* format_adj_nbr(u8* s, va_list *ap);
  * @brief Walk the neighbour Adjacencies on a given interface
  */
 extern void adj_nbr_walk (u32 sw_if_index,
-			  fib_protocol_t adj_nh_proto,
-			  adj_walk_cb_t cb,
-			  void *ctx);
+                          fib_protocol_t adj_nh_proto,
+                          adj_walk_cb_t cb,
+                          void *ctx);
 /**
  * @brief Walk the neighbour Adjacencies on a given interface with a given next-hop
  */
 void
 adj_nbr_walk_nh (u32 sw_if_index,
-		 fib_protocol_t adj_nh_proto,
-		 const ip46_address_t *nh,
-		 adj_walk_cb_t cb,
-		 void *ctx);
+                 fib_protocol_t adj_nh_proto,
+                 const ip46_address_t *nh,
+                 adj_walk_cb_t cb,
+                 void *ctx);
 
 /**
  * @brief Walk adjacencies on a link with a given v4 next-hop.
@@ -147,9 +146,9 @@ adj_nbr_walk_nh (u32 sw_if_index,
  */
 void
 adj_nbr_walk_nh4 (u32 sw_if_index,
-		  const ip4_address_t *addr,
-		  adj_walk_cb_t cb,
-		  void *ctx);
+                  const ip4_address_t *addr,
+                  adj_walk_cb_t cb,
+                  void *ctx);
 
 /**
  * @brief Walk adjacencies on a link with a given v6 next-hop.
@@ -157,9 +156,9 @@ adj_nbr_walk_nh4 (u32 sw_if_index,
  */
 void
 adj_nbr_walk_nh6 (u32 sw_if_index,
-		  const ip6_address_t *addr,
-		  adj_walk_cb_t cb,
-		  void *ctx);
+                  const ip6_address_t *addr,
+                  adj_walk_cb_t cb,
+                  void *ctx);
 
 /**
  * @brief

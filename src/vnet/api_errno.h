@@ -15,7 +15,7 @@
 #ifndef included_vnet_api_errno_h
 #define included_vnet_api_errno_h
 
-#define foreach_vnet_api_error						\
+#define foreach_vnet_api_error                      \
 _(UNSPECIFIED, -1, "Unspecified Error")                                 \
 _(INVALID_SW_IF_INDEX, -2, "Invalid sw_if_index")                       \
 _(NO_SUCH_FIB, -3, "No such FIB / VRF")                                 \
@@ -50,23 +50,23 @@ _(INVALID_DST_ADDRESS, -58, "Invalid dst address")                      \
 _(ADDRESS_LENGTH_MISMATCH, -59, "Address length mismatch")              \
 _(ADDRESS_NOT_FOUND_FOR_INTERFACE, -60, "Address not found for interface") \
 _(ADDRESS_NOT_LINK_LOCAL, -61, "Address not link-local")                \
-_(IP6_NOT_ENABLED, -62, "ip6 not enabled")				\
-_(IN_PROGRESS, 10, "Operation in progress")				\
-_(NO_SUCH_NODE, -63, "No such graph node")				\
-_(NO_SUCH_NODE2, -64, "No such graph node #2")				\
+_(IP6_NOT_ENABLED, -62, "ip6 not enabled")              \
+_(IN_PROGRESS, 10, "Operation in progress")             \
+_(NO_SUCH_NODE, -63, "No such graph node")              \
+_(NO_SUCH_NODE2, -64, "No such graph node #2")              \
 _(NO_SUCH_TABLE, -65, "No such table")                                  \
 _(NO_SUCH_TABLE2, -66, "No such table #2")                              \
 _(NO_SUCH_TABLE3, -67, "No such table #3")                              \
 _(SUBIF_ALREADY_EXISTS, -68, "Subinterface already exists")             \
-_(SUBIF_CREATE_FAILED, -69, "Subinterface creation failed")		\
+_(SUBIF_CREATE_FAILED, -69, "Subinterface creation failed")     \
 _(INVALID_MEMORY_SIZE, -70, "Invalid memory size requested")            \
 _(INVALID_INTERFACE, -71, "Invalid interface")                          \
 _(INVALID_VLAN_TAG_COUNT, -72, "Invalid number of tags for requested operation") \
 _(INVALID_ARGUMENT, -73, "Invalid argument")                            \
 _(UNEXPECTED_INTF_STATE, -74, "Unexpected interface state")             \
 _(TUNNEL_EXIST, -75, "Tunnel already exists")                           \
-_(INVALID_DECAP_NEXT, -76, "Invalid decap-next")			\
-_(RESPONSE_NOT_READY, -77, "Response not ready")			\
+_(INVALID_DECAP_NEXT, -76, "Invalid decap-next")            \
+_(RESPONSE_NOT_READY, -77, "Response not ready")            \
 _(NOT_CONNECTED, -78, "Not connected to the data plane")                \
 _(IF_ALREADY_EXISTS, -79, "Interface already exists")                   \
 _(BOND_SLAVE_NOT_ALLOWED, -80, "Operation not allowed on slave of BondEthernet") \
@@ -94,52 +94,51 @@ _(BFD_EEXIST, -101, "Duplicate BFD object")                             \
 _(BFD_ENOENT, -102, "No such BFD object")                               \
 _(BFD_EINUSE, -103, "BFD object in use")                                \
 _(BFD_NOTSUPP, -104, "BFD feature not supported")                       \
-_(ADDRESS_IN_USE, -105, "Address in use")				\
-_(ADDRESS_NOT_IN_USE, -106, "Address not in use")			\
+_(ADDRESS_IN_USE, -105, "Address in use")               \
+_(ADDRESS_NOT_IN_USE, -106, "Address not in use")           \
 _(QUEUE_FULL, -107, "Queue full")                                       \
-_(UNKNOWN_URI_TYPE, -108, "Unknown URI type")				\
+_(UNKNOWN_URI_TYPE, -108, "Unknown URI type")               \
 _(URI_FIFO_CREATE_FAILED, -109, "URI FIFO segment create failed")       \
 _(LISP_RLOC_LOCAL, -110, "RLOC address is local")                       \
-_(BFD_EAGAIN, -111, "BFD object cannot be manipulated at this time")	\
+_(BFD_EAGAIN, -111, "BFD object cannot be manipulated at this time")    \
 _(INVALID_GPE_MODE, -112, "Invalid GPE mode")                           \
 _(LISP_GPE_ENTRIES_PRESENT, -113, "LISP GPE entries are present")       \
-_(ADDRESS_FOUND_FOR_INTERFACE, -114, "Address found for interface")	\
-_(SESSION_CONNECT, -115, "Session failed to connect")              	\
-_(ENTRY_ALREADY_EXISTS, -116, "Entry already exists")			\
-_(SVM_SEGMENT_CREATE_FAIL, -117, "svm segment create fail")		\
+_(ADDRESS_FOUND_FOR_INTERFACE, -114, "Address found for interface") \
+_(SESSION_CONNECT, -115, "Session failed to connect")               \
+_(ENTRY_ALREADY_EXISTS, -116, "Entry already exists")           \
+_(SVM_SEGMENT_CREATE_FAIL, -117, "svm segment create fail")     \
 _(APPLICATION_NOT_ATTACHED, -118, "application not attached")           \
 _(BD_ALREADY_EXISTS, -119, "Bridge domain already exists")              \
-_(BD_IN_USE, -120, "Bridge domain has member interfaces")		\
+_(BD_IN_USE, -120, "Bridge domain has member interfaces")       \
 _(BD_NOT_MODIFIABLE, -121, "Bridge domain 0 can't be deleted/modified") \
-_(BD_ID_EXCEED_MAX, -122, "Bridge domain ID exceed 16M limit")		\
+_(BD_ID_EXCEED_MAX, -122, "Bridge domain ID exceed 16M limit")      \
 _(SUBIF_DOESNT_EXIST, -123, "Subinterface doesn't exist")               \
 _(L2_MACS_EVENT_CLINET_PRESENT, -124, "Client already exist for L2 MACs events") \
-_(INVALID_QUEUE, -125, "Invalid queue")                 		\
-_(UNSUPPORTED, -126, "Unsupported")					\
-_(DUPLICATE_IF_ADDRESS, -127, "Address already present on another interface")	\
-_(APP_INVALID_NS, -128, "Invalid application namespace")			\
-_(APP_WRONG_NS_SECRET, -129, "Wrong app namespace secret")		\
-_(APP_CONNECT_SCOPE, -130, "Connect scope")				\
-_(APP_ALREADY_ATTACHED, -131, "App already attached")			\
-_(SESSION_REDIRECT, -132, "Redirect failed")				\
-_(ILLEGAL_NAME, -133, "Illegal name")					\
-_(NO_NAME_SERVERS, -134, "No name servers configured")			\
-_(NAME_SERVER_NOT_FOUND, -135, "Name server not found")			\
-_(NAME_RESOLUTION_NOT_ENABLED, -136, "Name resolution not enabled")	\
-_(NAME_SERVER_FORMAT_ERROR, -137, "Server format error (bug!)")		\
+_(INVALID_QUEUE, -125, "Invalid queue")                         \
+_(UNSUPPORTED, -126, "Unsupported")                 \
+_(DUPLICATE_IF_ADDRESS, -127, "Address already present on another interface")   \
+_(APP_INVALID_NS, -128, "Invalid application namespace")            \
+_(APP_WRONG_NS_SECRET, -129, "Wrong app namespace secret")      \
+_(APP_CONNECT_SCOPE, -130, "Connect scope")             \
+_(APP_ALREADY_ATTACHED, -131, "App already attached")           \
+_(SESSION_REDIRECT, -132, "Redirect failed")                \
+_(ILLEGAL_NAME, -133, "Illegal name")                   \
+_(NO_NAME_SERVERS, -134, "No name servers configured")          \
+_(NAME_SERVER_NOT_FOUND, -135, "Name server not found")         \
+_(NAME_RESOLUTION_NOT_ENABLED, -136, "Name resolution not enabled") \
+_(NAME_SERVER_FORMAT_ERROR, -137, "Server format error (bug!)")     \
 _(NAME_SERVER_NO_SUCH_NAME, -138, "No such name")                       \
-_(NAME_SERVER_NO_ADDRESSES, -139, "No addresses available")		\
-_(NAME_SERVER_NEXT_SERVER, -140, "Retry with new server")		\
-_(APP_CONNECT_FILTERED, -141, "Connect was filtered")			\
-_(ACL_IN_USE_INBOUND, -142, "Inbound ACL in use")			\
-_(ACL_IN_USE_OUTBOUND, -143, "Outbound ACL in use")			\
-_(INIT_FAILED, -144, "Initialization Failed")				\
+_(NAME_SERVER_NO_ADDRESSES, -139, "No addresses available")     \
+_(NAME_SERVER_NEXT_SERVER, -140, "Retry with new server")       \
+_(APP_CONNECT_FILTERED, -141, "Connect was filtered")           \
+_(ACL_IN_USE_INBOUND, -142, "Inbound ACL in use")           \
+_(ACL_IN_USE_OUTBOUND, -143, "Outbound ACL in use")         \
+_(INIT_FAILED, -144, "Initialization Failed")               \
 _(NETLINK_ERROR, -145, "netlink error")
 
-typedef enum
-{
+typedef enum {
 #define _(a,b,c) VNET_API_ERROR_##a = (b),
-  foreach_vnet_api_error
+    foreach_vnet_api_error
 #undef _
     VNET_API_N_ERROR,
 } vnet_api_error_t;

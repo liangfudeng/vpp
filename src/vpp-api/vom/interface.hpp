@@ -26,584 +26,589 @@
 #include "vom/rpc_cmd.hpp"
 #include "vom/singular_db.hpp"
 
-namespace VOM {
-/**
- * Forward declaration of the stats and events command
- */
-namespace interface_cmds {
-class stats_enable_cmd;
-class events_cmd;
-};
-
-/**
- * A representation of an interface in VPP
- */
-class interface : public object_base
+namespace VOM
 {
-public:
-  /**
-   * The key for interface's key
-   */
-  typedef std::string key_t;
-
-  /**
-   * The iterator type
-   */
-  typedef singular_db<const std::string, interface>::const_iterator
-    const_iterator_t;
-
-  /**
-   * An interface type
-   */
-  struct type_t : enum_base<type_t>
-  {
     /**
-     * Unkown type
+     * Forward declaration of the stats and events command
      */
-    const static type_t UNKNOWN;
-    /**
-     * A brideged Virtual interface (aka SVI or IRB)
-     */
-    const static type_t BVI;
-    /**
-     * VXLAN interface
-     */
-    const static type_t VXLAN;
-    /**
-     * Ethernet interface type
-     */
-    const static type_t ETHERNET;
-    /**
-     * AF-Packet interface type
-     */
-    const static type_t AFPACKET;
-    /**
-     * loopback interface type
-     */
-    const static type_t LOOPBACK;
-    /**
-     * Local interface type (specific to VPP)
-     */
-    const static type_t LOCAL;
-    /**
-     * TAP interface type
-     */
-    const static type_t TAP;
-
-    /**
-     * Convert VPP's name of the interface to a type
-     */
-    static type_t from_string(const std::string& str);
-
-  private:
-    /**
-     * Private constructor taking the value and the string name
-     */
-    type_t(int v, const std::string& s);
-  };
-
-  /**
-   * The admin state of the interface
-   */
-  struct admin_state_t : enum_base<admin_state_t>
-  {
-    /**
-     * Admin DOWN state
-     */
-    const static admin_state_t DOWN;
-    /**
-     * Admin UP state
-     */
-    const static admin_state_t UP;
-
-    /**
-     * Convert VPP's numerical value to enum type
-     */
-    static admin_state_t from_int(uint8_t val);
-
-  private:
-    /**
-     * Private constructor taking the value and the string name
-     */
-    admin_state_t(int v, const std::string& s);
-  };
-
-  /**
-   * The oper state of the interface
-   */
-  struct oper_state_t : enum_base<oper_state_t>
-  {
-    /**
-     * Operational DOWN state
-     */
-    const static oper_state_t DOWN;
-    /**
-     * Operational UP state
-     */
-    const static oper_state_t UP;
-
-    /**
-     * Convert VPP's numerical value to enum type
-     */
-    static oper_state_t from_int(uint8_t val);
-
-  private:
-    /**
-     * Private constructor taking the value and the string name
-     */
-    oper_state_t(int v, const std::string& s);
-  };
-
-  /**
-   * Construct a new object matching the desried state
-   */
-  interface(const std::string& name, type_t type, admin_state_t state);
-  /**
-   * Construct a new object matching the desried state mapped
-   * to a specific route_domain
-   */
-  interface(const std::string& name,
-            type_t type,
-            admin_state_t state,
-            const route_domain& rd);
-  /**
-   * Destructor
-   */
-  virtual ~interface();
-
-  /**
-   * Copy Constructor
-   */
-  interface(const interface& o);
-
-  static const_iterator_t cbegin();
-  static const_iterator_t cend();
-
-  /**
-   * Return the matching'singular' of the interface
-   */
-  std::shared_ptr<interface> singular() const;
-
-  /**
-   * convert to string format for debug purposes
-   */
-  virtual std::string to_string(void) const;
-
-  /**
-   * Return VPP's handle to this object
-   */
-  const handle_t& handle() const;
-
-  /**
-   * Return the interface type
-   */
-  const type_t& type() const;
-
-  /**
-   * Return the interface type
-   */
-  const std::string& name() const;
-
-  /**
-   * Return the interface type
-   */
-  const key_t& key() const;
-
-  /**
-   * Return the L2 Address
-   */
-  const l2_address_t& l2_address() const;
-
-  /**
-   * Set the L2 Address
-   */
-  void set(const l2_address_t& addr);
-
-  /**
-   * Set the operational state of the interface, as reported by VPP
-   */
-  void set(const oper_state_t& state);
-
-  /**
-   * Comparison operator - only used for UT
-   */
-  virtual bool operator==(const interface& i) const;
-
-  /**
-   * A base class for interface Create commands
-   */
-  template <typename MSG>
-  class create_cmd : public rpc_cmd<HW::item<handle_t>, HW::item<handle_t>, MSG>
-  {
-  public:
-    create_cmd(HW::item<handle_t>& item, const std::string& name)
-      : rpc_cmd<HW::item<handle_t>, HW::item<handle_t>, MSG>(item)
-      , m_name(name)
+    namespace interface_cmds
     {
-    }
+        class stats_enable_cmd;
+        class events_cmd;
+    };
 
     /**
-     * Destructor
+     * A representation of an interface in VPP
      */
-    virtual ~create_cmd() = default;
+    class interface : public object_base
+        {
+        public:
+            /**
+             * The key for interface's key
+             */
+            typedef std::string key_t;
 
-    /**
-     * Comparison operator - only used for UT
-     */
-    virtual bool operator==(const create_cmd& o) const
-    {
-      return (m_name == o.m_name);
-    }
+            /**
+             * The iterator type
+             */
+            typedef singular_db<const std::string, interface>::const_iterator
+                const_iterator_t;
 
-    /**
-     * Indicate the succeeded, when the HW Q is disabled.
-     */
-    void succeeded()
-    {
-      rpc_cmd<HW::item<handle_t>, HW::item<handle_t>, MSG>::succeeded();
-      interface::add(m_name, this->item());
-    }
+            /**
+             * An interface type
+             */
+            struct type_t : enum_base<type_t> {
+                /**
+                 * Unkown type
+                 */
+                const static type_t UNKNOWN;
+                /**
+                 * A brideged Virtual interface (aka SVI or IRB)
+                 */
+                const static type_t BVI;
+                /**
+                 * VXLAN interface
+                 */
+                const static type_t VXLAN;
+                /**
+                 * Ethernet interface type
+                 */
+                const static type_t ETHERNET;
+                /**
+                 * AF-Packet interface type
+                 */
+                const static type_t AFPACKET;
+                /**
+                 * loopback interface type
+                 */
+                const static type_t LOOPBACK;
+                /**
+                 * Local interface type (specific to VPP)
+                 */
+                const static type_t LOCAL;
+                /**
+                 * TAP interface type
+                 */
+                const static type_t TAP;
 
-    /**
-     * add the created interface to the DB
-     */
-    void insert_interface() { interface::add(m_name, this->item()); }
+                /**
+                 * Convert VPP's name of the interface to a type
+                 */
+                static type_t from_string(const std::string& str);
 
-    virtual vapi_error_e operator()(MSG& reply)
-    {
-      int sw_if_index = reply.get_response().get_payload().sw_if_index;
-      int retval = reply.get_response().get_payload().retval;
+            private:
+                /**
+                 * Private constructor taking the value and the string name
+                 */
+                type_t(int v, const std::string& s);
+            };
 
-      VOM_LOG(log_level_t::DEBUG) << this->to_string() << " " << retval;
+            /**
+             * The admin state of the interface
+             */
+            struct admin_state_t : enum_base<admin_state_t> {
+                /**
+                 * Admin DOWN state
+                 */
+                const static admin_state_t DOWN;
+                /**
+                 * Admin UP state
+                 */
+                const static admin_state_t UP;
 
-      rc_t rc = rc_t::from_vpp_retval(retval);
-      handle_t handle = handle_t::INVALID;
+                /**
+                 * Convert VPP's numerical value to enum type
+                 */
+                static admin_state_t from_int(uint8_t val);
 
-      if (rc_t::OK == rc) {
-        handle = sw_if_index;
-      }
+            private:
+                /**
+                 * Private constructor taking the value and the string name
+                 */
+                admin_state_t(int v, const std::string& s);
+            };
 
-      HW::item<handle_t> res(handle, rc);
+            /**
+             * The oper state of the interface
+             */
+            struct oper_state_t : enum_base<oper_state_t> {
+                /**
+                 * Operational DOWN state
+                 */
+                const static oper_state_t DOWN;
+                /**
+                 * Operational UP state
+                 */
+                const static oper_state_t UP;
 
-      this->fulfill(res);
+                /**
+                 * Convert VPP's numerical value to enum type
+                 */
+                static oper_state_t from_int(uint8_t val);
 
-      return (VAPI_OK);
-    }
+            private:
+                /**
+                 * Private constructor taking the value and the string name
+                 */
+                oper_state_t(int v, const std::string& s);
+            };
 
-  protected:
-    /**
-     * The name of the interface to be created
-     */
-    const std::string& m_name;
-  };
+            /**
+             * Construct a new object matching the desried state
+             */
+            interface(const std::string& name, type_t type, admin_state_t state);
+            /**
+             * Construct a new object matching the desried state mapped
+             * to a specific route_domain
+             */
+            interface(const std::string& name,
+                          type_t type,
+                          admin_state_t state,
+                          const route_domain& rd);
+            /**
+             * Destructor
+             */
+            virtual ~interface();
 
-  /**
-   * Base class for intterface Delete commands
-   */
-  template <typename MSG>
-  class delete_cmd : public rpc_cmd<HW::item<handle_t>, HW::item<handle_t>, MSG>
-  {
-  public:
-    delete_cmd(HW::item<handle_t>& item, const std::string& name)
-      : rpc_cmd<HW::item<handle_t>, HW::item<handle_t>, MSG>(item)
-      , m_name(name)
-    {
-    }
+            /**
+             * Copy Constructor
+             */
+            interface(const interface& o);
 
-    delete_cmd(HW::item<handle_t>& item)
-      : rpc_cmd<HW::item<handle_t>, HW::item<handle_t>, MSG>(item)
-      , m_name()
-    {
-    }
+            static const_iterator_t cbegin();
+            static const_iterator_t cend();
 
-    /**
-     * Destructor
-     */
-    virtual ~delete_cmd() = default;
+            /**
+             * Return the matching'singular' of the interface
+             */
+            std::shared_ptr<interface> singular() const;
 
-    /**
-     * Comparison operator - only used for UT
-     */
-    virtual bool operator==(const delete_cmd& o) const
-    {
-      return (this->m_hw_item == o.m_hw_item);
-    }
+            /**
+             * convert to string format for debug purposes
+             */
+            virtual std::string to_string(void) const;
 
-    /**
-     * Indicate the succeeded, when the HW Q is disabled.
-     */
-    void succeeded() {}
+            /**
+             * Return VPP's handle to this object
+             */
+            const handle_t& handle() const;
 
-    /**
-     * add the created interface to the DB
-     */
-    void remove_interface() { interface::remove(this->item()); }
+            /**
+             * Return the interface type
+             */
+            const type_t& type() const;
 
-  protected:
-    /**
-     * The name of the interface to be created
-     */
-    const std::string m_name;
-  };
+            /**
+             * Return the interface type
+             */
+            const std::string& name() const;
 
-  /**
-   * A class that listens to interface Events
-   */
-  class event_listener
-  {
-  public:
-    /**
-     * Default Constructor
-     */
-    event_listener();
+            /**
+             * Return the interface type
+             */
+            const key_t& key() const;
 
-    /**
-     * Virtual function called on the listener when the command has data
-     * ready to process
-     */
-    virtual void handle_interface_event(interface_cmds::events_cmd* cmd) = 0;
+            /**
+             * Return the L2 Address
+             */
+            const l2_address_t& l2_address() const;
 
-    /**
-     * Return the HW::item representing the status
-     */
-    HW::item<bool>& status();
+            /**
+             * Set the L2 Address
+             */
+            void set(const l2_address_t& addr);
 
-  protected:
-    /**
-     * The status of the subscription
-     */
-    HW::item<bool> m_status;
-  };
+            /**
+             * Set the operational state of the interface, as reported by VPP
+             */
+            void set(const oper_state_t& state);
 
-  /**
-   * A class that listens to interface Stats
-   */
-  class stat_listener
-  {
-  public:
-    /**
-     * Default Constructor
-     */
-    stat_listener();
+            /**
+             * Comparison operator - only used for UT
+             */
+            virtual bool operator==(const interface& i) const;
 
-    /**
-     * Virtual function called on the listener when the command has data
-     * ready to process
-     */
-    virtual void handle_interface_stat(
-      interface_cmds::stats_enable_cmd* cmd) = 0;
+            /**
+             * A base class for interface Create commands
+             */
+            template <typename MSG>
+            class create_cmd : public rpc_cmd<HW::item<handle_t>, HW::item<handle_t>, MSG>
+            {
+            public:
+                create_cmd(HW::item<handle_t>& item, const std::string& name)
+                    : rpc_cmd<HW::item<handle_t>, HW::item<handle_t>, MSG>(item)
+                    , m_name(name)
+                {
+                }
 
-    /**
-     * Return the HW::item representing the status
-     */
-    HW::item<bool>& status();
+                /**
+                 * Destructor
+                 */
+                virtual ~create_cmd() = default;
 
-  protected:
-    /**
-     * The status of the subscription
-     */
-    HW::item<bool> m_status;
-  };
+                /**
+                 * Comparison operator - only used for UT
+                 */
+                virtual bool operator==(const create_cmd& o) const
+                {
+                    return (m_name == o.m_name);
+                }
 
-  /**
-   * The the singular instance of the interface in the DB by handle
-   */
-  static std::shared_ptr<interface> find(const handle_t& h);
+                /**
+                 * Indicate the succeeded, when the HW Q is disabled.
+                 */
+                void succeeded()
+                {
+                    rpc_cmd<HW::item<handle_t>, HW::item<handle_t>, MSG>::succeeded();
+                    interface::add(m_name, this->item());
+                }
 
-  /**
-   * The the singular instance of the interface in the DB by key
-   */
-  static std::shared_ptr<interface> find(const key_t& k);
+                /**
+                 * add the created interface to the DB
+                 */
+                void insert_interface()
+                {
+                    interface::add(m_name, this->item());
+                }
 
-  /**
-   * Dump all interfaces into the stream provided
-   */
-  static void dump(std::ostream& os);
+                virtual vapi_error_e operator()(MSG& reply)
+                {
+                    int sw_if_index = reply.get_response().get_payload().sw_if_index;
+                    int retval = reply.get_response().get_payload().retval;
 
-  /**
-   * Enable stats for this interface
-   */
-  void enable_stats(stat_listener& el);
+                    VOM_LOG(log_level_t::DEBUG) << this->to_string() << " " << retval;
 
-protected:
-  /**
-   * Set the handle of an interface object. Only called by the interface
-   * factory during the populate
-   */
-  void set(const handle_t& handle);
-  friend class interface_factory;
+                    rc_t rc = rc_t::from_vpp_retval(retval);
+                    handle_t handle = handle_t::INVALID;
 
-  /**
-   * The SW interface handle VPP has asigned to the interface
-   */
-  HW::item<handle_t> m_hdl;
+                    if (rc_t::OK == rc) {
+                        handle = sw_if_index;
+                    }
 
-  /**
-   * Return the matching 'singular' of the interface
-   */
-  virtual std::shared_ptr<interface> singular_i() const;
+                    HW::item<handle_t> res(handle, rc);
 
-  /**
-   * release/remove an interface form the singular store
-   */
-  void release();
+                    this->fulfill(res);
 
-  /**
-   * Virtual functions to construct an interface create commands.
-   * Overridden in derived classes like the sub_interface
-   */
-  virtual std::queue<cmd*>& mk_create_cmd(std::queue<cmd*>& cmds);
+                    return (VAPI_OK);
+                }
 
-  /**
-   * Virtual functions to construct an interface delete commands.
-   * Overridden in derived classes like the sub_interface
-   */
-  virtual std::queue<cmd*>& mk_delete_cmd(std::queue<cmd*>& cmds);
+            protected:
+                /**
+                 * The name of the interface to be created
+                 */
+                const std::string& m_name;
+            };
 
-  /**
-   * Sweep/reap the object if still stale
-   */
-  virtual void sweep(void);
+            /**
+             * Base class for intterface Delete commands
+             */
+            template <typename MSG>
+            class delete_cmd : public rpc_cmd<HW::item<handle_t>, HW::item<handle_t>, MSG>
+            {
+            public:
+                delete_cmd(HW::item<handle_t>& item, const std::string& name)
+                    : rpc_cmd<HW::item<handle_t>, HW::item<handle_t>, MSG>(item)
+                    , m_name(name)
+                {
+                }
 
-  /**
-   * A map of all interfaces key against the interface's name
-   */
-  static singular_db<key_t, interface> m_db;
+                delete_cmd(HW::item<handle_t>& item)
+                    : rpc_cmd<HW::item<handle_t>, HW::item<handle_t>, MSG>(item)
+                    , m_name()
+                {
+                }
 
-  /**
-   * Add an interface to the DB keyed on handle
-   */
-  static void add(const key_t& name, const HW::item<handle_t>& item);
+                /**
+                 * Destructor
+                 */
+                virtual ~delete_cmd() = default;
 
-  /**
-   * remove an interface from the DB keyed on handle
-   */
-  static void remove(const HW::item<handle_t>& item);
+                /**
+                 * Comparison operator - only used for UT
+                 */
+                virtual bool operator==(const delete_cmd& o) const
+                {
+                    return (this->m_hw_item == o.m_hw_item);
+                }
 
-private:
-  /**
-   * Class definition for listeners to OM events
-   */
-  class event_handler : public OM::listener, public inspect::command_handler
-  {
-  public:
-    event_handler();
-    virtual ~event_handler() = default;
+                /**
+                 * Indicate the succeeded, when the HW Q is disabled.
+                 */
+                void succeeded() {}
 
-    /**
-     * Handle a populate event
-     */
-    void handle_populate(const client_db::key_t& key);
+                /**
+                 * add the created interface to the DB
+                 */
+                void remove_interface()
+                {
+                    interface::remove(this->item());
+                }
 
-    /**
-     * Handle a replay event
-     */
-    void handle_replay();
+            protected:
+                /**
+                 * The name of the interface to be created
+                 */
+                const std::string m_name;
+            };
 
-    /**
-     * Show the object in the Singular DB
-     */
-    void show(std::ostream& os);
+            /**
+             * A class that listens to interface Events
+             */
+            class event_listener
+            {
+            public:
+                /**
+                 * Default Constructor
+                 */
+                event_listener();
 
-    /**
-     * Get the sortable Id of the listener
-     */
-    dependency_t order() const;
-  };
+                /**
+                 * Virtual function called on the listener when the command has data
+                 * ready to process
+                 */
+                virtual void handle_interface_event(interface_cmds::events_cmd* cmd) = 0;
 
-  static event_handler m_evh;
+                /**
+                 * Return the HW::item representing the status
+                 */
+                HW::item<bool>& status();
 
-  /**
-   * enable the interface stats in the singular instance
-   */
-  void enable_stats_i(stat_listener& el);
+            protected:
+                /**
+                 * The status of the subscription
+                 */
+                HW::item<bool> m_status;
+            };
 
-  /**
-   * Commit the acculmulated changes into VPP. i.e. to a 'HW" write.
-   */
-  void update(const interface& obj);
+            /**
+             * A class that listens to interface Stats
+             */
+            class stat_listener
+            {
+            public:
+                /**
+                 * Default Constructor
+                 */
+                stat_listener();
 
-  /*
-   * return the interface's handle in the singular instance
-   */
-  const handle_t& handle_i() const;
+                /**
+                 * Virtual function called on the listener when the command has data
+                 * ready to process
+                 */
+                virtual void handle_interface_stat(
+                    interface_cmds::stats_enable_cmd* cmd) = 0;
 
-  /*
-   * It's the OM class that calls singular()
-   */
-  friend class OM;
+                /**
+                 * Return the HW::item representing the status
+                 */
+                HW::item<bool>& status();
 
-  /**
-   * It's the singular_db class that calls replay()
-   */
-  friend class singular_db<key_t, interface>;
+            protected:
+                /**
+                 * The status of the subscription
+                 */
+                HW::item<bool> m_status;
+            };
 
-  /**
-   * The interfaces name
-   */
-  const std::string m_name;
+            /**
+             * The the singular instance of the interface in the DB by handle
+             */
+            static std::shared_ptr<interface> find(const handle_t& h);
 
-  /**
-   * The interface type. clearly this cannot be changed
-   * once the interface has been created.
-   */
-  const type_t m_type;
+            /**
+             * The the singular instance of the interface in the DB by key
+             */
+            static std::shared_ptr<interface> find(const key_t& k);
 
-  /**
-   * shared pointer to the routeDoamin the interface is in.
-   * NULL is not mapped  - i.e. in the default table
-   */
-  std::shared_ptr<route_domain> m_rd;
+            /**
+             * Dump all interfaces into the stream provided
+             */
+            static void dump(std::ostream& os);
 
-  /**
-   * shared pointer to the stats object for this interface.
-   */
-  std::shared_ptr<interface_cmds::stats_enable_cmd> m_stats;
+            /**
+             * Enable stats for this interface
+             */
+            void enable_stats(stat_listener& el);
 
-  /**
-   * The state of the interface
-   */
-  HW::item<admin_state_t> m_state;
+        protected:
+            /**
+             * Set the handle of an interface object. Only called by the interface
+             * factory during the populate
+             */
+            void set(const handle_t& handle);
+            friend class interface_factory;
 
-  /**
-   * HW state of the VPP table mapping
-   */
-  HW::item<route::table_id_t> m_table_id;
+            /**
+             * The SW interface handle VPP has asigned to the interface
+             */
+            HW::item<handle_t> m_hdl;
 
-  /**
-   * HW state of the L2 address
-   */
-  HW::item<l2_address_t> m_l2_address;
+            /**
+             * Return the matching 'singular' of the interface
+             */
+            virtual std::shared_ptr<interface> singular_i() const;
 
-  /**
-   * Operational state of the interface
-   */
-  oper_state_t m_oper;
+            /**
+             * release/remove an interface form the singular store
+             */
+            void release();
 
-  /**
-   * A map of all interfaces keyed against VPP's handle
-   */
-  static std::map<handle_t, std::weak_ptr<interface>> m_hdl_db;
+            /**
+             * Virtual functions to construct an interface create commands.
+             * Overridden in derived classes like the sub_interface
+             */
+            virtual std::queue<cmd*>& mk_create_cmd(std::queue<cmd*>& cmds);
 
-  /**
-   * replay the object to create it in hardware
-   */
-  virtual void replay(void);
+            /**
+             * Virtual functions to construct an interface delete commands.
+             * Overridden in derived classes like the sub_interface
+             */
+            virtual std::queue<cmd*>& mk_delete_cmd(std::queue<cmd*>& cmds);
 
-  /**
-   * Create commands are firends so they can add interfaces to the
-   * handle store.
-   */
-  template <typename MSG>
-  friend class create_cmd;
+            /**
+             * Sweep/reap the object if still stale
+             */
+            virtual void sweep(void);
 
-  /**
-   * Create commands are firends so they can remove interfaces from the
-   * handle store.
-   */
-  template <typename MSG>
-  friend class delete_cmd;
-};
+            /**
+             * A map of all interfaces key against the interface's name
+             */
+            static singular_db<key_t, interface> m_db;
+
+            /**
+             * Add an interface to the DB keyed on handle
+             */
+            static void add(const key_t& name, const HW::item<handle_t>& item);
+
+            /**
+             * remove an interface from the DB keyed on handle
+             */
+            static void remove(const HW::item<handle_t>& item);
+
+        private:
+            /**
+             * Class definition for listeners to OM events
+             */
+            class event_handler : public OM::listener, public inspect::command_handler
+            {
+            public:
+                event_handler();
+                virtual ~event_handler() = default;
+
+                /**
+                 * Handle a populate event
+                 */
+                void handle_populate(const client_db::key_t& key);
+
+                /**
+                 * Handle a replay event
+                 */
+                void handle_replay();
+
+                /**
+                 * Show the object in the Singular DB
+                 */
+                void show(std::ostream& os);
+
+                /**
+                 * Get the sortable Id of the listener
+                 */
+                dependency_t order() const;
+            };
+
+            static event_handler m_evh;
+
+            /**
+             * enable the interface stats in the singular instance
+             */
+            void enable_stats_i(stat_listener& el);
+
+            /**
+             * Commit the acculmulated changes into VPP. i.e. to a 'HW" write.
+             */
+            void update(const interface& obj);
+
+            /*
+             * return the interface's handle in the singular instance
+             */
+            const handle_t& handle_i() const;
+
+            /*
+             * It's the OM class that calls singular()
+             */
+            friend class OM;
+
+            /**
+             * It's the singular_db class that calls replay()
+             */
+            friend class singular_db<key_t, interface>;
+
+            /**
+             * The interfaces name
+             */
+            const std::string m_name;
+
+            /**
+             * The interface type. clearly this cannot be changed
+             * once the interface has been created.
+             */
+            const type_t m_type;
+
+            /**
+             * shared pointer to the routeDoamin the interface is in.
+             * NULL is not mapped  - i.e. in the default table
+             */
+            std::shared_ptr<route_domain> m_rd;
+
+            /**
+             * shared pointer to the stats object for this interface.
+             */
+            std::shared_ptr<interface_cmds::stats_enable_cmd> m_stats;
+
+            /**
+             * The state of the interface
+             */
+            HW::item<admin_state_t> m_state;
+
+            /**
+             * HW state of the VPP table mapping
+             */
+            HW::item<route::table_id_t> m_table_id;
+
+            /**
+             * HW state of the L2 address
+             */
+            HW::item<l2_address_t> m_l2_address;
+
+            /**
+             * Operational state of the interface
+             */
+            oper_state_t m_oper;
+
+            /**
+             * A map of all interfaces keyed against VPP's handle
+             */
+            static std::map<handle_t, std::weak_ptr<interface>> m_hdl_db;
+
+            /**
+             * replay the object to create it in hardware
+             */
+            virtual void replay(void);
+
+            /**
+             * Create commands are firends so they can add interfaces to the
+             * handle store.
+             */
+            template <typename MSG>
+            friend class create_cmd;
+
+            /**
+             * Create commands are firends so they can remove interfaces from the
+             * handle store.
+             */
+            template <typename MSG>
+            friend class delete_cmd;
+        };
 };
 /*
  * fd.io coding-style-patch-verification: ON

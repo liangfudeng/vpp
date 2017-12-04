@@ -22,16 +22,16 @@
 always_inline vlib_main_t *
 vlib_get_main (void)
 {
-  vlib_main_t *vm;
-  vm = vlib_mains[vlib_get_thread_index ()];
-  ASSERT (vm);
-  return vm;
+    vlib_main_t *vm;
+    vm = vlib_mains[vlib_get_thread_index ()];
+    ASSERT (vm);
+    return vm;
 }
 
 always_inline vlib_thread_main_t *
 vlib_get_thread_main ()
 {
-  return &vlib_thread_main;
+    return &vlib_thread_main;
 }
 
 #endif /* included_vlib_global_funcs_h_ */

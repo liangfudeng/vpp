@@ -41,30 +41,28 @@
 #include <vppinfra/clib.h>
 #include <vppinfra/random_isaac.h>
 
-typedef struct
-{
-  /* Two parallel ISAAC contexts for speed. */
-  isaac_t ctx[2];
+typedef struct {
+    /* Two parallel ISAAC contexts for speed. */
+    isaac_t ctx[2];
 
-  /* Random buffer. */
-  uword *buffer;
+    /* Random buffer. */
+    uword *buffer;
 
-  /* Cache up to 1 word worth of bytes for random data
-     less than one word at a time. */
-  uword n_cached_bytes;
+    /* Cache up to 1 word worth of bytes for random data
+       less than one word at a time. */
+    uword n_cached_bytes;
 
-  union
-  {
-    u8 cached_bytes[sizeof (uword)];
-    uword cached_word;
-  };
+    union {
+        u8 cached_bytes[sizeof (uword)];
+        uword cached_word;
+    };
 }
 clib_random_buffer_t;
 
 always_inline void
 clib_random_buffer_free (clib_random_buffer_t * b)
 {
-  vec_free (b->buffer);
+    vec_free (b->buffer);
 }
 
 /* Fill random buffer. */
@@ -77,34 +75,31 @@ void clib_random_buffer_init (clib_random_buffer_t * b, uword seed);
 always_inline void *
 clib_random_buffer_get_data (clib_random_buffer_t * b, uword n_bytes)
 {
-  uword n_words, i, l;
+    uword n_words, i, l;
 
-  l = b->n_cached_bytes;
-  if (n_bytes <= l)
-    {
-      b->n_cached_bytes = l - n_bytes;
-      return &b->cached_bytes[l];
+    l = b->n_cached_bytes;
+    if (n_bytes <= l) {
+        b->n_cached_bytes = l - n_bytes;
+        return &b->cached_bytes[l];
     }
 
-  n_words = n_bytes / sizeof (uword);
-  if (n_bytes % sizeof (uword))
-    n_words++;
+    n_words = n_bytes / sizeof (uword);
+    if (n_bytes % sizeof (uword))
+        n_words++;
 
-  /* Enough random words left? */
-  if (PREDICT_FALSE (n_words > vec_len (b->buffer)))
-    clib_random_buffer_fill (b, n_words);
+    /* Enough random words left? */
+    if (PREDICT_FALSE (n_words > vec_len (b->buffer)))
+        clib_random_buffer_fill (b, n_words);
 
-  i = vec_len (b->buffer) - n_words;
-  _vec_len (b->buffer) = i;
+    i = vec_len (b->buffer) - n_words;
+    _vec_len (b->buffer) = i;
 
-  if (n_bytes < sizeof (uword))
-    {
-      b->cached_word = b->buffer[i];
-      b->n_cached_bytes = sizeof (uword) - n_bytes;
-      return b->cached_bytes;
-    }
-  else
-    return b->buffer + i;
+    if (n_bytes < sizeof (uword)) {
+        b->cached_word = b->buffer[i];
+        b->n_cached_bytes = sizeof (uword) - n_bytes;
+        return b->cached_bytes;
+    } else
+        return b->buffer + i;
 }
 
 #endif /* included_clib_random_buffer_h */

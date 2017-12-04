@@ -37,25 +37,25 @@
  */
 static int bier_test_do_debug;
 
-#define BIER_TEST_I(_cond, _comment, _args...)			\
-({								\
-    int _evald = (_cond);					\
-    if (!(_evald)) {						\
-        fformat(stderr, "FAIL:%d: " _comment "\n",		\
-                __LINE__, ##_args);				\
-    } else {							\
+#define BIER_TEST_I(_cond, _comment, _args...)          \
+({                              \
+    int _evald = (_cond);                   \
+    if (!(_evald)) {                        \
+        fformat(stderr, "FAIL:%d: " _comment "\n",      \
+                __LINE__, ##_args);             \
+    } else {                            \
         if (bier_test_do_debug)                                 \
             fformat(stderr, "PASS:%d: " _comment "\n",          \
-                    __LINE__, ##_args);				\
-    }								\
-    _evald;							\
+                    __LINE__, ##_args);             \
+    }                               \
+    _evald;                         \
 })
-#define BIER_TEST(_cond, _comment, _args...)			\
-{								\
-    if (!BIER_TEST_I(_cond, _comment, ##_args)) {		\
+#define BIER_TEST(_cond, _comment, _args...)            \
+{                               \
+    if (!BIER_TEST_I(_cond, _comment, ##_args)) {       \
         return 1;                                               \
-        ASSERT(!("FAIL: " _comment));				\
-    }								\
+        ASSERT(!("FAIL: " _comment));               \
+    }                               \
 }
 
 /**
@@ -77,22 +77,22 @@ static test_main_t test_main;
 /* fake ethernet device class, distinct from "fake-ethX" */
 static u8 * format_test_interface_name (u8 * s, va_list * args)
 {
-  u32 dev_instance = va_arg (*args, u32);
-  return format (s, "test-eth%d", dev_instance);
+    u32 dev_instance = va_arg (*args, u32);
+    return format (s, "test-eth%d", dev_instance);
 }
 
 static uword dummy_interface_tx (vlib_main_t * vm,
                                  vlib_node_runtime_t * node,
                                  vlib_frame_t * frame)
 {
-  clib_warning ("you shouldn't be here, leaking buffers...");
-  return frame->n_vectors;
+    clib_warning ("you shouldn't be here, leaking buffers...");
+    return frame->n_vectors;
 }
 
 VNET_DEVICE_CLASS (test_interface_device_class,static) = {
-  .name = "Test interface",
-  .format_device_name = format_test_interface_name,
-  .tx_function = dummy_interface_tx,
+    .name = "Test interface",
+    .format_device_name = format_test_interface_name,
+    .tx_function = dummy_interface_tx,
 };
 
 static u8 *hw_address;
@@ -107,14 +107,12 @@ bier_test_mk_intf (u32 ninterfaces)
 
     ASSERT(ninterfaces <= ARRAY_LEN(tm->hw_if_indicies));
 
-    for (i=0; i<6; i++)
-    {
+    for (i=0; i<6; i++) {
         byte = 0xd0+i;
         vec_add1(hw_address, byte);
     }
 
-    for (i = 0; i < ninterfaces; i++)
-    {
+    for (i = 0; i < ninterfaces; i++) {
         hw_address[5] = i;
 
         error = ethernet_register_interface(vnet_get_main(),
@@ -140,8 +138,7 @@ bier_test_mk_intf (u32 ninterfaces)
     /*
      * re-eval after the inevitable realloc
      */
-    for (i = 0; i < ninterfaces; i++)
-    {
+    for (i = 0; i < ninterfaces; i++) {
         tm->hw[i] = vnet_get_hw_interface(vnet_get_main(),
                                           tm->hw_if_indicies[i]);
     }
@@ -149,11 +146,11 @@ bier_test_mk_intf (u32 ninterfaces)
     return (0);
 }
 
-#define BIER_TEST_LB(_cond, _comment, _args...)			\
-{								\
-    if (!BIER_TEST_I(_cond, _comment, ##_args)) {		\
-        return (0);						\
-    }								\
+#define BIER_TEST_LB(_cond, _comment, _args...)         \
+{                               \
+    if (!BIER_TEST_I(_cond, _comment, ##_args)) {       \
+        return (0);                     \
+    }                               \
 }
 
 static int
@@ -213,8 +210,7 @@ bier_test_mpls_spf (void)
     fib_test_lb_bucket_t l_o_bt[N_BIER_ECMP_TABLES];
     bier_table_id_t bt_ecmp_0_0_0_256 = bt_0_0_0_256;
 
-    for (ii = 0; ii < N_BIER_ECMP_TABLES; ii++)
-    {
+    for (ii = 0; ii < N_BIER_ECMP_TABLES; ii++) {
         bt_ecmp_0_0_0_256.bti_ecmp = ii;
 
         l_o_bt[ii].type = FT_LB_BIER_TABLE;
@@ -358,7 +354,7 @@ bier_test_mpls_spf (void)
         .type = FT_LB_DROP,
     };
     BIER_TEST(fib_test_validate_lb(&neos_dpo_1_1_1_1, 1, &bucket_drop),
-             "1.1.1.1/32 n-eos LB 1 buckets via: DROP");
+              "1.1.1.1/32 n-eos LB 1 buckets via: DROP");
 
     /*
      * The BIER entry should stack on the forwarding chain of the fmask
@@ -382,9 +378,9 @@ bier_test_mpls_spf (void)
     };
     adj_index_t ai_mpls_10_10_10_1;
     ai_mpls_10_10_10_1 = adj_nbr_add_or_lock(FIB_PROTOCOL_IP4,
-                                             VNET_LINK_MPLS,
-                                             &nh_10_10_10_1,
-                                             tm->hw[0]->sw_if_index);
+                         VNET_LINK_MPLS,
+                         &nh_10_10_10_1,
+                         tm->hw[0]->sw_if_index);
 
     fib_test_lb_bucket_t bucket_neos_99_via_10_10_10_1 = {
         .type = FT_LB_LABEL_O_ADJ,
@@ -435,9 +431,9 @@ bier_test_mpls_spf (void)
     adj_index_t ai_mpls_10_10_10_2;
 
     ai_mpls_10_10_10_2 = adj_nbr_add_or_lock(FIB_PROTOCOL_IP4,
-                                             VNET_LINK_MPLS,
-                                             &nh_10_10_10_2,
-                                             tm->hw[0]->sw_if_index);
+                         VNET_LINK_MPLS,
+                         &nh_10_10_10_2,
+                         tm->hw[0]->sw_if_index);
 
     fib_test_lb_bucket_t bucket_neos_100_via_10_10_10_2 = {
         .type = FT_LB_LABEL_O_ADJ,
@@ -668,8 +664,7 @@ bier_test_mpls_spf (void)
     /*
      * test resources are freed
      */
-    for (ii = 0; ii < N_BIER_ECMP_TABLES; ii++)
-    {
+    for (ii = 0; ii < N_BIER_ECMP_TABLES; ii++) {
         bier_table_ecmp_unlock(l_o_bt[ii].bier.table);
     };
     BIER_TEST(0 == pool_elts(bier_table_pool), "BIER table pool empty");
@@ -687,7 +682,7 @@ bier_test_mpls_spf (void)
     BIER_TEST(lb_count+1 == pool_elts(load_balance_pool),
               "Load-balance resources freed ");
     BIER_TEST((0 == adj_nbr_db_size()), "ADJ DB size is %d",
-             adj_nbr_db_size());
+              adj_nbr_db_size());
 
     vec_free(paths_1_1_1_1);
     vec_free(paths_1_1_1_2);
@@ -747,12 +742,12 @@ bier_test_mpls_imp (void)
         .frp_flags = FIB_ROUTE_PATH_BIER_IMP,
     };
     mfib_table_entry_path_update(0, // default table
-                                 &pfx_1_1_1_1_c_239_1_1_1 ,
+                                 &pfx_1_1_1_1_c_239_1_1_1,
                                  MFIB_SOURCE_API,
                                  &path_via_bier_imp_1,
                                  MFIB_ITF_FLAG_FORWARD);
     mfib_table_entry_delete(0,
-                            &pfx_1_1_1_1_c_239_1_1_1 ,
+                            &pfx_1_1_1_1_c_239_1_1_1,
                             MFIB_SOURCE_API);
 
     bier_imp_unlock(bii);
@@ -908,8 +903,7 @@ bier_test (vlib_main_t * vm,
 
     res += bier_test_mk_intf(4);
 
-    if (unformat (input, "debug"))
-    {
+    if (unformat (input, "debug")) {
         bier_test_do_debug = 1;
     }
 
@@ -919,19 +913,15 @@ bier_test (vlib_main_t * vm,
         res += bier_test_mpls_imp();
     else if (unformat (input, "tail"))
         res += bier_test_mpls_disp();
-    else
-    {
+    else {
         res += bier_test_mpls_spf();
         res += bier_test_mpls_imp();
         res += bier_test_mpls_disp();
     }
 
-    if (res)
-    {
+    if (res) {
         return clib_error_return(0, "BIER Unit Test Failed");
-    }
-    else
-    {
+    } else {
         return (NULL);
     }
 }

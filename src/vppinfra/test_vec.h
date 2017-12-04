@@ -51,45 +51,44 @@ extern u32 g_seed;
 always_inline u8 *
 format_u32_binary (u8 * s, va_list * va)
 {
-  u32 val = va_arg (*va, u32);
-  word i = 0;
+    u32 val = va_arg (*va, u32);
+    word i = 0;
 
-  for (i = BITS (val) - 1; i >= 0; i--)
-    {
-      if (val & (1 << i))
-	s = format (s, "1");
-      else
-	s = format (s, "0");
+    for (i = BITS (val) - 1; i >= 0; i--) {
+        if (val & (1 << i))
+            s = format (s, "1");
+        else
+            s = format (s, "0");
     }
 
-  return s;
+    return s;
 }
 
-#define VERBOSE1(fmt, args...)			\
-do {						\
-  if (g_verbose >= 1)				\
-    fformat (stdout, fmt, ## args);		\
+#define VERBOSE1(fmt, args...)          \
+do {                        \
+  if (g_verbose >= 1)               \
+    fformat (stdout, fmt, ## args);     \
 } while (0)
 
-#define VERBOSE2(fmt, args...)			\
-do {						\
-  if (g_verbose >= 2)				\
-    fformat (stdout, fmt, ## args);		\
+#define VERBOSE2(fmt, args...)          \
+do {                        \
+  if (g_verbose >= 2)               \
+    fformat (stdout, fmt, ## args);     \
 } while (0)
 
-#define VERBOSE3(fmt, args...)			\
-do {						\
-  if (g_verbose >= 3)				\
-    fformat (stdout, fmt, ## args);		\
+#define VERBOSE3(fmt, args...)          \
+do {                        \
+  if (g_verbose >= 3)               \
+    fformat (stdout, fmt, ## args);     \
 } while (0)
 
-#define clib_mem_free_safe(p)			\
-do {						\
-  if (p)					\
-    {						\
-      clib_mem_free (p);			\
-      (p) = NULL;				\
-    }						\
+#define clib_mem_free_safe(p)           \
+do {                        \
+  if (p)                    \
+    {                       \
+      clib_mem_free (p);            \
+      (p) = NULL;               \
+    }                       \
 } while (0)
 
 /* XXX - I get undefined symbol trying to call random_u32() <vppinfra/random.h> */
@@ -97,83 +96,83 @@ do {						\
 static u32
 my_random_u32 (u32 * seed_return)
 {
-  /* Unlikely mask value to XOR into seed.
-     Otherwise small seed values would give
-     non-random seeming smallish numbers. */
-  const u32 mask = 0x12345678;
-  u32 seed, a, b, result;
+    /* Unlikely mask value to XOR into seed.
+       Otherwise small seed values would give
+       non-random seeming smallish numbers. */
+    const u32 mask = 0x12345678;
+    u32 seed, a, b, result;
 
-  seed = *seed_return;
-  seed ^= mask;
+    seed = *seed_return;
+    seed ^= mask;
 
-  a = seed / 127773;
-  b = seed % 127773;
-  seed = 16807 * b - 2836 * a;
+    a = seed / 127773;
+    b = seed % 127773;
+    seed = 16807 * b - 2836 * a;
 
-  if ((i32) seed < 0)
-    seed += ((u32) 1 << 31) - 1;
+    if ((i32) seed < 0)
+        seed += ((u32) 1 << 31) - 1;
 
-  result = seed;
+    result = seed;
 
-  *seed_return = seed ^ mask;
+    *seed_return = seed ^ mask;
 
-  return result;
+    return result;
 }
 
 static u32
 bounded_random_u32 (u32 * seed, uword lo, uword hi)
 {
-  if (lo == hi)
-    return lo;
+    if (lo == hi)
+        return lo;
 
-  ASSERT (lo < hi);
+    ASSERT (lo < hi);
 
-  return ((my_random_u32 (seed) % (hi - lo + ((hi != ~0) ? (1) : (0)))) + lo);
+    return ((my_random_u32 (seed) % (hi - lo + ((hi != ~0) ? (1) : (0)))) + lo);
 }
 
-#define fill_with_random_data(ptr, bytes, seed)			\
-do {								\
-  u8 * _v(p) = (u8 *) (ptr);					\
-  uword _v(b) = (bytes);					\
-  uword _v(i);							\
-								\
-  for (_v(i) = 0; _v(i) < _v(b); _v(i)++)			\
-    _v(p)[_v(i)] = (u8) bounded_random_u32 (&(seed), 0, 255);	\
-								\
+#define fill_with_random_data(ptr, bytes, seed)         \
+do {                                \
+  u8 * _v(p) = (u8 *) (ptr);                    \
+  uword _v(b) = (bytes);                    \
+  uword _v(i);                          \
+                                \
+  for (_v(i) = 0; _v(i) < _v(b); _v(i)++)           \
+    _v(p)[_v(i)] = (u8) bounded_random_u32 (&(seed), 0, 255);   \
+                                \
 } while (0)
 
-#define compute_mem_hash(hash, ptr, bytes)	\
-({						\
-  u8 * _v(p) = (u8 *) (ptr);			\
-  uword _v(b) = (uword) (bytes);		\
-  uword _v(i);					\
-  uword _v(h) = (u8) (hash);			\
-						\
-  if (_v(p) && _v(b) > 0)			\
-    {						\
-      for (_v(i) = 0; _v(i) < _v(b); _v(i)++)	\
-	_v(h) ^= _v(p)[_v(i)];			\
-    }						\
-						\
-  _v(h);					\
+#define compute_mem_hash(hash, ptr, bytes)  \
+({                      \
+  u8 * _v(p) = (u8 *) (ptr);            \
+  uword _v(b) = (uword) (bytes);        \
+  uword _v(i);                  \
+  uword _v(h) = (u8) (hash);            \
+                        \
+  if (_v(p) && _v(b) > 0)           \
+    {                       \
+      for (_v(i) = 0; _v(i) < _v(b); _v(i)++)   \
+    _v(h) ^= _v(p)[_v(i)];          \
+    }                       \
+                        \
+  _v(h);                    \
 })
 
-#define log2_align_down(value, align)		\
-({						\
-  uword _v = (uword) (value);			\
-  uword _a = (uword) (align);			\
-  uword _m = (1 << _a) - 1;			\
-						\
-  _v = _v & ~_m;				\
+#define log2_align_down(value, align)       \
+({                      \
+  uword _v = (uword) (value);           \
+  uword _a = (uword) (align);           \
+  uword _m = (1 << _a) - 1;         \
+                        \
+  _v = _v & ~_m;                \
 })
 
-#define log2_align_up(value, align)		\
-({						\
-  uword _v = (uword) (value);			\
-  uword _a = (uword) (align);			\
-  uword _m = (1 << _a) - 1;			\
-						\
-  _v = (_v + _m) & ~_m;				\
+#define log2_align_up(value, align)     \
+({                      \
+  uword _v = (uword) (value);           \
+  uword _a = (uword) (align);           \
+  uword _m = (1 << _a) - 1;         \
+                        \
+  _v = (_v + _m) & ~_m;             \
 })
 
 #define log2_align_ptr_down(ptr, align) \
@@ -182,25 +181,25 @@ uword_to_pointer (log2_align_down (pointer_to_uword (ptr), align), void *)
 #define log2_align_ptr_up(ptr, align) \
 uword_to_pointer (log2_align_up (pointer_to_uword (ptr), align), void *)
 
-#define MAX_LOG2_ALIGN		6
-#define MAX_UNALIGN_OFFSET	((1 << MAX_LOG2_ALIGN) - 1)
+#define MAX_LOG2_ALIGN      6
+#define MAX_UNALIGN_OFFSET  ((1 << MAX_LOG2_ALIGN) - 1)
 
 /* Allocates pointer to memory whose address is:
    addr = <log2_align>-aligned address */
 always_inline void *
 alloc_aligned (uword size, uword log2_align, void **ptr_to_free)
 {
-  void *p;
+    void *p;
 
-  if (size <= 0)
-    return NULL;
+    if (size <= 0)
+        return NULL;
 
-  p = (void *) clib_mem_alloc (size + (1 << log2_align) - 1);
+    p = (void *) clib_mem_alloc (size + (1 << log2_align) - 1);
 
-  if (ptr_to_free)
-    *ptr_to_free = p;
+    if (ptr_to_free)
+        *ptr_to_free = p;
 
-  return (p) ? log2_align_ptr_up (p, log2_align) : (NULL);
+    return (p) ? log2_align_ptr_up (p, log2_align) : (NULL);
 }
 
 /* Allocates pointer to memory whose address is:
@@ -208,27 +207,27 @@ alloc_aligned (uword size, uword log2_align, void **ptr_to_free)
 always_inline void *
 alloc_unaligned (uword size, uword offset, void **ptr_to_free)
 {
-  void *p;
+    void *p;
 
-  if (size <= 0)
-    return NULL;
+    if (size <= 0)
+        return NULL;
 
-  ASSERT (offset <= MAX_UNALIGN_OFFSET);
+    ASSERT (offset <= MAX_UNALIGN_OFFSET);
 
-  p =
-    alloc_aligned (size + (1 << MAX_LOG2_ALIGN), MAX_LOG2_ALIGN, ptr_to_free);
+    p =
+        alloc_aligned (size + (1 << MAX_LOG2_ALIGN), MAX_LOG2_ALIGN, ptr_to_free);
 
-  if (!p)
-    return NULL;
+    if (!p)
+        return NULL;
 
-  return (void *) ((u8 *) p + (offset % MAX_UNALIGN_OFFSET));
+    return (void *) ((u8 *) p + (offset % MAX_UNALIGN_OFFSET));
 }
 
-#define memory_snap()						\
-do {								\
-  clib_mem_usage_t _usage = { 0 };				\
-  clib_mem_usage (&_usage);					\
-  fformat (stdout, "%U\n", format_clib_mem_usage, _usage, 0);	\
+#define memory_snap()                       \
+do {                                \
+  clib_mem_usage_t _usage = { 0 };              \
+  clib_mem_usage (&_usage);                 \
+  fformat (stdout, "%U\n", format_clib_mem_usage, _usage, 0);   \
 } while (0)
 
 

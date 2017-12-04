@@ -19,7 +19,7 @@
 
 u32
 fib_entry_cover_track (fib_entry_t* cover,
-		       fib_node_index_t covered)
+                       fib_node_index_t covered)
 {
     fib_entry_delegate_t *fed;
 
@@ -29,8 +29,7 @@ fib_entry_cover_track (fib_entry_t* cover,
 
     fed = fib_entry_delegate_get(cover, FIB_ENTRY_DELEGATE_COVERED);
 
-    if (NULL == fed)
-    {
+    if (NULL == fed) {
         fed = fib_entry_delegate_find_or_add(cover, FIB_ENTRY_DELEGATE_COVERED);
         fed->fd_list = fib_node_list_create();
     }
@@ -42,7 +41,7 @@ fib_entry_cover_track (fib_entry_t* cover,
 
 void
 fib_entry_cover_untrack (fib_entry_t* cover,
-			 u32 tracked_index)
+                         u32 tracked_index)
 {
     fib_entry_delegate_t *fed;
 
@@ -55,10 +54,9 @@ fib_entry_cover_untrack (fib_entry_t* cover,
 
     fib_node_list_remove(fed->fd_list, tracked_index);
 
-    if (0 == fib_node_list_get_size(fed->fd_list))
-    {
+    if (0 == fib_node_list_get_size(fed->fd_list)) {
         fib_node_list_destroy(&fed->fd_list);
-        fib_entry_delegate_remove(cover, FIB_ENTRY_DELEGATE_COVERED);        
+        fib_entry_delegate_remove(cover, FIB_ENTRY_DELEGATE_COVERED);
     }
 }
 
@@ -73,7 +71,7 @@ typedef struct fib_enty_cover_walk_ctx_t_ {
 
 static int
 fib_entry_cover_walk_node_ptr (fib_node_ptr_t *depend,
-			       void *args)
+                               void *args)
 {
     fib_enty_cover_walk_ctx_t *ctx = args;
 
@@ -85,8 +83,8 @@ fib_entry_cover_walk_node_ptr (fib_node_ptr_t *depend,
 
 void
 fib_entry_cover_walk (fib_entry_t *cover,
-		      fib_entry_covered_walk_t walk,
-		      void *args)
+                      fib_entry_covered_walk_t walk,
+                      void *args)
 {
     fib_entry_delegate_t *fed;
 
@@ -108,8 +106,8 @@ fib_entry_cover_walk (fib_entry_t *cover,
 
 static int
 fib_entry_cover_change_one (fib_entry_t *cover,
-			    fib_node_index_t covered,
-			    void *args)
+                            fib_node_index_t covered,
+                            void *args)
 {
     fib_node_index_t new_cover;
 
@@ -123,25 +121,21 @@ fib_entry_cover_change_one (fib_entry_t *cover,
      */
     new_cover = pointer_to_uword(args);
 
-    if (FIB_NODE_INDEX_INVALID == new_cover)
-    {
-	/*
-	 * nothing has been inserted, which implies the cover was removed.
-	 * 'cover' is thus the new cover.
-	 */
-	fib_entry_cover_changed(covered);
-    }
-    else if (new_cover != covered)
-    {
-	fib_prefix_t pfx_covered, pfx_new_cover;
+    if (FIB_NODE_INDEX_INVALID == new_cover) {
+        /*
+         * nothing has been inserted, which implies the cover was removed.
+         * 'cover' is thus the new cover.
+         */
+        fib_entry_cover_changed(covered);
+    } else if (new_cover != covered) {
+        fib_prefix_t pfx_covered, pfx_new_cover;
 
-	fib_entry_get_prefix(covered, &pfx_covered);
-	fib_entry_get_prefix(new_cover, &pfx_new_cover);
+        fib_entry_get_prefix(covered, &pfx_covered);
+        fib_entry_get_prefix(new_cover, &pfx_new_cover);
 
-	if (fib_prefix_is_cover(&pfx_new_cover, &pfx_covered))
-	{
-	    fib_entry_cover_changed(covered);
-	}
+        if (fib_prefix_is_cover(&pfx_new_cover, &pfx_covered)) {
+            fib_entry_cover_changed(covered);
+        }
     }
     /* continue */
     return (1);
@@ -149,21 +143,21 @@ fib_entry_cover_change_one (fib_entry_t *cover,
 
 void
 fib_entry_cover_change_notify (fib_node_index_t cover_index,
-			       fib_node_index_t covered)
+                               fib_node_index_t covered)
 {
     fib_entry_t *cover;
 
     cover = fib_entry_get(cover_index);
 
-    fib_entry_cover_walk(cover, 
-			 fib_entry_cover_change_one,
-			 uword_to_pointer(covered, void*));
+    fib_entry_cover_walk(cover,
+                         fib_entry_cover_change_one,
+                         uword_to_pointer(covered, void*));
 }
 
 static int
 fib_entry_cover_update_one (fib_entry_t *cover,
-			    fib_node_index_t covered,
-			    void *args)
+                            fib_node_index_t covered,
+                            void *args)
 {
     fib_entry_cover_updated(covered);
 
@@ -174,7 +168,7 @@ fib_entry_cover_update_one (fib_entry_t *cover,
 void
 fib_entry_cover_update_notify (fib_entry_t *fib_entry)
 {
-    fib_entry_cover_walk(fib_entry, 
-			 fib_entry_cover_update_one,
-			 NULL);
+    fib_entry_cover_walk(fib_entry,
+                         fib_entry_cover_update_one,
+                         NULL);
 }

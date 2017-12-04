@@ -37,17 +37,13 @@ const char*
 fib_node_type_get_name (fib_node_type_t type)
 {
     if (type < FIB_NODE_TYPE_LAST)
-	return (fn_type_names[type]);
-    else
-    {
-	if (NULL != fn_vfts[type].fnv_format)
-	{
-	    return ("fixme");
-	}
-	else
-	{
-	    return ("unknown");
-	}
+        return (fn_type_names[type]);
+    else {
+        if (NULL != fn_vfts[type].fnv_format) {
+            return ("fixme");
+        } else {
+            return ("unknown");
+        }
     }
 }
 
@@ -58,13 +54,13 @@ fib_node_type_get_name (fib_node_type_t type)
  */
 void
 fib_node_register_type (fib_node_type_t type,
-			const fib_node_vft_t *vft)
+                        const fib_node_vft_t *vft)
 {
     /*
      * assert that one only registration is made per-node type
      */
     if (vec_len(fn_vfts) > type)
-	ASSERT(NULL == fn_vfts[type].fnv_get);
+        ASSERT(NULL == fn_vfts[type].fnv_get);
 
     /*
      * Assert that we are getting each of the required functions
@@ -86,19 +82,19 @@ fib_node_register_new_type (const fib_node_vft_t *vft)
     fib_node_register_type(new_type, vft);
 
     return (new_type);
-}   
+}
 
 static u8*
 fib_node_format (fib_node_ptr_t *fnp, u8*s)
 {
-    return (format(s, "{%s:%d}", fn_type_names[fnp->fnp_type], fnp->fnp_index)); 
+    return (format(s, "{%s:%d}", fn_type_names[fnp->fnp_type], fnp->fnp_index));
 }
 
 u32
 fib_node_child_add (fib_node_type_t parent_type,
                     fib_node_index_t parent_index,
                     fib_node_type_t type,
-		    fib_node_index_t index)
+                    fib_node_index_t index)
 {
     fib_node_t *parent;
 
@@ -109,10 +105,9 @@ fib_node_child_add (fib_node_type_t parent_type,
      */
     fib_node_lock(parent);
 
-    if (FIB_NODE_INDEX_INVALID == parent->fn_children)
-    {
+    if (FIB_NODE_INDEX_INVALID == parent->fn_children) {
         parent->fn_children = fib_node_list_create();
-    }   
+    }
 
     return (fib_node_list_push_front(parent->fn_children,
                                      0, type,
@@ -130,8 +125,7 @@ fib_node_child_remove (fib_node_type_t parent_type,
 
     fib_node_list_remove(parent->fn_children, sibling_index);
 
-    if (0 == fib_node_list_get_size(parent->fn_children))
-    {
+    if (0 == fib_node_list_get_size(parent->fn_children)) {
         fib_node_list_destroy(&parent->fn_children);
     }
 
@@ -163,7 +157,7 @@ fib_node_back_walk_one (fib_node_ptr_t *ptr,
 
 static int
 fib_node_ptr_format_one_child (fib_node_ptr_t *ptr,
-			       void *arg)
+                               void *arg)
 {
     u8 **s = (u8**) arg;
 
@@ -174,7 +168,7 @@ fib_node_ptr_format_one_child (fib_node_ptr_t *ptr,
 
 u8*
 fib_node_children_format (fib_node_list_t list,
-			  u8 *s)
+                          u8 *s)
 {
     fib_node_list_walk(list, fib_node_ptr_format_one_child, (void*)&s);
 
@@ -183,7 +177,7 @@ fib_node_children_format (fib_node_list_t list,
 
 void
 fib_node_init (fib_node_t *node,
-	       fib_node_type_t type)
+               fib_node_type_t type)
 {
     /**
      * The node's type. used to retrieve the VFT.
@@ -210,28 +204,27 @@ fib_node_unlock (fib_node_t *node)
 {
     node->fn_locks--;
 
-    if (0 == node->fn_locks)
-    {
-	fn_vfts[node->fn_type].fnv_last_lock(node);
+    if (0 == node->fn_locks) {
+        fn_vfts[node->fn_type].fnv_last_lock(node);
     }
 }
 
 void
 fib_show_memory_usage (const char *name,
-		       u32 in_use_elts,
-		       u32 allocd_elts,
-		       size_t size_elt)
+                       u32 in_use_elts,
+                       u32 allocd_elts,
+                       size_t size_elt)
 {
     vlib_cli_output (vlib_get_main(), "%=30s %=5d %=8d/%=9d   %d/%d ",
-		     name, size_elt,
-		     in_use_elts, allocd_elts,
-		     in_use_elts*size_elt, allocd_elts*size_elt);
+                     name, size_elt,
+                     in_use_elts, allocd_elts,
+                     in_use_elts*size_elt, allocd_elts*size_elt);
 }
 
 static clib_error_t *
 fib_memory_show (vlib_main_t * vm,
-		 unformat_input_t * input,
-		 vlib_cli_command_t * cmd)
+                 unformat_input_t * input,
+                 vlib_cli_command_t * cmd)
 {
     fib_node_vft_t *vft;
 
@@ -242,12 +235,11 @@ fib_memory_show (vlib_main_t * vm,
     vlib_cli_output (vm, "%U", format_mfib_table_memory);
     vlib_cli_output (vm, "  Nodes:");
     vlib_cli_output (vm, "%=30s %=5s %=8s/%=9s   totals",
-		     "Name","Size", "in-use", "allocated");
+                     "Name","Size", "in-use", "allocated");
 
-    vec_foreach(vft, fn_vfts)
-    {
-	if (NULL != vft->fnv_mem_show)
-	    vft->fnv_mem_show();
+    vec_foreach(vft, fn_vfts) {
+        if (NULL != vft->fnv_mem_show)
+            vft->fnv_mem_show();
     }
 
     fib_node_list_memory_show();

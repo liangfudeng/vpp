@@ -22,30 +22,28 @@
 #define MIN(x,y) (((x)<(y))?(x):(y))
 #endif
 
-typedef struct
-{
-  u8 *name;
-  u8 hw_addr_set;
-  u8 hw_addr[6];
-  u16 rx_ring_sz;
-  u16 tx_ring_sz;
-  u8 *host_namespace;
-  u8 *host_bridge;
-  ip4_address_t host_ip4_addr;
-  u32 host_ip4_prefix_len;
-  ip6_address_t host_ip6_addr;
-  u32 host_ip6_prefix_len;
-  /* return */
-  u32 sw_if_index;
-  int rv;
-  clib_error_t *error;
+typedef struct {
+    u8 *name;
+    u8 hw_addr_set;
+    u8 hw_addr[6];
+    u16 rx_ring_sz;
+    u16 tx_ring_sz;
+    u8 *host_namespace;
+    u8 *host_bridge;
+    ip4_address_t host_ip4_addr;
+    u32 host_ip4_prefix_len;
+    ip6_address_t host_ip6_addr;
+    u32 host_ip6_prefix_len;
+    /* return */
+    u32 sw_if_index;
+    int rv;
+    clib_error_t *error;
 } tap_create_if_args_t;
 
 /** TAP interface details struct */
-typedef struct
-{
-  u32 sw_if_index;
-  u8 dev_name[64];
+typedef struct {
+    u32 sw_if_index;
+    u8 dev_name[64];
 } tap_interface_details_t;
 
 void tap_create_if (vlib_main_t * vm, tap_create_if_args_t * args);

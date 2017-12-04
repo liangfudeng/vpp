@@ -70,12 +70,9 @@ load_balance_get_index (const load_balance_t *lb)
 static inline dpo_id_t*
 load_balance_get_buckets (load_balance_t *lb)
 {
-    if (LB_HAS_INLINE_BUCKETS(lb))
-    {
+    if (LB_HAS_INLINE_BUCKETS(lb)) {
         return (lb->lb_buckets_inline);
-    }
-    else
-    {
+    } else {
         return (lb->lb_buckets);
     }
 }
@@ -123,21 +120,18 @@ load_balance_format (index_t lbi,
     s = format(s, "index:%d buckets:%d ", lbi, lb->lb_n_buckets);
     s = format(s, "uRPF:%d ", lb->lb_urpf);
     s = format(s, "to:[%Ld:%Ld]", to.packets, to.bytes);
-    if (0 != via.packets)
-    {
+    if (0 != via.packets) {
         s = format(s, " via:[%Ld:%Ld]",
                    via.packets, via.bytes);
     }
     s = format(s, "]");
 
-    if (INDEX_INVALID != lb->lb_map)
-    {
+    if (INDEX_INVALID != lb->lb_map) {
         s = format(s, "\n%U%U",
                    format_white_space, indent+4,
                    format_load_balance_map, lb->lb_map, indent+4);
     }
-    for (i = 0; i < lb->lb_n_buckets; i++)
-    {
+    for (i = 0; i < lb->lb_n_buckets; i++) {
         s = format(s, "\n%U[%d] %U",
                    format_white_space, indent+2,
                    i,
@@ -178,8 +172,7 @@ load_balance_create_i (u32 num_buckets,
     lb->lb_n_buckets_minus_1 = num_buckets-1;
     lb->lb_proto = lb_proto;
 
-    if (!LB_HAS_INLINE_BUCKETS(lb))
-    {
+    if (!LB_HAS_INLINE_BUCKETS(lb)) {
         vec_validate_aligned(lb->lb_buckets,
                              lb->lb_n_buckets - 1,
                              CLIB_CACHE_LINE_BYTES);
@@ -233,8 +226,7 @@ load_balance_is_drop (const dpo_id_t *dpo)
 
     lb = load_balance_get(dpo->dpoi_index);
 
-    if (1 == lb->lb_n_buckets)
-    {
+    if (1 == lb->lb_n_buckets) {
         return (dpo_is_drop(load_balance_get_bucket_i(lb, 0)));
     }
     return (0);
@@ -253,7 +245,7 @@ load_balance_set_fib_entry_flags (index_t lbi,
 
 void
 load_balance_set_urpf (index_t lbi,
-		       index_t urpf)
+                       index_t urpf)
 {
     load_balance_t *lb;
     index_t old;
@@ -322,8 +314,7 @@ ip_multipath_normalize_next_hops (const load_balance_path_t * raw_next_hops,
 
     /* Fast path: 1 next hop in block. */
     n_adj = n_nhs;
-    if (n_nhs == 1)
-    {
+    if (n_nhs == 1) {
         nhs[0] = raw_next_hops[0];
         nhs[0].path_weight = 1;
         _vec_len (nhs) = 1;
@@ -331,8 +322,7 @@ ip_multipath_normalize_next_hops (const load_balance_path_t * raw_next_hops,
         goto done;
     }
 
-    else if (n_nhs == 2)
-    {
+    else if (n_nhs == 2) {
         int cmp = next_hop_sort_by_weight (&raw_next_hops[0], &raw_next_hops[1]) < 0;
 
         /* Fast sort. */
@@ -340,16 +330,13 @@ ip_multipath_normalize_next_hops (const load_balance_path_t * raw_next_hops,
         nhs[1] = raw_next_hops[cmp ^ 1];
 
         /* Fast path: equal cost multipath with 2 next hops. */
-        if (nhs[0].path_weight == nhs[1].path_weight)
-        {
+        if (nhs[0].path_weight == nhs[1].path_weight) {
             nhs[0].path_weight = nhs[1].path_weight = 1;
             _vec_len (nhs) = 2;
             sum_weight = 2;
             goto done;
         }
-    }
-    else
-    {
+    } else {
         clib_memcpy (nhs, raw_next_hops, n_nhs * sizeof (raw_next_hops[0]));
         qsort (nhs, n_nhs, sizeof (nhs[0]), (void *) next_hop_sort_by_weight);
     }
@@ -360,8 +347,7 @@ ip_multipath_normalize_next_hops (const load_balance_path_t * raw_next_hops,
         sum_weight += nhs[i].path_weight;
 
     /* In the unlikely case that all weights are given as 0, set them all to 1. */
-    if (sum_weight == 0)
-    {
+    if (sum_weight == 0) {
         for (i = 0; i < n_nhs; i++)
             nhs[i].path_weight = 1;
         sum_weight = n_nhs;
@@ -373,14 +359,12 @@ ip_multipath_normalize_next_hops (const load_balance_path_t * raw_next_hops,
 
     /* Try larger and larger power of 2 sized adjacency blocks until we
        find one where traffic flows to within 1% of specified weights. */
-    for (n_adj = max_pow2 (n_nhs); ; n_adj *= 2)
-    {
+    for (n_adj = max_pow2 (n_nhs); ; n_adj *= 2) {
         error = 0;
 
         norm = n_adj / ((f64) sum_weight);
         n_adj_left = n_adj;
-        for (i = 0; i < n_nhs; i++)
-        {
+        for (i = 0; i < n_nhs; i++) {
             f64 nf = nhs[n_nhs + i].path_weight * norm; /* use saved weights */
             word n = flt_round_nearest (nf);
 
@@ -389,8 +373,7 @@ ip_multipath_normalize_next_hops (const load_balance_path_t * raw_next_hops,
             error += fabs (nf - n);
             nhs[i].path_weight = n;
 
-            if (0 == nhs[i].path_weight)
-            {
+            if (0 == nhs[i].path_weight) {
                 /*
                  * when the weight skew is high (norm is small) and n == nf.
                  * without this correction the path with a low weight would have
@@ -406,8 +389,7 @@ ip_multipath_normalize_next_hops (const load_balance_path_t * raw_next_hops,
         nhs[0].path_weight += n_adj_left;
 
         /* Less than 5% average error per adjacency with this size adjacency block? */
-        if (error <= multipath_next_hop_error_tolerance*n_adj)
-        {
+        if (error <= multipath_next_hop_error_tolerance*n_adj) {
             /* Truncate any next hops with zero weight. */
             _vec_len (nhs) = i;
             break;
@@ -425,8 +407,7 @@ static load_balance_path_t *
 load_balance_multipath_next_hop_fixup (const load_balance_path_t *nhs,
                                        dpo_proto_t drop_proto)
 {
-    if (0 == vec_len(nhs))
-    {
+    if (0 == vec_len(nhs)) {
         load_balance_path_t *new_nhs = NULL, *nh;
 
         /*
@@ -462,10 +443,8 @@ load_balance_fill_buckets (load_balance_t *lb,
      * the next-hops have normalised weights. that means their sum is the number
      * of buckets we need to fill.
      */
-    vec_foreach (nh, nhs)
-    {
-        for (ii = 0; ii < nh->path_weight; ii++)
-        {
+    vec_foreach (nh, nhs) {
+        for (ii = 0; ii < nh->path_weight; ii++) {
             ASSERT(bucket < n_buckets);
             load_balance_set_bucket_i(lb, bucket++, buckets, &nh->path_dpo);
         }
@@ -510,17 +489,13 @@ load_balance_multipath_update (const dpo_id_t *dpo,
      * Save the old load-balance map used, and get a new one if required.
      */
     old_lbmi = lb->lb_map;
-    if (flags & LOAD_BALANCE_FLAG_USES_MAP)
-    {
+    if (flags & LOAD_BALANCE_FLAG_USES_MAP) {
         lbmi = load_balance_map_add_or_lock(n_buckets, sum_of_weights, nhs);
-    }
-    else
-    {
+    } else {
         lbmi = INDEX_INVALID;
     }
 
-    if (0 == lb->lb_n_buckets)
-    {
+    if (0 == lb->lb_n_buckets) {
         /*
          * first time initialisation. no packets inflight, so we can write
          * at leisure.
@@ -536,9 +511,7 @@ load_balance_multipath_update (const dpo_id_t *dpo,
                                   load_balance_get_buckets(lb),
                                   n_buckets);
         lb->lb_map = lbmi;
-    }
-    else
-    {
+    } else {
         /*
          * This is a modification of an existing load-balance.
          * We need to ensure that packets inflight see a consistent state, that
@@ -547,8 +520,7 @@ load_balance_multipath_update (const dpo_id_t *dpo,
          * number of buckets is increasing, we must update the bucket array first,
          * then the reported number. vice-versa if the number of buckets goes down.
          */
-        if (n_buckets == lb->lb_n_buckets)
-        {
+        if (n_buckets == lb->lb_n_buckets) {
             /*
              * no change in the number of buckets. we can simply fill what
              * is new over what is old.
@@ -557,17 +529,14 @@ load_balance_multipath_update (const dpo_id_t *dpo,
                                       load_balance_get_buckets(lb),
                                       n_buckets);
             lb->lb_map = lbmi;
-        }
-        else if (n_buckets > lb->lb_n_buckets)
-        {
+        } else if (n_buckets > lb->lb_n_buckets) {
             /*
              * we have more buckets. the old load-balance map (if there is one)
              * will remain valid, i.e. mapping to indices within range, so we
              * update it last.
              */
             if (n_buckets > LB_NUM_INLINE_BUCKETS &&
-                lb->lb_n_buckets <= LB_NUM_INLINE_BUCKETS)
-            {
+                lb->lb_n_buckets <= LB_NUM_INLINE_BUCKETS) {
                 /*
                  * the new increased number of buckets is crossing the threshold
                  * from the inline storage to out-line. Alloc the outline buckets
@@ -586,15 +555,11 @@ load_balance_multipath_update (const dpo_id_t *dpo,
 
                 CLIB_MEMORY_BARRIER();
 
-                for (ii = 0; ii < LB_NUM_INLINE_BUCKETS; ii++)
-                {
+                for (ii = 0; ii < LB_NUM_INLINE_BUCKETS; ii++) {
                     dpo_reset(&lb->lb_buckets_inline[ii]);
                 }
-            }
-            else
-            {
-                if (n_buckets <= LB_NUM_INLINE_BUCKETS)
-                {
+            } else {
+                if (n_buckets <= LB_NUM_INLINE_BUCKETS) {
                     /*
                      * we are not crossing the threshold and it's still inline buckets.
                      * we can write the new on the old..
@@ -604,9 +569,7 @@ load_balance_multipath_update (const dpo_id_t *dpo,
                                               n_buckets);
                     CLIB_MEMORY_BARRIER();
                     load_balance_set_n_buckets(lb, n_buckets);
-                }
-                else
-                {
+                } else {
                     /*
                      * we are not crossing the threshold. We need a new bucket array to
                      * hold the increased number of choices.
@@ -626,8 +589,7 @@ load_balance_multipath_update (const dpo_id_t *dpo,
                     CLIB_MEMORY_BARRIER();
                     load_balance_set_n_buckets(lb, n_buckets);
 
-                    vec_foreach(tmp_dpo, old_buckets)
-                    {
+                    vec_foreach(tmp_dpo, old_buckets) {
                         dpo_reset(tmp_dpo);
                     }
                     vec_free(old_buckets);
@@ -638,9 +600,7 @@ load_balance_multipath_update (const dpo_id_t *dpo,
              * buckets fixed. ready for the MAP update.
              */
             lb->lb_map = lbmi;
-        }
-        else
-        {
+        } else {
             /*
              * bucket size shrinkage.
              * Any map we have will be based on the old
@@ -652,8 +612,7 @@ load_balance_multipath_update (const dpo_id_t *dpo,
 
 
             if (n_buckets <= LB_NUM_INLINE_BUCKETS &&
-                lb->lb_n_buckets > LB_NUM_INLINE_BUCKETS)
-            {
+                lb->lb_n_buckets > LB_NUM_INLINE_BUCKETS) {
                 /*
                  * the new decreased number of buckets is crossing the threshold
                  * from out-line storage to inline:
@@ -669,14 +628,11 @@ load_balance_multipath_update (const dpo_id_t *dpo,
                 load_balance_set_n_buckets(lb, n_buckets);
                 CLIB_MEMORY_BARRIER();
 
-                vec_foreach(tmp_dpo, lb->lb_buckets)
-                {
+                vec_foreach(tmp_dpo, lb->lb_buckets) {
                     dpo_reset(tmp_dpo);
                 }
                 vec_free(lb->lb_buckets);
-            }
-            else
-            {
+            } else {
                 /*
                  * not crossing the threshold.
                  *  1 - update the number to the smaller size
@@ -696,16 +652,14 @@ load_balance_multipath_update (const dpo_id_t *dpo,
                                           buckets,
                                           n_buckets);
 
-                for (ii = n_buckets; ii < old_n_buckets; ii++)
-                {
+                for (ii = n_buckets; ii < old_n_buckets; ii++) {
                     dpo_reset(&buckets[ii]);
                 }
             }
         }
     }
 
-    vec_foreach (nh, nhs)
-    {
+    vec_foreach (nh, nhs) {
         dpo_reset(&nh->path_dpo);
     }
     vec_free(nhs);
@@ -732,14 +686,12 @@ load_balance_destroy (load_balance_t *lb)
 
     buckets = load_balance_get_buckets(lb);
 
-    for (i = 0; i < lb->lb_n_buckets; i++)
-    {
+    for (i = 0; i < lb->lb_n_buckets; i++) {
         dpo_reset(&buckets[i]);
     }
 
     LB_DBG(lb, "destroy");
-    if (!LB_HAS_INLINE_BUCKETS(lb))
-    {
+    if (!LB_HAS_INLINE_BUCKETS(lb)) {
         vec_free(lb->lb_buckets);
     }
 
@@ -758,8 +710,7 @@ load_balance_unlock (dpo_id_t *dpo)
 
     lb->lb_locks--;
 
-    if (0 == lb->lb_locks)
-    {
+    if (0 == lb->lb_locks) {
         load_balance_destroy(lb);
     }
 }
@@ -768,9 +719,9 @@ static void
 load_balance_mem_show (void)
 {
     fib_show_memory_usage("load-balance",
-			  pool_elts(load_balance_pool),
-			  pool_len(load_balance_pool),
-			  sizeof(load_balance_t));
+                          pool_elts(load_balance_pool),
+                          pool_len(load_balance_pool),
+                          sizeof(load_balance_t));
     load_balance_map_show_mem();
 }
 
@@ -792,38 +743,31 @@ const static dpo_vft_t lb_vft = {
  * we are relying on the correct use of the .sibling_of field when setting
  * up these sibling nodes.
  */
-const static char* const load_balance_ip4_nodes[] =
-{
+const static char* const load_balance_ip4_nodes[] = {
     "ip4-load-balance",
     NULL,
 };
-const static char* const load_balance_ip6_nodes[] =
-{
+const static char* const load_balance_ip6_nodes[] = {
     "ip6-load-balance",
     NULL,
 };
-const static char* const load_balance_mpls_nodes[] =
-{
+const static char* const load_balance_mpls_nodes[] = {
     "mpls-load-balance",
     NULL,
 };
-const static char* const load_balance_l2_nodes[] =
-{
+const static char* const load_balance_l2_nodes[] = {
     "l2-load-balance",
     NULL,
 };
-const static char* const load_balance_nsh_nodes[] =
-{
+const static char* const load_balance_nsh_nodes[] = {
     "nsh-load-balance",
     NULL
 };
-const static char* const load_balance_bier_nodes[] =
-{
+const static char* const load_balance_bier_nodes[] = {
     "bier-load-balance",
     NULL,
 };
-const static char* const * const load_balance_nodes[DPO_PROTO_NUM] =
-{
+const static char* const * const load_balance_nodes[DPO_PROTO_NUM] = {
     [DPO_PROTO_IP4]  = load_balance_ip4_nodes,
     [DPO_PROTO_IP6]  = load_balance_ip6_nodes,
     [DPO_PROTO_MPLS] = load_balance_mpls_nodes,
@@ -858,21 +802,17 @@ load_balance_show (vlib_main_t * vm,
 {
     index_t lbi = INDEX_INVALID;
 
-    while (unformat_check_input (input) != UNFORMAT_END_OF_INPUT)
-    {
+    while (unformat_check_input (input) != UNFORMAT_END_OF_INPUT) {
         if (unformat (input, "%d", &lbi))
             ;
         else
             break;
     }
 
-    if (INDEX_INVALID != lbi)
-    {
+    if (INDEX_INVALID != lbi) {
         vlib_cli_output (vm, "%U", format_load_balance, lbi,
                          LOAD_BALANCE_FORMAT_DETAIL);
-    }
-    else
-    {
+    } else {
         load_balance_t *lb;
 
         pool_foreach(lb, load_balance_pool,
@@ -896,129 +836,122 @@ VLIB_CLI_COMMAND (load_balance_show_command, static) = {
 always_inline u32
 ip_flow_hash (void *data)
 {
-  ip4_header_t *iph = (ip4_header_t *) data;
+    ip4_header_t *iph = (ip4_header_t *) data;
 
-  if ((iph->ip_version_and_header_length & 0xF0) == 0x40)
-    return ip4_compute_flow_hash (iph, IP_FLOW_HASH_DEFAULT);
-  else
-    return ip6_compute_flow_hash ((ip6_header_t *) iph, IP_FLOW_HASH_DEFAULT);
+    if ((iph->ip_version_and_header_length & 0xF0) == 0x40)
+        return ip4_compute_flow_hash (iph, IP_FLOW_HASH_DEFAULT);
+    else
+        return ip6_compute_flow_hash ((ip6_header_t *) iph, IP_FLOW_HASH_DEFAULT);
 }
 
 always_inline u64
 mac_to_u64 (u8 * m)
 {
-  return (*((u64 *) m) & 0xffffffffffff);
+    return (*((u64 *) m) & 0xffffffffffff);
 }
 
 always_inline u32
 l2_flow_hash (vlib_buffer_t * b0)
 {
-  ethernet_header_t *eh;
-  u64 a, b, c;
-  uword is_ip, eh_size;
-  u16 eh_type;
+    ethernet_header_t *eh;
+    u64 a, b, c;
+    uword is_ip, eh_size;
+    u16 eh_type;
 
-  eh = vlib_buffer_get_current (b0);
-  eh_type = clib_net_to_host_u16 (eh->type);
-  eh_size = ethernet_buffer_header_size (b0);
+    eh = vlib_buffer_get_current (b0);
+    eh_type = clib_net_to_host_u16 (eh->type);
+    eh_size = ethernet_buffer_header_size (b0);
 
-  is_ip = (eh_type == ETHERNET_TYPE_IP4 || eh_type == ETHERNET_TYPE_IP6);
+    is_ip = (eh_type == ETHERNET_TYPE_IP4 || eh_type == ETHERNET_TYPE_IP6);
 
-  /* since we have 2 cache lines, use them */
-  if (is_ip)
-    a = ip_flow_hash ((u8 *) vlib_buffer_get_current (b0) + eh_size);
-  else
-    a = eh->type;
+    /* since we have 2 cache lines, use them */
+    if (is_ip)
+        a = ip_flow_hash ((u8 *) vlib_buffer_get_current (b0) + eh_size);
+    else
+        a = eh->type;
 
-  b = mac_to_u64 ((u8 *) eh->dst_address);
-  c = mac_to_u64 ((u8 *) eh->src_address);
-  hash_mix64 (a, b, c);
+    b = mac_to_u64 ((u8 *) eh->dst_address);
+    c = mac_to_u64 ((u8 *) eh->src_address);
+    hash_mix64 (a, b, c);
 
-  return (u32) c;
+    return (u32) c;
 }
 
-typedef struct load_balance_trace_t_
-{
+typedef struct load_balance_trace_t_ {
     index_t lb_index;
 } load_balance_trace_t;
 
 always_inline uword
 load_balance_inline (vlib_main_t * vm,
-		     vlib_node_runtime_t * node,
-		     vlib_frame_t * frame,
-		     int is_l2)
+                     vlib_node_runtime_t * node,
+                     vlib_frame_t * frame,
+                     int is_l2)
 {
-  u32 n_left_from, next_index, *from, *to_next;
+    u32 n_left_from, next_index, *from, *to_next;
 
-  from = vlib_frame_vector_args (frame);
-  n_left_from = frame->n_vectors;
+    from = vlib_frame_vector_args (frame);
+    n_left_from = frame->n_vectors;
 
-  next_index = node->cached_next_index;
+    next_index = node->cached_next_index;
 
-  while (n_left_from > 0)
-    {
-      u32 n_left_to_next;
+    while (n_left_from > 0) {
+        u32 n_left_to_next;
 
-      vlib_get_next_frame (vm, node, next_index, to_next, n_left_to_next);
+        vlib_get_next_frame (vm, node, next_index, to_next, n_left_to_next);
 
-      while (n_left_from > 0 && n_left_to_next > 0)
-	{
-	  vlib_buffer_t *b0;
-	  u32 bi0, lbi0, next0;
-	  const dpo_id_t *dpo0;
-	  const load_balance_t *lb0;
+        while (n_left_from > 0 && n_left_to_next > 0) {
+            vlib_buffer_t *b0;
+            u32 bi0, lbi0, next0;
+            const dpo_id_t *dpo0;
+            const load_balance_t *lb0;
 
-	  bi0 = from[0];
-	  to_next[0] = bi0;
-	  from += 1;
-	  to_next += 1;
-	  n_left_from -= 1;
-	  n_left_to_next -= 1;
+            bi0 = from[0];
+            to_next[0] = bi0;
+            from += 1;
+            to_next += 1;
+            n_left_from -= 1;
+            n_left_to_next -= 1;
 
-	  b0 = vlib_get_buffer (vm, bi0);
+            b0 = vlib_get_buffer (vm, bi0);
 
-	  /* lookup dst + src mac */
-	  lbi0 =  vnet_buffer (b0)->ip.adj_index[VLIB_TX];
-	  lb0 = load_balance_get(lbi0);
+            /* lookup dst + src mac */
+            lbi0 =  vnet_buffer (b0)->ip.adj_index[VLIB_TX];
+            lb0 = load_balance_get(lbi0);
 
-	  if (is_l2)
-	  {
-	      vnet_buffer(b0)->ip.flow_hash = l2_flow_hash(b0);
-	  }
-	  else
-	  {
-	      /* it's BIER */
-	      const bier_hdr_t *bh0 = vlib_buffer_get_current(b0);
-	      vnet_buffer(b0)->ip.flow_hash = bier_hdr_get_entropy(bh0);
-	  }
+            if (is_l2) {
+                vnet_buffer(b0)->ip.flow_hash = l2_flow_hash(b0);
+            } else {
+                /* it's BIER */
+                const bier_hdr_t *bh0 = vlib_buffer_get_current(b0);
+                vnet_buffer(b0)->ip.flow_hash = bier_hdr_get_entropy(bh0);
+            }
 
-	  dpo0 = load_balance_get_bucket_i(lb0, 
-					   vnet_buffer(b0)->ip.flow_hash &
-					   (lb0->lb_n_buckets_minus_1));
+            dpo0 = load_balance_get_bucket_i(lb0,
+                                             vnet_buffer(b0)->ip.flow_hash &
+                                             (lb0->lb_n_buckets_minus_1));
 
-	  next0 = dpo0->dpoi_next_node;
-	  vnet_buffer (b0)->ip.adj_index[VLIB_TX] = dpo0->dpoi_index;
+            next0 = dpo0->dpoi_next_node;
+            vnet_buffer (b0)->ip.adj_index[VLIB_TX] = dpo0->dpoi_index;
 
-	  if (PREDICT_FALSE (b0->flags & VLIB_BUFFER_IS_TRACED))
-	    {
-	      load_balance_trace_t *tr = vlib_add_trace (vm, node, b0,
-							 sizeof (*tr));
-	      tr->lb_index = lbi0;
-	    }
-	  vlib_validate_buffer_enqueue_x1 (vm, node, next_index, to_next,
-					   n_left_to_next, bi0, next0);
-	}
+            if (PREDICT_FALSE (b0->flags & VLIB_BUFFER_IS_TRACED)) {
+                load_balance_trace_t *tr = vlib_add_trace (vm, node, b0,
+                                           sizeof (*tr));
+                tr->lb_index = lbi0;
+            }
+            vlib_validate_buffer_enqueue_x1 (vm, node, next_index, to_next,
+                                             n_left_to_next, bi0, next0);
+        }
 
-      vlib_put_next_frame (vm, node, next_index, n_left_to_next);
+        vlib_put_next_frame (vm, node, next_index, n_left_to_next);
     }
 
-  return frame->n_vectors;
+    return frame->n_vectors;
 }
 
 static uword
 l2_load_balance (vlib_main_t * vm,
-		 vlib_node_runtime_t * node,
-		 vlib_frame_t * frame)
+                 vlib_node_runtime_t * node,
+                 vlib_frame_t * frame)
 {
     return (load_balance_inline(vm, node, frame, 1));
 }
@@ -1026,134 +959,131 @@ l2_load_balance (vlib_main_t * vm,
 static u8 *
 format_l2_load_balance_trace (u8 * s, va_list * args)
 {
-  CLIB_UNUSED (vlib_main_t * vm) = va_arg (*args, vlib_main_t *);
-  CLIB_UNUSED (vlib_node_t * node) = va_arg (*args, vlib_node_t *);
-  load_balance_trace_t *t = va_arg (*args, load_balance_trace_t *);
+    CLIB_UNUSED (vlib_main_t * vm) = va_arg (*args, vlib_main_t *);
+    CLIB_UNUSED (vlib_node_t * node) = va_arg (*args, vlib_node_t *);
+    load_balance_trace_t *t = va_arg (*args, load_balance_trace_t *);
 
-  s = format (s, "L2-load-balance: index %d", t->lb_index);
-  return s;
+    s = format (s, "L2-load-balance: index %d", t->lb_index);
+    return s;
 }
 
 /**
  * @brief
  */
 VLIB_REGISTER_NODE (l2_load_balance_node) = {
-  .function = l2_load_balance,
-  .name = "l2-load-balance",
-  .vector_size = sizeof (u32),
+    .function = l2_load_balance,
+    .name = "l2-load-balance",
+    .vector_size = sizeof (u32),
 
-  .format_trace = format_l2_load_balance_trace,
-  .n_next_nodes = 1,
-  .next_nodes = {
-      [0] = "error-drop",
-  },
+    .format_trace = format_l2_load_balance_trace,
+    .n_next_nodes = 1,
+    .next_nodes = {
+        [0] = "error-drop",
+    },
 };
 
 static uword
 nsh_load_balance (vlib_main_t * vm,
-                 vlib_node_runtime_t * node,
-                 vlib_frame_t * frame)
+                  vlib_node_runtime_t * node,
+                  vlib_frame_t * frame)
 {
-  u32 n_left_from, next_index, *from, *to_next;
+    u32 n_left_from, next_index, *from, *to_next;
 
-  from = vlib_frame_vector_args (frame);
-  n_left_from = frame->n_vectors;
+    from = vlib_frame_vector_args (frame);
+    n_left_from = frame->n_vectors;
 
-  next_index = node->cached_next_index;
+    next_index = node->cached_next_index;
 
-  while (n_left_from > 0)
-    {
-      u32 n_left_to_next;
+    while (n_left_from > 0) {
+        u32 n_left_to_next;
 
-      vlib_get_next_frame (vm, node, next_index, to_next, n_left_to_next);
+        vlib_get_next_frame (vm, node, next_index, to_next, n_left_to_next);
 
-      while (n_left_from > 0 && n_left_to_next > 0)
-        {
-          vlib_buffer_t *b0;
-          u32 bi0, lbi0, next0, *nsh0;
-          const dpo_id_t *dpo0;
-          const load_balance_t *lb0;
+        while (n_left_from > 0 && n_left_to_next > 0) {
+            vlib_buffer_t *b0;
+            u32 bi0, lbi0, next0, *nsh0;
+            const dpo_id_t *dpo0;
+            const load_balance_t *lb0;
 
-          bi0 = from[0];
-          to_next[0] = bi0;
-          from += 1;
-          to_next += 1;
-          n_left_from -= 1;
-          n_left_to_next -= 1;
+            bi0 = from[0];
+            to_next[0] = bi0;
+            from += 1;
+            to_next += 1;
+            n_left_from -= 1;
+            n_left_to_next -= 1;
 
-          b0 = vlib_get_buffer (vm, bi0);
+            b0 = vlib_get_buffer (vm, bi0);
 
-          lbi0 =  vnet_buffer (b0)->ip.adj_index[VLIB_TX];
-          lb0 = load_balance_get(lbi0);
+            lbi0 =  vnet_buffer (b0)->ip.adj_index[VLIB_TX];
+            lb0 = load_balance_get(lbi0);
 
-          /* SPI + SI are the second word of the NSH header */
-          nsh0 = vlib_buffer_get_current (b0);
-          vnet_buffer(b0)->ip.flow_hash = nsh0[1] % lb0->lb_n_buckets;
+            /* SPI + SI are the second word of the NSH header */
+            nsh0 = vlib_buffer_get_current (b0);
+            vnet_buffer(b0)->ip.flow_hash = nsh0[1] % lb0->lb_n_buckets;
 
-          dpo0 = load_balance_get_bucket_i(lb0,
-                                           vnet_buffer(b0)->ip.flow_hash &
-                                           (lb0->lb_n_buckets_minus_1));
+            dpo0 = load_balance_get_bucket_i(lb0,
+                                             vnet_buffer(b0)->ip.flow_hash &
+                                             (lb0->lb_n_buckets_minus_1));
 
-          next0 = dpo0->dpoi_next_node;
-          vnet_buffer (b0)->ip.adj_index[VLIB_TX] = dpo0->dpoi_index;
+            next0 = dpo0->dpoi_next_node;
+            vnet_buffer (b0)->ip.adj_index[VLIB_TX] = dpo0->dpoi_index;
 
-          if (PREDICT_FALSE (b0->flags & VLIB_BUFFER_IS_TRACED))
-            {
-              load_balance_trace_t *tr = vlib_add_trace (vm, node, b0,
-                                                         sizeof (*tr));
-              tr->lb_index = lbi0;
+            if (PREDICT_FALSE (b0->flags & VLIB_BUFFER_IS_TRACED)) {
+                load_balance_trace_t *tr = vlib_add_trace (vm, node, b0,
+                                           sizeof (*tr));
+                tr->lb_index = lbi0;
             }
-          vlib_validate_buffer_enqueue_x1 (vm, node, next_index, to_next,
-                                           n_left_to_next, bi0, next0);
+            vlib_validate_buffer_enqueue_x1 (vm, node, next_index, to_next,
+                                             n_left_to_next, bi0, next0);
         }
 
-      vlib_put_next_frame (vm, node, next_index, n_left_to_next);
+        vlib_put_next_frame (vm, node, next_index, n_left_to_next);
     }
 
-  return frame->n_vectors;
+    return frame->n_vectors;
 }
 
 static u8 *
 format_nsh_load_balance_trace (u8 * s, va_list * args)
 {
-  CLIB_UNUSED (vlib_main_t * vm) = va_arg (*args, vlib_main_t *);
-  CLIB_UNUSED (vlib_node_t * node) = va_arg (*args, vlib_node_t *);
-  load_balance_trace_t *t = va_arg (*args, load_balance_trace_t *);
+    CLIB_UNUSED (vlib_main_t * vm) = va_arg (*args, vlib_main_t *);
+    CLIB_UNUSED (vlib_node_t * node) = va_arg (*args, vlib_node_t *);
+    load_balance_trace_t *t = va_arg (*args, load_balance_trace_t *);
 
-  s = format (s, "NSH-load-balance: index %d", t->lb_index);
-  return s;
+    s = format (s, "NSH-load-balance: index %d", t->lb_index);
+    return s;
 }
 
 /**
  * @brief
  */
 VLIB_REGISTER_NODE (nsh_load_balance_node) = {
-  .function = nsh_load_balance,
-  .name = "nsh-load-balance",
-  .vector_size = sizeof (u32),
+    .function = nsh_load_balance,
+    .name = "nsh-load-balance",
+    .vector_size = sizeof (u32),
 
-  .format_trace = format_nsh_load_balance_trace,
-  .n_next_nodes = 1,
-  .next_nodes = {
-      [0] = "error-drop",
-  },
+    .format_trace = format_nsh_load_balance_trace,
+    .n_next_nodes = 1,
+    .next_nodes = {
+        [0] = "error-drop",
+    },
 };
 
 static u8 *
 format_bier_load_balance_trace (u8 * s, va_list * args)
 {
-  CLIB_UNUSED (vlib_main_t * vm) = va_arg (*args, vlib_main_t *);
-  CLIB_UNUSED (vlib_node_t * node) = va_arg (*args, vlib_node_t *);
-  load_balance_trace_t *t = va_arg (*args, load_balance_trace_t *);
+    CLIB_UNUSED (vlib_main_t * vm) = va_arg (*args, vlib_main_t *);
+    CLIB_UNUSED (vlib_node_t * node) = va_arg (*args, vlib_node_t *);
+    load_balance_trace_t *t = va_arg (*args, load_balance_trace_t *);
 
-  s = format (s, "BIER-load-balance: index %d", t->lb_index);
-  return s;
+    s = format (s, "BIER-load-balance: index %d", t->lb_index);
+    return s;
 }
 
 static uword
 bier_load_balance (vlib_main_t * vm,
-		   vlib_node_runtime_t * node,
-		   vlib_frame_t * frame)
+                   vlib_node_runtime_t * node,
+                   vlib_frame_t * frame)
 {
     return (load_balance_inline(vm, node, frame, 0));
 }
@@ -1162,10 +1092,10 @@ bier_load_balance (vlib_main_t * vm,
  * @brief
  */
 VLIB_REGISTER_NODE (bier_load_balance_node) = {
-  .function = bier_load_balance,
-  .name = "bier-load-balance",
-  .vector_size = sizeof (u32),
+    .function = bier_load_balance,
+    .name = "bier-load-balance",
+    .vector_size = sizeof (u32),
 
-  .format_trace = format_bier_load_balance_trace,
-  .sibling_of = "mpls-load-balance",
+    .format_trace = format_bier_load_balance_trace,
+    .sibling_of = "mpls-load-balance",
 };

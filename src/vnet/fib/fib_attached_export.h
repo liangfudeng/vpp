@@ -40,14 +40,14 @@
 #include <vnet/fib/fib_types.h>
 
 extern void fib_attached_export_import(fib_entry_t *fib_entry,
-				       fib_node_index_t export_fib);
-				       
+                                       fib_node_index_t export_fib);
+
 extern void fib_attached_export_purge(fib_entry_t *fib_entry);
 
 extern void fib_attached_export_covered_added(fib_entry_t *cover,
-					      fib_node_index_t covered);
+        fib_node_index_t covered);
 extern void fib_attached_export_covered_removed(fib_entry_t *cover,
-						fib_node_index_t covered);
+        fib_node_index_t covered);
 extern void fib_attached_export_cover_change(fib_entry_t *fib_entry);
 extern void fib_attached_export_cover_update(fib_entry_t *fib_entry);
 

@@ -30,21 +30,18 @@
 #define NAT_MAX_FRAG_DEFAULT 5
 #define NAT_REASS_HT_LOAD_FACTOR (0.75)
 
-typedef struct
-{
-  union
-  {
-    struct
-    {
-      ip4_address_t src;
-      ip4_address_t dst;
-      /* align by making this 4 octets even though its a 2 octets field */
-      u32 frag_id;
-      /* align by making this 4 octets even though its a 1 octet field */
-      u32 proto;
+typedef struct {
+    union {
+        struct {
+            ip4_address_t src;
+            ip4_address_t dst;
+            /* align by making this 4 octets even though its a 2 octets field */
+            u32 frag_id;
+            /* align by making this 4 octets even though its a 1 octet field */
+            u32 proto;
+        };
+        u64 as_u64[2];
     };
-    u64 as_u64[2];
-  };
 } nat_reass_ip4_key_t;
 
 /* *INDENT-OFF* */
@@ -59,21 +56,18 @@ typedef CLIB_PACKED(struct
 }) nat_reass_ip4_t;
 /* *INDENT-ON* */
 
-typedef struct
-{
-  union
-  {
-    struct
-    {
-      ip6_address_t src;
-      ip6_address_t dst;
-      u32 frag_id;
-      /* align by making this 4 octets even though its a 1 octet field */
-      u32 proto;
-      u64 unused;
+typedef struct {
+    union {
+        struct {
+            ip6_address_t src;
+            ip6_address_t dst;
+            u32 frag_id;
+            /* align by making this 4 octets even though its a 1 octet field */
+            u32 proto;
+            u64 unused;
+        };
+        u64 as_u64[6];
     };
-    u64 as_u64[6];
-  };
 } nat_reass_ip6_key_t;
 
 /* *INDENT-OFF* */
@@ -88,41 +82,40 @@ typedef CLIB_PACKED(struct
 }) nat_reass_ip6_t;
 /* *INDENT-ON* */
 
-typedef struct
-{
-  /* IPv4 config */
-  u32 ip4_timeout;
-  u16 ip4_max_reass;
-  u8 ip4_max_frag;
-  u8 ip4_drop_frag;
+typedef struct {
+    /* IPv4 config */
+    u32 ip4_timeout;
+    u16 ip4_max_reass;
+    u8 ip4_max_frag;
+    u8 ip4_drop_frag;
 
-  /* IPv6 config */
-  u32 ip6_timeout;
-  u16 ip6_max_reass;
-  u8 ip6_max_frag;
-  u8 ip6_drop_frag;
+    /* IPv6 config */
+    u32 ip6_timeout;
+    u16 ip6_max_reass;
+    u8 ip6_max_frag;
+    u8 ip6_drop_frag;
 
-  /* IPv4 runtime */
-  nat_reass_ip4_t *ip4_reass_pool;
-  clib_bihash_16_8_t ip4_reass_hash;
-  dlist_elt_t *ip4_reass_lru_list_pool;
-  dlist_elt_t *ip4_frags_list_pool;
-  u32 ip4_reass_head_index;
-  u16 ip4_reass_n;
-  clib_spinlock_t ip4_reass_lock;
+    /* IPv4 runtime */
+    nat_reass_ip4_t *ip4_reass_pool;
+    clib_bihash_16_8_t ip4_reass_hash;
+    dlist_elt_t *ip4_reass_lru_list_pool;
+    dlist_elt_t *ip4_frags_list_pool;
+    u32 ip4_reass_head_index;
+    u16 ip4_reass_n;
+    clib_spinlock_t ip4_reass_lock;
 
-  /* IPv6 runtime */
-  nat_reass_ip6_t *ip6_reass_pool;
-  clib_bihash_48_8_t ip6_reass_hash;
-  dlist_elt_t *ip6_reass_lru_list_pool;
-  dlist_elt_t *ip6_frags_list_pool;
-  u32 ip6_reass_head_index;
-  u16 ip6_reass_n;
-  clib_spinlock_t ip6_reass_lock;
+    /* IPv6 runtime */
+    nat_reass_ip6_t *ip6_reass_pool;
+    clib_bihash_48_8_t ip6_reass_hash;
+    dlist_elt_t *ip6_reass_lru_list_pool;
+    dlist_elt_t *ip6_frags_list_pool;
+    u32 ip6_reass_head_index;
+    u16 ip6_reass_n;
+    clib_spinlock_t ip6_reass_lock;
 
-  /* convenience */
-  vlib_main_t *vlib_main;
-  vnet_main_t *vnet_main;
+    /* convenience */
+    vlib_main_t *vlib_main;
+    vnet_main_t *vnet_main;
 } nat_reass_main_t;
 
 /**
@@ -137,7 +130,7 @@ typedef struct
  * @returns 0 on success, non-zero value otherwise.
  */
 int nat_reass_set (u32 timeout, u16 max_reass, u8 max_frag, u8 drop_frag,
-		   u8 is_ip6);
+                   u8 is_ip6);
 
 /**
  * @brief Get reassembly timeout.
@@ -197,10 +190,10 @@ clib_error_t *nat_reass_init (vlib_main_t * vm);
  * @returns Reassembly data or 0 on failure.
  */
 nat_reass_ip4_t *nat_ip4_reass_find_or_create (ip4_address_t src,
-					       ip4_address_t dst,
-					       u16 frag_id, u8 proto,
-					       u8 reset_timeout,
-					       u32 ** bi_to_drop);
+        ip4_address_t dst,
+        u16 frag_id, u8 proto,
+        u8 reset_timeout,
+        u32 ** bi_to_drop);
 /**
  * @brief Cache fragment.
  *
@@ -246,10 +239,10 @@ void nat_ip4_reass_walk (nat_ip4_reass_walk_fn_t fn, void *ctx);
  * @returns Reassembly data or 0 on failure.
  */
 nat_reass_ip6_t *nat_ip6_reass_find_or_create (ip6_address_t src,
-					       ip6_address_t dst,
-					       u32 frag_id, u8 proto,
-					       u8 reset_timeout,
-					       u32 ** bi_to_drop);
+        ip6_address_t dst,
+        u32 frag_id, u8 proto,
+        u8 reset_timeout,
+        u32 ** bi_to_drop);
 /**
  * @brief Cache fragment.
  *

@@ -15,39 +15,40 @@
 
 #include "vom/client_db.hpp"
 
-namespace VOM {
-object_ref_list&
-client_db::find(const client_db::key_t& k)
+namespace VOM
 {
-  return (m_objs[k]);
-}
+    object_ref_list&
+    client_db::find(const client_db::key_t& k)
+    {
+        return (m_objs[k]);
+    }
 
-void
-client_db::flush(const client_db::key_t& k)
-{
-  auto found = m_objs.find(k);
+    void
+    client_db::flush(const client_db::key_t& k)
+    {
+        auto found = m_objs.find(k);
 
-  if (found != m_objs.end())
-    m_objs.erase(found);
-}
+        if (found != m_objs.end())
+            m_objs.erase(found);
+    }
 
-void
-client_db::dump(const key_t& key, std::ostream& os)
-{
-  object_ref_list& orlist = find(key);
+    void
+    client_db::dump(const key_t& key, std::ostream& os)
+    {
+        object_ref_list& orlist = find(key);
 
-  for (auto entry : orlist) {
-    os << "  " << entry.obj()->to_string() << std::endl;
-  }
-}
+        for (auto entry : orlist) {
+            os << "  " << entry.obj()->to_string() << std::endl;
+        }
+    }
 
-void
-client_db::dump(std::ostream& os)
-{
-  for (auto entry : m_objs) {
-    os << "  key:[" << entry.first << "]" << std::endl;
-  }
-}
+    void
+    client_db::dump(std::ostream& os)
+    {
+        for (auto entry : m_objs) {
+            os << "  key:[" << entry.first << "]" << std::endl;
+        }
+    }
 }
 
 /*

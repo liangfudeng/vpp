@@ -27,7 +27,7 @@
  * than we can from
  *  foo bar(u32 t);
  */
-typedef u32 adj_index_t; 
+typedef u32 adj_index_t;
 
 /**
  * @brief Invalid ADJ index - used when no adj is known
@@ -38,8 +38,7 @@ typedef u32 adj_index_t;
 /**
  * @brief return codes from a adjacency walker callback function
  */
-typedef enum adj_walk_rc_t_
-{
+typedef enum adj_walk_rc_t_ {
     ADJ_WALK_RC_STOP,
     ADJ_WALK_RC_CONTINUE,
 } adj_walk_rc_t;
@@ -48,6 +47,6 @@ typedef enum adj_walk_rc_t_
  * @brief Call back function when walking adjacencies
  */
 typedef adj_walk_rc_t (*adj_walk_cb_t)(adj_index_t ai,
-				       void *ctx);
+                                       void *ctx);
 
 #endif

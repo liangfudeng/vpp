@@ -28,10 +28,9 @@
 #include <unistd.h>
 #endif
 
-typedef struct
-{
-  uword *the_builtin_eval_hash;
-  uword *the_value_table_hash;
+typedef struct {
+    uword *the_builtin_eval_hash;
+    uword *the_value_table_hash;
 } macro_main_t;
 
 int clib_macro_unset (macro_main_t * mm, char *name);

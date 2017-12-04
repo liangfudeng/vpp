@@ -17,136 +17,138 @@
 
 DEFINE_VAPI_MSG_IDS_IP_API_JSON;
 
-namespace VOM {
-namespace l3_binding_cmds {
-bind_cmd::bind_cmd(HW::item<bool>& item,
-                   const handle_t& itf,
-                   const route::prefix_t& pfx)
-  : rpc_cmd(item)
-  , m_itf(itf)
-  , m_pfx(pfx)
+namespace VOM
 {
-}
+    namespace l3_binding_cmds
+    {
+        bind_cmd::bind_cmd(HW::item<bool>& item,
+                           const handle_t& itf,
+                           const route::prefix_t& pfx)
+            : rpc_cmd(item)
+            , m_itf(itf)
+            , m_pfx(pfx)
+        {
+        }
 
-bool
-bind_cmd::operator==(const bind_cmd& other) const
-{
-  return ((m_itf == other.m_itf) && (m_pfx == other.m_pfx));
-}
+        bool
+        bind_cmd::operator==(const bind_cmd& other) const
+        {
+            return ((m_itf == other.m_itf) && (m_pfx == other.m_pfx));
+        }
 
-rc_t
-bind_cmd::issue(connection& con)
-{
-  msg_t req(con.ctx(), std::ref(*this));
+        rc_t
+        bind_cmd::issue(connection& con)
+        {
+            msg_t req(con.ctx(), std::ref(*this));
 
-  auto& payload = req.get_request().get_payload();
-  payload.sw_if_index = m_itf.value();
-  payload.is_add = 1;
-  payload.del_all = 0;
+            auto& payload = req.get_request().get_payload();
+            payload.sw_if_index = m_itf.value();
+            payload.is_add = 1;
+            payload.del_all = 0;
 
-  m_pfx.to_vpp(&payload.is_ipv6, payload.address, &payload.address_length);
+            m_pfx.to_vpp(&payload.is_ipv6, payload.address, &payload.address_length);
 
-  VAPI_CALL(req.execute());
+            VAPI_CALL(req.execute());
 
-  m_hw_item.set(wait());
+            m_hw_item.set(wait());
 
-  return rc_t::OK;
-}
+            return rc_t::OK;
+        }
 
-std::string
-bind_cmd::to_string() const
-{
-  std::ostringstream s;
-  s << "L3-bind: " << m_hw_item.to_string() << " itf:" << m_itf.to_string()
-    << " pfx:" << m_pfx.to_string();
+        std::string
+        bind_cmd::to_string() const
+        {
+            std::ostringstream s;
+            s << "L3-bind: " << m_hw_item.to_string() << " itf:" << m_itf.to_string()
+              << " pfx:" << m_pfx.to_string();
 
-  return (s.str());
-}
+            return (s.str());
+        }
 
-unbind_cmd::unbind_cmd(HW::item<bool>& item,
-                       const handle_t& itf,
-                       const route::prefix_t& pfx)
-  : rpc_cmd(item)
-  , m_itf(itf)
-  , m_pfx(pfx)
-{
-}
+        unbind_cmd::unbind_cmd(HW::item<bool>& item,
+                               const handle_t& itf,
+                               const route::prefix_t& pfx)
+            : rpc_cmd(item)
+            , m_itf(itf)
+            , m_pfx(pfx)
+        {
+        }
 
-bool
-unbind_cmd::operator==(const unbind_cmd& other) const
-{
-  return ((m_itf == other.m_itf) && (m_pfx == other.m_pfx));
-}
+        bool
+        unbind_cmd::operator==(const unbind_cmd& other) const
+        {
+            return ((m_itf == other.m_itf) && (m_pfx == other.m_pfx));
+        }
 
-rc_t
-unbind_cmd::issue(connection& con)
-{
-  msg_t req(con.ctx(), std::ref(*this));
+        rc_t
+        unbind_cmd::issue(connection& con)
+        {
+            msg_t req(con.ctx(), std::ref(*this));
 
-  auto& payload = req.get_request().get_payload();
-  payload.sw_if_index = m_itf.value();
-  payload.is_add = 0;
-  payload.del_all = 0;
+            auto& payload = req.get_request().get_payload();
+            payload.sw_if_index = m_itf.value();
+            payload.is_add = 0;
+            payload.del_all = 0;
 
-  m_pfx.to_vpp(&payload.is_ipv6, payload.address, &payload.address_length);
+            m_pfx.to_vpp(&payload.is_ipv6, payload.address, &payload.address_length);
 
-  VAPI_CALL(req.execute());
+            VAPI_CALL(req.execute());
 
-  wait();
-  m_hw_item.set(rc_t::NOOP);
+            wait();
+            m_hw_item.set(rc_t::NOOP);
 
-  return rc_t::OK;
-}
+            return rc_t::OK;
+        }
 
-std::string
-unbind_cmd::to_string() const
-{
-  std::ostringstream s;
-  s << "L3-unbind: " << m_hw_item.to_string() << " itf:" << m_itf.to_string()
-    << " pfx:" << m_pfx.to_string();
+        std::string
+        unbind_cmd::to_string() const
+        {
+            std::ostringstream s;
+            s << "L3-unbind: " << m_hw_item.to_string() << " itf:" << m_itf.to_string()
+              << " pfx:" << m_pfx.to_string();
 
-  return (s.str());
-}
+            return (s.str());
+        }
 
-dump_v4_cmd::dump_v4_cmd(const handle_t& hdl)
-  : m_itf(hdl)
-{
-}
+        dump_v4_cmd::dump_v4_cmd(const handle_t& hdl)
+            : m_itf(hdl)
+        {
+        }
 
-dump_v4_cmd::dump_v4_cmd(const dump_v4_cmd& d)
-  : m_itf(d.m_itf)
-{
-}
+        dump_v4_cmd::dump_v4_cmd(const dump_v4_cmd& d)
+            : m_itf(d.m_itf)
+        {
+        }
 
-bool
-dump_v4_cmd::operator==(const dump_v4_cmd& other) const
-{
-  return (true);
-}
+        bool
+        dump_v4_cmd::operator==(const dump_v4_cmd& other) const
+        {
+            return (true);
+        }
 
-rc_t
-dump_v4_cmd::issue(connection& con)
-{
-  m_dump.reset(new msg_t(con.ctx(), std::ref(*this)));
+        rc_t
+        dump_v4_cmd::issue(connection& con)
+        {
+            m_dump.reset(new msg_t(con.ctx(), std::ref(*this)));
 
-  auto& payload = m_dump->get_request().get_payload();
-  payload.sw_if_index = m_itf.value();
-  payload.is_ipv6 = 0;
+            auto& payload = m_dump->get_request().get_payload();
+            payload.sw_if_index = m_itf.value();
+            payload.is_ipv6 = 0;
 
-  VAPI_CALL(m_dump->execute());
+            VAPI_CALL(m_dump->execute());
 
-  wait();
+            wait();
 
-  return rc_t::OK;
-}
+            return rc_t::OK;
+        }
 
-std::string
-dump_v4_cmd::to_string() const
-{
-  return ("L3-binding-dump");
-}
+        std::string
+        dump_v4_cmd::to_string() const
+        {
+            return ("L3-binding-dump");
+        }
 
-}; // namespace l3_binding_cmds
+    }; // namespace l3_binding_cmds
 }; // namespace VOM
 
 /*

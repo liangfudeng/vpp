@@ -23,171 +23,171 @@
 #include "vom/om.hpp"
 #include "vom/singular_db.hpp"
 
-namespace VOM {
-/**
- * A base class for all object_base in the VPP object_base-Model.
- *  provides the abstract interface.
- */
-class bridge_domain : public object_base
+namespace VOM
 {
-public:
-  /**
-   * Key Type for Bridge Domains in the sigular DB
-   */
-  typedef uint32_t key_t;
-
-  /**
-   * Bridge Domain Learning mode
-   */
-  struct learning_mode_t : enum_base<learning_mode_t>
-  {
-    const static learning_mode_t ON;
-    const static learning_mode_t OFF;
-
-  private:
     /**
-     * Private constructor taking the value and the string name
+     * A base class for all object_base in the VPP object_base-Model.
+     *  provides the abstract interface.
      */
-    learning_mode_t(int v, const std::string& s);
-  };
+    class bridge_domain : public object_base
+    {
+    public:
+        /**
+         * Key Type for Bridge Domains in the sigular DB
+         */
+        typedef uint32_t key_t;
 
-  /**
-   * The value of the defaultbridge domain
-   */
-  const static uint32_t DEFAULT_TABLE = 0;
+        /**
+         * Bridge Domain Learning mode
+         */
+        struct learning_mode_t : enum_base<learning_mode_t> {
+            const static learning_mode_t ON;
+            const static learning_mode_t OFF;
 
-  /**
-   * Construct a new object matching the desried state
-   */
-  bridge_domain(uint32_t id,
-                const learning_mode_t& lmode = learning_mode_t::ON);
+        private:
+            /**
+             * Private constructor taking the value and the string name
+             */
+            learning_mode_t(int v, const std::string& s);
+        };
 
-  /**
-   * Copy Constructor
-   */
-  bridge_domain(const bridge_domain& o);
+        /**
+         * The value of the defaultbridge domain
+         */
+        const static uint32_t DEFAULT_TABLE = 0;
 
-  /**
-   * Destructor
-   */
-  ~bridge_domain();
+        /**
+         * Construct a new object matching the desried state
+         */
+        bridge_domain(uint32_t id,
+                      const learning_mode_t& lmode = learning_mode_t::ON);
 
-  /**
-   * Comparison operator - for UT
-   */
-  bool operator==(const bridge_domain& b) const;
+        /**
+         * Copy Constructor
+         */
+        bridge_domain(const bridge_domain& o);
 
-  /**
-   * Return the bridge domain's VPP ID
-   */
-  uint32_t id() const;
+        /**
+         * Destructor
+         */
+        ~bridge_domain();
 
-  /**
-   * Return the bridge domain's key
-   */
-  const key_t& key() const;
+        /**
+         * Comparison operator - for UT
+         */
+        bool operator==(const bridge_domain& b) const;
 
-  /**
-   * Return the matchin 'singular' instance of the bridge-domain
-   */
-  std::shared_ptr<bridge_domain> singular() const;
+        /**
+         * Return the bridge domain's VPP ID
+         */
+        uint32_t id() const;
 
-  /**
-   * convert to string format for debug purposes
-   */
-  std::string to_string(void) const;
+        /**
+         * Return the bridge domain's key
+         */
+        const key_t& key() const;
 
-  /**
-   * Static function to find the bridge_domain in the model
-   */
-  static std::shared_ptr<bridge_domain> find(const key_t& key);
+        /**
+         * Return the matchin 'singular' instance of the bridge-domain
+         */
+        std::shared_ptr<bridge_domain> singular() const;
 
-  /**
-   * Dump all bridge-doamin into the stream provided
-   */
-  static void dump(std::ostream& os);
+        /**
+         * convert to string format for debug purposes
+         */
+        std::string to_string(void) const;
 
-private:
-  /**
-   * Class definition for listeners to OM events
-   */
-  class event_handler : public OM::listener, public inspect::command_handler
-  {
-  public:
-    event_handler();
-    virtual ~event_handler() = default;
+        /**
+         * Static function to find the bridge_domain in the model
+         */
+        static std::shared_ptr<bridge_domain> find(const key_t& key);
 
-    /**
-     * Handle a populate event
-     */
-    void handle_populate(const client_db::key_t& key);
+        /**
+         * Dump all bridge-doamin into the stream provided
+         */
+        static void dump(std::ostream& os);
 
-    /**
-     * Handle a replay event
-     */
-    void handle_replay();
+    private:
+        /**
+         * Class definition for listeners to OM events
+         */
+        class event_handler : public OM::listener, public inspect::command_handler
+        {
+        public:
+            event_handler();
+            virtual ~event_handler() = default;
 
-    /**
-     * Show the object in the Singular DB
-     */
-    void show(std::ostream& os);
+            /**
+             * Handle a populate event
+             */
+            void handle_populate(const client_db::key_t& key);
 
-    /**
-     * Get the sortable Id of the listener
-     */
-    dependency_t order() const;
-  };
+            /**
+             * Handle a replay event
+             */
+            void handle_replay();
 
-  /**
-   * Instance of the event handler to register with OM
-   */
-  static event_handler m_evh;
+            /**
+             * Show the object in the Singular DB
+             */
+            void show(std::ostream& os);
 
-  /**
-   * Commit the acculmulated changes into VPP. i.e. to a 'HW" write.
-   */
-  void update(const bridge_domain& obj);
+            /**
+             * Get the sortable Id of the listener
+             */
+            dependency_t order() const;
+        };
 
-  /**
-   * Find or add an singular of a Bridge-Domain in the object_base Model
-   */
-  static std::shared_ptr<bridge_domain> find_or_add(const bridge_domain& temp);
+        /**
+         * Instance of the event handler to register with OM
+         */
+        static event_handler m_evh;
 
-  /*
-   * It's the OM class that calls singular()
-   */
-  friend class OM;
+        /**
+         * Commit the acculmulated changes into VPP. i.e. to a 'HW" write.
+         */
+        void update(const bridge_domain& obj);
 
-  /**
-   * It's the singular_db class that calls replay()
-   */
-  friend class singular_db<key_t, bridge_domain>;
+        /**
+         * Find or add an singular of a Bridge-Domain in the object_base Model
+         */
+        static std::shared_ptr<bridge_domain> find_or_add(const bridge_domain& temp);
 
-  /**
-   * Sweep/reap the object if still stale
-   */
-  void sweep(void);
+        /*
+         * It's the OM class that calls singular()
+         */
+        friend class OM;
 
-  /**
-   * replay the object to create it in hardware
-   */
-  void replay(void);
+        /**
+         * It's the singular_db class that calls replay()
+         */
+        friend class singular_db<key_t, bridge_domain>;
 
-  /**
-   * The ID we assign to this BD and the HW result in VPP
-   */
-  HW::item<uint32_t> m_id;
+        /**
+         * Sweep/reap the object if still stale
+         */
+        void sweep(void);
 
-  /**
-   * The leanring mode of the bridge
-   */
-  learning_mode_t m_learning_mode;
+        /**
+         * replay the object to create it in hardware
+         */
+        void replay(void);
 
-  /**
-   * A map of all interfaces key against the interface's name
-   */
-  static singular_db<key_t, bridge_domain> m_db;
-};
+        /**
+         * The ID we assign to this BD and the HW result in VPP
+         */
+        HW::item<uint32_t> m_id;
+
+        /**
+         * The leanring mode of the bridge
+         */
+        learning_mode_t m_learning_mode;
+
+        /**
+         * A map of all interfaces key against the interface's name
+         */
+        static singular_db<key_t, bridge_domain> m_db;
+    };
 };
 
 /*

@@ -30,10 +30,9 @@
 #include <vppinfra/crc32.h>
 
 /** 8 octet key, 8 octet key value pair */
-typedef struct
-{
-  u64 key;			/**< the key */
-  u64 value;			/**< the value */
+typedef struct {
+    u64 key;          /**< the key */
+    u64 value;            /**< the value */
 } clib_bihash_kv_8_8_t;
 
 /** Decide if a clib_bihash_kv_8_8_t instance is free
@@ -42,9 +41,9 @@ typedef struct
 static inline int
 clib_bihash_is_free_8_8 (clib_bihash_kv_8_8_t * v)
 {
-  if (v->key == ~0ULL && v->value == ~0ULL)
-    return 1;
-  return 0;
+    if (v->key == ~0ULL && v->value == ~0ULL)
+        return 1;
+    return 0;
 }
 
 /** Hash a clib_bihash_kv_8_8_t instance
@@ -53,11 +52,11 @@ clib_bihash_is_free_8_8 (clib_bihash_kv_8_8_t * v)
 static inline u64
 clib_bihash_hash_8_8 (clib_bihash_kv_8_8_t * v)
 {
-  /* Note: to torture-test linear scan, make this fn return a constant */
+    /* Note: to torture-test linear scan, make this fn return a constant */
 #ifdef clib_crc32c_uses_intrinsics
-  return clib_crc32c ((u8 *) & v->key, 8);
+    return clib_crc32c ((u8 *) & v->key, 8);
 #else
-  return clib_xxhash (v->key);
+    return clib_xxhash (v->key);
 #endif
 }
 
@@ -69,10 +68,10 @@ clib_bihash_hash_8_8 (clib_bihash_kv_8_8_t * v)
 static inline u8 *
 format_bihash_kvp_8_8 (u8 * s, va_list * args)
 {
-  clib_bihash_kv_8_8_t *v = va_arg (*args, clib_bihash_kv_8_8_t *);
+    clib_bihash_kv_8_8_t *v = va_arg (*args, clib_bihash_kv_8_8_t *);
 
-  s = format (s, "key %llu value %llu", v->key, v->value);
-  return s;
+    s = format (s, "key %llu value %llu", v->key, v->value);
+    return s;
 }
 
 /** Compare two clib_bihash_kv_8_8_t instances
@@ -82,7 +81,7 @@ format_bihash_kvp_8_8 (u8 * s, va_list * args)
 static inline int
 clib_bihash_key_compare_8_8 (u64 a, u64 b)
 {
-  return a == b;
+    return a == b;
 }
 
 #undef __included_bihash_template_h__

@@ -41,44 +41,43 @@
 clib_smp_fifo_t *
 clib_smp_fifo_init (uword max_n_elts, uword n_bytes_per_elt)
 {
-  clib_smp_fifo_t *f;
-  uword n_bytes_per_elt_cache_aligned;
+    clib_smp_fifo_t *f;
+    uword n_bytes_per_elt_cache_aligned;
 
-  f = clib_mem_alloc_aligned (sizeof (f[0]), CLIB_CACHE_LINE_BYTES);
+    f = clib_mem_alloc_aligned (sizeof (f[0]), CLIB_CACHE_LINE_BYTES);
 
-  memset (f, 0, sizeof (f[0]));
+    memset (f, 0, sizeof (f[0]));
 
-  max_n_elts = max_n_elts ? max_n_elts : 32;
-  f->log2_max_n_elts = max_log2 (max_n_elts);
-  f->max_n_elts_less_one = (1 << f->log2_max_n_elts) - 1;
+    max_n_elts = max_n_elts ? max_n_elts : 32;
+    f->log2_max_n_elts = max_log2 (max_n_elts);
+    f->max_n_elts_less_one = (1 << f->log2_max_n_elts) - 1;
 
-  n_bytes_per_elt_cache_aligned =
-    clib_smp_fifo_round_elt_bytes (n_bytes_per_elt);
-  clib_exec_on_global_heap (
-			     {
-			     f->data =
-			     clib_mem_alloc_aligned
-			     (n_bytes_per_elt_cache_aligned <<
-			      f->log2_max_n_elts, CLIB_CACHE_LINE_BYTES);}
-  );
+    n_bytes_per_elt_cache_aligned =
+        clib_smp_fifo_round_elt_bytes (n_bytes_per_elt);
+    clib_exec_on_global_heap ( {
+        f->data =
+        clib_mem_alloc_aligned
+        (n_bytes_per_elt_cache_aligned <<
+         f->log2_max_n_elts, CLIB_CACHE_LINE_BYTES);
+    }
+                             );
 
-  /* Zero all data and mark all elements free. */
-  {
-    uword i;
-    for (i = 0; i <= f->max_n_elts_less_one; i++)
-      {
-	void *d = clib_smp_fifo_elt_at_index (f, n_bytes_per_elt, i);
-	clib_smp_fifo_data_footer_t *t;
+    /* Zero all data and mark all elements free. */
+    {
+        uword i;
+        for (i = 0; i <= f->max_n_elts_less_one; i++) {
+            void *d = clib_smp_fifo_elt_at_index (f, n_bytes_per_elt, i);
+            clib_smp_fifo_data_footer_t *t;
 
-	memset (d, 0, n_bytes_per_elt_cache_aligned);
+            memset (d, 0, n_bytes_per_elt_cache_aligned);
 
-	t = clib_smp_fifo_get_data_footer (d, n_bytes_per_elt);
-	clib_smp_fifo_data_footer_set_state (t,
-					     CLIB_SMP_FIFO_DATA_STATE_free);
-      }
-  }
+            t = clib_smp_fifo_get_data_footer (d, n_bytes_per_elt);
+            clib_smp_fifo_data_footer_set_state (t,
+                                                 CLIB_SMP_FIFO_DATA_STATE_free);
+        }
+    }
 
-  return f;
+    return f;
 }
 
 

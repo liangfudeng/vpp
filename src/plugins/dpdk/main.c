@@ -27,63 +27,61 @@
 static int
 rte_delay_us_override (unsigned us)
 {
-  vlib_main_t *vm;
+    vlib_main_t *vm;
 
-  /* Don't bother intercepting for short delays */
-  if (us < 10)
-    return 0;
+    /* Don't bother intercepting for short delays */
+    if (us < 10)
+        return 0;
 
-  /*
-   * Only intercept if we are in a vlib process.
-   * If we are called from a vlib worker thread or the vlib main
-   * thread then do not intercept. (Must not be called from an
-   * independent pthread).
-   */
-  if (vlib_get_thread_index () == 0)
-    {
-      /*
-       * We're in the vlib main thread or a vlib process. Make sure
-       * the process is running and we're not still initializing.
-       */
-      vm = vlib_get_main ();
-      if (vlib_in_process_context (vm))
-	{
-	  /* Only suspend for the admin_down_process */
-	  vlib_process_t *proc = vlib_get_current_process (vm);
-	  if (!(proc->flags & VLIB_PROCESS_IS_RUNNING) ||
-	      (proc->node_runtime.function != admin_up_down_process))
-	    return 0;
+    /*
+     * Only intercept if we are in a vlib process.
+     * If we are called from a vlib worker thread or the vlib main
+     * thread then do not intercept. (Must not be called from an
+     * independent pthread).
+     */
+    if (vlib_get_thread_index () == 0) {
+        /*
+         * We're in the vlib main thread or a vlib process. Make sure
+         * the process is running and we're not still initializing.
+         */
+        vm = vlib_get_main ();
+        if (vlib_in_process_context (vm)) {
+            /* Only suspend for the admin_down_process */
+            vlib_process_t *proc = vlib_get_current_process (vm);
+            if (!(proc->flags & VLIB_PROCESS_IS_RUNNING) ||
+                (proc->node_runtime.function != admin_up_down_process))
+                return 0;
 
-	  f64 delay = 1e-6 * us;
-	  vlib_process_suspend (vm, delay);
-	  return 1;
-	}
+            f64 delay = 1e-6 * us;
+            vlib_process_suspend (vm, delay);
+            return 1;
+        }
     }
-  return 0;			// no override
+    return 0;         // no override
 }
 
 static void
 rte_delay_us_override_cb (unsigned us)
 {
-  if (rte_delay_us_override (us) == 0)
-    rte_delay_us_block (us);
+    if (rte_delay_us_override (us) == 0)
+        rte_delay_us_block (us);
 }
 
 static clib_error_t * dpdk_main_init (vlib_main_t * vm)
 {
-  dpdk_main_t * dm = &dpdk_main;
-  clib_error_t * error = 0;
+    dpdk_main_t * dm = &dpdk_main;
+    clib_error_t * error = 0;
 
-  dm->vlib_main = vm;
-  dm->vnet_main = vnet_get_main ();
+    dm->vlib_main = vm;
+    dm->vnet_main = vnet_get_main ();
 
-  if ((error = vlib_call_init_function (vm, dpdk_init)))
+    if ((error = vlib_call_init_function (vm, dpdk_init)))
+        return error;
+
+    /* register custom delay function */
+    rte_delay_us_callback_register (rte_delay_us_override_cb);
+
     return error;
-
-  /* register custom delay function */
-  rte_delay_us_callback_register (rte_delay_us_override_cb);
-
-  return error;
 }
 
 VLIB_INIT_FUNCTION (dpdk_main_init);

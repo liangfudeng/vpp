@@ -55,14 +55,13 @@ typedef u64 counter_t;
 
 /** A collection of simple counters */
 
-typedef struct
-{
-  counter_t **counters;	 /**< Per-thread u64 non-atomic counters */
-  counter_t *value_at_last_serialize;	/**< Values as of last serialize. */
-  u32 last_incremental_serialize_index;	/**< Last counter index
+typedef struct {
+    counter_t **counters;  /**< Per-thread u64 non-atomic counters */
+    counter_t *value_at_last_serialize;   /**< Values as of last serialize. */
+    u32 last_incremental_serialize_index; /**< Last counter index
                                            serialized incrementally. */
 
-  char *name;			/**< The counter collection's name. */
+    char *name;           /**< The counter collection's name. */
 } vlib_simple_counter_main_t;
 
 /** The number of counters (not the number of per-thread counters) */
@@ -76,12 +75,12 @@ u32 vlib_simple_counter_n_counters (const vlib_simple_counter_main_t * cm);
 */
 always_inline void
 vlib_increment_simple_counter (vlib_simple_counter_main_t * cm,
-			       u32 thread_index, u32 index, u64 increment)
+                               u32 thread_index, u32 index, u64 increment)
 {
-  counter_t *my_counters;
+    counter_t *my_counters;
 
-  my_counters = cm->counters[thread_index];
-  my_counters[index] += increment;
+    my_counters = cm->counters[thread_index];
+    my_counters[index] += increment;
 }
 
 /** Get the value of a simple counter
@@ -96,21 +95,20 @@ vlib_increment_simple_counter (vlib_simple_counter_main_t * cm,
 always_inline counter_t
 vlib_get_simple_counter (vlib_simple_counter_main_t * cm, u32 index)
 {
-  counter_t *my_counters;
-  counter_t v;
-  int i;
+    counter_t *my_counters;
+    counter_t v;
+    int i;
 
-  ASSERT (index < vlib_simple_counter_n_counters (cm));
+    ASSERT (index < vlib_simple_counter_n_counters (cm));
 
-  v = 0;
+    v = 0;
 
-  for (i = 0; i < vec_len (cm->counters); i++)
-    {
-      my_counters = cm->counters[i];
-      v += my_counters[index];
+    for (i = 0; i < vec_len (cm->counters); i++) {
+        my_counters = cm->counters[i];
+        v += my_counters[index];
     }
 
-  return v;
+    return v;
 }
 
 /** Clear a simple counter
@@ -122,24 +120,22 @@ vlib_get_simple_counter (vlib_simple_counter_main_t * cm, u32 index)
 always_inline void
 vlib_zero_simple_counter (vlib_simple_counter_main_t * cm, u32 index)
 {
-  counter_t *my_counters;
-  int i;
+    counter_t *my_counters;
+    int i;
 
-  ASSERT (index < vlib_simple_counter_n_counters (cm));
+    ASSERT (index < vlib_simple_counter_n_counters (cm));
 
-  for (i = 0; i < vec_len (cm->counters); i++)
-    {
-      my_counters = cm->counters[i];
-      my_counters[index] = 0;
+    for (i = 0; i < vec_len (cm->counters); i++) {
+        my_counters = cm->counters[i];
+        my_counters[index] = 0;
     }
 }
 
 /** Combined counter to hold both packets and byte differences.
  */
-typedef struct
-{
-  counter_t packets;			/**< packet counter */
-  counter_t bytes;			/**< byte counter  */
+typedef struct {
+    counter_t packets;            /**< packet counter */
+    counter_t bytes;          /**< byte counter  */
 } vlib_counter_t;
 
 /** Add two combined counters, results in the first counter
@@ -150,8 +146,8 @@ typedef struct
 always_inline void
 vlib_counter_add (vlib_counter_t * a, vlib_counter_t * b)
 {
-  a->packets += b->packets;
-  a->bytes += b->bytes;
+    a->packets += b->packets;
+    a->bytes += b->bytes;
 }
 
 /** Subtract combined counters, results in the first counter
@@ -161,10 +157,10 @@ vlib_counter_add (vlib_counter_t * a, vlib_counter_t * b)
 always_inline void
 vlib_counter_sub (vlib_counter_t * a, vlib_counter_t * b)
 {
-  ASSERT (a->packets >= b->packets);
-  ASSERT (a->bytes >= b->bytes);
-  a->packets -= b->packets;
-  a->bytes -= b->bytes;
+    ASSERT (a->packets >= b->packets);
+    ASSERT (a->bytes >= b->bytes);
+    a->packets -= b->packets;
+    a->bytes -= b->bytes;
 }
 
 /** Clear a combined counter
@@ -173,21 +169,20 @@ vlib_counter_sub (vlib_counter_t * a, vlib_counter_t * b)
 always_inline void
 vlib_counter_zero (vlib_counter_t * a)
 {
-  a->packets = a->bytes = 0;
+    a->packets = a->bytes = 0;
 }
 
 /** A collection of combined counters */
-typedef struct
-{
-  vlib_counter_t **counters;	/**< Per-thread u64 non-atomic counter pairs */
-  vlib_counter_t *value_at_last_serialize; /**< Counter values as of last serialize. */
-  u32 last_incremental_serialize_index;	/**< Last counter index serialized incrementally. */
-  char *name; /**< The counter collection's name. */
+typedef struct {
+    vlib_counter_t **counters;    /**< Per-thread u64 non-atomic counter pairs */
+    vlib_counter_t *value_at_last_serialize; /**< Counter values as of last serialize. */
+    u32 last_incremental_serialize_index; /**< Last counter index serialized incrementally. */
+    char *name; /**< The counter collection's name. */
 } vlib_combined_counter_main_t;
 
 /** The number of counters (not the number of per-thread counters) */
 u32 vlib_combined_counter_n_counters (const vlib_combined_counter_main_t *
-				      cm);
+                                      cm);
 
 /** Clear a collection of simple counters
     @param cm - (vlib_simple_counter_main_t *) collection to clear
@@ -209,30 +204,30 @@ void vlib_clear_combined_counters (vlib_combined_counter_main_t * cm);
 
 always_inline void
 vlib_increment_combined_counter (vlib_combined_counter_main_t * cm,
-				 u32 thread_index,
-				 u32 index, u64 n_packets, u64 n_bytes)
+                                 u32 thread_index,
+                                 u32 index, u64 n_packets, u64 n_bytes)
 {
-  vlib_counter_t *my_counters;
+    vlib_counter_t *my_counters;
 
-  /* Use this CPU's counter array */
-  my_counters = cm->counters[thread_index];
+    /* Use this CPU's counter array */
+    my_counters = cm->counters[thread_index];
 
-  my_counters[index].packets += n_packets;
-  my_counters[index].bytes += n_bytes;
+    my_counters[index].packets += n_packets;
+    my_counters[index].bytes += n_bytes;
 }
 
 /** Pre-fetch a per-thread combined counter for the given object index */
 always_inline void
 vlib_prefetch_combined_counter (const vlib_combined_counter_main_t * cm,
-				u32 thread_index, u32 index)
+                                u32 thread_index, u32 index)
 {
-  vlib_counter_t *cpu_counters;
+    vlib_counter_t *cpu_counters;
 
-  /*
-   * This CPU's index is assumed to already be in cache
-   */
-  cpu_counters = cm->counters[thread_index];
-  CLIB_PREFETCH (cpu_counters + index, CLIB_CACHE_LINE_BYTES, STORE);
+    /*
+     * This CPU's index is assumed to already be in cache
+     */
+    cpu_counters = cm->counters[thread_index];
+    CLIB_PREFETCH (cpu_counters + index, CLIB_CACHE_LINE_BYTES, STORE);
 }
 
 
@@ -248,21 +243,20 @@ vlib_prefetch_combined_counter (const vlib_combined_counter_main_t * cm,
 
 static inline void
 vlib_get_combined_counter (const vlib_combined_counter_main_t * cm,
-			   u32 index, vlib_counter_t * result)
+                           u32 index, vlib_counter_t * result)
 {
-  vlib_counter_t *my_counters, *counter;
-  int i;
+    vlib_counter_t *my_counters, *counter;
+    int i;
 
-  result->packets = 0;
-  result->bytes = 0;
+    result->packets = 0;
+    result->bytes = 0;
 
-  for (i = 0; i < vec_len (cm->counters); i++)
-    {
-      my_counters = cm->counters[i];
+    for (i = 0; i < vec_len (cm->counters); i++) {
+        my_counters = cm->counters[i];
 
-      counter = vec_elt_at_index (my_counters, index);
-      result->packets += counter->packets;
-      result->bytes += counter->bytes;
+        counter = vec_elt_at_index (my_counters, index);
+        result->packets += counter->packets;
+        result->bytes += counter->bytes;
     }
 }
 
@@ -275,16 +269,15 @@ vlib_get_combined_counter (const vlib_combined_counter_main_t * cm,
 always_inline void
 vlib_zero_combined_counter (vlib_combined_counter_main_t * cm, u32 index)
 {
-  vlib_counter_t *my_counters, *counter;
-  int i;
+    vlib_counter_t *my_counters, *counter;
+    int i;
 
-  for (i = 0; i < vec_len (cm->counters); i++)
-    {
-      my_counters = cm->counters[i];
+    for (i = 0; i < vec_len (cm->counters); i++) {
+        my_counters = cm->counters[i];
 
-      counter = vec_elt_at_index (my_counters, index);
-      counter->packets = 0;
-      counter->bytes = 0;
+        counter = vec_elt_at_index (my_counters, index);
+        counter->packets = 0;
+        counter->bytes = 0;
     }
 }
 
@@ -294,7 +287,7 @@ vlib_zero_combined_counter (vlib_combined_counter_main_t * cm, u32 index)
 */
 
 void vlib_validate_simple_counter (vlib_simple_counter_main_t * cm,
-				   u32 index);
+                                   u32 index);
 /** validate a combined counter
     @param cm - (vlib_combined_counter_main_t *) pointer to the counter
     collection
@@ -302,7 +295,7 @@ void vlib_validate_simple_counter (vlib_simple_counter_main_t * cm,
 */
 
 void vlib_validate_combined_counter (vlib_combined_counter_main_t * cm,
-				     u32 index);
+                                     u32 index);
 
 /** Obtain the number of simple or combined counters allocated.
     A macro which reduces to to vec_len(cm->maxi), the answer in either
@@ -315,9 +308,9 @@ void vlib_validate_combined_counter (vlib_combined_counter_main_t * cm,
 #define vlib_counter_len(cm) vec_len((cm)->maxi)
 
 serialize_function_t serialize_vlib_simple_counter_main,
-  unserialize_vlib_simple_counter_main;
+                     unserialize_vlib_simple_counter_main;
 serialize_function_t serialize_vlib_combined_counter_main,
-  unserialize_vlib_combined_counter_main;
+                     unserialize_vlib_combined_counter_main;
 
 #endif /* included_vlib_counter_h */
 

@@ -53,8 +53,7 @@ vlib_node_registration_t bier_output_node;
 /**
  * @brief Packet trace recoed for a BIER output
  */
-typedef struct bier_output_trace_t_
-{
+typedef struct bier_output_trace_t_ {
     u32 next_index;
     index_t bfm_index;
 } bier_output_trace_t;
@@ -76,15 +75,13 @@ bier_output (vlib_main_t * vm,
      */
     next_index = node->cached_next_index;
 
-    while (n_left_from > 0)
-    {
+    while (n_left_from > 0) {
         u32 n_left_to_next;
 
         vlib_get_next_frame (vm, node, next_index,
                              to_next, n_left_to_next);
 
-        while (n_left_from > 0 && n_left_to_next > 0)
-        {
+        while (n_left_from > 0 && n_left_to_next > 0) {
             bier_output_next_t next0;
             bier_bit_string_t bbs;
             vlib_buffer_t * b0;
@@ -129,8 +126,7 @@ bier_output (vlib_main_t * vm,
             /*
              * paint the BIER peer's label
              */
-            if (!(bfm0->bfm_flags & BIER_FMASK_FLAG_DISP))
-            {
+            if (!(bfm0->bfm_flags & BIER_FMASK_FLAG_DISP)) {
                 vlib_buffer_advance(b0, -(word)sizeof(mpls_label_t));
                 h0 = vlib_buffer_get_current(b0);
                 h0[0] = bfm0->bfm_label;
@@ -142,8 +138,7 @@ bier_output (vlib_main_t * vm,
             next0 = bfm0->bfm_dpo.dpoi_next_node;
             vnet_buffer(b0)->ip.adj_index[VLIB_TX] = bfm0->bfm_dpo.dpoi_index;
 
-            if (PREDICT_FALSE(b0->flags & VLIB_BUFFER_IS_TRACED))
-            {
+            if (PREDICT_FALSE(b0->flags & VLIB_BUFFER_IS_TRACED)) {
                 bier_output_trace_t *tr;
 
                 tr = vlib_add_trace (vm, node, b0, sizeof (*tr));

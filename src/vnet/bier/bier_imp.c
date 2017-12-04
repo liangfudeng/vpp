@@ -87,8 +87,7 @@ bier_imp_add_or_lock (const bier_table_id_t *bti,
     /*
      * get and stack on the forwarding info from the table
      */
-    FOR_EACH_FIB_IP_PROTOCOL(fproto)
-    {
+    FOR_EACH_FIB_IP_PROTOCOL(fproto) {
         /*
          * initialise to invalid first, lest we pick up garbage
          * from the pool alloc
@@ -112,8 +111,7 @@ bier_imp_unlock (index_t bii)
     fib_protocol_t fproto;
     bier_imp_t *bi;
 
-    if (INDEX_INVALID == bii)
-    {
+    if (INDEX_INVALID == bii) {
         return;
     }
 
@@ -121,12 +119,10 @@ bier_imp_unlock (index_t bii)
 
     bi->bi_locks--;
 
-    if (0 == bi->bi_locks)
-    {
+    if (0 == bi->bi_locks) {
         bier_table_unlock(&bi->bi_tbl);
 
-        FOR_EACH_FIB_IP_PROTOCOL(fproto)
-        {
+        FOR_EACH_FIB_IP_PROTOCOL(fproto) {
             dpo_reset(&bi->bi_dpo[fproto]);
         }
         pool_put(bier_imp_pool, bi);
@@ -148,8 +144,7 @@ format_bier_imp (u8* s, va_list *args)
                format_bier_table_id, &bi->bi_tbl,
                format_bier_hdr, &bi->bi_hdr);
 
-    if (BIER_SHOW_DETAIL & flags)
-    {
+    if (BIER_SHOW_DETAIL & flags) {
         bier_bit_string_t bbs;
         bier_hdr_t copy;
 
@@ -178,19 +173,16 @@ bier_imp_contribute_forwarding (index_t bii,
     dpo_set(dpo, DPO_BIER_IMP, proto, bii);
 }
 
-const static char* const bier_imp_ip4_nodes[] =
-{
+const static char* const bier_imp_ip4_nodes[] = {
     "bier-imp-ip4",
     NULL,
 };
-const static char* const bier_imp_ip6_nodes[] =
-{
+const static char* const bier_imp_ip6_nodes[] = {
     "bier-imp-ip6",
     NULL,
 };
 
-const static char* const * const bier_imp_nodes[DPO_PROTO_NUM] =
-{
+const static char* const * const bier_imp_nodes[DPO_PROTO_NUM] = {
     [DPO_PROTO_IP4]  = bier_imp_ip4_nodes,
     [DPO_PROTO_IP6]  = bier_imp_ip6_nodes,
 };
@@ -257,14 +249,12 @@ show_bier_imp (vlib_main_t * vm,
     while (unformat_check_input (input) != UNFORMAT_END_OF_INPUT) {
         if (unformat (input, "%d", &bii))
             ;
-        else
-        {
+        else {
             break;
         }
     }
 
-    if (INDEX_INVALID == bii)
-    {
+    if (INDEX_INVALID == bii) {
         pool_foreach(bi, bier_imp_pool,
         ({
             vlib_cli_output(vm, "%U", format_bier_imp,
@@ -272,9 +262,7 @@ show_bier_imp (vlib_main_t * vm,
                             1,
                             BIER_SHOW_BRIEF);
         }));
-    }
-    else
-    {
+    } else {
         vlib_cli_output(vm, "%U", format_bier_imp, bii, 1,
                         BIER_SHOW_DETAIL);
     }

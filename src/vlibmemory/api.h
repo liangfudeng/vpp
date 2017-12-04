@@ -30,23 +30,23 @@
 static inline u32
 vl_msg_api_handle_get_epoch (u32 index)
 {
-  return (index & VL_API_EPOCH_MASK);
+    return (index & VL_API_EPOCH_MASK);
 }
 
 static inline u32
 vl_msg_api_handle_get_index (u32 index)
 {
-  return (index >> VL_API_EPOCH_SHIFT);
+    return (index >> VL_API_EPOCH_SHIFT);
 }
 
 static inline u32
 vl_msg_api_handle_from_index_and_epoch (u32 index, u32 epoch)
 {
-  u32 handle;
-  ASSERT (index < 0x00FFFFFF);
+    u32 handle;
+    ASSERT (index < 0x00FFFFFF);
 
-  handle = (index << VL_API_EPOCH_SHIFT) | (epoch & VL_API_EPOCH_MASK);
-  return handle;
+    handle = (index << VL_API_EPOCH_SHIFT) | (epoch & VL_API_EPOCH_MASK);
+    return handle;
 }
 
 void vl_enable_disable_memory_api (vlib_main_t * vm, int yesno);

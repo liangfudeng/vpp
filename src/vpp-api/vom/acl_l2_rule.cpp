@@ -17,78 +17,80 @@
 
 #include "vom/acl_l2_rule.hpp"
 
-namespace VOM {
-namespace ACL {
-
-l2_rule::l2_rule(uint32_t priority,
-                 const action_t& action,
-                 const route::prefix_t& ip,
-                 const mac_address_t& mac,
-                 const mac_address_t& mac_mask)
-  : m_priority(priority)
-  , m_action(action)
-  , m_src_ip(ip)
-  , m_mac(mac)
-  , m_mac_mask(mac_mask)
+namespace VOM
 {
-}
+    namespace ACL
+    {
 
-bool
-l2_rule::operator<(const l2_rule& other) const
-{
-  return (other.m_priority < m_priority);
-}
+        l2_rule::l2_rule(uint32_t priority,
+                         const action_t& action,
+                         const route::prefix_t& ip,
+                         const mac_address_t& mac,
+                         const mac_address_t& mac_mask)
+            : m_priority(priority)
+            , m_action(action)
+            , m_src_ip(ip)
+            , m_mac(mac)
+            , m_mac_mask(mac_mask)
+        {
+        }
 
-bool
-l2_rule::operator==(const l2_rule& rule) const
-{
-  return ((m_action == rule.m_action) && (m_src_ip == rule.m_src_ip) &&
-          (m_mac == rule.m_mac) && (m_mac_mask == rule.m_mac_mask));
-}
+        bool
+        l2_rule::operator<(const l2_rule& other) const
+        {
+            return (other.m_priority < m_priority);
+        }
 
-std::string
-l2_rule::to_string() const
-{
-  std::ostringstream s;
+        bool
+        l2_rule::operator==(const l2_rule& rule) const
+        {
+            return ((m_action == rule.m_action) && (m_src_ip == rule.m_src_ip) &&
+                    (m_mac == rule.m_mac) && (m_mac_mask == rule.m_mac_mask));
+        }
 
-  s << "L2-rule:["
-    << "priority:" << m_priority << " action:" << m_action.to_string()
-    << " ip:" << m_src_ip.to_string() << " mac:" << m_mac
-    << " mac-mask:" << m_mac_mask << "]";
+        std::string
+        l2_rule::to_string() const
+        {
+            std::ostringstream s;
 
-  return (s.str());
-}
+            s << "L2-rule:["
+              << "priority:" << m_priority << " action:" << m_action.to_string()
+              << " ip:" << m_src_ip.to_string() << " mac:" << m_mac
+              << " mac-mask:" << m_mac_mask << "]";
 
-uint32_t
-l2_rule::priority() const
-{
-  return m_priority;
-}
+            return (s.str());
+        }
 
-action_t
-l2_rule::action() const
-{
-  return m_action;
-}
+        uint32_t
+        l2_rule::priority() const
+        {
+            return m_priority;
+        }
 
-const route::prefix_t&
-l2_rule::src_ip() const
-{
-  return m_src_ip;
-}
+        action_t
+        l2_rule::action() const
+        {
+            return m_action;
+        }
 
-const mac_address_t&
-l2_rule::mac() const
-{
-  return m_mac;
-}
+        const route::prefix_t&
+        l2_rule::src_ip() const
+        {
+            return m_src_ip;
+        }
 
-const mac_address_t&
-l2_rule::mac_mask() const
-{
-  return m_mac_mask;
-}
-}
+        const mac_address_t&
+        l2_rule::mac() const
+        {
+            return m_mac;
+        }
+
+        const mac_address_t&
+        l2_rule::mac_mask() const
+        {
+            return m_mac_mask;
+        }
+    }
 }
 /*
  * fd.io coding-style-patch-verification: ON

@@ -27,79 +27,72 @@
 
 static clib_error_t *
 netmap_create_command_fn (vlib_main_t * vm, unformat_input_t * input,
-			  vlib_cli_command_t * cmd)
+                          vlib_cli_command_t * cmd)
 {
-  unformat_input_t _line_input, *line_input = &_line_input;
-  u8 *host_if_name = NULL;
-  u8 hwaddr[6];
-  u8 *hw_addr_ptr = 0;
-  int r;
-  u8 is_pipe = 0;
-  u8 is_master = 0;
-  u32 sw_if_index = ~0;
-  clib_error_t *error = NULL;
+    unformat_input_t _line_input, *line_input = &_line_input;
+    u8 *host_if_name = NULL;
+    u8 hwaddr[6];
+    u8 *hw_addr_ptr = 0;
+    int r;
+    u8 is_pipe = 0;
+    u8 is_master = 0;
+    u32 sw_if_index = ~0;
+    clib_error_t *error = NULL;
 
-  /* Get a line of input. */
-  if (!unformat_user (input, unformat_line_input, line_input))
-    return 0;
+    /* Get a line of input. */
+    if (!unformat_user (input, unformat_line_input, line_input))
+        return 0;
 
-  while (unformat_check_input (line_input) != UNFORMAT_END_OF_INPUT)
-    {
-      if (unformat (line_input, "name %s", &host_if_name))
-	;
-      else
-	if (unformat
-	    (line_input, "hw-addr %U", unformat_ethernet_address, hwaddr))
-	hw_addr_ptr = hwaddr;
-      else if (unformat (line_input, "pipe"))
-	is_pipe = 1;
-      else if (unformat (line_input, "master"))
-	is_master = 1;
-      else if (unformat (line_input, "slave"))
-	is_master = 0;
-      else
-	{
-	  error = clib_error_return (0, "unknown input `%U'",
-				     format_unformat_error, line_input);
-	  goto done;
-	}
+    while (unformat_check_input (line_input) != UNFORMAT_END_OF_INPUT) {
+        if (unformat (line_input, "name %s", &host_if_name))
+            ;
+        else if (unformat
+                 (line_input, "hw-addr %U", unformat_ethernet_address, hwaddr))
+            hw_addr_ptr = hwaddr;
+        else if (unformat (line_input, "pipe"))
+            is_pipe = 1;
+        else if (unformat (line_input, "master"))
+            is_master = 1;
+        else if (unformat (line_input, "slave"))
+            is_master = 0;
+        else {
+            error = clib_error_return (0, "unknown input `%U'",
+                                       format_unformat_error, line_input);
+            goto done;
+        }
     }
 
-  if (host_if_name == NULL)
-    {
-      error = clib_error_return (0, "missing host interface name");
-      goto done;
+    if (host_if_name == NULL) {
+        error = clib_error_return (0, "missing host interface name");
+        goto done;
     }
 
-  r =
-    netmap_create_if (vm, host_if_name, hw_addr_ptr, is_pipe, is_master,
-		      &sw_if_index);
+    r =
+        netmap_create_if (vm, host_if_name, hw_addr_ptr, is_pipe, is_master,
+                          &sw_if_index);
 
-  if (r == VNET_API_ERROR_SYSCALL_ERROR_1)
-    {
-      error = clib_error_return (0, "%s (errno %d)", strerror (errno), errno);
-      goto done;
+    if (r == VNET_API_ERROR_SYSCALL_ERROR_1) {
+        error = clib_error_return (0, "%s (errno %d)", strerror (errno), errno);
+        goto done;
     }
 
-  if (r == VNET_API_ERROR_INVALID_INTERFACE)
-    {
-      error = clib_error_return (0, "Invalid interface name");
-      goto done;
+    if (r == VNET_API_ERROR_INVALID_INTERFACE) {
+        error = clib_error_return (0, "Invalid interface name");
+        goto done;
     }
 
-  if (r == VNET_API_ERROR_SUBIF_ALREADY_EXISTS)
-    {
-      error = clib_error_return (0, "Interface already exists");
-      goto done;
+    if (r == VNET_API_ERROR_SUBIF_ALREADY_EXISTS) {
+        error = clib_error_return (0, "Interface already exists");
+        goto done;
     }
 
-  vlib_cli_output (vm, "%U\n", format_vnet_sw_if_index_name, vnet_get_main (),
-		   sw_if_index);
+    vlib_cli_output (vm, "%U\n", format_vnet_sw_if_index_name, vnet_get_main (),
+                     sw_if_index);
 
 done:
-  unformat_free (line_input);
+    unformat_free (line_input);
 
-  return error;
+    return error;
 }
 
 /*?
@@ -159,40 +152,37 @@ VLIB_CLI_COMMAND (netmap_create_command, static) = {
 
 static clib_error_t *
 netmap_delete_command_fn (vlib_main_t * vm, unformat_input_t * input,
-			  vlib_cli_command_t * cmd)
+                          vlib_cli_command_t * cmd)
 {
-  unformat_input_t _line_input, *line_input = &_line_input;
-  u8 *host_if_name = NULL;
-  clib_error_t *error = NULL;
+    unformat_input_t _line_input, *line_input = &_line_input;
+    u8 *host_if_name = NULL;
+    clib_error_t *error = NULL;
 
-  /* Get a line of input. */
-  if (!unformat_user (input, unformat_line_input, line_input))
-    return 0;
+    /* Get a line of input. */
+    if (!unformat_user (input, unformat_line_input, line_input))
+        return 0;
 
-  while (unformat_check_input (line_input) != UNFORMAT_END_OF_INPUT)
-    {
-      if (unformat (line_input, "name %s", &host_if_name))
-	;
-      else
-	{
-	  error = clib_error_return (0, "unknown input `%U'",
-				     format_unformat_error, line_input);
-	  goto done;
-	}
+    while (unformat_check_input (line_input) != UNFORMAT_END_OF_INPUT) {
+        if (unformat (line_input, "name %s", &host_if_name))
+            ;
+        else {
+            error = clib_error_return (0, "unknown input `%U'",
+                                       format_unformat_error, line_input);
+            goto done;
+        }
     }
 
-  if (host_if_name == NULL)
-    {
-      error = clib_error_return (0, "missing host interface name");
-      goto done;
+    if (host_if_name == NULL) {
+        error = clib_error_return (0, "missing host interface name");
+        goto done;
     }
 
-  netmap_delete_if (vm, host_if_name);
+    netmap_delete_if (vm, host_if_name);
 
 done:
-  unformat_free (line_input);
+    unformat_free (line_input);
 
-  return error;
+    return error;
 }
 
 /*?
@@ -222,7 +212,7 @@ VLIB_CLI_COMMAND (netmap_delete_command, static) = {
 clib_error_t *
 netmap_cli_init (vlib_main_t * vm)
 {
-  return 0;
+    return 0;
 }
 
 VLIB_INIT_FUNCTION (netmap_cli_init);

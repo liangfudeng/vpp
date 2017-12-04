@@ -22,121 +22,110 @@
 #include <vnet/session/application.h>
 #include <vnet/session/transport.h>
 
-typedef struct _vnet_app_attach_args_t
-{
-  /** Binary API client index */
-  u32 api_client_index;
+typedef struct _vnet_app_attach_args_t {
+    /** Binary API client index */
+    u32 api_client_index;
 
-  /** Application and segment manager options */
-  u64 *options;
+    /** Application and segment manager options */
+    u64 *options;
 
-  /* Namespace id */
-  u8 *namespace_id;
+    /* Namespace id */
+    u8 *namespace_id;
 
-  /** Session to application callback functions */
-  session_cb_vft_t *session_cb_vft;
+    /** Session to application callback functions */
+    session_cb_vft_t *session_cb_vft;
 
-  /*
-   * Results
-   */
-  u8 *segment_name;
-  u32 segment_name_length;
-  u32 segment_size;
-  u64 app_event_queue_address;
-  u32 app_index;
+    /*
+     * Results
+     */
+    u8 *segment_name;
+    u32 segment_name_length;
+    u32 segment_size;
+    u64 app_event_queue_address;
+    u32 app_index;
 } vnet_app_attach_args_t;
 
-typedef struct _vnet_app_detach_args_t
-{
-  u32 app_index;
+typedef struct _vnet_app_detach_args_t {
+    u32 app_index;
 } vnet_app_detach_args_t;
 
-typedef struct _vnet_bind_args_t
-{
-  union
-  {
-    char *uri;
-    session_endpoint_t sep;
-  };
+typedef struct _vnet_bind_args_t {
+    union {
+        char *uri;
+        session_endpoint_t sep;
+    };
 
-  u32 app_index;
+    u32 app_index;
 
-  /*
-   * Results
-   */
-  char *segment_name;
-  u32 segment_name_length;
-  u64 server_event_queue_address;
-  u64 handle;
+    /*
+     * Results
+     */
+    char *segment_name;
+    u32 segment_name_length;
+    u64 server_event_queue_address;
+    u64 handle;
 } vnet_bind_args_t;
 
-typedef struct _vnet_unbind_args_t
-{
-  union
-  {
-    char *uri;
-    u64 handle;
-  };
-  u32 app_index;
+typedef struct _vnet_unbind_args_t {
+    union {
+        char *uri;
+        u64 handle;
+    };
+    u32 app_index;
 } vnet_unbind_args_t;
 
-typedef struct _vnet_connect_args
-{
-  char *uri;
-  session_endpoint_t sep;
-  u32 app_index;
-  u32 api_context;
+typedef struct _vnet_connect_args {
+    char *uri;
+    session_endpoint_t sep;
+    u32 app_index;
+    u32 api_context;
 
-  /* Used for redirects */
-  void *mp;
-  u64 session_handle;
+    /* Used for redirects */
+    void *mp;
+    u64 session_handle;
 } vnet_connect_args_t;
 
-typedef struct _vnet_disconnect_args_t
-{
-  u64 handle;
-  u32 app_index;
+typedef struct _vnet_disconnect_args_t {
+    u64 handle;
+    u32 app_index;
 } vnet_disconnect_args_t;
 
 /* Application attach options */
-typedef enum
-{
-  APP_EVT_QUEUE_SIZE,
-  APP_OPTIONS_FLAGS,
-  APP_OPTIONS_PREALLOC_FIFO_PAIRS,
-  APP_OPTIONS_PRIVATE_SEGMENT_COUNT,
-  APP_OPTIONS_PRIVATE_SEGMENT_SIZE,
-  APP_OPTIONS_NAMESPACE,
-  APP_OPTIONS_NAMESPACE_SECRET,
-  APP_OPTIONS_PROXY_TRANSPORT,
-  SESSION_OPTIONS_SEGMENT_SIZE,
-  SESSION_OPTIONS_ADD_SEGMENT_SIZE,
-  SESSION_OPTIONS_RX_FIFO_SIZE,
-  SESSION_OPTIONS_TX_FIFO_SIZE,
-  SESSION_OPTIONS_PREALLOCATED_FIFO_PAIRS,
-  SESSION_OPTIONS_ACCEPT_COOKIE,
-  SESSION_OPTIONS_N_OPTIONS
+typedef enum {
+    APP_EVT_QUEUE_SIZE,
+    APP_OPTIONS_FLAGS,
+    APP_OPTIONS_PREALLOC_FIFO_PAIRS,
+    APP_OPTIONS_PRIVATE_SEGMENT_COUNT,
+    APP_OPTIONS_PRIVATE_SEGMENT_SIZE,
+    APP_OPTIONS_NAMESPACE,
+    APP_OPTIONS_NAMESPACE_SECRET,
+    APP_OPTIONS_PROXY_TRANSPORT,
+    SESSION_OPTIONS_SEGMENT_SIZE,
+    SESSION_OPTIONS_ADD_SEGMENT_SIZE,
+    SESSION_OPTIONS_RX_FIFO_SIZE,
+    SESSION_OPTIONS_TX_FIFO_SIZE,
+    SESSION_OPTIONS_PREALLOCATED_FIFO_PAIRS,
+    SESSION_OPTIONS_ACCEPT_COOKIE,
+    SESSION_OPTIONS_N_OPTIONS
 } app_attach_options_index_t;
 
-#define foreach_app_options_flags				\
-  _(ACCEPT_REDIRECT, "Use FIFO with redirects")			\
-  _(ADD_SEGMENT, "Add segment and signal app if needed")	\
-  _(IS_BUILTIN, "Application is builtin")			\
-  _(IS_PROXY, "Application is proxying")				\
-  _(USE_GLOBAL_SCOPE, "App can use global session scope")	\
+#define foreach_app_options_flags               \
+  _(ACCEPT_REDIRECT, "Use FIFO with redirects")         \
+  _(ADD_SEGMENT, "Add segment and signal app if needed")    \
+  _(IS_BUILTIN, "Application is builtin")           \
+  _(IS_PROXY, "Application is proxying")                \
+  _(USE_GLOBAL_SCOPE, "App can use global session scope")   \
   _(USE_LOCAL_SCOPE, "App can use local session scope")
 
-typedef enum _app_options
-{
+typedef enum _app_options {
 #define _(sym, str) APP_OPTIONS_##sym,
-  foreach_app_options_flags
+    foreach_app_options_flags
 #undef _
 } app_options_t;
 
-typedef enum _app_options_flags
-{
+typedef enum _app_options_flags {
 #define _(sym, str) APP_OPTIONS_FLAGS_##sym = 1 << APP_OPTIONS_##sym,
-  foreach_app_options_flags
+    foreach_app_options_flags
 #undef _
 } app_options_flags_t;
 
@@ -154,7 +143,7 @@ clib_error_t *vnet_unbind (vnet_unbind_args_t * a);
 
 int
 api_parse_session_handle (u64 handle, u32 * session_index,
-			  u32 * thread_index);
+                          u32 * thread_index);
 
 #endif /* __included_uri_h__ */
 

@@ -22,8 +22,7 @@
 /**
  * @brief An interface associated with a particular MFIB entry
  */
-typedef struct mfib_itf_t_
-{
+typedef struct mfib_itf_t_ {
     /**
      * @brief Falags on the entry
      */

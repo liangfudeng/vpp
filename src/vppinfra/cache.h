@@ -69,25 +69,25 @@
 
 /* Read/write arguments to __builtin_prefetch. */
 #define CLIB_PREFETCH_READ 0
-#define CLIB_PREFETCH_LOAD 0	/* alias for read */
+#define CLIB_PREFETCH_LOAD 0    /* alias for read */
 #define CLIB_PREFETCH_WRITE 1
-#define CLIB_PREFETCH_STORE 1	/* alias for write */
+#define CLIB_PREFETCH_STORE 1   /* alias for write */
 
-#define _CLIB_PREFETCH(n,size,type)				\
-  if ((size) > (n)*CLIB_CACHE_LINE_BYTES)			\
-    __builtin_prefetch (_addr + (n)*CLIB_CACHE_LINE_BYTES,	\
-			CLIB_PREFETCH_##type,			\
-			/* locality */ 3);
+#define _CLIB_PREFETCH(n,size,type)             \
+  if ((size) > (n)*CLIB_CACHE_LINE_BYTES)           \
+    __builtin_prefetch (_addr + (n)*CLIB_CACHE_LINE_BYTES,  \
+            CLIB_PREFETCH_##type,           \
+            /* locality */ 3);
 
-#define CLIB_PREFETCH(addr,size,type)		\
-do {						\
-  void * _addr = (addr);			\
-						\
-  ASSERT ((size) <= 4*CLIB_CACHE_LINE_BYTES);	\
-  _CLIB_PREFETCH (0, size, type);		\
-  _CLIB_PREFETCH (1, size, type);		\
-  _CLIB_PREFETCH (2, size, type);		\
-  _CLIB_PREFETCH (3, size, type);		\
+#define CLIB_PREFETCH(addr,size,type)       \
+do {                        \
+  void * _addr = (addr);            \
+                        \
+  ASSERT ((size) <= 4*CLIB_CACHE_LINE_BYTES);   \
+  _CLIB_PREFETCH (0, size, type);       \
+  _CLIB_PREFETCH (1, size, type);       \
+  _CLIB_PREFETCH (2, size, type);       \
+  _CLIB_PREFETCH (3, size, type);       \
 } while (0)
 
 #undef _

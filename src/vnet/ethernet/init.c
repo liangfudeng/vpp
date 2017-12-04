@@ -39,7 +39,7 @@
 
 #include <vlib/vlib.h>
 #include <vnet/ethernet/ethernet.h>
-#include <vnet/ip/ip.h>		// for feature registration
+#include <vnet/ip/ip.h>     // for feature registration
 
 /* Global main structure. */
 ethernet_main_t ethernet_main;
@@ -47,18 +47,18 @@ ethernet_main_t ethernet_main;
 static void
 add_type (ethernet_main_t * em, ethernet_type_t type, char *type_name)
 {
-  ethernet_type_info_t *ti;
-  u32 i;
+    ethernet_type_info_t *ti;
+    u32 i;
 
-  vec_add2 (em->type_infos, ti, 1);
-  i = ti - em->type_infos;
+    vec_add2 (em->type_infos, ti, 1);
+    i = ti - em->type_infos;
 
-  ti->name = type_name;
-  ti->type = type;
-  ti->next_index = ti->node_index = ~0;
+    ti->name = type_name;
+    ti->type = type;
+    ti->next_index = ti->node_index = ~0;
 
-  hash_set (em->type_info_by_type, type, i);
-  hash_set_mem (em->type_info_by_name, ti->name, i);
+    hash_set (em->type_info_by_type, type, i);
+    hash_set_mem (em->type_info_by_name, ti->name, i);
 }
 
 /* Built-in ip4 tx feature path definition */
@@ -81,33 +81,33 @@ VNET_FEATURE_INIT (ethernet_tx_drop, static) =
 static clib_error_t *
 ethernet_init (vlib_main_t * vm)
 {
-  ethernet_main_t *em = &ethernet_main;
-  clib_error_t *error;
+    ethernet_main_t *em = &ethernet_main;
+    clib_error_t *error;
 
-  /*
-   * Set up the L2 path now, or we'll wipe out the L2 ARP
-   * registration set up by ethernet_arp_init.
-   */
-  if ((error = vlib_call_init_function (vm, l2_init)))
-    return error;
+    /*
+     * Set up the L2 path now, or we'll wipe out the L2 ARP
+     * registration set up by ethernet_arp_init.
+     */
+    if ((error = vlib_call_init_function (vm, l2_init)))
+        return error;
 
-  em->vlib_main = vm;
+    em->vlib_main = vm;
 
-  em->type_info_by_name = hash_create_string (0, sizeof (uword));
-  em->type_info_by_type = hash_create (0, sizeof (uword));
+    em->type_info_by_name = hash_create_string (0, sizeof (uword));
+    em->type_info_by_type = hash_create (0, sizeof (uword));
 
 #define ethernet_type(n,s) add_type (em, ETHERNET_TYPE_##s, #s);
 #include "types.def"
 #undef ethernet_type
 
-  if ((error = vlib_call_init_function (vm, llc_init)))
-    return error;
-  if ((error = vlib_call_init_function (vm, ethernet_input_init)))
-    return error;
-  if ((error = vlib_call_init_function (vm, vnet_feature_init)))
-    return error;
+    if ((error = vlib_call_init_function (vm, llc_init)))
+        return error;
+    if ((error = vlib_call_init_function (vm, ethernet_input_init)))
+        return error;
+    if ((error = vlib_call_init_function (vm, vnet_feature_init)))
+        return error;
 
-  return 0;
+    return 0;
 }
 
 VLIB_INIT_FUNCTION (ethernet_init);
@@ -115,8 +115,8 @@ VLIB_INIT_FUNCTION (ethernet_init);
 ethernet_main_t *
 ethernet_get_main (vlib_main_t * vm)
 {
-  vlib_call_init_function (vm, ethernet_init);
-  return &ethernet_main;
+    vlib_call_init_function (vm, ethernet_init);
+    return &ethernet_main;
 }
 
 /*

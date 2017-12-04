@@ -50,212 +50,206 @@ void input_acl_packet_match(u32 sw_if_index, vlib_buffer_t * b0, u32 *nextp, u32
 void output_acl_packet_match(u32 sw_if_index, vlib_buffer_t * b0, u32 *nextp, u32 *acl_match_p, u32 *rule_match_p, u32 *trace_bitmap);
 
 enum acl_timeout_e {
-  ACL_TIMEOUT_UDP_IDLE = 0,
-  ACL_TIMEOUT_TCP_IDLE,
-  ACL_TIMEOUT_TCP_TRANSIENT,
-  ACL_N_TIMEOUTS
+    ACL_TIMEOUT_UDP_IDLE = 0,
+    ACL_TIMEOUT_TCP_IDLE,
+    ACL_TIMEOUT_TCP_TRANSIENT,
+    ACL_N_TIMEOUTS
 };
 
 
 enum address_e { IP4, IP6 };
-typedef struct
-{
-  enum address_e type;
-  union {
-    ip6_address_t ip6;
-    ip4_address_t ip4;
-  } addr;
+typedef struct {
+    enum address_e type;
+    union {
+        ip6_address_t ip6;
+        ip4_address_t ip4;
+    } addr;
 } address_t;
 
 /*
  * ACL rules
  */
-typedef struct
-{
-  u8 is_permit;
-  u8 is_ipv6;
-  ip46_address_t src;
-  u8 src_prefixlen;
-  ip46_address_t dst;
-  u8 dst_prefixlen;
-  u8 proto;
-  u16 src_port_or_type_first;
-  u16 src_port_or_type_last;
-  u16 dst_port_or_code_first;
-  u16 dst_port_or_code_last;
-  u8 tcp_flags_value;
-  u8 tcp_flags_mask;
+typedef struct {
+    u8 is_permit;
+    u8 is_ipv6;
+    ip46_address_t src;
+    u8 src_prefixlen;
+    ip46_address_t dst;
+    u8 dst_prefixlen;
+    u8 proto;
+    u16 src_port_or_type_first;
+    u16 src_port_or_type_last;
+    u16 dst_port_or_code_first;
+    u16 dst_port_or_code_last;
+    u8 tcp_flags_value;
+    u8 tcp_flags_mask;
 } acl_rule_t;
 
-typedef struct
-{
-  u8 is_permit;
-  u8 is_ipv6;
-  u8 src_mac[6];
-  u8 src_mac_mask[6];
-  ip46_address_t src_ip_addr;
-  u8 src_prefixlen;
+typedef struct {
+    u8 is_permit;
+    u8 is_ipv6;
+    u8 src_mac[6];
+    u8 src_mac_mask[6];
+    ip46_address_t src_ip_addr;
+    u8 src_prefixlen;
 } macip_acl_rule_t;
 
 /*
  * ACL
  */
-typedef struct
-{
-  u8 tag[64];
-  u32 count;
-  acl_rule_t *rules;
+typedef struct {
+    u8 tag[64];
+    u32 count;
+    acl_rule_t *rules;
 } acl_list_t;
 
-typedef struct
-{
-  u8 tag[64];
-  u32 count;
-  macip_acl_rule_t *rules;
-  /* References to the classifier tables that will enforce the rules */
-  u32 ip4_table_index;
-  u32 ip6_table_index;
-  u32 l2_table_index;
+typedef struct {
+    u8 tag[64];
+    u32 count;
+    macip_acl_rule_t *rules;
+    /* References to the classifier tables that will enforce the rules */
+    u32 ip4_table_index;
+    u32 ip6_table_index;
+    u32 l2_table_index;
 } macip_acl_list_t;
 
 /*
  * An element describing a particular configuration fo the mask,
  * and how many times it has been used.
  */
-typedef struct
-{
-  fa_5tuple_t mask;
-  u32 refcount;
+typedef struct {
+    fa_5tuple_t mask;
+    u32 refcount;
 } ace_mask_type_entry_t;
 
 typedef struct {
-  /* mheap to hold all the ACL module related allocations, other than hash */
-  void *acl_mheap;
-  u32 acl_mheap_size;
+    /* mheap to hold all the ACL module related allocations, other than hash */
+    void *acl_mheap;
+    u32 acl_mheap_size;
 
-  /* API message ID base */
-  u16 msg_id_base;
+    /* API message ID base */
+    u16 msg_id_base;
 
-  acl_list_t *acls;	/* Pool of ACLs */
-  hash_acl_info_t *hash_acl_infos; /* corresponding hash matching housekeeping info */
-  clib_bihash_48_8_t acl_lookup_hash; /* ACL lookup hash table. */
-  u32 hash_lookup_hash_buckets;
-  u32 hash_lookup_hash_memory;
+    acl_list_t *acls; /* Pool of ACLs */
+    hash_acl_info_t *hash_acl_infos; /* corresponding hash matching housekeeping info */
+    clib_bihash_48_8_t acl_lookup_hash; /* ACL lookup hash table. */
+    u32 hash_lookup_hash_buckets;
+    u32 hash_lookup_hash_memory;
 
-  /* mheap to hold all the miscellaneous allocations related to hash-based lookups */
-  void *hash_lookup_mheap;
-  u32 hash_lookup_mheap_size;
-  int acl_lookup_hash_initialized;
-  applied_hash_ace_entry_t **input_hash_entry_vec_by_sw_if_index;
-  applied_hash_ace_entry_t **output_hash_entry_vec_by_sw_if_index;
-  applied_hash_acl_info_t *input_applied_hash_acl_info_by_sw_if_index;
-  applied_hash_acl_info_t *output_applied_hash_acl_info_by_sw_if_index;
+    /* mheap to hold all the miscellaneous allocations related to hash-based lookups */
+    void *hash_lookup_mheap;
+    u32 hash_lookup_mheap_size;
+    int acl_lookup_hash_initialized;
+    applied_hash_ace_entry_t **input_hash_entry_vec_by_sw_if_index;
+    applied_hash_ace_entry_t **output_hash_entry_vec_by_sw_if_index;
+    applied_hash_acl_info_t *input_applied_hash_acl_info_by_sw_if_index;
+    applied_hash_acl_info_t *output_applied_hash_acl_info_by_sw_if_index;
 
-  macip_acl_list_t *macip_acls;	/* Pool of MAC-IP ACLs */
+    macip_acl_list_t *macip_acls; /* Pool of MAC-IP ACLs */
 
-  /* ACLs associated with interfaces */
-  u32 **input_acl_vec_by_sw_if_index;
-  u32 **output_acl_vec_by_sw_if_index;
+    /* ACLs associated with interfaces */
+    u32 **input_acl_vec_by_sw_if_index;
+    u32 **output_acl_vec_by_sw_if_index;
 
-  /* interfaces on which given ACLs are applied */
-  u32 **input_sw_if_index_vec_by_acl;
-  u32 **output_sw_if_index_vec_by_acl;
+    /* interfaces on which given ACLs are applied */
+    u32 **input_sw_if_index_vec_by_acl;
+    u32 **output_sw_if_index_vec_by_acl;
 
-  /* Total count of interface+direction pairs enabled */
-  u32 fa_total_enabled_count;
+    /* Total count of interface+direction pairs enabled */
+    u32 fa_total_enabled_count;
 
-  /* Do we use hash-based ACL matching or linear */
-  int use_hash_acl_matching;
+    /* Do we use hash-based ACL matching or linear */
+    int use_hash_acl_matching;
 
-  /* a pool of all mask types present in all ACEs */
-  ace_mask_type_entry_t *ace_mask_type_pool;
+    /* a pool of all mask types present in all ACEs */
+    ace_mask_type_entry_t *ace_mask_type_pool;
 
-  /*
-   * Classify tables used to grab the packets for the ACL check,
-   * and serving as the 5-tuple session tables at the same time
-   */
-  u32 *acl_ip4_input_classify_table_by_sw_if_index;
-  u32 *acl_ip6_input_classify_table_by_sw_if_index;
-  u32 *acl_ip4_output_classify_table_by_sw_if_index;
-  u32 *acl_ip6_output_classify_table_by_sw_if_index;
+    /*
+     * Classify tables used to grab the packets for the ACL check,
+     * and serving as the 5-tuple session tables at the same time
+     */
+    u32 *acl_ip4_input_classify_table_by_sw_if_index;
+    u32 *acl_ip6_input_classify_table_by_sw_if_index;
+    u32 *acl_ip4_output_classify_table_by_sw_if_index;
+    u32 *acl_ip6_output_classify_table_by_sw_if_index;
 
-  u32 *acl_dot1q_input_classify_table_by_sw_if_index;
-  u32 *acl_dot1ad_input_classify_table_by_sw_if_index;
-  u32 *acl_dot1q_output_classify_table_by_sw_if_index;
-  u32 *acl_dot1ad_output_classify_table_by_sw_if_index;
+    u32 *acl_dot1q_input_classify_table_by_sw_if_index;
+    u32 *acl_dot1ad_input_classify_table_by_sw_if_index;
+    u32 *acl_dot1q_output_classify_table_by_sw_if_index;
+    u32 *acl_dot1ad_output_classify_table_by_sw_if_index;
 
-  /* MACIP (input) ACLs associated with the interfaces */
-  u32 *macip_acl_by_sw_if_index;
+    /* MACIP (input) ACLs associated with the interfaces */
+    u32 *macip_acl_by_sw_if_index;
 
-  /* bitmaps when set the processing is enabled on the interface */
-  uword *fa_in_acl_on_sw_if_index;
-  uword *fa_out_acl_on_sw_if_index;
-  /* bihash holding all of the sessions */
-  int fa_sessions_hash_is_initialized;
-  clib_bihash_40_8_t fa_sessions_hash;
-  /* The process node which orcherstrates the cleanup */
-  u32 fa_cleaner_node_index;
-  /* FA session timeouts, in seconds */
-  u32 session_timeout_sec[ACL_N_TIMEOUTS];
-  /* total session adds/dels */
-  u64 fa_session_total_adds;
-  u64 fa_session_total_dels;
+    /* bitmaps when set the processing is enabled on the interface */
+    uword *fa_in_acl_on_sw_if_index;
+    uword *fa_out_acl_on_sw_if_index;
+    /* bihash holding all of the sessions */
+    int fa_sessions_hash_is_initialized;
+    clib_bihash_40_8_t fa_sessions_hash;
+    /* The process node which orcherstrates the cleanup */
+    u32 fa_cleaner_node_index;
+    /* FA session timeouts, in seconds */
+    u32 session_timeout_sec[ACL_N_TIMEOUTS];
+    /* total session adds/dels */
+    u64 fa_session_total_adds;
+    u64 fa_session_total_dels;
 
-  /* L2 datapath glue */
+    /* L2 datapath glue */
 
-  /* next indices within L2 classifiers for ip4/ip6 fa L2 nodes */
-  u32 l2_input_classify_next_acl_ip4;
-  u32 l2_input_classify_next_acl_ip6;
-  u32 l2_output_classify_next_acl_ip4;
-  u32 l2_output_classify_next_acl_ip6;
-  /* next node indices for L2 dispatch */
-  u32 fa_acl_in_ip4_l2_node_feat_next_node_index[32];
-  u32 fa_acl_in_ip6_l2_node_feat_next_node_index[32];
-  u32 fa_acl_out_ip4_l2_node_feat_next_node_index[32];
-  u32 fa_acl_out_ip6_l2_node_feat_next_node_index[32];
+    /* next indices within L2 classifiers for ip4/ip6 fa L2 nodes */
+    u32 l2_input_classify_next_acl_ip4;
+    u32 l2_input_classify_next_acl_ip6;
+    u32 l2_output_classify_next_acl_ip4;
+    u32 l2_output_classify_next_acl_ip6;
+    /* next node indices for L2 dispatch */
+    u32 fa_acl_in_ip4_l2_node_feat_next_node_index[32];
+    u32 fa_acl_in_ip6_l2_node_feat_next_node_index[32];
+    u32 fa_acl_out_ip4_l2_node_feat_next_node_index[32];
+    u32 fa_acl_out_ip6_l2_node_feat_next_node_index[32];
 
-  /* EH values that we can skip over */
-  uword *fa_ipv6_known_eh_bitmap;
+    /* EH values that we can skip over */
+    uword *fa_ipv6_known_eh_bitmap;
 
-  /* whether to match L4 ACEs with ports on the non-initial fragment */
-  int l4_match_nonfirst_fragment;
+    /* whether to match L4 ACEs with ports on the non-initial fragment */
+    int l4_match_nonfirst_fragment;
 
-  /* conn table per-interface conn table parameters */
-  u32 fa_conn_table_hash_num_buckets;
-  uword fa_conn_table_hash_memory_size;
-  u64 fa_conn_table_max_entries;
+    /* conn table per-interface conn table parameters */
+    u32 fa_conn_table_hash_num_buckets;
+    uword fa_conn_table_hash_memory_size;
+    u64 fa_conn_table_max_entries;
 
-  /*
-   * If the cleaner has to delete more than this number
-   * of connections, it halves the sleep time.
-   */
+    /*
+     * If the cleaner has to delete more than this number
+     * of connections, it halves the sleep time.
+     */
 
 #define ACL_FA_DEFAULT_MAX_DELETED_SESSIONS_PER_INTERVAL 100
-  u64 fa_max_deleted_sessions_per_interval;
+    u64 fa_max_deleted_sessions_per_interval;
 
-  /*
-   * If the cleaner deletes less than these connections,
-   * it increases the wait time by the "increment"
-   */
+    /*
+     * If the cleaner deletes less than these connections,
+     * it increases the wait time by the "increment"
+     */
 
 #define ACL_FA_DEFAULT_MIN_DELETED_SESSIONS_PER_INTERVAL 1
-  u64 fa_min_deleted_sessions_per_interval;
+    u64 fa_min_deleted_sessions_per_interval;
 
 #define ACL_FA_DEFAULT_CLEANER_WAIT_TIME_INCREMENT 0.1
-  f64 fa_cleaner_wait_time_increment;
+    f64 fa_cleaner_wait_time_increment;
 
-  u64 fa_current_cleaner_timer_wait_interval;
+    u64 fa_current_cleaner_timer_wait_interval;
 
-  int fa_interrupt_generation;
+    int fa_interrupt_generation;
 
-  /* per-worker data related t conn management */
-  acl_fa_per_worker_data_t *per_worker_data;
+    /* per-worker data related t conn management */
+    acl_fa_per_worker_data_t *per_worker_data;
 
-  /* Configured session timeout */
-  u64 session_timeout[ACL_N_TIMEOUTS];
+    /* Configured session timeout */
+    u64 session_timeout[ACL_N_TIMEOUTS];
 
 
-  /* Counters for the cleaner thread */
+    /* Counters for the cleaner thread */
 
 #define foreach_fa_cleaner_counter                                         \
   _(fa_cleaner_cnt_delete_by_sw_index, "delete_by_sw_index events")        \
@@ -267,12 +261,12 @@ typedef struct {
   _(fa_cleaner_cnt_event_cycles, "total event cycles")                     \
 /* end of counters */
 #define _(id, desc) u32 id;
-  foreach_fa_cleaner_counter
+    foreach_fa_cleaner_counter
 #undef _
 
-  /* convenience */
-  vlib_main_t * vlib_main;
-  vnet_main_t * vnet_main;
+    /* convenience */
+    vlib_main_t * vlib_main;
+    vnet_main_t * vnet_main;
 } acl_main_t;
 
 #define foreach_acl_eh                                          \
@@ -307,11 +301,11 @@ AH has a special treatment of its length, it is in 32-bit words, not 64-bit word
 */
 
 
- typedef enum {
- #define _(N, v, s) ACL_EH_##N = v,
-	 foreach_acl_eh
- #undef _
- } acl_eh_t;
+typedef enum {
+#define _(N, v, s) ACL_EH_##N = v,
+    foreach_acl_eh
+#undef _
+} acl_eh_t;
 
 
 

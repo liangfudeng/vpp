@@ -42,17 +42,20 @@ typedef struct {
 
 extern jvpp_main_t jvpp_main __attribute__((aligned (64)));
 
-static_always_inline u32 vppjni_get_context_id(jvpp_main_t * jm) {
+static_always_inline u32 vppjni_get_context_id(jvpp_main_t * jm)
+{
     return __sync_add_and_fetch(&jm->context_id, 1);
 }
 
-static_always_inline void vppjni_lock(jvpp_main_t * jm, u32 tag) {
+static_always_inline void vppjni_lock(jvpp_main_t * jm, u32 tag)
+{
     while (__sync_lock_test_and_set(&jm->lock, 1))
         ;
     jm->tag = tag;
 }
 
-static_always_inline void vppjni_unlock(jvpp_main_t * jm) {
+static_always_inline void vppjni_unlock(jvpp_main_t * jm)
+{
     jm->tag = 0;
     CLIB_MEMORY_BARRIER();
     jm->lock = 0;
@@ -62,8 +65,8 @@ static_always_inline void vppjni_unlock(jvpp_main_t * jm) {
  * Calls onError callback on callbackObject reference. Passes instance of callbackExceptionClass as parameter.
  */
 void call_on_error(const char* callName, int contextId, int retval,
-        jclass callbackClass, jobject callbackObject,
-        jclass callbackExceptionClass);
+                   jclass callbackClass, jobject callbackObject,
+                   jclass callbackExceptionClass);
 
 /**
  * Retrieves message id based on message name and crc (key format: name_crc).

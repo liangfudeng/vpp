@@ -15,137 +15,139 @@
 
 #include "vom/bridge_domain_entry_cmds.hpp"
 
-namespace VOM {
-namespace bridge_domain_entry_cmds {
-create_cmd::create_cmd(HW::item<bool>& item,
-                       const mac_address_t& mac,
-                       uint32_t bd,
-                       handle_t tx_itf,
-                       bool is_bvi)
-  : rpc_cmd(item)
-  , m_mac(mac)
-  , m_bd(bd)
-  , m_tx_itf(tx_itf)
-  , m_is_bvi(is_bvi)
+namespace VOM
 {
-}
+    namespace bridge_domain_entry_cmds
+    {
+        create_cmd::create_cmd(HW::item<bool>& item,
+                               const mac_address_t& mac,
+                               uint32_t bd,
+                               handle_t tx_itf,
+                               bool is_bvi)
+            : rpc_cmd(item)
+            , m_mac(mac)
+            , m_bd(bd)
+            , m_tx_itf(tx_itf)
+            , m_is_bvi(is_bvi)
+        {
+        }
 
-bool
-create_cmd::operator==(const create_cmd& other) const
-{
-  return ((m_mac == other.m_mac) && (m_tx_itf == other.m_tx_itf) &&
-          (m_bd == other.m_bd) && (m_is_bvi == other.m_is_bvi));
-}
+        bool
+        create_cmd::operator==(const create_cmd& other) const
+        {
+            return ((m_mac == other.m_mac) && (m_tx_itf == other.m_tx_itf) &&
+                    (m_bd == other.m_bd) && (m_is_bvi == other.m_is_bvi));
+        }
 
-rc_t
-create_cmd::issue(connection& con)
-{
-  msg_t req(con.ctx(), std::ref(*this));
+        rc_t
+        create_cmd::issue(connection& con)
+        {
+            msg_t req(con.ctx(), std::ref(*this));
 
-  auto& payload = req.get_request().get_payload();
-  payload.bd_id = m_bd;
-  payload.is_add = 1;
-  m_mac.to_bytes(payload.mac, 6);
-  payload.sw_if_index = m_tx_itf.value();
-  payload.bvi_mac = m_is_bvi;
+            auto& payload = req.get_request().get_payload();
+            payload.bd_id = m_bd;
+            payload.is_add = 1;
+            m_mac.to_bytes(payload.mac, 6);
+            payload.sw_if_index = m_tx_itf.value();
+            payload.bvi_mac = m_is_bvi;
 
-  VAPI_CALL(req.execute());
+            VAPI_CALL(req.execute());
 
-  m_hw_item.set(wait());
+            m_hw_item.set(wait());
 
-  return rc_t::OK;
-}
+            return rc_t::OK;
+        }
 
-std::string
-create_cmd::to_string() const
-{
-  std::ostringstream s;
-  s << "bridge-domain-entry-create: " << m_hw_item.to_string() << " bd:" << m_bd
-    << " mac:" << m_mac.to_string() << " tx:" << m_tx_itf
-    << " bvi:" << m_is_bvi;
+        std::string
+        create_cmd::to_string() const
+        {
+            std::ostringstream s;
+            s << "bridge-domain-entry-create: " << m_hw_item.to_string() << " bd:" << m_bd
+              << " mac:" << m_mac.to_string() << " tx:" << m_tx_itf
+              << " bvi:" << m_is_bvi;
 
-  return (s.str());
-}
+            return (s.str());
+        }
 
-delete_cmd::delete_cmd(HW::item<bool>& item,
-                       const mac_address_t& mac,
-                       uint32_t bd,
-                       bool is_bvi)
-  : rpc_cmd(item)
-  , m_mac(mac)
-  , m_bd(bd)
-  , m_is_bvi(is_bvi)
-{
-}
+        delete_cmd::delete_cmd(HW::item<bool>& item,
+                               const mac_address_t& mac,
+                               uint32_t bd,
+                               bool is_bvi)
+            : rpc_cmd(item)
+            , m_mac(mac)
+            , m_bd(bd)
+            , m_is_bvi(is_bvi)
+        {
+        }
 
-bool
-delete_cmd::operator==(const delete_cmd& other) const
-{
-  return ((m_mac == other.m_mac) && (m_bd == other.m_bd) &&
-          (m_is_bvi == other.m_is_bvi));
-}
+        bool
+        delete_cmd::operator==(const delete_cmd& other) const
+        {
+            return ((m_mac == other.m_mac) && (m_bd == other.m_bd) &&
+                    (m_is_bvi == other.m_is_bvi));
+        }
 
-rc_t
-delete_cmd::issue(connection& con)
-{
-  msg_t req(con.ctx(), std::ref(*this));
+        rc_t
+        delete_cmd::issue(connection& con)
+        {
+            msg_t req(con.ctx(), std::ref(*this));
 
-  auto& payload = req.get_request().get_payload();
-  payload.bd_id = m_bd;
-  payload.is_add = 0;
-  m_mac.to_bytes(payload.mac, 6);
-  payload.sw_if_index = ~0;
-  payload.bvi_mac = m_is_bvi;
+            auto& payload = req.get_request().get_payload();
+            payload.bd_id = m_bd;
+            payload.is_add = 0;
+            m_mac.to_bytes(payload.mac, 6);
+            payload.sw_if_index = ~0;
+            payload.bvi_mac = m_is_bvi;
 
-  VAPI_CALL(req.execute());
+            VAPI_CALL(req.execute());
 
-  wait();
-  m_hw_item.set(rc_t::NOOP);
+            wait();
+            m_hw_item.set(rc_t::NOOP);
 
-  return rc_t::OK;
-}
+            return rc_t::OK;
+        }
 
-std::string
-delete_cmd::to_string() const
-{
-  std::ostringstream s;
-  s << "bridge-domain-entry-delete: " << m_hw_item.to_string() << " bd:" << m_bd
-    << " mac:" << m_mac.to_string() << " bvi:" << m_is_bvi;
+        std::string
+        delete_cmd::to_string() const
+        {
+            std::ostringstream s;
+            s << "bridge-domain-entry-delete: " << m_hw_item.to_string() << " bd:" << m_bd
+              << " mac:" << m_mac.to_string() << " bvi:" << m_is_bvi;
 
-  return (s.str());
-}
+            return (s.str());
+        }
 
-dump_cmd::dump_cmd()
-{
-}
+        dump_cmd::dump_cmd()
+        {
+        }
 
-bool
-dump_cmd::operator==(const dump_cmd& other) const
-{
-  return (true);
-}
+        bool
+        dump_cmd::operator==(const dump_cmd& other) const
+        {
+            return (true);
+        }
 
-rc_t
-dump_cmd::issue(connection& con)
-{
-  m_dump.reset(new msg_t(con.ctx(), std::ref(*this)));
+        rc_t
+        dump_cmd::issue(connection& con)
+        {
+            m_dump.reset(new msg_t(con.ctx(), std::ref(*this)));
 
-  auto& payload = m_dump->get_request().get_payload();
-  payload.bd_id = ~0;
+            auto& payload = m_dump->get_request().get_payload();
+            payload.bd_id = ~0;
 
-  VAPI_CALL(m_dump->execute());
+            VAPI_CALL(m_dump->execute());
 
-  wait();
+            wait();
 
-  return rc_t::OK;
-}
+            return rc_t::OK;
+        }
 
-std::string
-dump_cmd::to_string() const
-{
-  return ("bridge-domain-entry-dump");
-}
-}
+        std::string
+        dump_cmd::to_string() const
+        {
+            return ("bridge-domain-entry-dump");
+        }
+    }
 }
 
 /*

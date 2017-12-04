@@ -75,13 +75,10 @@ bier_fmask_stack (bier_fmask_t *bfm)
 {
     dpo_id_t via_dpo = DPO_INVALID;
 
-    if (bfm->bfm_flags & BIER_FMASK_FLAG_DISP)
-    {
+    if (bfm->bfm_flags & BIER_FMASK_FLAG_DISP) {
         bier_disp_table_contribute_forwarding(bfm->bfm_disp,
                                               &via_dpo);
-    }
-    else
-    {
+    } else {
         fib_entry_contribute_forwarding(bfm->bfm_fei,
                                         FIB_FORW_CHAIN_TYPE_MPLS_NON_EOS,
                                         &via_dpo);
@@ -93,12 +90,9 @@ bier_fmask_stack (bier_fmask_t *bfm)
      * unresolved and other ECMP options are used instead.
      */
     if (dpo_is_drop(&via_dpo) ||
-        load_balance_is_drop(&via_dpo))
-    {
+        load_balance_is_drop(&via_dpo)) {
         bfm->bfm_flags &= ~BIER_FMASK_FLAG_FORWARDING;
-    }
-    else
-    {
+    } else {
         bfm->bfm_flags |= BIER_FMASK_FLAG_FORWARDING;
     }
 
@@ -117,15 +111,12 @@ bier_fmask_contribute_forwarding (index_t bfmi,
 
     bfm = bier_fmask_get(bfmi);
 
-    if (bfm->bfm_flags & BIER_FMASK_FLAG_FORWARDING)
-    {
+    if (bfm->bfm_flags & BIER_FMASK_FLAG_FORWARDING) {
         dpo_set(dpo,
                 DPO_BIER_FMASK,
                 DPO_PROTO_BIER,
                 bfmi);
-    }
-    else
-    {
+    } else {
         dpo_copy(dpo, drop_dpo_get(DPO_PROTO_BIER));
     }
 }
@@ -133,12 +124,9 @@ bier_fmask_contribute_forwarding (index_t bfmi,
 static void
 bier_fmask_resolve (bier_fmask_t *bfm)
 {
-    if (bfm->bfm_flags & BIER_FMASK_FLAG_DISP)
-    {
+    if (bfm->bfm_flags & BIER_FMASK_FLAG_DISP) {
         bier_disp_table_lock(bfm->bfm_disp);
-    }
-    else
-    {
+    } else {
         /*
          * source a recursive route through which we resolve.
          */
@@ -151,9 +139,9 @@ bier_fmask_resolve (bier_fmask_t *bfm)
         };
 
         bfm->bfm_fei = fib_table_entry_special_add(0, // default table
-                                                   &pfx,
-                                                   FIB_SOURCE_RR,
-                                                   FIB_ENTRY_FLAG_NONE);
+                       &pfx,
+                       FIB_SOURCE_RR,
+                       FIB_ENTRY_FLAG_NONE);
 
         bfm->bfm_sibling = fib_entry_child_add(bfm->bfm_fei,
                                                FIB_NODE_TYPE_BIER_FMASK,
@@ -166,12 +154,9 @@ bier_fmask_resolve (bier_fmask_t *bfm)
 static void
 bier_fmask_unresolve (bier_fmask_t *bfm)
 {
-    if (bfm->bfm_flags & BIER_FMASK_FLAG_DISP)
-    {
+    if (bfm->bfm_flags & BIER_FMASK_FLAG_DISP) {
         bier_disp_table_unlock(bfm->bfm_disp);
-    }
-    else
-    {
+    } else {
         /*
          * un-source the recursive route through which we resolve.
          */
@@ -191,8 +176,8 @@ bier_fmask_unresolve (bier_fmask_t *bfm)
 
 u32
 bier_fmask_child_add (fib_node_index_t bfmi,
-                     fib_node_type_t child_type,
-                     fib_node_index_t child_index)
+                      fib_node_type_t child_type,
+                      fib_node_index_t child_index)
 {
     return (fib_node_child_add(FIB_NODE_TYPE_BIER_FMASK,
                                bfmi,
@@ -222,22 +207,18 @@ bier_fmask_init (bier_fmask_t *bfm,
     bfm->bfm_fib_index = bti;
     dpo_reset(&bfm->bfm_dpo);
 
-    if (ip46_address_is_zero(&(bfm->bfm_id.bfmi_nh)))
-    {
+    if (ip46_address_is_zero(&(bfm->bfm_id.bfmi_nh))) {
         bfm->bfm_flags |= BIER_FMASK_FLAG_DISP;
     }
 
-    if (!(bfm->bfm_flags & BIER_FMASK_FLAG_DISP))
-    {
+    if (!(bfm->bfm_flags & BIER_FMASK_FLAG_DISP)) {
         olabel = rpath->frp_label_stack[0];
         vnet_mpls_uc_set_label(&bfm->bfm_label, olabel);
         vnet_mpls_uc_set_exp(&bfm->bfm_label, 0);
         vnet_mpls_uc_set_s(&bfm->bfm_label, 1);
         vnet_mpls_uc_set_ttl(&bfm->bfm_label, 0xff);
         bfm->bfm_label = clib_host_to_net_u32(bfm->bfm_label);
-    }
-    else
-    {
+    } else {
         bfm->bfm_disp = rpath->frp_bier_fib_index;
     }
 
@@ -262,8 +243,7 @@ bier_fmask_unlock (index_t bfmi)
 {
     bier_fmask_t *bfm;
 
-    if (INDEX_INVALID == bfmi)
-    {
+    if (INDEX_INVALID == bfmi) {
         return;
     }
 
@@ -277,8 +257,7 @@ bier_fmask_lock (index_t bfmi)
 {
     bier_fmask_t *bfm;
 
-    if (INDEX_INVALID == bfmi)
-    {
+    if (INDEX_INVALID == bfmi) {
         return;
     }
 
@@ -314,8 +293,7 @@ bier_fmask_link (index_t bfmi,
 
     bfm = bier_fmask_get(bfmi);
 
-    if (0 == bfm->bfm_bits.bfmb_refs[BIER_BP_TO_INDEX(bp)])
-    {
+    if (0 == bfm->bfm_bits.bfmb_refs[BIER_BP_TO_INDEX(bp)]) {
         /*
          * 0 -> 1 transistion - set the bit in the string
          */
@@ -337,8 +315,7 @@ bier_fmask_unlink (index_t bfmi,
     --bfm->bfm_bits.bfmb_refs[BIER_BP_TO_INDEX(bp)];
     --bfm->bfm_bits.bfmb_count;
 
-    if (0 == bfm->bfm_bits.bfmb_refs[BIER_BP_TO_INDEX(bp)])
-    {
+    if (0 == bfm->bfm_bits.bfmb_refs[BIER_BP_TO_INDEX(bp)]) {
         /*
          * 1 -> 0 transistion - clear the bit in the string
          */
@@ -354,8 +331,7 @@ format_bier_fmask (u8 *s, va_list *ap)
     bier_fmask_attributes_t attr;
     bier_fmask_t *bfm;
 
-    if (pool_is_free_index(bier_fmask_pool, bfmi))
-    {
+    if (pool_is_free_index(bier_fmask_pool, bfmi)) {
         return (format(s, "No BIER f-mask %d", bfmi));
     }
 
@@ -391,7 +367,7 @@ bier_fmask_get_from_node (fib_node_t *node)
 {
     return ((bier_fmask_t*)(((char*)node) -
                             STRUCT_OFFSET_OF(bier_fmask_t,
-                                             bfm_node)));
+                                    bfm_node)));
 }
 
 /*
@@ -463,13 +439,11 @@ const static dpo_vft_t bier_fmask_dpo_vft = {
     .dv_format = format_bier_fmask,
 };
 
-const static char *const bier_fmask_mpls_nodes[] =
-{
+const static char *const bier_fmask_mpls_nodes[] = {
     "bier-output",
     NULL
 };
-const static char * const * const bier_fmask_nodes[DPO_PROTO_NUM] =
-{
+const static char * const * const bier_fmask_nodes[DPO_PROTO_NUM] = {
     [DPO_PROTO_BIER] = bier_fmask_mpls_nodes,
     [DPO_PROTO_MPLS] = bier_fmask_mpls_nodes,
 };
@@ -496,25 +470,20 @@ bier_fmask_show (vlib_main_t * vm,
     bfmi = INDEX_INVALID;
 
     while (unformat_check_input (input) != UNFORMAT_END_OF_INPUT) {
-        if (unformat (input, "%d", &bfmi))
-        {
+        if (unformat (input, "%d", &bfmi)) {
             ;
-        } else
-        {
+        } else {
             break;
         }
     }
 
-    if (INDEX_INVALID == bfmi)
-    {
+    if (INDEX_INVALID == bfmi) {
         pool_foreach(bfm, bier_fmask_pool,
         ({
             vlib_cli_output (vm, "%U",
                              format_bier_fmask, bier_fmask_get_index(bfm), 0);
         }));
-    }
-    else
-    {
+    } else {
         vlib_cli_output (vm, "%U", format_bier_fmask, bfmi, 0);
     }
 

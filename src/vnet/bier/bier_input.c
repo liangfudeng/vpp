@@ -42,8 +42,7 @@ vlib_node_registration_t bier_input_node;
 /**
  * @brief Packet trace recoed for a BIER output
  */
-typedef struct bier_input_trace_t_
-{
+typedef struct bier_input_trace_t_ {
     u32 next_index;
     u32 bt_index;
 } bier_input_trace_t;
@@ -80,15 +79,13 @@ bier_input (vlib_main_t * vm,
      */
     next_index = node->cached_next_index;
 
-    while (n_left_from > 0)
-    {
+    while (n_left_from > 0) {
         u32 n_left_to_next;
 
         vlib_get_next_frame (vm, node, next_index,
                              to_next, n_left_to_next);
 
-        while (n_left_from > 0 && n_left_to_next > 0)
-        {
+        while (n_left_from > 0 && n_left_to_next > 0) {
             const bier_table_t *bt0;
             vlib_buffer_t * b0;
             bier_hdr_t * bh0;
@@ -113,16 +110,14 @@ bier_input (vlib_main_t * vm,
             bt_index0 = vnet_buffer(b0)->ip.adj_index[VLIB_TX];
             bt0 = bier_table_get(bt_index0);
 
-            if (PREDICT_TRUE(bier_hdr_validate(bh0, bt0->bt_id.bti_hdr_len)))
-            {
+            if (PREDICT_TRUE(bier_hdr_validate(bh0, bt0->bt_id.bti_hdr_len))) {
                 next0 = BIER_INPUT_NEXT_BIER_LOOKUP;
             } else {
                 next0 = BIER_INPUT_NEXT_DROP;
                 b0->error = node->errors[BIER_INPUT_ERROR_INVALID_HEADER];
             }
 
-            if (PREDICT_FALSE(b0->flags & VLIB_BUFFER_IS_TRACED))
-            {
+            if (PREDICT_FALSE(b0->flags & VLIB_BUFFER_IS_TRACED)) {
                 bier_input_trace_t *tr;
 
                 tr = vlib_add_trace (vm, node, b0, sizeof (*tr));

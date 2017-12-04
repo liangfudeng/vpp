@@ -69,7 +69,7 @@ timer granularity:
 
     tw_timer_wheel_init_2t_1w_2048sl (&tm->single_wheel,
                                      expired_timer_single_callback,
-				      1.0 / * timer interval * / );
+                      1.0 / * timer interval * / );
 
 Start a timer:
 
@@ -86,7 +86,7 @@ Expired timer callback:
     static void
     expired_timer_single_callback (u32 * expired_timers)
     {
-    	int i;
+        int i;
         u32 pool_index, timer_id;
         tw_timer_test_elt_t *e;
         tw_timer_test_main_t *tm = &tw_timer_test_main;
@@ -102,7 +102,7 @@ Expired timer callback:
 
             if (e->expected_to_expire != tm->single_wheel.current_tick)
               {
-              	fformat (stdout, "[%d] expired at %d not %d\n",
+                fformat (stdout, "[%d] expired at %d not %d\n",
                          e - tm->test_elts, tm->single_wheel.current_tick,
                          e->expected_to_expire);
               }
@@ -115,37 +115,34 @@ Expired timer callback:
 #error TW_TIMER_WHEELS must be 1, 2 or 3
 #endif
 
-typedef struct
-{
-  /** next, previous pool indices */
-  u32 next;
-  u32 prev;
+typedef struct {
+    /** next, previous pool indices */
+    u32 next;
+    u32 prev;
 
-  union
-  {
-    struct
-    {
+    union {
+        struct {
 #if (TW_TIMER_WHEELS == 3)
-      /** fast ring offset, only valid in the slow ring */
-      u16 fast_ring_offset;
-      /** slow ring offset, only valid in the glacier ring */
-      u16 slow_ring_offset;
+            /** fast ring offset, only valid in the slow ring */
+            u16 fast_ring_offset;
+            /** slow ring offset, only valid in the glacier ring */
+            u16 slow_ring_offset;
 #endif
 #if (TW_TIMER_WHEELS == 2)
-      /** fast ring offset, only valid in the slow ring */
-      u16 fast_ring_offset;
-      /** slow ring offset, only valid in the glacier ring */
-      u16 pad;
+            /** fast ring offset, only valid in the slow ring */
+            u16 fast_ring_offset;
+            /** slow ring offset, only valid in the glacier ring */
+            u16 pad;
+#endif
+        };
+
+#if (TW_OVERFLOW_VECTOR > 0)
+        u64 expiration_time;
 #endif
     };
 
-#if (TW_OVERFLOW_VECTOR > 0)
-    u64 expiration_time;
-#endif
-  };
-
-  /** user timer handle */
-  u32 user_handle;
+    /** user timer handle */
+    u32 user_handle;
 } TWT (tw_timer);
 
 /*
@@ -154,100 +151,96 @@ typedef struct
  */
 #ifndef __defined_tw_timer_wheel_slot__
 #define __defined_tw_timer_wheel_slot__
-typedef struct
-{
-  /** Listhead of timers which expire in this interval */
-  u32 head_index;
+typedef struct {
+    /** Listhead of timers which expire in this interval */
+    u32 head_index;
 } tw_timer_wheel_slot_t;
-typedef enum
-{
-  /** Fast timer ring ID */
-  TW_TIMER_RING_FAST,
-  /** Slow timer ring ID */
-  TW_TIMER_RING_SLOW,
-  /** Glacier ring ID */
-  TW_TIMER_RING_GLACIER,
+typedef enum {
+    /** Fast timer ring ID */
+    TW_TIMER_RING_FAST,
+    /** Slow timer ring ID */
+    TW_TIMER_RING_SLOW,
+    /** Glacier ring ID */
+    TW_TIMER_RING_GLACIER,
 } tw_ring_index_t;
 #endif /* __defined_tw_timer_wheel_slot__ */
 
-typedef CLIB_PACKED (struct
-		     {
-		     u8 timer_id;
-		     u32 pool_index;
-		     u32 handle;
-		     }) TWT (trace);
+typedef CLIB_PACKED (struct {
+    u8 timer_id;
+    u32 pool_index;
+    u32 handle;
+}) TWT (trace);
 
-typedef struct
-{
-  /** Timer pool */
-  TWT (tw_timer) * timers;
+typedef struct {
+    /** Timer pool */
+    TWT (tw_timer) * timers;
 
-  /** Next time the wheel should run */
-  f64 next_run_time;
+    /** Next time the wheel should run */
+    f64 next_run_time;
 
-  /** Last time the wheel ran */
-  f64 last_run_time;
+    /** Last time the wheel ran */
+    f64 last_run_time;
 
-  /** Timer ticks per second */
-  f64 ticks_per_second;
+    /** Timer ticks per second */
+    f64 ticks_per_second;
 
-  /** Timer interval, also needed to avoid fp divide in speed path */
-  f64 timer_interval;
+    /** Timer interval, also needed to avoid fp divide in speed path */
+    f64 timer_interval;
 
-  /** current tick */
-  u64 current_tick;
+    /** current tick */
+    u64 current_tick;
 
-  /** first expiration time */
-  u64 first_expires_tick;
+    /** first expiration time */
+    u64 first_expires_tick;
 
-  /** current wheel indices */
-  u32 current_index[TW_TIMER_WHEELS];
+    /** current wheel indices */
+    u32 current_index[TW_TIMER_WHEELS];
 
-  /** wheel arrays */
-  tw_timer_wheel_slot_t w[TW_TIMER_WHEELS][TW_SLOTS_PER_RING];
+    /** wheel arrays */
+    tw_timer_wheel_slot_t w[TW_TIMER_WHEELS][TW_SLOTS_PER_RING];
 
 #if TW_OVERFLOW_VECTOR > 0
-  tw_timer_wheel_slot_t overflow;
+    tw_timer_wheel_slot_t overflow;
 #endif
 
 #if TW_FAST_WHEEL_BITMAP > 0
-  /** Fast wheel slot occupancy bitmap */
-  uword *fast_slot_bitmap;
+    /** Fast wheel slot occupancy bitmap */
+    uword *fast_slot_bitmap;
 #endif
 
-  /** expired timer callback, receives a vector of handles */
-  void (*expired_timer_callback) (u32 * expired_timer_handles);
+    /** expired timer callback, receives a vector of handles */
+    void (*expired_timer_callback) (u32 * expired_timer_handles);
 
-  /** vectors of expired timers */
-  u32 *expired_timer_handles;
+    /** vectors of expired timers */
+    u32 *expired_timer_handles;
 
-  /** maximum expirations */
-  u32 max_expirations;
+    /** maximum expirations */
+    u32 max_expirations;
 
-  /** current trace index */
+    /** current trace index */
 #if TW_START_STOP_TRACE_SIZE > 0
-  /* Start/stop/expire tracing */
-  u32 trace_index;
-  u32 trace_wrapped;
+    /* Start/stop/expire tracing */
+    u32 trace_index;
+    u32 trace_wrapped;
     TWT (trace) traces[TW_START_STOP_TRACE_SIZE];
 #endif
 
 } TWT (tw_timer_wheel);
 
 u32 TW (tw_timer_start) (TWT (tw_timer_wheel) * tw,
-			 u32 pool_index, u32 timer_id, u64 interval);
+                         u32 pool_index, u32 timer_id, u64 interval);
 
 void TW (tw_timer_stop) (TWT (tw_timer_wheel) * tw, u32 handle);
 
 void TW (tw_timer_wheel_init) (TWT (tw_timer_wheel) * tw,
-			       void *expired_timer_callback,
-			       f64 timer_interval, u32 max_expirations);
+                               void *expired_timer_callback,
+                               f64 timer_interval, u32 max_expirations);
 
 void TW (tw_timer_wheel_free) (TWT (tw_timer_wheel) * tw);
 
 u32 *TW (tw_timer_expire_timers) (TWT (tw_timer_wheel) * tw, f64 now);
 u32 *TW (tw_timer_expire_timers_vec) (TWT (tw_timer_wheel) * tw, f64 now,
-				      u32 * vec);
+                                      u32 * vec);
 #if TW_FAST_WHEEL_BITMAP
 u32 TW (tw_timer_first_expires_in_ticks) (TWT (tw_timer_wheel) * tw);
 #endif
@@ -255,7 +248,7 @@ u32 TW (tw_timer_first_expires_in_ticks) (TWT (tw_timer_wheel) * tw);
 #if TW_START_STOP_TRACE_SIZE > 0
 void TW (tw_search_trace) (TWT (tw_timer_wheel) * tw, u32 handle);
 void TW (tw_timer_trace) (TWT (tw_timer_wheel) * tw, u32 timer_id,
-			  u32 pool_index, u32 handle);
+                          u32 pool_index, u32 handle);
 #endif
 
 /*

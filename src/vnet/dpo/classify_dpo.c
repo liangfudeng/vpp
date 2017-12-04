@@ -62,8 +62,8 @@ format_classify_dpo (u8 *s, va_list *args)
     cd = classify_dpo_get(index);
 
     return (format(s, "%U-classify:[%d]:table:%d",
-		   format_dpo_proto, cd->cd_proto,
-		   index, cd->cd_table_index));
+                   format_dpo_proto, cd->cd_proto,
+                   index, cd->cd_table_index));
 }
 
 static void
@@ -85,9 +85,8 @@ classify_dpo_unlock (dpo_id_t *dpo)
 
     cd->cd_locks--;
 
-    if (0 == cd->cd_locks)
-    {
-	pool_put(classify_dpo_pool, cd);
+    if (0 == cd->cd_locks) {
+        pool_put(classify_dpo_pool, cd);
     }
 }
 
@@ -95,9 +94,9 @@ static void
 classify_dpo_mem_show (void)
 {
     fib_show_memory_usage("Classify",
-			  pool_elts(classify_dpo_pool),
-			  pool_len(classify_dpo_pool),
-			  sizeof(classify_dpo_t));
+                          pool_elts(classify_dpo_pool),
+                          pool_len(classify_dpo_pool),
+                          sizeof(classify_dpo_t));
 }
 
 const static dpo_vft_t cd_vft = {
@@ -107,18 +106,15 @@ const static dpo_vft_t cd_vft = {
     .dv_mem_show = classify_dpo_mem_show,
 };
 
-const static char* const classify_ip4_nodes[] =
-{
+const static char* const classify_ip4_nodes[] = {
     "ip4-classify",
     NULL,
 };
-const static char* const classify_ip6_nodes[] =
-{
+const static char* const classify_ip6_nodes[] = {
     "ip6-classify",
     NULL,
 };
-const static char* const * const classify_nodes[DPO_PROTO_NUM] =
-{
+const static char* const * const classify_nodes[DPO_PROTO_NUM] = {
     [DPO_PROTO_IP4]  = classify_ip4_nodes,
     [DPO_PROTO_IP6]  = classify_ip6_nodes,
     [DPO_PROTO_MPLS] = NULL,

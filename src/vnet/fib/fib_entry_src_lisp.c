@@ -18,7 +18,7 @@
 #include "fib_path_list.h"
 
 /**
- * Source initialisation Function 
+ * Source initialisation Function
  */
 static void
 fib_entry_src_lisp_init (fib_entry_src_t *src)
@@ -26,7 +26,7 @@ fib_entry_src_lisp_init (fib_entry_src_t *src)
 }
 
 /**
- * Source deinitialisation Function 
+ * Source deinitialisation Function
  */
 static void
 fib_entry_src_lisp_deinit (fib_entry_src_t *src)
@@ -35,45 +35,41 @@ fib_entry_src_lisp_deinit (fib_entry_src_t *src)
 
 static void
 fib_entry_src_lisp_path_swap (fib_entry_src_t *src,
-			      const fib_entry_t *entry,
-			      fib_path_list_flags_t pl_flags,
-			     const fib_route_path_t *paths)
+                              const fib_entry_t *entry,
+                              fib_path_list_flags_t pl_flags,
+                              const fib_route_path_t *paths)
 {
     src->fes_pl = fib_path_list_create((FIB_PATH_LIST_FLAG_SHARED | pl_flags),
-				       paths);
+                                       paths);
 }
 
 static void
 fib_entry_src_lisp_path_add (fib_entry_src_t *src,
-			    const fib_entry_t *entry,
-			    fib_path_list_flags_t pl_flags,
-			    const fib_route_path_t *paths)
+                             const fib_entry_t *entry,
+                             fib_path_list_flags_t pl_flags,
+                             const fib_route_path_t *paths)
 {
-    if (FIB_NODE_INDEX_INVALID == src->fes_pl)
-    {	
-	src->fes_pl =
-	    fib_path_list_create((FIB_PATH_LIST_FLAG_SHARED | pl_flags), paths);
-    }
-    else
-    {
-	src->fes_pl =
-	    fib_path_list_copy_and_path_add(src->fes_pl,
-					    (FIB_PATH_LIST_FLAG_SHARED | pl_flags),
-					    paths);
+    if (FIB_NODE_INDEX_INVALID == src->fes_pl) {
+        src->fes_pl =
+            fib_path_list_create((FIB_PATH_LIST_FLAG_SHARED | pl_flags), paths);
+    } else {
+        src->fes_pl =
+            fib_path_list_copy_and_path_add(src->fes_pl,
+                                            (FIB_PATH_LIST_FLAG_SHARED | pl_flags),
+                                            paths);
     }
 }
 
 static void
 fib_entry_src_lisp_path_remove (fib_entry_src_t *src,
-			       fib_path_list_flags_t pl_flags,
-			       const fib_route_path_t *paths)
+                                fib_path_list_flags_t pl_flags,
+                                const fib_route_path_t *paths)
 {
-    if (FIB_NODE_INDEX_INVALID != src->fes_pl)
-    {
-	src->fes_pl =
-	    fib_path_list_copy_and_path_remove(src->fes_pl,
-					       (FIB_PATH_LIST_FLAG_SHARED | pl_flags),
-					       paths);
+    if (FIB_NODE_INDEX_INVALID != src->fes_pl) {
+        src->fes_pl =
+            fib_path_list_copy_and_path_remove(src->fes_pl,
+                                               (FIB_PATH_LIST_FLAG_SHARED | pl_flags),
+                                               paths);
     }
 }
 
@@ -84,12 +80,11 @@ fib_entry_src_lisp_add (fib_entry_src_t *src,
                         dpo_proto_t proto,
                         const dpo_id_t *dpo)
 {
-    if (FIB_ENTRY_FLAG_NONE != flags)
-    {
-	src->fes_pl = fib_path_list_create_special(
-	                  proto,
-			  fib_entry_src_flags_2_path_list_flags(flags),
-			  dpo);
+    if (FIB_ENTRY_FLAG_NONE != flags) {
+        src->fes_pl = fib_path_list_create_special(
+                          proto,
+                          fib_entry_src_flags_2_path_list_flags(flags),
+                          dpo);
     }
 }
 

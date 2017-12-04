@@ -44,8 +44,8 @@
 #define LB_DEFAULT_FLOW_TIMEOUT 40
 
 typedef enum {
-  LB_NEXT_DROP,
-  LB_N_NEXT,
+    LB_NEXT_DROP,
+    LB_N_NEXT,
 } lb_next_t;
 
 /**
@@ -53,66 +53,66 @@ typedef enum {
  * application server.
  */
 typedef struct {
-  /**
-   * Registration to FIB event.
-   */
-  fib_node_t fib_node;
+    /**
+     * Registration to FIB event.
+     */
+    fib_node_t fib_node;
 
-  /**
-   * Destination address used to tunnel traffic towards
-   * that application server.
-   * The address is also used as ID and pseudo-random
-   * seed for the load-balancing process.
-   */
-  ip46_address_t address;
+    /**
+     * Destination address used to tunnel traffic towards
+     * that application server.
+     * The address is also used as ID and pseudo-random
+     * seed for the load-balancing process.
+     */
+    ip46_address_t address;
 
-  /**
-   * ASs are indexed by address and VIP Index.
-   * Which means there will be duplicated if the same server
-   * address is used for multiple VIPs.
-   */
-  u32 vip_index;
+    /**
+     * ASs are indexed by address and VIP Index.
+     * Which means there will be duplicated if the same server
+     * address is used for multiple VIPs.
+     */
+    u32 vip_index;
 
-  /**
-   * Some per-AS flags.
-   * For now only LB_AS_FLAGS_USED is defined.
-   */
-  u8 flags;
+    /**
+     * Some per-AS flags.
+     * For now only LB_AS_FLAGS_USED is defined.
+     */
+    u8 flags;
 
 #define LB_AS_FLAGS_USED 0x1
 
-  /**
-   * Rotating timestamp of when LB_AS_FLAGS_USED flag was last set.
-   *
-   * AS removal is based on garbage collection and reference counting.
-   * When an AS is removed, there is a race between configuration core
-   * and worker cores which may still add a reference while it should not
-   * be used. This timestamp is used to not remove the AS while a race condition
-   * may happen.
-   */
-  u32 last_used;
+    /**
+     * Rotating timestamp of when LB_AS_FLAGS_USED flag was last set.
+     *
+     * AS removal is based on garbage collection and reference counting.
+     * When an AS is removed, there is a race between configuration core
+     * and worker cores which may still add a reference while it should not
+     * be used. This timestamp is used to not remove the AS while a race condition
+     * may happen.
+     */
+    u32 last_used;
 
-  /**
-   * The FIB entry index for the next-hop
-   */
-  fib_node_index_t next_hop_fib_entry_index;
+    /**
+     * The FIB entry index for the next-hop
+     */
+    fib_node_index_t next_hop_fib_entry_index;
 
-  /**
-   * The child index on the FIB entry
-   */
-  u32 next_hop_child_index;
+    /**
+     * The child index on the FIB entry
+     */
+    u32 next_hop_child_index;
 
-  /**
-   * The next DPO in the graph to follow.
-   */
-  dpo_id_t dpo;
+    /**
+     * The next DPO in the graph to follow.
+     */
+    dpo_id_t dpo;
 
 } lb_as_t;
 
 format_function_t format_lb_as;
 
 typedef struct {
-  u32 as_index;
+    u32 as_index;
 } lb_new_flow_entry_t;
 
 #define lb_foreach_vip_counter \
@@ -123,9 +123,9 @@ typedef struct {
 
 typedef enum {
 #define _(a,b,c) LB_VIP_COUNTER_##a = c,
-  lb_foreach_vip_counter
+    lb_foreach_vip_counter
 #undef _
-  LB_N_VIP_COUNTERS
+    LB_N_VIP_COUNTERS
 } lb_vip_counter_t;
 
 /**
@@ -133,11 +133,11 @@ typedef enum {
  * and GRE4 and GRE6 encap.
  */
 typedef enum {
-  LB_VIP_TYPE_IP6_GRE6,
-  LB_VIP_TYPE_IP6_GRE4,
-  LB_VIP_TYPE_IP4_GRE6,
-  LB_VIP_TYPE_IP4_GRE4,
-  LB_VIP_N_TYPES,
+    LB_VIP_TYPE_IP6_GRE6,
+    LB_VIP_TYPE_IP6_GRE4,
+    LB_VIP_TYPE_IP4_GRE6,
+    LB_VIP_TYPE_IP4_GRE4,
+    LB_VIP_N_TYPES,
 } lb_vip_type_t;
 
 format_function_t format_lb_vip_type;
@@ -153,63 +153,63 @@ unformat_function_t unformat_lb_vip_type;
  */
 typedef struct {
 
-  //Runtime
+    //Runtime
 
-  /**
-   * Vector mapping (flow-hash & new_connect_table_mask) to AS index.
-   * This is used for new flows.
-   */
-  lb_new_flow_entry_t *new_flow_table;
+    /**
+     * Vector mapping (flow-hash & new_connect_table_mask) to AS index.
+     * This is used for new flows.
+     */
+    lb_new_flow_entry_t *new_flow_table;
 
-  /**
-   * New flows table length - 1
-   * (length MUST be a power of 2)
-   */
-  u32 new_flow_table_mask;
+    /**
+     * New flows table length - 1
+     * (length MUST be a power of 2)
+     */
+    u32 new_flow_table_mask;
 
-  /**
-   * Last time garbage collection was run to free the ASs.
-   */
-  u32 last_garbage_collection;
+    /**
+     * Last time garbage collection was run to free the ASs.
+     */
+    u32 last_garbage_collection;
 
-  //Not runtime
+    //Not runtime
 
-  /**
-   * A Virtual IP represents a given service delivered
-   * by a set of application servers. It can be a single
-   * address or a prefix.
-   * IPv4 prefixes are encoded using IPv4-in-IPv6 embedded address
-   * (i.e. ::/96 prefix).
-   */
-  ip46_address_t prefix;
+    /**
+     * A Virtual IP represents a given service delivered
+     * by a set of application servers. It can be a single
+     * address or a prefix.
+     * IPv4 prefixes are encoded using IPv4-in-IPv6 embedded address
+     * (i.e. ::/96 prefix).
+     */
+    ip46_address_t prefix;
 
-  /**
-   * The VIP prefix length.
-   * In case of IPv4, plen = 96 + ip4_plen.
-   */
-  u8 plen;
+    /**
+     * The VIP prefix length.
+     * In case of IPv4, plen = 96 + ip4_plen.
+     */
+    u8 plen;
 
-  /**
-   * The type of traffic for this.
-   * LB_TYPE_UNDEFINED if unknown.
-   */
-  lb_vip_type_t type;
+    /**
+     * The type of traffic for this.
+     * LB_TYPE_UNDEFINED if unknown.
+     */
+    lb_vip_type_t type;
 
-  /**
-   * Flags related to this VIP.
-   * LB_VIP_FLAGS_USED means the VIP is active.
-   * When it is not set, the VIP in the process of being removed.
-   * We cannot immediately remove a VIP because the VIP index still may be stored
-   * in the adjacency index.
-   */
-  u8 flags;
+    /**
+     * Flags related to this VIP.
+     * LB_VIP_FLAGS_USED means the VIP is active.
+     * When it is not set, the VIP in the process of being removed.
+     * We cannot immediately remove a VIP because the VIP index still may be stored
+     * in the adjacency index.
+     */
+    u8 flags;
 #define LB_VIP_FLAGS_USED 0x1
 
-  /**
-   * Pool of AS indexes used for this VIP.
-   * This also includes ASs that have been removed (but are still referenced).
-   */
-  u32 *as_indexes;
+    /**
+     * Pool of AS indexes used for this VIP.
+     * This also includes ASs that have been removed (but are still referenced).
+     */
+    u32 *as_indexes;
 } lb_vip_t;
 
 #define lb_vip_is_ip4(vip) ((vip)->type == LB_VIP_TYPE_IP4_GRE6 || (vip)->type == LB_VIP_TYPE_IP4_GRE4)
@@ -218,86 +218,86 @@ format_function_t format_lb_vip;
 format_function_t format_lb_vip_detailed;
 
 typedef struct {
-  /**
-   * Each CPU has its own sticky flow hash table.
-   * One single table is used for all VIPs.
-   */
-  lb_hash_t *sticky_ht;
+    /**
+     * Each CPU has its own sticky flow hash table.
+     * One single table is used for all VIPs.
+     */
+    lb_hash_t *sticky_ht;
 } lb_per_cpu_t;
 
 typedef struct {
-  /**
-   * Pool of all Virtual IPs
-   */
-  lb_vip_t *vips;
+    /**
+     * Pool of all Virtual IPs
+     */
+    lb_vip_t *vips;
 
-  /**
-   * Pool of ASs.
-   * ASs are referenced by address and vip index.
-   * The first element (index 0) is special and used only to fill
-   * new_flow_tables when no AS has been configured.
-   */
-  lb_as_t *ass;
+    /**
+     * Pool of ASs.
+     * ASs are referenced by address and vip index.
+     * The first element (index 0) is special and used only to fill
+     * new_flow_tables when no AS has been configured.
+     */
+    lb_as_t *ass;
 
-  /**
-   * Each AS has an associated reference counter.
-   * As ass[0] has a special meaning, its associated counter
-   * starts at 0 and is decremented instead. i.e. do not use it.
-   */
-  vlib_refcount_t as_refcount;
+    /**
+     * Each AS has an associated reference counter.
+     * As ass[0] has a special meaning, its associated counter
+     * starts at 0 and is decremented instead. i.e. do not use it.
+     */
+    vlib_refcount_t as_refcount;
 
-  /**
-   * Some global data is per-cpu
-   */
-  lb_per_cpu_t *per_cpu;
+    /**
+     * Some global data is per-cpu
+     */
+    lb_per_cpu_t *per_cpu;
 
-  /**
-   * Node next index for IP adjacencies, for each of the traffic types.
-   */
-  u32 ip_lookup_next_index[LB_VIP_N_TYPES];
+    /**
+     * Node next index for IP adjacencies, for each of the traffic types.
+     */
+    u32 ip_lookup_next_index[LB_VIP_N_TYPES];
 
-  /**
-   * Source address used in IPv6 encapsulated traffic
-   */
-  ip6_address_t ip6_src_address;
+    /**
+     * Source address used in IPv6 encapsulated traffic
+     */
+    ip6_address_t ip6_src_address;
 
-  /**
-   * Source address used for IPv4 encapsulated traffic
-   */
-  ip4_address_t ip4_src_address;
+    /**
+     * Source address used for IPv4 encapsulated traffic
+     */
+    ip4_address_t ip4_src_address;
 
-  /**
-   * Number of buckets in the per-cpu sticky hash table.
-   */
-  u32 per_cpu_sticky_buckets;
+    /**
+     * Number of buckets in the per-cpu sticky hash table.
+     */
+    u32 per_cpu_sticky_buckets;
 
-  /**
-   * Flow timeout in seconds.
-   */
-  u32 flow_timeout;
+    /**
+     * Flow timeout in seconds.
+     */
+    u32 flow_timeout;
 
-  /**
-   * Per VIP counter
-   */
-  vlib_simple_counter_main_t vip_counters[LB_N_VIP_COUNTERS];
+    /**
+     * Per VIP counter
+     */
+    vlib_simple_counter_main_t vip_counters[LB_N_VIP_COUNTERS];
 
-  /**
-   * DPO used to send packet from IP4/6 lookup to LB node.
-   */
-  dpo_type_t dpo_gre4_type;
-  dpo_type_t dpo_gre6_type;
+    /**
+     * DPO used to send packet from IP4/6 lookup to LB node.
+     */
+    dpo_type_t dpo_gre4_type;
+    dpo_type_t dpo_gre6_type;
 
-  /**
-   * Node type for registering to fib changes.
-   */
-  fib_node_type_t fib_node_type;
+    /**
+     * Node type for registering to fib changes.
+     */
+    fib_node_type_t fib_node_type;
 
-  /**
-   * API dynamically registered base ID.
-   */
-  u16 msg_id_base;
+    /**
+     * API dynamically registered base ID.
+     */
+    u16 msg_id_base;
 
-  volatile u32 *writer_lock;
+    volatile u32 *writer_lock;
 } lb_main_t;
 
 extern lb_main_t lb_main;

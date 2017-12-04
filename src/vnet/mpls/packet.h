@@ -31,15 +31,14 @@ typedef struct {
     mpls_label_t label_exp_s_ttl;
 } mpls_unicast_header_t;
 
-typedef enum mpls_eos_bit_t_
-{
+typedef enum mpls_eos_bit_t_ {
     MPLS_NON_EOS = 0,
     MPLS_EOS     = 1,
 } mpls_eos_bit_t;
 
-#define MPLS_EOS_BITS {				\
-    [MPLS_NON_EOS] = "neos",		      	\
-    [MPLS_EOS] = "eos",				\
+#define MPLS_EOS_BITS {             \
+    [MPLS_NON_EOS] = "neos",                \
+    [MPLS_EOS] = "eos",             \
 }
 
 #define FOR_EACH_MPLS_EOS_BIT(_eos) \
@@ -95,28 +94,28 @@ static inline u32 vnet_mpls_uc_get_ttl (mpls_label_t label_exp_s_ttl)
 }
 
 static inline void vnet_mpls_uc_set_label (mpls_label_t *label_exp_s_ttl,
-                                           u32 value)
+        u32 value)
 {
     *label_exp_s_ttl = (((*label_exp_s_ttl) & ~(MPLS_ENTRY_LABEL_BITS)) |
                         ((value  & MPLS_ENTRY_LABEL_MASK) << MPLS_ENTRY_LABEL_SHIFT));
 }
 
 static inline void vnet_mpls_uc_set_exp (mpls_label_t *label_exp_s_ttl,
-                                         u32 exp)
+        u32 exp)
 {
     *label_exp_s_ttl = (((*label_exp_s_ttl) & ~(MPLS_ENTRY_EXP_BITS)) |
                         ((exp & MPLS_ENTRY_EXP_MASK) << MPLS_ENTRY_EXP_SHIFT));
 }
- 
+
 static inline void vnet_mpls_uc_set_s (mpls_label_t *label_exp_s_ttl,
                                        u32 eos)
 {
     *label_exp_s_ttl = (((*label_exp_s_ttl) & ~(MPLS_ENTRY_EOS_BIT)) |
                         ((eos & MPLS_ENTRY_EOS_MASK) << MPLS_ENTRY_EOS_SHIFT));
 }
- 
+
 static inline void vnet_mpls_uc_set_ttl (mpls_label_t *label_exp_s_ttl,
-                                         u32 ttl)
+        u32 ttl)
 {
     *label_exp_s_ttl = (((*label_exp_s_ttl) & ~(MPLS_ENTRY_TTL_BITS)) |
                         ((ttl & MPLS_ENTRY_TTL_MASK)));

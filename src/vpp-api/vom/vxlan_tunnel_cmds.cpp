@@ -17,135 +17,137 @@
 
 DEFINE_VAPI_MSG_IDS_VXLAN_API_JSON;
 
-namespace VOM {
-namespace vxlan_tunnel_cmds {
-
-create_cmd::create_cmd(HW::item<handle_t>& item,
-                       const std::string& name,
-                       const vxlan_tunnel::endpoint_t& ep)
-  : interface::create_cmd<vapi::Vxlan_add_del_tunnel>(item, name)
-  , m_ep(ep)
+namespace VOM
 {
-}
+    namespace vxlan_tunnel_cmds
+    {
 
-bool
-create_cmd::operator==(const create_cmd& other) const
-{
-  return (m_ep == other.m_ep);
-}
+        create_cmd::create_cmd(HW::item<handle_t>& item,
+                               const std::string& name,
+                               const vxlan_tunnel::endpoint_t& ep)
+            : interface::create_cmd<vapi::Vxlan_add_del_tunnel>(item, name)
+                , m_ep(ep)
+        {
+        }
 
-rc_t
-create_cmd::issue(connection& con)
-{
-  msg_t req(con.ctx(), std::ref(*this));
+        bool
+        create_cmd::operator==(const create_cmd& other) const
+        {
+            return (m_ep == other.m_ep);
+        }
 
-  auto& payload = req.get_request().get_payload();
-  payload.is_add = 1;
-  payload.is_ipv6 = 0;
-  to_bytes(m_ep.src, &payload.is_ipv6, payload.src_address);
-  to_bytes(m_ep.dst, &payload.is_ipv6, payload.dst_address);
-  payload.mcast_sw_if_index = ~0;
-  payload.encap_vrf_id = 0;
-  payload.decap_next_index = ~0;
-  payload.vni = m_ep.vni;
+        rc_t
+        create_cmd::issue(connection& con)
+        {
+            msg_t req(con.ctx(), std::ref(*this));
 
-  VAPI_CALL(req.execute());
+            auto& payload = req.get_request().get_payload();
+            payload.is_add = 1;
+            payload.is_ipv6 = 0;
+            to_bytes(m_ep.src, &payload.is_ipv6, payload.src_address);
+            to_bytes(m_ep.dst, &payload.is_ipv6, payload.dst_address);
+            payload.mcast_sw_if_index = ~0;
+            payload.encap_vrf_id = 0;
+            payload.decap_next_index = ~0;
+            payload.vni = m_ep.vni;
 
-  m_hw_item = wait();
+            VAPI_CALL(req.execute());
 
-  if (m_hw_item) {
-    insert_interface();
-  }
+            m_hw_item = wait();
 
-  return rc_t::OK;
-}
+            if (m_hw_item) {
+                insert_interface();
+            }
 
-std::string
-create_cmd::to_string() const
-{
-  std::ostringstream s;
-  s << "vxlan-tunnel-create: " << m_hw_item.to_string() << m_ep.to_string();
+            return rc_t::OK;
+        }
 
-  return (s.str());
-}
+        std::string
+        create_cmd::to_string() const
+        {
+            std::ostringstream s;
+            s << "vxlan-tunnel-create: " << m_hw_item.to_string() << m_ep.to_string();
 
-delete_cmd::delete_cmd(HW::item<handle_t>& item,
-                       const vxlan_tunnel::endpoint_t& ep)
-  : interface::delete_cmd<vapi::Vxlan_add_del_tunnel>(item)
-  , m_ep(ep)
-{
-}
+            return (s.str());
+        }
 
-bool
-delete_cmd::operator==(const delete_cmd& other) const
-{
-  return (m_ep == other.m_ep);
-}
+        delete_cmd::delete_cmd(HW::item<handle_t>& item,
+                               const vxlan_tunnel::endpoint_t& ep)
+            : interface::delete_cmd<vapi::Vxlan_add_del_tunnel>(item)
+                , m_ep(ep)
+        {
+        }
 
-rc_t
-delete_cmd::issue(connection& con)
-{
-  msg_t req(con.ctx(), std::ref(*this));
+        bool
+        delete_cmd::operator==(const delete_cmd& other) const
+        {
+            return (m_ep == other.m_ep);
+        }
 
-  auto payload = req.get_request().get_payload();
-  payload.is_add = 0;
-  payload.is_ipv6 = 0;
-  to_bytes(m_ep.src, &payload.is_ipv6, payload.src_address);
-  to_bytes(m_ep.dst, &payload.is_ipv6, payload.dst_address);
-  payload.mcast_sw_if_index = ~0;
-  payload.encap_vrf_id = 0;
-  payload.decap_next_index = ~0;
-  payload.vni = m_ep.vni;
+        rc_t
+        delete_cmd::issue(connection& con)
+        {
+            msg_t req(con.ctx(), std::ref(*this));
 
-  VAPI_CALL(req.execute());
+            auto payload = req.get_request().get_payload();
+            payload.is_add = 0;
+            payload.is_ipv6 = 0;
+            to_bytes(m_ep.src, &payload.is_ipv6, payload.src_address);
+            to_bytes(m_ep.dst, &payload.is_ipv6, payload.dst_address);
+            payload.mcast_sw_if_index = ~0;
+            payload.encap_vrf_id = 0;
+            payload.decap_next_index = ~0;
+            payload.vni = m_ep.vni;
 
-  wait();
-  m_hw_item.set(rc_t::NOOP);
+            VAPI_CALL(req.execute());
 
-  remove_interface();
-  return (rc_t::OK);
-}
+            wait();
+            m_hw_item.set(rc_t::NOOP);
 
-std::string
-delete_cmd::to_string() const
-{
-  std::ostringstream s;
-  s << "vxlan-tunnel-delete: " << m_hw_item.to_string() << m_ep.to_string();
+            remove_interface();
+            return (rc_t::OK);
+        }
 
-  return (s.str());
-}
+        std::string
+        delete_cmd::to_string() const
+        {
+            std::ostringstream s;
+            s << "vxlan-tunnel-delete: " << m_hw_item.to_string() << m_ep.to_string();
 
-dump_cmd::dump_cmd()
-{
-}
+            return (s.str());
+        }
 
-bool
-dump_cmd::operator==(const dump_cmd& other) const
-{
-  return (true);
-}
+        dump_cmd::dump_cmd()
+        {
+        }
 
-rc_t
-dump_cmd::issue(connection& con)
-{
-  m_dump.reset(new msg_t(con.ctx(), std::ref(*this)));
+        bool
+        dump_cmd::operator==(const dump_cmd& other) const
+        {
+            return (true);
+        }
 
-  auto& payload = m_dump->get_request().get_payload();
-  payload.sw_if_index = ~0;
+        rc_t
+        dump_cmd::issue(connection& con)
+        {
+            m_dump.reset(new msg_t(con.ctx(), std::ref(*this)));
 
-  VAPI_CALL(m_dump->execute());
+            auto& payload = m_dump->get_request().get_payload();
+            payload.sw_if_index = ~0;
 
-  wait();
+            VAPI_CALL(m_dump->execute());
 
-  return rc_t::OK;
-}
+            wait();
 
-std::string
-dump_cmd::to_string() const
-{
-  return ("Vpp-vxlan_tunnels-Dump");
-}
-} // namespace vxlan_tunnel_cmds
+            return rc_t::OK;
+        }
+
+        std::string
+        dump_cmd::to_string() const
+        {
+            return ("Vpp-vxlan_tunnels-Dump");
+        }
+    } // namespace vxlan_tunnel_cmds
 } // namespace VOM
 
 /*

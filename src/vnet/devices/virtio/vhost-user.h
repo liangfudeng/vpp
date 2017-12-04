@@ -19,7 +19,7 @@
 #define VHOST_MEMORY_MAX_NREGIONS       8
 #define VHOST_USER_MSG_HDR_SZ           12
 #define VHOST_VRING_MAX_SIZE            32768
-#define VHOST_VRING_MAX_N               16	//8TX + 8RX
+#define VHOST_VRING_MAX_N               16  //8TX + 8RX
 #define VHOST_VRING_IDX_RX(qid)         (2*qid)
 #define VHOST_VRING_IDX_TX(qid)         (2*qid + 1)
 
@@ -29,12 +29,12 @@
 #define VHOST_USER_REPLY_MASK       (0x1 << 2)
 
 #define VHOST_USER_PROTOCOL_F_MQ   0
-#define VHOST_USER_PROTOCOL_F_LOG_SHMFD	1
+#define VHOST_USER_PROTOCOL_F_LOG_SHMFD 1
 #define VHOST_VRING_F_LOG 0
 
 #define VHOST_USER_F_PROTOCOL_FEATURES  30
-#define VHOST_USER_PROTOCOL_FEATURES   ((1ULL << VHOST_USER_PROTOCOL_F_MQ) |	\
-					(1ULL << VHOST_USER_PROTOCOL_F_LOG_SHMFD))
+#define VHOST_USER_PROTOCOL_FEATURES   ((1ULL << VHOST_USER_PROTOCOL_F_MQ) |    \
+                    (1ULL << VHOST_USER_PROTOCOL_F_LOG_SHMFD))
 
 /* If multiqueue is provided by host, then we suppport it. */
 #define VIRTIO_NET_CTRL_MQ   4
@@ -57,23 +57,22 @@
  _ (VIRTIO_F_VERSION_1, 32)
 
 
-typedef enum
-{
+typedef enum {
 #define _(f,n) FEAT_##f = (n),
-  foreach_virtio_net_feature
+    foreach_virtio_net_feature
 #undef _
 } virtio_net_feature_t;
 
 int vhost_user_create_if (vnet_main_t * vnm, vlib_main_t * vm,
-			  const char *sock_filename, u8 is_server,
-			  u32 * sw_if_index, u64 feature_mask,
-			  u8 renumber, u32 custom_dev_instance, u8 * hwaddr);
+                          const char *sock_filename, u8 is_server,
+                          u32 * sw_if_index, u64 feature_mask,
+                          u8 renumber, u32 custom_dev_instance, u8 * hwaddr);
 int vhost_user_modify_if (vnet_main_t * vnm, vlib_main_t * vm,
-			  const char *sock_filename, u8 is_server,
-			  u32 sw_if_index, u64 feature_mask,
-			  u8 renumber, u32 custom_dev_instance);
+                          const char *sock_filename, u8 is_server,
+                          u32 sw_if_index, u64 feature_mask,
+                          u8 renumber, u32 custom_dev_instance);
 int vhost_user_delete_if (vnet_main_t * vnm, vlib_main_t * vm,
-			  u32 sw_if_index);
+                          u32 sw_if_index);
 
 /* *INDENT-OFF* */
 typedef struct vhost_user_memory_region
@@ -189,147 +188,140 @@ typedef struct vhost_user_msg {
 } __attribute ((packed)) vhost_user_msg_t;
 /* *INDENT-ON* */
 
-typedef struct
-{
-  CLIB_CACHE_LINE_ALIGN_MARK (cacheline0);
-  u16 qsz_mask;
-  u16 last_avail_idx;
-  u16 last_used_idx;
-  u16 n_since_last_int;
-  vring_desc_t *desc;
-  vring_avail_t *avail;
-  vring_used_t *used;
-  f64 int_deadline;
-  u8 started;
-  u8 enabled;
-  u8 log_used;
-  //Put non-runtime in a different cache line
+typedef struct {
+    CLIB_CACHE_LINE_ALIGN_MARK (cacheline0);
+    u16 qsz_mask;
+    u16 last_avail_idx;
+    u16 last_used_idx;
+    u16 n_since_last_int;
+    vring_desc_t *desc;
+    vring_avail_t *avail;
+    vring_used_t *used;
+    f64 int_deadline;
+    u8 started;
+    u8 enabled;
+    u8 log_used;
+    //Put non-runtime in a different cache line
     CLIB_CACHE_LINE_ALIGN_MARK (cacheline1);
-  int errfd;
-  u32 callfd_idx;
-  u32 kickfd_idx;
-  u64 log_guest_addr;
+    int errfd;
+    u32 callfd_idx;
+    u32 kickfd_idx;
+    u64 log_guest_addr;
 
-  /* The rx queue policy (interrupt/adaptive/polling) for this queue */
-  u32 mode;
+    /* The rx queue policy (interrupt/adaptive/polling) for this queue */
+    u32 mode;
 } vhost_user_vring_t;
 
 #define VHOST_USER_EVENT_START_TIMER 1
 #define VHOST_USER_EVENT_STOP_TIMER  2
 
-typedef struct
-{
-  CLIB_CACHE_LINE_ALIGN_MARK (cacheline0);
-  u32 is_up;
-  u32 admin_up;
-  u32 unix_server_index;
-  u32 clib_file_index;
-  char sock_filename[256];
-  int sock_errno;
-  uword if_index;
-  u32 hw_if_index, sw_if_index;
+typedef struct {
+    CLIB_CACHE_LINE_ALIGN_MARK (cacheline0);
+    u32 is_up;
+    u32 admin_up;
+    u32 unix_server_index;
+    u32 clib_file_index;
+    char sock_filename[256];
+    int sock_errno;
+    uword if_index;
+    u32 hw_if_index, sw_if_index;
 
-  //Feature negotiation
-  u64 features;
-  u64 feature_mask;
-  u64 protocol_features;
+    //Feature negotiation
+    u64 features;
+    u64 feature_mask;
+    u64 protocol_features;
 
-  //Memory region information
-  u32 nregions;
-  vhost_user_memory_region_t regions[VHOST_MEMORY_MAX_NREGIONS];
-  void *region_mmap_addr[VHOST_MEMORY_MAX_NREGIONS];
-  u64 region_guest_addr_lo[VHOST_MEMORY_MAX_NREGIONS];
-  u64 region_guest_addr_hi[VHOST_MEMORY_MAX_NREGIONS];
-  u32 region_mmap_fd[VHOST_MEMORY_MAX_NREGIONS];
+    //Memory region information
+    u32 nregions;
+    vhost_user_memory_region_t regions[VHOST_MEMORY_MAX_NREGIONS];
+    void *region_mmap_addr[VHOST_MEMORY_MAX_NREGIONS];
+    u64 region_guest_addr_lo[VHOST_MEMORY_MAX_NREGIONS];
+    u64 region_guest_addr_hi[VHOST_MEMORY_MAX_NREGIONS];
+    u32 region_mmap_fd[VHOST_MEMORY_MAX_NREGIONS];
 
-  //Virtual rings
-  vhost_user_vring_t vrings[VHOST_VRING_MAX_N];
-  volatile u32 *vring_locks[VHOST_VRING_MAX_N];
+    //Virtual rings
+    vhost_user_vring_t vrings[VHOST_VRING_MAX_N];
+    volatile u32 *vring_locks[VHOST_VRING_MAX_N];
 
-  int virtio_net_hdr_sz;
-  int is_any_layout;
+    int virtio_net_hdr_sz;
+    int is_any_layout;
 
-  void *log_base_addr;
-  u64 log_size;
+    void *log_base_addr;
+    u64 log_size;
 
-  /* Whether to use spinlock or per_cpu_tx_qid assignment */
-  u8 use_tx_spinlock;
-  u16 *per_cpu_tx_qid;
+    /* Whether to use spinlock or per_cpu_tx_qid assignment */
+    u8 use_tx_spinlock;
+    u16 *per_cpu_tx_qid;
 
-  /* Vector of active rx queues for this interface */
-  u16 *rx_queues;
+    /* Vector of active rx queues for this interface */
+    u16 *rx_queues;
 } vhost_user_intf_t;
 
-typedef struct
-{
-  uword dst;
-  uword src;
-  u32 len;
+typedef struct {
+    uword dst;
+    uword src;
+    u32 len;
 } vhost_copy_t;
 
-typedef struct
-{
-  u16 qid; /** The interface queue index (Not the virtio vring idx) */
-  u16 device_index; /** The device index */
-  u32 virtio_ring_flags; /** Runtime queue flags  **/
-  u16 first_desc_len; /** Length of the first data descriptor **/
-  virtio_net_hdr_mrg_rxbuf_t hdr; /** Virtio header **/
+typedef struct {
+    u16 qid; /** The interface queue index (Not the virtio vring idx) */
+    u16 device_index; /** The device index */
+    u32 virtio_ring_flags; /** Runtime queue flags  **/
+    u16 first_desc_len; /** Length of the first data descriptor **/
+    virtio_net_hdr_mrg_rxbuf_t hdr; /** Virtio header **/
 } vhost_trace_t;
 
 
 #define VHOST_USER_RX_BUFFERS_N (2 * VLIB_FRAME_SIZE + 2)
 #define VHOST_USER_COPY_ARRAY_N (4 * VLIB_FRAME_SIZE)
 
-typedef struct
-{
-  u32 rx_buffers_len;
-  u32 rx_buffers[VHOST_USER_RX_BUFFERS_N];
+typedef struct {
+    u32 rx_buffers_len;
+    u32 rx_buffers[VHOST_USER_RX_BUFFERS_N];
 
-  virtio_net_hdr_mrg_rxbuf_t tx_headers[VLIB_FRAME_SIZE];
-  vhost_copy_t copy[VHOST_USER_COPY_ARRAY_N];
+    virtio_net_hdr_mrg_rxbuf_t tx_headers[VLIB_FRAME_SIZE];
+    vhost_copy_t copy[VHOST_USER_COPY_ARRAY_N];
 
-  /* This is here so it doesn't end-up
-   * using stack or registers. */
-  vhost_trace_t *current_trace;
+    /* This is here so it doesn't end-up
+     * using stack or registers. */
+    vhost_trace_t *current_trace;
 } vhost_cpu_t;
 
-typedef struct
-{
-  mhash_t if_index_by_sock_name;
-  u32 mtu_bytes;
-  vhost_user_intf_t *vhost_user_interfaces;
-  u32 *show_dev_instance_by_real_dev_instance;
-  u32 coalesce_frames;
-  f64 coalesce_time;
-  int dont_dump_vhost_user_memory;
+typedef struct {
+    mhash_t if_index_by_sock_name;
+    u32 mtu_bytes;
+    vhost_user_intf_t *vhost_user_interfaces;
+    u32 *show_dev_instance_by_real_dev_instance;
+    u32 coalesce_frames;
+    f64 coalesce_time;
+    int dont_dump_vhost_user_memory;
 
-  /** Per-CPU data for vhost-user */
-  vhost_cpu_t *cpus;
+    /** Per-CPU data for vhost-user */
+    vhost_cpu_t *cpus;
 
-  /** Pseudo random iterator */
-  u32 random;
+    /** Pseudo random iterator */
+    u32 random;
 
-  /* The number of rx interface/queue pairs in interrupt mode */
-  u32 ifq_count;
+    /* The number of rx interface/queue pairs in interrupt mode */
+    u32 ifq_count;
 
-  /* debug on or off */
-  u8 debug;
+    /* debug on or off */
+    u8 debug;
 } vhost_user_main_t;
 
-typedef struct
-{
-  u8 if_name[64];
-  u32 sw_if_index;
-  u32 virtio_net_hdr_sz;
-  u64 features;
-  u8 is_server;
-  u8 sock_filename[256];
-  u32 num_regions;
-  int sock_errno;
+typedef struct {
+    u8 if_name[64];
+    u32 sw_if_index;
+    u32 virtio_net_hdr_sz;
+    u64 features;
+    u8 is_server;
+    u8 sock_filename[256];
+    u32 num_regions;
+    int sock_errno;
 } vhost_user_intf_details_t;
 
 int vhost_user_dump_ifs (vnet_main_t * vnm, vlib_main_t * vm,
-			 vhost_user_intf_details_t ** out_vuids);
+                         vhost_user_intf_details_t ** out_vuids);
 
 #endif
 

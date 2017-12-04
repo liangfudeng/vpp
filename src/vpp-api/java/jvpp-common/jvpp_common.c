@@ -41,23 +41,24 @@ foreach_vnet_api_error              \
 jvpp_main_t jvpp_main __attribute__((aligned (64)));
 
 void call_on_error(const char* callName, int contextId, int retval,
-        jclass callbackClass, jobject callbackObject,
-        jclass callbackExceptionClass) {
+                   jclass callbackClass, jobject callbackObject,
+                   jclass callbackExceptionClass)
+{
     DEBUG_LOG("\nCallOnError : callback=%s, retval=%d, context=%d\n", callName,
-            clib_net_to_host_u32(retval), clib_net_to_host_u32(context));
+              clib_net_to_host_u32(retval), clib_net_to_host_u32(context));
     JNIEnv *env = jvpp_main.jenv;
     if (!callbackClass) {
         DEBUG_LOG("CallOnError : jm->callbackClass is null!\n");
         return;
     }
     jmethodID excConstructor = (*env)->GetMethodID(env, callbackExceptionClass,
-            "<init>", "(Ljava/lang/String;Ljava/lang/String;II)V");
+                               "<init>", "(Ljava/lang/String;Ljava/lang/String;II)V");
     if (!excConstructor) {
         DEBUG_LOG("CallOnError : excConstructor is null!\n");
         return;
     }
     jmethodID callbackExcMethod = (*env)->GetMethodID(env, callbackClass,
-            "onError", "(Lio/fd/vpp/jvpp/VppCallbackException;)V");
+                                  "onError", "(Lio/fd/vpp/jvpp/VppCallbackException;)V");
     if (!callbackExcMethod) {
         DEBUG_LOG("CallOnError : callbackExcMethod is null!\n");
         return;
@@ -66,9 +67,9 @@ void call_on_error(const char* callName, int contextId, int retval,
     char *message;
     get_error_message(clib_net_to_host_u32(retval));
     jobject excObject = (*env)->NewObject(env, callbackExceptionClass,
-            excConstructor, (*env)->NewStringUTF(env, callName),
-            (*env)->NewStringUTF(env, message),
-            clib_net_to_host_u32(contextId), clib_net_to_host_u32(retval));
+                                          excConstructor, (*env)->NewStringUTF(env, callName),
+                                          (*env)->NewStringUTF(env, message),
+                                          clib_net_to_host_u32(contextId), clib_net_to_host_u32(retval));
     if (!excObject) {
         DEBUG_LOG("CallOnError : excObject is null!\n");
         return;
@@ -79,7 +80,8 @@ void call_on_error(const char* callName, int contextId, int retval,
 }
 #undef _
 
-u32 get_message_id(JNIEnv *env, const char *key) {
+u32 get_message_id(JNIEnv *env, const char *key)
+{
     uword *p = hash_get(jvpp_main.messages_hash, key);
     if (!p) {
         jclass exClass = (*env)->FindClass(env, "java/lang/IllegalStateException");

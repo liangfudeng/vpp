@@ -23,8 +23,7 @@
  * Strict priorities. All walks a priority n are completed before n+1 is started.
  * Increasing numerical value implies decreasing priority.
  */
-typedef enum fib_walk_priority_t_
-{
+typedef enum fib_walk_priority_t_ {
     FIB_WALK_PRIORITY_HIGH = 0,
     FIB_WALK_PRIORITY_LOW  = 1,
 } fib_walk_priority_t;

@@ -1,17 +1,17 @@
- /*
- * Copyright (c) 2016 Cisco and/or its affiliates.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at:
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+/*
+* Copyright (c) 2016 Cisco and/or its affiliates.
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at:
+*
+*     http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 
 #ifndef __MFIB_TYPES_H__
 #define __MFIB_TYPES_H__
@@ -47,8 +47,7 @@ typedef struct mfib_prefix_t_ {
     ip46_address_t fp_src_addr;
 } mfib_prefix_t;
 
-typedef enum mfib_entry_attribute_t_
-{
+typedef enum mfib_entry_attribute_t_ {
     MFIB_ENTRY_ATTRIBUTE_FIRST = 0,
     /**
      * The control planes needs packets mathing this entry to generate
@@ -79,10 +78,10 @@ typedef enum mfib_entry_attribute_t_
     MFIB_ENTRY_ATTRIBUTE_LAST = MFIB_ENTRY_INHERIT_ACCEPT,
 } mfib_entry_attribute_t;
 
-#define FOR_EACH_MFIB_ATTRIBUTE(_item)			\
-    for (_item = MFIB_ENTRY_ATTRIBUTE_FIRST;		\
-	 _item <= MFIB_ENTRY_ATTRIBUTE_LAST;		\
-	 _item++)
+#define FOR_EACH_MFIB_ATTRIBUTE(_item)          \
+    for (_item = MFIB_ENTRY_ATTRIBUTE_FIRST;        \
+     _item <= MFIB_ENTRY_ATTRIBUTE_LAST;        \
+     _item++)
 
 #define MFIB_ENTRY_NAMES_SHORT  {          \
     [MFIB_ENTRY_SIGNAL]         = "S",     \
@@ -102,8 +101,7 @@ typedef enum mfib_entry_attribute_t_
     [MFIB_ENTRY_EXCLUSIVE]      = "Exclusive",      \
 }
 
-typedef enum mfib_entry_flags_t_
-{
+typedef enum mfib_entry_flags_t_ {
     MFIB_ENTRY_FLAG_NONE,
     MFIB_ENTRY_FLAG_SIGNAL = (1 << MFIB_ENTRY_SIGNAL),
     MFIB_ENTRY_FLAG_DROP = (1 << MFIB_ENTRY_DROP),
@@ -113,8 +111,7 @@ typedef enum mfib_entry_flags_t_
     MFIB_ENTRY_FLAG_INHERIT_ACCEPT = (1 << MFIB_ENTRY_INHERIT_ACCEPT),
 } mfib_entry_flags_t;
 
-typedef enum mfib_itf_attribute_t_
-{
+typedef enum mfib_itf_attribute_t_ {
     MFIB_ITF_ATTRIBUTE_FIRST,
     MFIB_ITF_NEGATE_SIGNAL = MFIB_ITF_ATTRIBUTE_FIRST,
     MFIB_ITF_ACCEPT,
@@ -124,10 +121,10 @@ typedef enum mfib_itf_attribute_t_
     MFIB_ITF_ATTRIBUTE_LAST = MFIB_ITF_DONT_PRESERVE,
 } mfib_itf_attribute_t;
 
-#define FOR_EACH_MFIB_ITF_ATTRIBUTE(_item)	       	\
-    for (_item = MFIB_ITF_ATTRIBUTE_FIRST;       	\
-	 _item <= MFIB_ITF_ATTRIBUTE_LAST;		\
-	 _item++)
+#define FOR_EACH_MFIB_ITF_ATTRIBUTE(_item)          \
+    for (_item = MFIB_ITF_ATTRIBUTE_FIRST;          \
+     _item <= MFIB_ITF_ATTRIBUTE_LAST;      \
+     _item++)
 
 #define MFIB_ITF_NAMES_SHORT  {             \
     [MFIB_ITF_NEGATE_SIGNAL] = "NS",        \
@@ -145,8 +142,7 @@ typedef enum mfib_itf_attribute_t_
     [MFIB_ITF_DONT_PRESERVE] = "Don't-Preserve", \
 }
 
-typedef enum mfib_itf_flags_t_
-{
+typedef enum mfib_itf_flags_t_ {
     MFIB_ITF_FLAG_NONE,
     MFIB_ITF_FLAG_NEGATE_SIGNAL = (1 << MFIB_ITF_NEGATE_SIGNAL),
     MFIB_ITF_FLAG_ACCEPT = (1 << MFIB_ITF_ACCEPT),
@@ -158,8 +154,7 @@ typedef enum mfib_itf_flags_t_
 /**
  * Possible [control plane] sources of MFIB entries
  */
-typedef enum mfib_source_t_
-{
+typedef enum mfib_source_t_ {
     MFIB_SOURCE_SPECIAL,
     MFIB_SOURCE_API,
     MFIB_SOURCE_CLI,

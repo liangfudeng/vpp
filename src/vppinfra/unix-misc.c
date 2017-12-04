@@ -41,131 +41,125 @@
 
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <sys/uio.h>		/* writev */
+#include <sys/uio.h>        /* writev */
 #include <fcntl.h>
-#include <stdio.h>		/* for sprintf */
+#include <stdio.h>      /* for sprintf */
 
 __thread uword __os_thread_index = 0;
 
 clib_error_t *
 clib_file_n_bytes (char *file, uword * result)
 {
-  struct stat s;
+    struct stat s;
 
-  if (stat (file, &s) < 0)
-    return clib_error_return_unix (0, "stat `%s'", file);
+    if (stat (file, &s) < 0)
+        return clib_error_return_unix (0, "stat `%s'", file);
 
-  if (S_ISREG (s.st_mode))
-    *result = s.st_size;
-  else
-    *result = 0;
+    if (S_ISREG (s.st_mode))
+        *result = s.st_size;
+    else
+        *result = 0;
 
-  return /* no error */ 0;
+    return /* no error */ 0;
 }
 
 clib_error_t *
 clib_file_read_contents (char *file, u8 * result, uword n_bytes)
 {
-  int fd = -1;
-  uword n_done, n_left;
-  clib_error_t *error = 0;
-  u8 *v = result;
+    int fd = -1;
+    uword n_done, n_left;
+    clib_error_t *error = 0;
+    u8 *v = result;
 
-  if ((fd = open (file, 0)) < 0)
-    return clib_error_return_unix (0, "open `%s'", file);
+    if ((fd = open (file, 0)) < 0)
+        return clib_error_return_unix (0, "open `%s'", file);
 
-  n_left = n_bytes;
-  n_done = 0;
-  while (n_left > 0)
-    {
-      int n_read;
-      if ((n_read = read (fd, v + n_done, n_left)) < 0)
-	{
-	  error = clib_error_return_unix (0, "open `%s'", file);
-	  goto done;
-	}
+    n_left = n_bytes;
+    n_done = 0;
+    while (n_left > 0) {
+        int n_read;
+        if ((n_read = read (fd, v + n_done, n_left)) < 0) {
+            error = clib_error_return_unix (0, "open `%s'", file);
+            goto done;
+        }
 
-      /* End of file. */
-      if (n_read == 0)
-	break;
+        /* End of file. */
+        if (n_read == 0)
+            break;
 
-      n_left -= n_read;
-      n_done += n_read;
+        n_left -= n_read;
+        n_done += n_read;
     }
 
-  if (n_left > 0)
-    {
-      error =
-	clib_error_return (0,
-			   " `%s' expected to read %wd bytes; read only %wd",
-			   file, n_bytes, n_bytes - n_left);
-      goto done;
+    if (n_left > 0) {
+        error =
+            clib_error_return (0,
+                               " `%s' expected to read %wd bytes; read only %wd",
+                               file, n_bytes, n_bytes - n_left);
+        goto done;
     }
 
 done:
-  close (fd);
-  return error;
+    close (fd);
+    return error;
 }
 
 clib_error_t *
 clib_file_contents (char *file, u8 ** result)
 {
-  uword n_bytes;
-  clib_error_t *error = 0;
-  u8 *v;
+    uword n_bytes;
+    clib_error_t *error = 0;
+    u8 *v;
 
-  if ((error = clib_file_n_bytes (file, &n_bytes)))
+    if ((error = clib_file_n_bytes (file, &n_bytes)))
+        return error;
+
+    v = 0;
+    vec_resize (v, n_bytes);
+
+    error = clib_file_read_contents (file, v, n_bytes);
+
+    if (error)
+        vec_free (v);
+    else
+        *result = v;
+
     return error;
-
-  v = 0;
-  vec_resize (v, n_bytes);
-
-  error = clib_file_read_contents (file, v, n_bytes);
-
-  if (error)
-    vec_free (v);
-  else
-    *result = v;
-
-  return error;
 }
 
 clib_error_t *
 unix_proc_file_contents (char *file, u8 ** result)
 {
-  u8 *rv = 0;
-  uword pos;
-  int bytes, fd;
+    u8 *rv = 0;
+    uword pos;
+    int bytes, fd;
 
-  /* Unfortunately, stat(/proc/XXX) returns zero... */
-  fd = open (file, O_RDONLY);
+    /* Unfortunately, stat(/proc/XXX) returns zero... */
+    fd = open (file, O_RDONLY);
 
-  if (fd < 0)
-    return clib_error_return_unix (0, "open `%s'", file);
+    if (fd < 0)
+        return clib_error_return_unix (0, "open `%s'", file);
 
-  vec_validate (rv, 4095);
-  pos = 0;
-  while (1)
-    {
-      bytes = read (fd, rv + pos, 4096);
-      if (bytes < 0)
-	{
-	  close (fd);
-	  vec_free (rv);
-	  return clib_error_return_unix (0, "read '%s'", file);
-	}
+    vec_validate (rv, 4095);
+    pos = 0;
+    while (1) {
+        bytes = read (fd, rv + pos, 4096);
+        if (bytes < 0) {
+            close (fd);
+            vec_free (rv);
+            return clib_error_return_unix (0, "read '%s'", file);
+        }
 
-      if (bytes == 0)
-	{
-	  _vec_len (rv) = pos;
-	  break;
-	}
-      pos += bytes;
-      vec_validate (rv, pos + 4095);
+        if (bytes == 0) {
+            _vec_len (rv) = pos;
+            break;
+        }
+        pos += bytes;
+        vec_validate (rv, pos + 4095);
     }
-  *result = rv;
-  close (fd);
-  return 0;
+    *result = rv;
+    close (fd);
+    return 0;
 }
 
 void os_panic (void) __attribute__ ((weak));
@@ -173,7 +167,7 @@ void os_panic (void) __attribute__ ((weak));
 void
 os_panic (void)
 {
-  abort ();
+    abort ();
 }
 
 void os_exit (int) __attribute__ ((weak));
@@ -181,51 +175,50 @@ void os_exit (int) __attribute__ ((weak));
 void
 os_exit (int code)
 {
-  exit (code);
+    exit (code);
 }
 
 void os_puts (u8 * string, uword string_length, uword is_error)
-  __attribute__ ((weak));
+__attribute__ ((weak));
 
 void
 os_puts (u8 * string, uword string_length, uword is_error)
 {
-  int cpu = os_get_thread_index ();
-  int nthreads = os_get_nthreads ();
-  char buf[64];
-  int fd = is_error ? 2 : 1;
-  struct iovec iovs[2];
-  int n_iovs = 0;
+    int cpu = os_get_thread_index ();
+    int nthreads = os_get_nthreads ();
+    char buf[64];
+    int fd = is_error ? 2 : 1;
+    struct iovec iovs[2];
+    int n_iovs = 0;
 
-  if (nthreads > 1)
-    {
-      snprintf (buf, sizeof (buf), "%d: ", cpu);
+    if (nthreads > 1) {
+        snprintf (buf, sizeof (buf), "%d: ", cpu);
 
-      iovs[n_iovs].iov_base = buf;
-      iovs[n_iovs].iov_len = strlen (buf);
-      n_iovs++;
+        iovs[n_iovs].iov_base = buf;
+        iovs[n_iovs].iov_len = strlen (buf);
+        n_iovs++;
     }
 
-  iovs[n_iovs].iov_base = string;
-  iovs[n_iovs].iov_len = string_length;
-  n_iovs++;
+    iovs[n_iovs].iov_base = string;
+    iovs[n_iovs].iov_len = string_length;
+    n_iovs++;
 
-  if (writev (fd, iovs, n_iovs) < 0)
-    ;
+    if (writev (fd, iovs, n_iovs) < 0)
+        ;
 }
 
 void os_out_of_memory (void) __attribute__ ((weak));
 void
 os_out_of_memory (void)
 {
-  os_panic ();
+    os_panic ();
 }
 
 uword os_get_nthreads (void) __attribute__ ((weak));
 uword
 os_get_nthreads (void)
 {
-  return 1;
+    return 1;
 }
 
 /*

@@ -21,79 +21,81 @@
 #include <vapi/l2.api.vapi.hpp>
 #include <vapi/vpe.api.vapi.hpp>
 
-namespace VOM {
-namespace bridge_domain_arp_entry_cmds {
-
-/**
-* A command class that creates or updates the bridge domain ARP Entry
-*/
-class create_cmd : public rpc_cmd<HW::item<bool>, rc_t, vapi::Bd_ip_mac_add_del>
+namespace VOM
 {
-public:
-  /**
-   * Constructor
-   */
-  create_cmd(HW::item<bool>& item,
-             uint32_t id,
-             const mac_address_t& mac,
-             const boost::asio::ip::address& ip_addr);
+    namespace bridge_domain_arp_entry_cmds
+    {
 
-  /**
-   * Issue the command to VPP/HW
-   */
-  rc_t issue(connection& con);
+        /**
+        * A command class that creates or updates the bridge domain ARP Entry
+        */
+        class create_cmd : public rpc_cmd<HW::item<bool>, rc_t, vapi::Bd_ip_mac_add_del>
+        {
+        public:
+            /**
+             * Constructor
+             */
+            create_cmd(HW::item<bool>& item,
+                       uint32_t id,
+                       const mac_address_t& mac,
+                       const boost::asio::ip::address& ip_addr);
 
-  /**
-   * convert to string format for debug purposes
-   */
-  std::string to_string() const;
+            /**
+             * Issue the command to VPP/HW
+             */
+            rc_t issue(connection& con);
 
-  /**
-   * Comparison operator - only used for UT
-   */
-  bool operator==(const create_cmd& i) const;
+            /**
+             * convert to string format for debug purposes
+             */
+            std::string to_string() const;
 
-private:
-  uint32_t m_bd;
-  mac_address_t m_mac;
-  boost::asio::ip::address m_ip_addr;
-};
+            /**
+             * Comparison operator - only used for UT
+             */
+            bool operator==(const create_cmd& i) const;
 
-/**
- * A cmd class that deletes a bridge domain ARP entry
- */
-class delete_cmd : public rpc_cmd<HW::item<bool>, rc_t, vapi::Bd_ip_mac_add_del>
-{
-public:
-  /**
-   * Constructor
-   */
-  delete_cmd(HW::item<bool>& item,
-             uint32_t id,
-             const mac_address_t& mac,
-             const boost::asio::ip::address& ip_addr);
+        private:
+            uint32_t m_bd;
+            mac_address_t m_mac;
+            boost::asio::ip::address m_ip_addr;
+        };
 
-  /**
-   * Issue the command to VPP/HW
-   */
-  rc_t issue(connection& con);
+        /**
+         * A cmd class that deletes a bridge domain ARP entry
+         */
+        class delete_cmd : public rpc_cmd<HW::item<bool>, rc_t, vapi::Bd_ip_mac_add_del>
+        {
+        public:
+            /**
+             * Constructor
+             */
+            delete_cmd(HW::item<bool>& item,
+                       uint32_t id,
+                       const mac_address_t& mac,
+                       const boost::asio::ip::address& ip_addr);
 
-  /**
-   * convert to string format for debug purposes
-   */
-  std::string to_string() const;
+            /**
+             * Issue the command to VPP/HW
+             */
+            rc_t issue(connection& con);
 
-  /**
-   * Comparison operator - only used for UT
-   */
-  bool operator==(const delete_cmd& i) const;
+            /**
+             * convert to string format for debug purposes
+             */
+            std::string to_string() const;
 
-private:
-  uint32_t m_bd;
-  mac_address_t m_mac;
-  boost::asio::ip::address m_ip_addr;
-};
-};
+            /**
+             * Comparison operator - only used for UT
+             */
+            bool operator==(const delete_cmd& i) const;
+
+        private:
+            uint32_t m_bd;
+            mac_address_t m_mac;
+            boost::asio::ip::address m_ip_addr;
+        };
+    };
 };
 
 /*

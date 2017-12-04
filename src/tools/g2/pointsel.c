@@ -1,4 +1,4 @@
-/* 
+/*
  *------------------------------------------------------------------
  * Copyright (c) 2005-2016 Cisco and/or its affiliates.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -95,7 +95,7 @@ static void point_select_callback(GtkToggleButton *item, gpointer data)
     int i = (int) (unsigned long long) data;
 
     g_eventdefs[i].selected = gtk_toggle_button_get_active(
-        GTK_TOGGLE_BUTTON(s_event_buttons[i]));
+                                  GTK_TOGGLE_BUTTON(s_event_buttons[i]));
     view1_display_when_idle();
 }
 
@@ -172,21 +172,21 @@ static void button_click_callback(GtkButton *item, gpointer data)
     enum button_click click = (enum button_click)data;
 
     switch (click) {
-    case ALL_BUTTON:
-        for (i = 0; i < g_neventdefs; i++) {
-            gtk_toggle_button_set_active (
-                GTK_TOGGLE_BUTTON(s_event_buttons[i]), TRUE);
-            g_eventdefs[i].selected = TRUE;
-        }
-        break;
+        case ALL_BUTTON:
+            for (i = 0; i < g_neventdefs; i++) {
+                gtk_toggle_button_set_active (
+                    GTK_TOGGLE_BUTTON(s_event_buttons[i]), TRUE);
+                g_eventdefs[i].selected = TRUE;
+            }
+            break;
 
-    case NONE_BUTTON:
-        for (i = 0; i < g_neventdefs; i++) {
-            gtk_toggle_button_set_active (
-                GTK_TOGGLE_BUTTON(s_event_buttons[i]), FALSE);
-            g_eventdefs[i].selected = FALSE;
-        }
-        break;
+        case NONE_BUTTON:
+            for (i = 0; i < g_neventdefs; i++) {
+                gtk_toggle_button_set_active (
+                    GTK_TOGGLE_BUTTON(s_event_buttons[i]), FALSE);
+                g_eventdefs[i].selected = FALSE;
+            }
+            break;
     }
 }
 
@@ -229,37 +229,37 @@ void point_selector_init(void)
     gtk_widget_show(s_nonebutton);
 
     gtk_signal_connect (GTK_OBJECT(s_allbutton), "clicked",
-                        GTK_SIGNAL_FUNC(button_click_callback), 
+                        GTK_SIGNAL_FUNC(button_click_callback),
                         (gpointer) ALL_BUTTON);
 
     gtk_signal_connect (GTK_OBJECT(s_nonebutton), "clicked",
-                        GTK_SIGNAL_FUNC(button_click_callback), 
+                        GTK_SIGNAL_FUNC(button_click_callback),
                         (gpointer) NONE_BUTTON);
 
-    gtk_box_pack_start(GTK_BOX(s_pointselbuttons), s_allbutton, FALSE, 
+    gtk_box_pack_start(GTK_BOX(s_pointselbuttons), s_allbutton, FALSE,
                        FALSE, 0);
-    gtk_box_pack_start(GTK_BOX(s_pointselbuttons), s_nonebutton, FALSE, 
+    gtk_box_pack_start(GTK_BOX(s_pointselbuttons), s_nonebutton, FALSE,
                        FALSE, 0);
-    
+
     gtk_widget_show(s_pointselbuttons);
-    gtk_widget_ref(s_pointselbuttons); 
+    gtk_widget_ref(s_pointselbuttons);
 
-    gtk_box_pack_start(GTK_BOX(s_pointselbox), s_pointselbuttons, FALSE, 
+    gtk_box_pack_start(GTK_BOX(s_pointselbox), s_pointselbuttons, FALSE,
                        FALSE, 0);
 
-    gtk_box_pack_end (GTK_BOX(g_mainhbox), s_pointselbox, 
-                       FALSE, FALSE, 0);
+    gtk_box_pack_end (GTK_BOX(g_mainhbox), s_pointselbox,
+                      FALSE, FALSE, 0);
 
-    s_ps_vsadj = gtk_adjustment_new(0.0 /* initial value */, 
+    s_ps_vsadj = gtk_adjustment_new(0.0 /* initial value */,
                                     0.0 /* minimum value */,
                                     2000.0 /* maximum value */,
-                                    0.1 /* step increment */, 
-                                    10.0/* page increment */, 
+                                    0.1 /* step increment */,
+                                    10.0/* page increment */,
                                     10.0/* page size */);
-    
+
     s_ps_vscroll = gtk_vscrollbar_new (GTK_ADJUSTMENT(s_ps_vsadj));
     gtk_signal_connect (GTK_OBJECT (s_ps_vsadj), "value-changed",
-                        GTK_SIGNAL_FUNC (scroll_callback), 
+                        GTK_SIGNAL_FUNC (scroll_callback),
                         (gpointer)s_ps_vscroll);
     gtk_box_pack_end(GTK_BOX(g_mainhbox), s_ps_vscroll, FALSE, FALSE, 0);
 }
@@ -289,12 +289,12 @@ static void reset_point_selector(void)
     gtk_widget_hide(s_pointselbox);
     gtk_widget_hide(s_pointselbuttons);
     gtk_widget_hide(s_ps_vscroll);
-    gtk_container_remove(GTK_CONTAINER(s_pointselbox), 
+    gtk_container_remove(GTK_CONTAINER(s_pointselbox),
                          s_pointselbuttons);
-    
+
     for (i = 0; i < g_neventdefs; i++) {
         if (s_event_buttons[i]) {
-            gtk_container_remove(GTK_CONTAINER(s_pointselbox), 
+            gtk_container_remove(GTK_CONTAINER(s_pointselbox),
                                  s_event_buttons[i]);
             s_event_buttons[i] = 0;
         }
@@ -314,7 +314,7 @@ static void create_point_selector(void)
 
     for (i = 0; i < g_neventdefs; i++) {
         ep = &g_eventdefs[i];
-        sprintf(tmpbuf, "[%lu] %s", ep->event, 
+        sprintf(tmpbuf, "[%lu] %s", ep->event,
                 ep->name ? ep->name : "(none)");
         /* Hack to reduce width of point selectors */
         if (strlen(tmpbuf) > 50) {
@@ -324,7 +324,7 @@ static void create_point_selector(void)
         wp = gtk_check_button_new_with_label (tmpbuf);
         s_event_buttons[i] = wp;
         gtk_signal_connect (GTK_OBJECT(wp), "toggled",
-                            GTK_SIGNAL_FUNC(point_select_callback), 
+                            GTK_SIGNAL_FUNC(point_select_callback),
                             (gpointer) (unsigned long long) i);
         gtk_toggle_button_set_active (
             GTK_TOGGLE_BUTTON(wp), TRUE);
@@ -335,7 +335,7 @@ static void create_point_selector(void)
     s_min_shown_pointsel = 1;
     up_button();
 
-    gtk_box_pack_start(GTK_BOX(s_pointselbox), s_pointselbuttons, FALSE, 
+    gtk_box_pack_start(GTK_BOX(s_pointselbox), s_pointselbuttons, FALSE,
                        FALSE, 0);
     gtk_widget_show(s_pointselbuttons);
     gtk_widget_show(s_pointselbox);
@@ -376,7 +376,7 @@ static void add_event(ulong event, char *name, char *format)
         g_error("Too many event definitions, increase NEVENTS!");
         /*NOTREACHED*/
     }
-        
+
     /* Simple dup check, probably not needed very often */
     for (i = 0; i < g_neventdefs; i++) {
         if (g_eventdefs[i].event == event) {
@@ -398,7 +398,7 @@ static void add_event(ulong event, char *name, char *format)
 * add_event_from_cpel_file
 ****************************************************************************/
 
-void add_event_from_cpel_file(ulong event, char *event_format, 
+void add_event_from_cpel_file(ulong event, char *event_format,
                               char *datum_format)
 {
     event_def_t *ep;
@@ -414,7 +414,7 @@ void add_event_from_cpel_file(ulong event, char *event_format,
     /*
      * Duplicate the strings for backward compatibility. Otherwise,
      * the g_free above will barf because the name/format strings are
-     * actually in mmap'ed memory 
+     * actually in mmap'ed memory
      */
     ep->name = sxerox(event_format);
     ep->format = sxerox(datum_format);
@@ -425,7 +425,7 @@ void add_event_from_cpel_file(ulong event, char *event_format,
 * add_event_from_clib_file
 ****************************************************************************/
 
-void add_event_from_clib_file(unsigned int event, char *name, 
+void add_event_from_clib_file(unsigned int event, char *name,
                               unsigned int vec_index)
 {
     event_def_t *ep;
@@ -448,7 +448,7 @@ void add_event_from_clib_file(unsigned int event, char *name,
 /****************************************************************************
 * read_header_file - eats header file lines of the form
 *
-*     #define EVENT_FOO  123	/ * name: %d * /
+*     #define EVENT_FOO  123    / * name: %d * /
 *
 ****************************************************************************/
 
@@ -460,8 +460,7 @@ static void read_header_file (void)
     unsigned long event;
     int ev_num_flag;
 
-    while (fgets (tmpbuf, sizeof (tmpbuf), s_hfp))
-    {
+    while (fgets (tmpbuf, sizeof (tmpbuf), s_hfp)) {
         cp = tmpbuf;
         ev_num_flag = 0;
 
@@ -478,7 +477,7 @@ static void read_header_file (void)
         /* skip ws after #define */
         while (*cp && isspace ((int)*cp))
             cp++;
-            
+
         if (*cp == 0)
             continue;
 
@@ -492,7 +491,7 @@ static void read_header_file (void)
         /* skip ws after symbolic name */
         while (*cp && isspace ((int)*cp))
             cp++;
-            
+
         if (*cp == 0)
             continue;
 
@@ -504,20 +503,19 @@ static void read_header_file (void)
 
             while (*cp && *cp != '(')
                 cp++;
-            
+
             if (*cp == 0)
                 continue;
 
-            cp++; 
+            cp++;
 
             while (*cp && isspace ((int)*cp))
                 cp++;
-            
-        } 
+
+        }
 
         /* eat event code. */
-        while (*cp && isdigit ((int)*cp))
-        {
+        while (*cp && isdigit ((int)*cp)) {
             event = event * 10 + (*cp - '0');
             cp++;
         }
@@ -537,7 +535,7 @@ static void read_header_file (void)
         /* skip ws after event code */
         while (*cp && isspace ((int)*cp))
             cp++;
-            
+
         if (*cp != '/')
             continue;
 
@@ -565,19 +563,18 @@ static void read_header_file (void)
             continue;
 
         *cp++ = 0;
-        
+
         /* skip ws after name: */
         while (*cp && isspace ((int)*cp))
             cp++;
-        
-        if (*cp == 0 || *cp == '/')
-        {
+
+        if (*cp == 0 || *cp == '/') {
             format = " ";
             goto write_it;
         }
 
         format = cp;
-        
+
         /* accumulate format string */
         while (*cp && !isspace ((int)*cp))
             cp++;
@@ -593,7 +590,7 @@ static void read_header_file (void)
 /****************************************************************************
 * read_header_files - eats header file lines of the form
 *
-*     #define FILE1_BASE  100	/ * pointdefs: ../vpn/vpn_points.h * /
+*     #define FILE1_BASE  100   / * pointdefs: ../vpn/vpn_points.h * /
 *
 ****************************************************************************/
 
@@ -604,8 +601,7 @@ static boolean read_header_files (void)
     int basenum;
     boolean rv=FALSE;
 
-    while (fgets (tmpbuf, sizeof (tmpbuf), s_elog_hfp))
-    {
+    while (fgets (tmpbuf, sizeof (tmpbuf), s_elog_hfp)) {
         cp = tmpbuf;
 
         if (strncmp (cp, "#define", 7))
@@ -630,12 +626,12 @@ static boolean read_header_files (void)
         /* skip ws after EV_COMPxxx_START */
         while (*cp && isspace ((int)*cp))
             cp++;
-        
+
         if (*cp == 0)
             continue;
-        
+
         basenum = atol (cp);
-        
+
         /* skip #define */
         while (*cp && (*cp != '/'))
             cp++;
@@ -669,7 +665,7 @@ static boolean read_header_files (void)
 
         while (*cp && !isspace ((int)*cp))
             cp++;
-       
+
         *cp = 0;
 
         s_hfp = fopen (name, "rt");
@@ -802,10 +798,10 @@ event_def_t *find_event_definition (ulong code)
     top = 0;
 
     while (1) {
-	index = (bottom + top) / 2;
+        index = (bottom + top) / 2;
 
         edp = (g_eventdefs + index);
-        
+
         if (edp->event == code)
             return(edp);
 
@@ -822,7 +818,7 @@ event_def_t *find_event_definition (ulong code)
 
         if (edp->event < code)
             top = index + 1;
-        else 
+        else
             bottom = index - 1;
     }
 }
@@ -835,10 +831,10 @@ event_def_t *find_event_definition (ulong code)
 void pointsel_next_snapshot(void)
 {
     int i;
-    
+
     for (i = 0; i < g_neventdefs; i++) {
         gtk_toggle_button_set_active (
-            GTK_TOGGLE_BUTTON(s_event_buttons[i]), 
+            GTK_TOGGLE_BUTTON(s_event_buttons[i]),
             g_eventdefs[i].selected);
     }
 }
@@ -849,6 +845,6 @@ void pointsel_next_snapshot(void)
 
 void pointsel_about (char *tmpbuf)
 {
-    sprintf (tmpbuf+strlen(tmpbuf), "%d event definitions\n", 
+    sprintf (tmpbuf+strlen(tmpbuf), "%d event definitions\n",
              g_neventdefs);
 }

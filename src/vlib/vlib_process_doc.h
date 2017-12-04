@@ -76,40 +76,40 @@
            // or until we receive event(s)
            //
           poll_time_remaining =
-    	    vlib_process_wait_for_event_or_clock (vm, poll_time_remaining);
+            vlib_process_wait_for_event_or_clock (vm, poll_time_remaining);
 
           event_type = vlib_process_get_events (vm, &event_data);
           switch (event_type)
-     	    {
-       	    case ~0:		// no events => timeout
-      	      break;
+            {
+            case ~0:        // no events => timeout
+              break;
 
             case EVENT1:
-    	      for (i = 0; i < vec_len (event_data); i++)
-    	        handle_event1 (mm, event_data[i]);
-    	      break;
+              for (i = 0; i < vec_len (event_data); i++)
+                handle_event1 (mm, event_data[i]);
+              break;
 
-    	    case EVENT2:
-    	      for (i = 0; i < vec_len (event_data); i++)
-    	        handle_event2 (vm, event_data[i]);
-    	      break;
+            case EVENT2:
+              for (i = 0; i < vec_len (event_data); i++)
+                handle_event2 (vm, event_data[i]);
+              break;
 
               // ... and so forth for each event type
 
             default:
               // This should never happen...
-    	      clib_warning ("BUG: unhandled event type %d",
+              clib_warning ("BUG: unhandled event type %d",
                             event_type);
-    	      break;
-      	    }
+              break;
+            }
           vec_reset_length (event_data);
 
           // Timer expired, call periodic function
           if (vlib_process_suspend_time_is_zero (poll_time_remaining))
-    	    {
-    	      example_periodic (vm);
-    	      poll_time_remaining = EXAMPLE_POLL_PERIOD;
-    	    }
+            {
+              example_periodic (vm);
+              poll_time_remaining = EXAMPLE_POLL_PERIOD;
+            }
         }
       // NOTREACHED
       return 0;

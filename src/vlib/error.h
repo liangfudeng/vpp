@@ -46,49 +46,48 @@ typedef u32 vlib_error_t;
 always_inline u32
 vlib_error_get_node (vlib_error_t e)
 {
-  return e >> 12;
+    return e >> 12;
 }
 
 always_inline u32
 vlib_error_get_code (vlib_error_t e)
 {
-  return e & 0xfff;
+    return e & 0xfff;
 }
 
 always_inline vlib_error_t
 vlib_error_set (u32 node_index, u32 code)
 {
-  ASSERT (node_index < (1 << 20));
-  ASSERT (code < (1 << 12));
-  return (node_index << 12) | code;
+    ASSERT (node_index < (1 << 20));
+    ASSERT (code < (1 << 12));
+    return (node_index << 12) | code;
 }
 
 always_inline vlib_error_t
 vlib_error_set_code (vlib_error_t e, u32 code)
 {
-  ASSERT (vlib_error_get_code (e) == 0);
-  ASSERT (code < (1 << 12));
-  e |= code;
-  return e;
+    ASSERT (vlib_error_get_code (e) == 0);
+    ASSERT (code < (1 << 12));
+    e |= code;
+    return e;
 }
 
-typedef struct
-{
-  /* Error counters. */
-  u64 *counters;
+typedef struct {
+    /* Error counters. */
+    u64 *counters;
 
-  /* Counter values as of last counter clear. */
-  u64 *counters_last_clear;
+    /* Counter values as of last counter clear. */
+    u64 *counters_last_clear;
 
-  /* Error name strings in heap.  Heap index
-     indexes counter vector. */
-  char **error_strings_heap;
+    /* Error name strings in heap.  Heap index
+       indexes counter vector. */
+    char **error_strings_heap;
 } vlib_error_main_t;
 
 /* Per node error registration. */
 void vlib_register_errors (struct vlib_main_t *vm,
-			   u32 node_index,
-			   u32 n_errors, char *error_strings[]);
+                           u32 node_index,
+                           u32 n_errors, char *error_strings[]);
 
 #endif /* included_vlib_error_h */
 

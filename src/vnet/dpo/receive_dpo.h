@@ -23,8 +23,7 @@
 #include <vnet/dpo/dpo.h>
 #include <vnet/ip/ip6.h>
 
-typedef struct receive_dpo_t_
-{
+typedef struct receive_dpo_t_ {
     /**
      * The Software interface index on which traffic is received
      */

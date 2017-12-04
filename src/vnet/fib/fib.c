@@ -25,11 +25,11 @@ fib_module_init (vlib_main_t * vm)
     clib_error_t * error;
 
     if ((error = vlib_call_init_function (vm, dpo_module_init)))
-	return (error);
+        return (error);
     if ((error = vlib_call_init_function (vm, adj_module_init)))
-	return (error);
+        return (error);
     if ((error = vlib_call_init_function (vm, ip4_mtrie_module_init)))
-	return (error);
+        return (error);
 
     fib_entry_module_init();
     fib_entry_src_module_init();

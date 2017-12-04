@@ -45,8 +45,7 @@ typedef enum adj_delegate_type_t_ {
  * Distillation of the BFD session states into a go/no-go for using
  * the associated tracked adjacency
  */
-typedef enum adj_bfd_state_t_
-{
+typedef enum adj_bfd_state_t_ {
     ADJ_BFD_STATE_DOWN,
     ADJ_BFD_STATE_UP,
 } adj_bfd_state_t;
@@ -58,8 +57,7 @@ typedef enum adj_bfd_state_t_
  * These 'other' objects are delegates. Delagates are thus attached to
  * ADJ objects to extend their functionality.
  */
-typedef struct adj_delegate_t_
-{
+typedef struct adj_delegate_t_ {
     /**
      * The ADJ entry object to which the delagate is attached
      */
@@ -73,8 +71,7 @@ typedef struct adj_delegate_t_
     /**
      * A union of data for the different delegate types
      */
-    union
-    {
+    union {
         /**
          * BFD delegate daa
          */
@@ -95,7 +92,7 @@ extern void adj_delegate_remove(ip_adjacency_t *adj,
                                 adj_delegate_type_t type);
 
 extern adj_delegate_t *adj_delegate_find_or_add(ip_adjacency_t *adj,
-                                                adj_delegate_type_t fdt);
+        adj_delegate_type_t fdt);
 extern adj_delegate_t *adj_delegate_get(const ip_adjacency_t *adj,
                                         adj_delegate_type_t type);
 

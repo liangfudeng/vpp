@@ -47,67 +47,62 @@
 
 /* Attribute used is so that static registrations work even if
    variable is not referenced. */
-#define CLIB_ELF_SECTION(SECTION)					\
-   __attribute__ ((used,						\
-		   aligned (CLIB_ELF_SECTION_DATA_ALIGN),		\
-		   section (CLIB_ELF_SECTION_ADD_PREFIX (SECTION))))
+#define CLIB_ELF_SECTION(SECTION)                   \
+   __attribute__ ((used,                        \
+           aligned (CLIB_ELF_SECTION_DATA_ALIGN),       \
+           section (CLIB_ELF_SECTION_ADD_PREFIX (SECTION))))
 
 /* Given pointer to previous data A get next pointer.  EXTRA gives extra
    space beyond A + 1 used in object. */
-#define clib_elf_section_data_next(a,extra)				\
-  uword_to_pointer (round_pow2 (pointer_to_uword (a + 1) + (extra),	\
-				CLIB_ELF_SECTION_DATA_ALIGN),		\
-		    void *)
+#define clib_elf_section_data_next(a,extra)             \
+  uword_to_pointer (round_pow2 (pointer_to_uword (a + 1) + (extra), \
+                CLIB_ELF_SECTION_DATA_ALIGN),       \
+            void *)
 
-typedef struct
-{
-  void *lo, *hi;
+typedef struct {
+    void *lo, *hi;
 } clib_elf_section_bounds_t;
 
-typedef struct
-{
-  /* Vector of bounds for this section.  Multiple shared objects may have instances
-     of the same sections. */
-  clib_elf_section_bounds_t *bounds;
+typedef struct {
+    /* Vector of bounds for this section.  Multiple shared objects may have instances
+       of the same sections. */
+    clib_elf_section_bounds_t *bounds;
 
-  /* Name of ELF section (e.g. .text). */
-  u8 *name;
+    /* Name of ELF section (e.g. .text). */
+    u8 *name;
 } clib_elf_section_t;
 
-typedef struct
-{
-  /* Vector of sections. */
-  clib_elf_section_t *sections;
+typedef struct {
+    /* Vector of sections. */
+    clib_elf_section_t *sections;
 
-  /* Hash map of name to section index. */
-  uword *section_by_name;
+    /* Hash map of name to section index. */
+    uword *section_by_name;
 
-  /* Unix path that we were exec()ed with. */
-  char *exec_path;
+    /* Unix path that we were exec()ed with. */
+    char *exec_path;
 
-  elf_main_t *elf_mains;
+    elf_main_t *elf_mains;
 } clib_elf_main_t;
 
 always_inline void
 clib_elf_main_free (clib_elf_main_t * m)
 {
-  clib_elf_section_t *s;
-  vec_foreach (s, m->sections)
-  {
-    vec_free (s->bounds);
-    vec_free (s->name);
-  }
-  vec_free (m->sections);
-  hash_free (m->section_by_name);
-
-  {
-    elf_main_t *em;
-    vec_foreach (em, m->elf_mains)
-    {
-      elf_main_free (em);
+    clib_elf_section_t *s;
+    vec_foreach (s, m->sections) {
+        vec_free (s->bounds);
+        vec_free (s->name);
     }
-    vec_free (m->elf_mains);
-  }
+    vec_free (m->sections);
+    hash_free (m->section_by_name);
+
+    {
+        elf_main_t *em;
+        vec_foreach (em, m->elf_mains) {
+            elf_main_free (em);
+        }
+        vec_free (m->elf_mains);
+    }
 }
 
 /* Call with exec_path equal to argv[0] from C main. */
@@ -115,16 +110,15 @@ void clib_elf_main_init (char *exec_path);
 
 clib_elf_section_bounds_t *clib_elf_get_section_bounds (char *name);
 
-typedef struct
-{
-  /* The symbol. */
-  elf64_symbol_t symbol;
+typedef struct {
+    /* The symbol. */
+    elf64_symbol_t symbol;
 
-  /* elf_main_t where symbol came from. */
-  u32 elf_main_index;
+    /* elf_main_t where symbol came from. */
+    u32 elf_main_index;
 
-  /* Symbol table in elf_main_t where this symbol came from. */
-  u32 symbol_table_index;
+    /* Symbol table in elf_main_t where this symbol came from. */
+    u32 symbol_table_index;
 } clib_elf_symbol_t;
 
 /* Returns 1 if found; otherwise zero. */

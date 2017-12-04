@@ -21,143 +21,144 @@
 
 #include "vom/logger.hpp"
 
-namespace VOM {
-const log_level_t log_level_t::CRITICAL(4, "critical");
-const log_level_t log_level_t::ERROR(3, "error");
-const log_level_t log_level_t::WARNING(2, "warning");
-const log_level_t log_level_t::INFO(1, "info");
-const log_level_t log_level_t::DEBUG(0, "debug");
-
-log_level_t::log_level_t(int v, const std::string& s)
-  : enum_base<log_level_t>(v, s)
+namespace VOM
 {
-}
+    const log_level_t log_level_t::CRITICAL(4, "critical");
+    const log_level_t log_level_t::ERROR(3, "error");
+    const log_level_t log_level_t::WARNING(2, "warning");
+    const log_level_t log_level_t::INFO(1, "info");
+    const log_level_t log_level_t::DEBUG(0, "debug");
 
-static log_t slog;
+    log_level_t::log_level_t(int v, const std::string& s)
+        : enum_base<log_level_t>(v, s)
+    {
+    }
 
-log_t&
-logger()
-{
-  return slog;
-}
+    static log_t slog;
 
-log_t::log_t()
-  : m_level(log_level_t::ERROR)
-  , m_handler(new cout_handler())
-{
-}
+    log_t&
+    logger()
+    {
+        return slog;
+    }
 
-void
-log_t::set(const log_level_t& level)
-{
-  m_level = level;
-}
+    log_t::log_t()
+        : m_level(log_level_t::ERROR)
+        , m_handler(new cout_handler())
+    {
+    }
 
-void
-log_t::set(handler* h)
-{
-  m_handler = h;
-}
+    void
+    log_t::set(const log_level_t& level)
+    {
+        m_level = level;
+    }
 
-void
-log_t::write(const std::string& file,
-             const int line,
-             const std::string& function,
-             const log_level_t& level,
-             const std::string& message)
-{
-  m_handler->handle_message(file, line, function, level, message);
-}
+    void
+    log_t::set(handler* h)
+    {
+        m_handler = h;
+    }
 
-/**
- * The configured level
- */
-const log_level_t&
-log_t::level() const
-{
-  return (m_level);
-}
+    void
+    log_t::write(const std::string& file,
+                 const int line,
+                 const std::string& function,
+                 const log_level_t& level,
+                 const std::string& message)
+    {
+        m_handler->handle_message(file, line, function, level, message);
+    }
 
-static std::string
-get_filename(const std::string& file)
-{
-  std::vector<std::string> dirs;
-  boost::split(dirs, file, boost::is_any_of("/"));
+    /**
+     * The configured level
+     */
+    const log_level_t&
+    log_t::level() const
+    {
+        return (m_level);
+    }
 
-  return dirs.back();
-}
+    static std::string
+    get_filename(const std::string& file)
+    {
+        std::vector<std::string> dirs;
+        boost::split(dirs, file, boost::is_any_of("/"));
 
-log_t::entry::entry(const char* file,
-                    const char* function,
-                    int line,
-                    const log_level_t& level)
-  : m_file(get_filename(file))
-  , m_function(function)
-  , m_level(level)
-  , m_line(line)
-{
-}
+        return dirs.back();
+    }
 
-log_t::entry::~entry()
-{
-  logger().write(m_file, m_line, m_function, m_level, m_stream.str());
-}
+    log_t::entry::entry(const char* file,
+                        const char* function,
+                        int line,
+                        const log_level_t& level)
+        : m_file(get_filename(file))
+        , m_function(function)
+        , m_level(level)
+        , m_line(line)
+    {
+    }
 
-std::stringstream&
-log_t::entry::stream()
-{
-  return (m_stream);
-}
+    log_t::entry::~entry()
+    {
+        logger().write(m_file, m_line, m_function, m_level, m_stream.str());
+    }
 
-static std::string
-get_timestamp()
-{
-  auto end = std::chrono::system_clock::now();
-  auto end_time = std::chrono::system_clock::to_time_t(end);
+    std::stringstream&
+    log_t::entry::stream()
+    {
+        return (m_stream);
+    }
 
-  /*
-   * put-time is not support in gcc in 4.8
-   * so we play this dance with ctime
-   */
-  std::string display = std::ctime(&end_time);
-  display.pop_back();
+    static std::string
+    get_timestamp()
+    {
+        auto end = std::chrono::system_clock::now();
+        auto end_time = std::chrono::system_clock::to_time_t(end);
 
-  return (display);
-}
+        /*
+         * put-time is not support in gcc in 4.8
+         * so we play this dance with ctime
+         */
+        std::string display = std::ctime(&end_time);
+        display.pop_back();
 
-file_handler::file_handler(const std::string& ofile)
-{
-  m_file_stream.open(ofile);
-}
+        return (display);
+    }
 
-file_handler::~file_handler()
-{
-  m_file_stream.close();
-}
+    file_handler::file_handler(const std::string& ofile)
+    {
+        m_file_stream.open(ofile);
+    }
 
-void
-file_handler::handle_message(const std::string& file,
-                             const int line,
-                             const std::string& function,
-                             const log_level_t& level,
-                             const std::string& message)
-{
-  m_file_stream << get_timestamp();
-  m_file_stream << " [" << level.to_string() << "]" << file << ":" << line
-                << " " << function << "() " << message << std::endl;
-}
+    file_handler::~file_handler()
+    {
+        m_file_stream.close();
+    }
 
-void
-cout_handler::handle_message(const std::string& file,
-                             const int line,
-                             const std::string& function,
-                             const log_level_t& level,
-                             const std::string& message)
-{
-  std::cout << get_timestamp();
-  std::cout << " [" << level.to_string() << "]" << file << ":" << line << " "
-            << function << "() " << message << std::endl;
-}
+    void
+    file_handler::handle_message(const std::string& file,
+                                 const int line,
+                                 const std::string& function,
+                                 const log_level_t& level,
+                                 const std::string& message)
+    {
+        m_file_stream << get_timestamp();
+        m_file_stream << " [" << level.to_string() << "]" << file << ":" << line
+                      << " " << function << "() " << message << std::endl;
+    }
+
+    void
+    cout_handler::handle_message(const std::string& file,
+                                 const int line,
+                                 const std::string& function,
+                                 const log_level_t& level,
+                                 const std::string& message)
+    {
+        std::cout << get_timestamp();
+        std::cout << " [" << level.to_string() << "]" << file << ":" << line << " "
+                  << function << "() " << message << std::endl;
+    }
 
 }; // namespace VOM
 

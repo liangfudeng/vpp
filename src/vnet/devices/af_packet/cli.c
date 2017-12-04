@@ -17,12 +17,12 @@
  *------------------------------------------------------------------
  */
 
-#include <fcntl.h>		/* for open */
+#include <fcntl.h>      /* for open */
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <sys/uio.h>		/* for iovec */
+#include <sys/uio.h>        /* for iovec */
 #include <netinet/in.h>
 
 #include <vlib/vlib.h>
@@ -41,70 +41,63 @@
 
 static clib_error_t *
 af_packet_create_command_fn (vlib_main_t * vm, unformat_input_t * input,
-			     vlib_cli_command_t * cmd)
+                             vlib_cli_command_t * cmd)
 {
-  unformat_input_t _line_input, *line_input = &_line_input;
-  u8 *host_if_name = NULL;
-  u8 hwaddr[6];
-  u8 *hw_addr_ptr = 0;
-  u32 sw_if_index;
-  int r;
-  clib_error_t *error = NULL;
+    unformat_input_t _line_input, *line_input = &_line_input;
+    u8 *host_if_name = NULL;
+    u8 hwaddr[6];
+    u8 *hw_addr_ptr = 0;
+    u32 sw_if_index;
+    int r;
+    clib_error_t *error = NULL;
 
-  /* Get a line of input. */
-  if (!unformat_user (input, unformat_line_input, line_input))
-    return 0;
+    /* Get a line of input. */
+    if (!unformat_user (input, unformat_line_input, line_input))
+        return 0;
 
-  while (unformat_check_input (line_input) != UNFORMAT_END_OF_INPUT)
-    {
-      if (unformat (line_input, "name %s", &host_if_name))
-	;
-      else
-	if (unformat
-	    (line_input, "hw-addr %U", unformat_ethernet_address, hwaddr))
-	hw_addr_ptr = hwaddr;
-      else
-	{
-	  error = clib_error_return (0, "unknown input `%U'",
-				     format_unformat_error, line_input);
-	  goto done;
-	}
+    while (unformat_check_input (line_input) != UNFORMAT_END_OF_INPUT) {
+        if (unformat (line_input, "name %s", &host_if_name))
+            ;
+        else if (unformat
+                 (line_input, "hw-addr %U", unformat_ethernet_address, hwaddr))
+            hw_addr_ptr = hwaddr;
+        else {
+            error = clib_error_return (0, "unknown input `%U'",
+                                       format_unformat_error, line_input);
+            goto done;
+        }
     }
 
-  if (host_if_name == NULL)
-    {
-      error = clib_error_return (0, "missing host interface name");
-      goto done;
+    if (host_if_name == NULL) {
+        error = clib_error_return (0, "missing host interface name");
+        goto done;
     }
 
-  r = af_packet_create_if (vm, host_if_name, hw_addr_ptr, &sw_if_index);
+    r = af_packet_create_if (vm, host_if_name, hw_addr_ptr, &sw_if_index);
 
-  if (r == VNET_API_ERROR_SYSCALL_ERROR_1)
-    {
-      error = clib_error_return (0, "%s (errno %d)", strerror (errno), errno);
-      goto done;
+    if (r == VNET_API_ERROR_SYSCALL_ERROR_1) {
+        error = clib_error_return (0, "%s (errno %d)", strerror (errno), errno);
+        goto done;
     }
 
-  if (r == VNET_API_ERROR_INVALID_INTERFACE)
-    {
-      error = clib_error_return (0, "Invalid interface name");
-      goto done;
+    if (r == VNET_API_ERROR_INVALID_INTERFACE) {
+        error = clib_error_return (0, "Invalid interface name");
+        goto done;
     }
 
-  if (r == VNET_API_ERROR_SUBIF_ALREADY_EXISTS)
-    {
-      error = clib_error_return (0, "Interface elready exists");
-      goto done;
+    if (r == VNET_API_ERROR_SUBIF_ALREADY_EXISTS) {
+        error = clib_error_return (0, "Interface elready exists");
+        goto done;
     }
 
-  vlib_cli_output (vm, "%U\n", format_vnet_sw_if_index_name, vnet_get_main (),
-		   sw_if_index);
+    vlib_cli_output (vm, "%U\n", format_vnet_sw_if_index_name, vnet_get_main (),
+                     sw_if_index);
 
 done:
-  vec_free (host_if_name);
-  unformat_free (line_input);
+    vec_free (host_if_name);
+    unformat_free (line_input);
 
-  return error;
+    return error;
 }
 
 /*?
@@ -139,41 +132,38 @@ VLIB_CLI_COMMAND (af_packet_create_command, static) = {
 
 static clib_error_t *
 af_packet_delete_command_fn (vlib_main_t * vm, unformat_input_t * input,
-			     vlib_cli_command_t * cmd)
+                             vlib_cli_command_t * cmd)
 {
-  unformat_input_t _line_input, *line_input = &_line_input;
-  u8 *host_if_name = NULL;
-  clib_error_t *error = NULL;
+    unformat_input_t _line_input, *line_input = &_line_input;
+    u8 *host_if_name = NULL;
+    clib_error_t *error = NULL;
 
-  /* Get a line of input. */
-  if (!unformat_user (input, unformat_line_input, line_input))
-    return 0;
+    /* Get a line of input. */
+    if (!unformat_user (input, unformat_line_input, line_input))
+        return 0;
 
-  while (unformat_check_input (line_input) != UNFORMAT_END_OF_INPUT)
-    {
-      if (unformat (line_input, "name %s", &host_if_name))
-	;
-      else
-	{
-	  error = clib_error_return (0, "unknown input `%U'",
-				     format_unformat_error, line_input);
-	  goto done;
-	}
+    while (unformat_check_input (line_input) != UNFORMAT_END_OF_INPUT) {
+        if (unformat (line_input, "name %s", &host_if_name))
+            ;
+        else {
+            error = clib_error_return (0, "unknown input `%U'",
+                                       format_unformat_error, line_input);
+            goto done;
+        }
     }
 
-  if (host_if_name == NULL)
-    {
-      error = clib_error_return (0, "missing host interface name");
-      goto done;
+    if (host_if_name == NULL) {
+        error = clib_error_return (0, "missing host interface name");
+        goto done;
     }
 
-  af_packet_delete_if (vm, host_if_name);
+    af_packet_delete_if (vm, host_if_name);
 
 done:
-  vec_free (host_if_name);
-  unformat_free (line_input);
+    vec_free (host_if_name);
+    unformat_free (line_input);
 
-  return error;
+    return error;
 }
 
 /*?
@@ -196,41 +186,39 @@ VLIB_CLI_COMMAND (af_packet_delete_command, static) = {
 
 static clib_error_t *
 af_packet_set_l4_cksum_offload_command_fn (vlib_main_t * vm,
-					   unformat_input_t * input,
-					   vlib_cli_command_t * cmd)
+        unformat_input_t * input,
+        vlib_cli_command_t * cmd)
 {
-  unformat_input_t _line_input, *line_input = &_line_input;
-  u8 set = 0;
-  clib_error_t *error = NULL;
-  vnet_main_t *vnm = vnet_get_main ();
-  u32 sw_if_index;
+    unformat_input_t _line_input, *line_input = &_line_input;
+    u8 set = 0;
+    clib_error_t *error = NULL;
+    vnet_main_t *vnm = vnet_get_main ();
+    u32 sw_if_index;
 
-  if (!unformat_user (input, unformat_line_input, line_input))
-    return 0;
+    if (!unformat_user (input, unformat_line_input, line_input))
+        return 0;
 
-  while (unformat_check_input (line_input) != UNFORMAT_END_OF_INPUT)
-    {
-      if (unformat
-	  (line_input, "%U", unformat_vnet_sw_interface, vnm, &sw_if_index))
-	;
-      else if (unformat (line_input, "on"))
-	set = 1;
-      else if (unformat (line_input, "off"))
-	set = 0;
-      else
-	{
-	  error = clib_error_return (0, "unknown input '%U'",
-				     format_unformat_error, line_input);
-	  goto done;
-	}
+    while (unformat_check_input (line_input) != UNFORMAT_END_OF_INPUT) {
+        if (unformat
+            (line_input, "%U", unformat_vnet_sw_interface, vnm, &sw_if_index))
+            ;
+        else if (unformat (line_input, "on"))
+            set = 1;
+        else if (unformat (line_input, "off"))
+            set = 0;
+        else {
+            error = clib_error_return (0, "unknown input '%U'",
+                                       format_unformat_error, line_input);
+            goto done;
+        }
     }
 
-  if (af_packet_set_l4_cksum_offload (vm, sw_if_index, set) < 0)
-    error = clib_error_return (0, "not an af_packet interface");
+    if (af_packet_set_l4_cksum_offload (vm, sw_if_index, set) < 0)
+        error = clib_error_return (0, "not an af_packet interface");
 
 done:
-  unformat_free (line_input);
-  return error;
+    unformat_free (line_input);
+    return error;
 }
 
 /*?
@@ -254,7 +242,7 @@ VLIB_CLI_COMMAND (af_packet_set_l4_cksum_offload_command, static) = {
 clib_error_t *
 af_packet_cli_init (vlib_main_t * vm)
 {
-  return 0;
+    return 0;
 }
 
 VLIB_INIT_FUNCTION (af_packet_cli_init);

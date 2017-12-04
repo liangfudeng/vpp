@@ -63,7 +63,7 @@
   _ (ICMP_CHECKSUM, "bad icmp checksum")                                \
   _ (UDP_LENGTH, "inconsistent udp/ip lengths")                         \
                                                                         \
-  /* Errors signalled by udp6-lookup. */				\
+  /* Errors signalled by udp6-lookup. */                \
   _ (UNKNOWN_UDP_PORT, "no listener for udp port")                      \
                                                                         \
   /* Spoofed packets in ip6-rewrite-local */                            \
@@ -73,10 +73,9 @@
   _ (INACL_TABLE_MISS, "input ACL table-miss drops")                    \
   _ (INACL_SESSION_DENY, "input ACL session deny drops")
 
-typedef enum
-{
+typedef enum {
 #define _(sym,str) IP6_ERROR_##sym,
-  foreach_ip6_error
+    foreach_ip6_error
 #undef _
     IP6_N_ERROR,
 } ip6_error_t;

@@ -22,154 +22,155 @@
 #include "vom/om.hpp"
 #include "vom/singular_db.hpp"
 
-namespace VOM {
-/**
- * A representation of LLDP global configuration
- */
-class lldp_global : public object_base
+namespace VOM
 {
-public:
-  /**
-   * The key for the global conifugration is the 'system' namse
-   */
-  typedef std::string key_t;
-
-  /**
-   * Construct a new object matching the desried state
-   */
-  lldp_global(const std::string& system_name,
-              uint32_t tx_hold,
-              uint32_t tx_interval);
-
-  /**
-   * Copy Constructor
-   */
-  lldp_global(const lldp_global& o);
-
-  /**
-   * Destructor
-   */
-  ~lldp_global();
-
-  /**
-   * Get this objects key
-   */
-  const key_t& key() const;
-
-  /**
-   * Comparison operator
-   */
-  bool operator==(const lldp_global& l) const;
-
-  /**
-   * Return the 'singular' of the LLDP global that matches this object
-   */
-  std::shared_ptr<lldp_global> singular() const;
-
-  /**
-   * convert to string format for debug purposes
-   */
-  std::string to_string() const;
-
-  /**
-   * Dump all LLDP globals into the stream provided
-   */
-  static void dump(std::ostream& os);
-
-  /**
-   * Find LLDP global config from its key
-   */
-  static std::shared_ptr<lldp_global> find(const key_t& k);
-
-private:
-  /**
-   * Class definition for listeners to OM events
-   */
-  class event_handler : public OM::listener, public inspect::command_handler
-  {
-  public:
-    event_handler();
-    virtual ~event_handler() = default;
-
     /**
-     * Handle a populate event
+     * A representation of LLDP global configuration
      */
-    void handle_populate(const client_db::key_t& key);
+    class lldp_global : public object_base
+    {
+    public:
+        /**
+         * The key for the global conifugration is the 'system' namse
+         */
+        typedef std::string key_t;
 
-    /**
-     * Handle a replay event
-     */
-    void handle_replay();
+        /**
+         * Construct a new object matching the desried state
+         */
+        lldp_global(const std::string& system_name,
+                    uint32_t tx_hold,
+                    uint32_t tx_interval);
 
-    /**
-     * Show the object in the Singular DB
-     */
-    void show(std::ostream& os);
+        /**
+         * Copy Constructor
+         */
+        lldp_global(const lldp_global& o);
 
-    /**
-     * Get the sortable Id of the listener
-     */
-    dependency_t order() const;
-  };
+        /**
+         * Destructor
+         */
+        ~lldp_global();
 
-  /**
-   * event_handler to register with OM
-   */
-  static event_handler m_evh;
+        /**
+         * Get this objects key
+         */
+        const key_t& key() const;
 
-  /**
-   * Enquue commonds to the VPP command Q for the update
-   */
-  void update(const lldp_global& obj);
+        /**
+         * Comparison operator
+         */
+        bool operator==(const lldp_global& l) const;
 
-  /**
-   * Find or add LLDP global to the OM
-   */
-  static std::shared_ptr<lldp_global> find_or_add(const lldp_global& temp);
+        /**
+         * Return the 'singular' of the LLDP global that matches this object
+         */
+        std::shared_ptr<lldp_global> singular() const;
 
-  /*
-   * It's the OM class that calls singular()
-   */
-  friend class OM;
+        /**
+         * convert to string format for debug purposes
+         */
+        std::string to_string() const;
 
-  /**
-   * It's the singular_db class that calls replay()
-   */
-  friend class singular_db<key_t, lldp_global>;
+        /**
+         * Dump all LLDP globals into the stream provided
+         */
+        static void dump(std::ostream& os);
 
-  /**
-   * Sweep/reap the object if still stale
-   */
-  void sweep(void);
+        /**
+         * Find LLDP global config from its key
+         */
+        static std::shared_ptr<lldp_global> find(const key_t& k);
 
-  /**
-   * replay the object to create it in hardware
-   */
-  void replay(void);
+    private:
+        /**
+         * Class definition for listeners to OM events
+         */
+        class event_handler : public OM::listener, public inspect::command_handler
+        {
+        public:
+            event_handler();
+            virtual ~event_handler() = default;
 
-  /**
-   * The system name
-   */
-  const std::string m_system_name;
+            /**
+             * Handle a populate event
+             */
+            void handle_populate(const client_db::key_t& key);
 
-  /**
-   * TX timer configs
-   */
-  uint32_t m_tx_hold;
-  uint32_t m_tx_interval;
+            /**
+             * Handle a replay event
+             */
+            void handle_replay();
 
-  /**
-   * HW globaluration for the binding. The bool representing the
-   * do/don't bind.
-   */
-  HW::item<bool> m_binding;
+            /**
+             * Show the object in the Singular DB
+             */
+            void show(std::ostream& os);
 
-  /**
-   * A map of all Lldp globals keyed against the system name.
-   *  there needs to be some sort of key, that will do.
-   */
-  static singular_db<key_t, lldp_global> m_db;
-};
+            /**
+             * Get the sortable Id of the listener
+             */
+            dependency_t order() const;
+        };
+
+        /**
+         * event_handler to register with OM
+         */
+        static event_handler m_evh;
+
+        /**
+         * Enquue commonds to the VPP command Q for the update
+         */
+        void update(const lldp_global& obj);
+
+        /**
+         * Find or add LLDP global to the OM
+         */
+        static std::shared_ptr<lldp_global> find_or_add(const lldp_global& temp);
+
+        /*
+         * It's the OM class that calls singular()
+         */
+        friend class OM;
+
+        /**
+         * It's the singular_db class that calls replay()
+         */
+        friend class singular_db<key_t, lldp_global>;
+
+        /**
+         * Sweep/reap the object if still stale
+         */
+        void sweep(void);
+
+        /**
+         * replay the object to create it in hardware
+         */
+        void replay(void);
+
+        /**
+         * The system name
+         */
+        const std::string m_system_name;
+
+        /**
+         * TX timer configs
+         */
+        uint32_t m_tx_hold;
+        uint32_t m_tx_interval;
+
+        /**
+         * HW globaluration for the binding. The bool representing the
+         * do/don't bind.
+         */
+        HW::item<bool> m_binding;
+
+        /**
+         * A map of all Lldp globals keyed against the system name.
+         *  there needs to be some sort of key, that will do.
+         */
+        static singular_db<key_t, lldp_global> m_db;
+    };
 };
 
 /*

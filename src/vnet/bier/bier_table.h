@@ -114,13 +114,13 @@ extern void bier_table_ecmp_set_fmask(index_t bti,
                                       index_t bfmi);
 
 extern void bier_table_contribute_forwarding(index_t bti,
-                                             dpo_id_t *dpo);
+        dpo_id_t *dpo);
 
 /**
  * Types and functions to walk the ECMP tables of a main table
  */
 typedef void (*bier_table_ecmp_walk_fn_t)(index_t btei,
-                                          void *ctx);
+        void *ctx);
 extern void bier_table_ecmp_walk(index_t bti,
                                  bier_table_ecmp_walk_fn_t fn,
                                  void *ctx);

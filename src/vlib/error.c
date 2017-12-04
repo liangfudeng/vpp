@@ -42,88 +42,85 @@
 
 uword
 vlib_error_drop_buffers (vlib_main_t * vm,
-			 vlib_node_runtime_t * node,
-			 u32 * buffers,
-			 u32 next_buffer_stride,
-			 u32 n_buffers,
-			 u32 next_index,
-			 u32 drop_error_node, u32 drop_error_code)
+                         vlib_node_runtime_t * node,
+                         u32 * buffers,
+                         u32 next_buffer_stride,
+                         u32 n_buffers,
+                         u32 next_index,
+                         u32 drop_error_node, u32 drop_error_code)
 {
-  u32 n_left_this_frame, n_buffers_left, *args, n_args_left;
-  vlib_error_t drop_error;
+    u32 n_left_this_frame, n_buffers_left, *args, n_args_left;
+    vlib_error_t drop_error;
 
-  drop_error = vlib_error_set (drop_error_node, drop_error_code);
+    drop_error = vlib_error_set (drop_error_node, drop_error_code);
 
-  n_buffers_left = n_buffers;
-  while (n_buffers_left > 0)
-    {
-      vlib_get_next_frame (vm, node, next_index, args, n_args_left);
+    n_buffers_left = n_buffers;
+    while (n_buffers_left > 0) {
+        vlib_get_next_frame (vm, node, next_index, args, n_args_left);
 
-      n_left_this_frame = clib_min (n_buffers_left, n_args_left);
-      n_buffers_left -= n_left_this_frame;
-      n_args_left -= n_left_this_frame;
+        n_left_this_frame = clib_min (n_buffers_left, n_args_left);
+        n_buffers_left -= n_left_this_frame;
+        n_args_left -= n_left_this_frame;
 
-      while (n_left_this_frame >= 4)
-	{
-	  u32 bi0, bi1, bi2, bi3;
-	  vlib_buffer_t *b0, *b1, *b2, *b3;
+        while (n_left_this_frame >= 4) {
+            u32 bi0, bi1, bi2, bi3;
+            vlib_buffer_t *b0, *b1, *b2, *b3;
 
-	  args[0] = bi0 = buffers[0];
-	  args[1] = bi1 = buffers[1];
-	  args[2] = bi2 = buffers[2];
-	  args[3] = bi3 = buffers[3];
+            args[0] = bi0 = buffers[0];
+            args[1] = bi1 = buffers[1];
+            args[2] = bi2 = buffers[2];
+            args[3] = bi3 = buffers[3];
 
-	  b0 = vlib_get_buffer (vm, bi0);
-	  b1 = vlib_get_buffer (vm, bi1);
-	  b2 = vlib_get_buffer (vm, bi2);
-	  b3 = vlib_get_buffer (vm, bi3);
+            b0 = vlib_get_buffer (vm, bi0);
+            b1 = vlib_get_buffer (vm, bi1);
+            b2 = vlib_get_buffer (vm, bi2);
+            b3 = vlib_get_buffer (vm, bi3);
 
-	  b0->error = drop_error;
-	  b1->error = drop_error;
-	  b2->error = drop_error;
-	  b3->error = drop_error;
+            b0->error = drop_error;
+            b1->error = drop_error;
+            b2->error = drop_error;
+            b3->error = drop_error;
 
-	  buffers += 4;
-	  args += 4;
-	  n_left_this_frame -= 4;
-	}
+            buffers += 4;
+            args += 4;
+            n_left_this_frame -= 4;
+        }
 
-      while (n_left_this_frame >= 1)
-	{
-	  u32 bi0;
-	  vlib_buffer_t *b0;
+        while (n_left_this_frame >= 1) {
+            u32 bi0;
+            vlib_buffer_t *b0;
 
-	  args[0] = bi0 = buffers[0];
+            args[0] = bi0 = buffers[0];
 
-	  b0 = vlib_get_buffer (vm, bi0);
-	  b0->error = drop_error;
+            b0 = vlib_get_buffer (vm, bi0);
+            b0->error = drop_error;
 
-	  buffers += 1;
-	  args += 1;
-	  n_left_this_frame -= 1;
-	}
+            buffers += 1;
+            args += 1;
+            n_left_this_frame -= 1;
+        }
 
-      vlib_put_next_frame (vm, node, next_index, n_args_left);
+        vlib_put_next_frame (vm, node, next_index, n_args_left);
     }
 
-  return n_buffers;
+    return n_buffers;
 }
 
 /* Convenience node to drop a vector of buffers with a "misc error". */
 static uword
 misc_drop_buffers (vlib_main_t * vm,
-		   vlib_node_runtime_t * node, vlib_frame_t * frame)
+                   vlib_node_runtime_t * node, vlib_frame_t * frame)
 {
-  return vlib_error_drop_buffers (vm, node, vlib_frame_args (frame),
-				  /* buffer stride */ 1,
-				  frame->n_vectors,
-				  /* next */ 0,
-				  node->node_index,
-				  /* error */ 0);
+    return vlib_error_drop_buffers (vm, node, vlib_frame_args (frame),
+                                    /* buffer stride */ 1,
+                                    frame->n_vectors,
+                                    /* next */ 0,
+                                    node->node_index,
+                                    /* error */ 0);
 }
 
 static char *misc_drop_buffers_error_strings[] = {
-  [0] = "misc. errors",
+    [0] = "misc. errors",
 };
 
 /* *INDENT-OFF* */
@@ -143,83 +140,82 @@ VLIB_REGISTER_NODE (misc_drop_buffers_node,static) = {
 /* Reserves given number of error codes for given node. */
 void
 vlib_register_errors (vlib_main_t * vm,
-		      u32 node_index, u32 n_errors, char *error_strings[])
+                      u32 node_index, u32 n_errors, char *error_strings[])
 {
-  vlib_error_main_t *em = &vm->error_main;
-  vlib_node_t *n = vlib_get_node (vm, node_index);
-  uword l;
+    vlib_error_main_t *em = &vm->error_main;
+    vlib_node_t *n = vlib_get_node (vm, node_index);
+    uword l;
 
-  ASSERT (vlib_get_thread_index () == 0);
+    ASSERT (vlib_get_thread_index () == 0);
 
-  /* Free up any previous error strings. */
-  if (n->n_errors > 0)
-    heap_dealloc (em->error_strings_heap, n->error_heap_handle);
+    /* Free up any previous error strings. */
+    if (n->n_errors > 0)
+        heap_dealloc (em->error_strings_heap, n->error_heap_handle);
 
-  n->n_errors = n_errors;
-  n->error_strings = error_strings;
+    n->n_errors = n_errors;
+    n->error_strings = error_strings;
 
-  if (n_errors == 0)
-    return;
+    if (n_errors == 0)
+        return;
 
-  n->error_heap_index =
-    heap_alloc (em->error_strings_heap, n_errors, n->error_heap_handle);
+    n->error_heap_index =
+        heap_alloc (em->error_strings_heap, n_errors, n->error_heap_handle);
 
-  l = vec_len (em->error_strings_heap);
+    l = vec_len (em->error_strings_heap);
 
-  clib_memcpy (vec_elt_at_index (em->error_strings_heap, n->error_heap_index),
-	       error_strings, n_errors * sizeof (error_strings[0]));
+    clib_memcpy (vec_elt_at_index (em->error_strings_heap, n->error_heap_index),
+                 error_strings, n_errors * sizeof (error_strings[0]));
 
-  /* Allocate a counter/elog type for each error. */
-  vec_validate (em->counters, l - 1);
-  vec_validate (vm->error_elog_event_types, l - 1);
+    /* Allocate a counter/elog type for each error. */
+    vec_validate (em->counters, l - 1);
+    vec_validate (vm->error_elog_event_types, l - 1);
 
-  /* Zero counters for re-registrations of errors. */
-  if (n->error_heap_index + n_errors <= vec_len (em->counters_last_clear))
-    clib_memcpy (em->counters + n->error_heap_index,
-		 em->counters_last_clear + n->error_heap_index,
-		 n_errors * sizeof (em->counters[0]));
-  else
-    memset (em->counters + n->error_heap_index,
-	    0, n_errors * sizeof (em->counters[0]));
+    /* Zero counters for re-registrations of errors. */
+    if (n->error_heap_index + n_errors <= vec_len (em->counters_last_clear))
+        clib_memcpy (em->counters + n->error_heap_index,
+                     em->counters_last_clear + n->error_heap_index,
+                     n_errors * sizeof (em->counters[0]));
+    else
+        memset (em->counters + n->error_heap_index,
+                0, n_errors * sizeof (em->counters[0]));
 
-  {
-    elog_event_type_t t;
-    uword i;
+    {
+        elog_event_type_t t;
+        uword i;
 
-    memset (&t, 0, sizeof (t));
-    for (i = 0; i < n_errors; i++)
-      {
-	t.format = (char *) format (0, "%v %s: %%d",
-				    n->name, error_strings[i]);
-	vm->error_elog_event_types[n->error_heap_index + i] = t;
-      }
-  }
+        memset (&t, 0, sizeof (t));
+        for (i = 0; i < n_errors; i++) {
+            t.format = (char *) format (0, "%v %s: %%d",
+                                        n->name, error_strings[i]);
+            vm->error_elog_event_types[n->error_heap_index + i] = t;
+        }
+    }
 }
 
 static clib_error_t *
 show_errors (vlib_main_t * vm,
-	     unformat_input_t * input, vlib_cli_command_t * cmd)
+             unformat_input_t * input, vlib_cli_command_t * cmd)
 {
-  vlib_error_main_t *em = &vm->error_main;
-  vlib_node_t *n;
-  u32 code, i, ni;
-  u64 c;
-  int index = 0;
-  int verbose = 0;
-  u64 *sums = 0;
+    vlib_error_main_t *em = &vm->error_main;
+    vlib_node_t *n;
+    u32 code, i, ni;
+    u64 c;
+    int index = 0;
+    int verbose = 0;
+    u64 *sums = 0;
 
-  if (unformat (input, "verbose %d", &verbose))
-    ;
-  else if (unformat (input, "verbose"))
-    verbose = 1;
+    if (unformat (input, "verbose %d", &verbose))
+        ;
+    else if (unformat (input, "verbose"))
+        verbose = 1;
 
-  vec_validate (sums, vec_len (em->counters));
+    vec_validate (sums, vec_len (em->counters));
 
-  if (verbose)
-    vlib_cli_output (vm, "%=10s%=40s%=20s%=6s", "Count", "Node", "Reason",
-		     "Index");
-  else
-    vlib_cli_output (vm, "%=10s%=40s%=6s", "Count", "Node", "Reason");
+    if (verbose)
+        vlib_cli_output (vm, "%=10s%=40s%=20s%=6s", "Count", "Node", "Reason",
+                         "Index");
+    else
+        vlib_cli_output (vm, "%=10s%=40s%=6s", "Count", "Node", "Reason");
 
 
   /* *INDENT-OFF* */
@@ -256,27 +252,24 @@ show_errors (vlib_main_t * vm,
   }));
   /* *INDENT-ON* */
 
-  if (verbose)
-    vlib_cli_output (vm, "Total:");
+    if (verbose)
+        vlib_cli_output (vm, "Total:");
 
-  for (ni = 0; ni < vec_len (vm->node_main.nodes); ni++)
-    {
-      n = vlib_get_node (vm, ni);
-      for (code = 0; code < n->n_errors; code++)
-	{
-	  i = n->error_heap_index + code;
-	  if (sums[i])
-	    {
-	      if (verbose)
-		vlib_cli_output (vm, "%10Ld%=40v%=20s%=10d", sums[i], n->name,
-				 em->error_strings_heap[i], i);
-	    }
-	}
+    for (ni = 0; ni < vec_len (vm->node_main.nodes); ni++) {
+        n = vlib_get_node (vm, ni);
+        for (code = 0; code < n->n_errors; code++) {
+            i = n->error_heap_index + code;
+            if (sums[i]) {
+                if (verbose)
+                    vlib_cli_output (vm, "%10Ld%=40v%=20s%=10d", sums[i], n->name,
+                                     em->error_strings_heap[i], i);
+            }
+        }
     }
 
-  vec_free (sums);
+    vec_free (sums);
 
-  return 0;
+    return 0;
 }
 
 /* *INDENT-OFF* */
@@ -297,10 +290,10 @@ VLIB_CLI_COMMAND (cli_show_node_counters, static) = {
 
 static clib_error_t *
 clear_error_counters (vlib_main_t * vm,
-		      unformat_input_t * input, vlib_cli_command_t * cmd)
+                      unformat_input_t * input, vlib_cli_command_t * cmd)
 {
-  vlib_error_main_t *em;
-  u32 i;
+    vlib_error_main_t *em;
+    u32 i;
 
   /* *INDENT-OFF* */
   foreach_vlib_main(({
@@ -310,7 +303,7 @@ clear_error_counters (vlib_main_t * vm,
       em->counters_last_clear[i] = em->counters[i];
   }));
   /* *INDENT-ON* */
-  return 0;
+    return 0;
 }
 
 /* *INDENT-OFF* */

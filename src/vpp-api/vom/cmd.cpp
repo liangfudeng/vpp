@@ -15,17 +15,18 @@
 
 #include "vom/cmd.hpp"
 
-namespace VOM {
-/**
- * Free ostream function to print a command
- */
-std::ostream&
-operator<<(std::ostream& os, const cmd& cmd)
+namespace VOM
 {
-  os << cmd.to_string();
+    /**
+     * Free ostream function to print a command
+     */
+    std::ostream&
+    operator<<(std::ostream& os, const cmd& cmd)
+    {
+        os << cmd.to_string();
 
-  return (os);
-}
+        return (os);
+    }
 }
 
 /*

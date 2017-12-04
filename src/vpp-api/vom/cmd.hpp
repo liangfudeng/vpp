@@ -20,53 +20,54 @@
 
 #include "vom/types.hpp"
 
-namespace VOM {
-/**
- * Forward declaration of the connection class
- */
-class connection;
-
-/**
- * A representation of a method call to VPP
- */
-class cmd
+namespace VOM
 {
-public:
-  /**
-   * Default constructor
-   */
-  cmd() {}
-  /**
-   * Virtual destructor
-   */
-  virtual ~cmd() {}
+    /**
+     * Forward declaration of the connection class
+     */
+    class connection;
 
-  /**
-   * Issue the command to VPP/HW
-   */
-  virtual rc_t issue(connection& con) = 0;
+    /**
+     * A representation of a method call to VPP
+     */
+    class cmd
+    {
+    public:
+        /**
+         * Default constructor
+         */
+        cmd() {}
+        /**
+         * Virtual destructor
+         */
+        virtual ~cmd() {}
 
-  /**
-   * Retire/cancel a long running command
-   */
-  virtual void retire(connection& con) = 0;
+        /**
+         * Issue the command to VPP/HW
+         */
+        virtual rc_t issue(connection& con) = 0;
 
-  /**
-   * Invoked on a Command when the HW queue is disabled to indicate
-   * that the commnad can be considered successful
-   */
-  virtual void succeeded() = 0;
+        /**
+         * Retire/cancel a long running command
+         */
+        virtual void retire(connection& con) = 0;
 
-  /**
-   * convert to string format for debug purposes
-   */
-  virtual std::string to_string() const = 0;
-};
+        /**
+         * Invoked on a Command when the HW queue is disabled to indicate
+         * that the commnad can be considered successful
+         */
+        virtual void succeeded() = 0;
 
-/**
- * Free ostream function to print a command
- */
-std::ostream& operator<<(std::ostream& os, const cmd& cmd);
+        /**
+         * convert to string format for debug purposes
+         */
+        virtual std::string to_string() const = 0;
+    };
+
+    /**
+     * Free ostream function to print a command
+     */
+    std::ostream& operator<<(std::ostream& os, const cmd& cmd);
 };
 
 /*

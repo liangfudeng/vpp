@@ -83,8 +83,7 @@ l3_proxy_dpo_unlock (dpo_id_t *dpo)
     l3p = l3_proxy_dpo_get_from_dpo(dpo);
     l3p->l3p_locks--;
 
-    if (0 == l3p->l3p_locks)
-    {
+    if (0 == l3p->l3p_locks) {
         pool_put(l3_proxy_dpo_pool, l3p);
     }
 }
@@ -107,21 +106,17 @@ format_l3_proxy_dpo (u8 *s, va_list *ap)
     vnet_main_t * vnm = vnet_get_main();
     l3_proxy_dpo_t *l3p;
 
-    if (pool_is_free_index(l3_proxy_dpo_pool, index))
-    {
+    if (pool_is_free_index(l3_proxy_dpo_pool, index)) {
         return (format(s, "dpo-l3_proxy DELETED"));
     }
 
     l3p = l3_proxy_dpo_get(index);
 
-    if (~0 != l3p->l3p_sw_if_index)
-    {
+    if (~0 != l3p->l3p_sw_if_index) {
         return (format(s, "dpo-l3_proxy: %U",
                        format_vnet_sw_interface_name, vnm,
                        vnet_get_sw_interface(vnm, l3p->l3p_sw_if_index)));
-    }
-    else
-    {
+    } else {
         return (format(s, "dpo-l3-proxy"));
     }
 }
@@ -130,9 +125,9 @@ static void
 l3_proxy_dpo_mem_show (void)
 {
     fib_show_memory_usage("L3 Proxy",
-			  pool_elts(l3_proxy_dpo_pool),
-			  pool_len(l3_proxy_dpo_pool),
-			  sizeof(l3_proxy_dpo_t));
+                          pool_elts(l3_proxy_dpo_pool),
+                          pool_len(l3_proxy_dpo_pool),
+                          sizeof(l3_proxy_dpo_t));
 }
 
 const static dpo_vft_t l3_proxy_vft = {
@@ -150,19 +145,16 @@ const static dpo_vft_t l3_proxy_vft = {
  * this means that these graph nodes are ones from which a l3_proxy is the
  * parent object in the DPO-graph.
  */
-const static char* const l3_proxy_ip4_nodes[] =
-{
+const static char* const l3_proxy_ip4_nodes[] = {
     "ip4-local",
     NULL,
 };
-const static char* const l3_proxy_ip6_nodes[] =
-{
+const static char* const l3_proxy_ip6_nodes[] = {
     "ip6-local",
     NULL,
 };
 
-const static char* const * const l3_proxy_nodes[DPO_PROTO_NUM] =
-{
+const static char* const * const l3_proxy_nodes[DPO_PROTO_NUM] = {
     [DPO_PROTO_IP4]  = l3_proxy_ip4_nodes,
     [DPO_PROTO_IP6]  = l3_proxy_ip6_nodes,
     [DPO_PROTO_MPLS] = NULL,

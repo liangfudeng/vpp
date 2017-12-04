@@ -46,64 +46,61 @@ static int verbose;
 int
 test_zvec_main (unformat_input_t * input)
 {
-  uword n_iterations;
-  uword i;
-  u32 seed;
+    uword n_iterations;
+    uword i;
+    u32 seed;
 
-  n_iterations = 1024;
-  seed = 0;
+    n_iterations = 1024;
+    seed = 0;
 
-  while (unformat_check_input (input) != UNFORMAT_END_OF_INPUT)
-    {
-      if (0 == unformat (input, "iter %d", &n_iterations)
-	  && 0 == unformat (input, "seed %d", &seed))
-	clib_error ("unknown input `%U'", format_unformat_error, input);
+    while (unformat_check_input (input) != UNFORMAT_END_OF_INPUT) {
+        if (0 == unformat (input, "iter %d", &n_iterations)
+            && 0 == unformat (input, "seed %d", &seed))
+            clib_error ("unknown input `%U'", format_unformat_error, input);
     }
 
-  if_verbose ("%d iterations, seed %d\n", n_iterations, seed);
+    if_verbose ("%d iterations, seed %d\n", n_iterations, seed);
 
-  for (i = 0; i < n_iterations; i++)
-    {
-      uword coding, data, d[2], limit, n_zdata_bits[2];
+    for (i = 0; i < n_iterations; i++) {
+        uword coding, data, d[2], limit, n_zdata_bits[2];
 
-      if (seed)
-	coding = random_u32 (&seed);
-      else
-	coding = i;
+        if (seed)
+            coding = random_u32 (&seed);
+        else
+            coding = i;
 
-      limit = coding - 1;
-      if (limit > (1 << 16))
-	limit = 1 << 16;
-      for (data = 0; data <= limit; data++)
-	{
-	  d[0] = zvec_encode (coding, data, &n_zdata_bits[0]);
+        limit = coding - 1;
+        if (limit > (1 << 16))
+            limit = 1 << 16;
+        for (data = 0; data <= limit; data++) {
+            d[0] = zvec_encode (coding, data, &n_zdata_bits[0]);
 
-	  if (coding != 0)
-	    ASSERT ((d[0] >> n_zdata_bits[0]) == 0);
+            if (coding != 0)
+                ASSERT ((d[0] >> n_zdata_bits[0]) == 0);
 
-	  d[1] = zvec_decode (coding, d[0], &n_zdata_bits[1]);
-	  ASSERT (data == d[1]);
+            d[1] = zvec_decode (coding, d[0], &n_zdata_bits[1]);
+            ASSERT (data == d[1]);
 
-	  ASSERT (n_zdata_bits[0] == n_zdata_bits[1]);
-	}
+            ASSERT (n_zdata_bits[0] == n_zdata_bits[1]);
+        }
     }
 
-  return 0;
+    return 0;
 }
 
 #ifdef CLIB_UNIX
 int
 main (int argc, char *argv[])
 {
-  unformat_input_t i;
-  int ret;
+    unformat_input_t i;
+    int ret;
 
-  verbose = (argc > 1);
-  unformat_init_command_line (&i, argv);
-  ret = test_zvec_main (&i);
-  unformat_free (&i);
+    verbose = (argc > 1);
+    unformat_init_command_line (&i, argv);
+    ret = test_zvec_main (&i);
+    unformat_free (&i);
 
-  return ret;
+    return ret;
 }
 #endif /* CLIB_UNIX */
 

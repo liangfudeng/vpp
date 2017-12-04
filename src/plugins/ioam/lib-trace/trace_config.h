@@ -23,9 +23,9 @@ extern trace_main_t trace_main;
 always_inline trace_profile *
 trace_profile_find (void)
 {
-  trace_main_t *sm = &trace_main;
+    trace_main_t *sm = &trace_main;
 
-  return (&(sm->profile));
+    return (&(sm->profile));
 }
 
 

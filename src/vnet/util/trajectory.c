@@ -26,35 +26,33 @@ void
 vnet_dump_trajectory_trace (vlib_main_t * vm, u32 bi)
 {
 #if VLIB_BUFFER_TRACE_TRAJECTORY > 0
-  vlib_node_main_t *vnm = &vm->node_main;
-  vlib_buffer_t *b;
-  u16 *trace;
-  u8 i;
+    vlib_node_main_t *vnm = &vm->node_main;
+    vlib_buffer_t *b;
+    u16 *trace;
+    u8 i;
 
-  b = vlib_get_buffer (vm, bi);
+    b = vlib_get_buffer (vm, bi);
 
-  trace = vnet_buffer2 (b)->trajectory_trace;
+    trace = vnet_buffer2 (b)->trajectory_trace;
 
-  fformat (stderr, "Context trace for bi %d b 0x%llx, visited %d\n",
-	   bi, b, vec_len (trace));
+    fformat (stderr, "Context trace for bi %d b 0x%llx, visited %d\n",
+             bi, b, vec_len (trace));
 
-  for (i = 0; i < vec_len (trace); i++)
-    {
-      u32 node_index;
+    for (i = 0; i < vec_len (trace); i++) {
+        u32 node_index;
 
-      node_index = trace[i];
+        node_index = trace[i];
 
-      if (node_index > vec_len (vnm->nodes))
-	{
-	  fformat (stderr, "Skip bogus node index %d\n", node_index);
-	  continue;
-	}
+        if (node_index > vec_len (vnm->nodes)) {
+            fformat (stderr, "Skip bogus node index %d\n", node_index);
+            continue;
+        }
 
-      fformat (stderr, "%v (%d)\n", vnm->nodes[node_index]->name, node_index);
+        fformat (stderr, "%v (%d)\n", vnm->nodes[node_index]->name, node_index);
     }
 #else
-  fformat (stderr, "in vlib/buffers.h, "
-	   "#define VLIB_BUFFER_TRACE_TRAJECTORY 1\n");
+    fformat (stderr, "in vlib/buffers.h, "
+             "#define VLIB_BUFFER_TRACE_TRAJECTORY 1\n");
 
 #endif
 }
@@ -64,26 +62,25 @@ vnet_dump_trajectory_trace (vlib_main_t * vm, u32 bi)
 void
 init_trajectory_trace (vlib_buffer_t * b)
 {
-  if (!clib_mem_is_vec (vnet_buffer2 (b)->trajectory_trace))
-    {
-      vnet_buffer2 (b)->trajectory_trace = 0;
-      vec_validate (vnet_buffer2 (b)->trajectory_trace, 7);
+    if (!clib_mem_is_vec (vnet_buffer2 (b)->trajectory_trace)) {
+        vnet_buffer2 (b)->trajectory_trace = 0;
+        vec_validate (vnet_buffer2 (b)->trajectory_trace, 7);
     }
-  _vec_len (vnet_buffer2 (b)->trajectory_trace) = 0;
+    _vec_len (vnet_buffer2 (b)->trajectory_trace) = 0;
 }
 
 void
 add_trajectory_trace (vlib_buffer_t * b, u32 node_index)
 {
-  vec_add1 (vnet_buffer2 (b)->trajectory_trace, (u16) node_index);
+    vec_add1 (vnet_buffer2 (b)->trajectory_trace, (u16) node_index);
 }
 
 static clib_error_t *
 trajectory_trace_init (vlib_main_t * vm)
 {
-  vlib_buffer_trace_trajectory_cb = add_trajectory_trace;
-  vlib_buffer_trace_trajectory_init_cb = init_trajectory_trace;
-  return 0;
+    vlib_buffer_trace_trajectory_cb = add_trajectory_trace;
+    vlib_buffer_trace_trajectory_init_cb = init_trajectory_trace;
+    return 0;
 }
 
 VLIB_INIT_FUNCTION (trajectory_trace_init);

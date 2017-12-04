@@ -19,8 +19,7 @@
 #include <vnet/mpls/mpls.h>
 #include <vnet/fib/fib_path_ext.h>
 
-typedef enum mpls_tunnel_attribute_t_
-{
+typedef enum mpls_tunnel_attribute_t_ {
     MPLS_TUNNEL_ATTRIBUTE_FIRST = 0,
     /**
      * @brief The tunnel is L2 only
@@ -33,14 +32,14 @@ typedef enum mpls_tunnel_attribute_t_
     MPLS_TUNNEL_ATTRIBUTE_LAST = MPLS_TUNNEL_ATTRIBUTE_MCAST,
 } mpls_tunnel_attribute_t;
 
-#define MPLS_TUNNEL_ATTRIBUTES {		  \
+#define MPLS_TUNNEL_ATTRIBUTES {          \
     [MPLS_TUNNEL_ATTRIBUTE_MCAST]  = "multicast", \
     [MPLS_TUNNEL_ATTRIBUTE_L2]     = "L2",   \
 }
-#define FOR_EACH_MPLS_TUNNEL_ATTRIBUTE(_item)		\
-    for (_item = MPLS_TUNNEL_ATTRIBUTE_FIRST;		\
-	 _item <= MPLS_TUNNEL_ATTRIBUTE_LAST;		\
-	 _item++)
+#define FOR_EACH_MPLS_TUNNEL_ATTRIBUTE(_item)       \
+    for (_item = MPLS_TUNNEL_ATTRIBUTE_FIRST;       \
+     _item <= MPLS_TUNNEL_ATTRIBUTE_LAST;       \
+     _item++)
 
 typedef enum mpls_tunnel_flag_t_ {
     MPLS_TUNNEL_FLAG_NONE   = 0,
@@ -52,8 +51,7 @@ typedef enum mpls_tunnel_flag_t_ {
 /**
  * @brief A uni-directional MPLS tunnel
  */
-typedef struct mpls_tunnel_t_
-{
+typedef struct mpls_tunnel_t_ {
     /**
      * @brief The tunnel hooks into the FIB control plane graph.
      */
@@ -114,7 +112,7 @@ extern void vnet_mpls_tunnel_path_add (u32 sw_if_index,
  * @return the number of remaining paths. 0 implies the tunnel can be deleted
  */
 extern int vnet_mpls_tunnel_path_remove (u32 sw_if_index,
-                                         fib_route_path_t *rpath);
+        fib_route_path_t *rpath);
 
 /**
  * @brief Delete an MPLS tunnel
@@ -132,6 +130,6 @@ typedef void (*mpls_tunnel_walk_cb_t)(u32 index, void *ctx);
  * @brief Walk all the MPLS tunnels
  */
 extern void mpls_tunnel_walk(mpls_tunnel_walk_cb_t cb,
-			     void *ctx);
+                             void *ctx);
 
 #endif

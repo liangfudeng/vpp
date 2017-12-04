@@ -86,16 +86,16 @@ static uword *fib_path_list_db;
  * Debug macro
  */
 #ifdef FIB_DEBUG
-#define FIB_PATH_LIST_DBG(_pl, _fmt, _args...)		  \
-{   		            				  \
-    u8 *_tmp = 0;					  \
-    _tmp = fib_path_list_format(			  \
-	fib_path_list_get_index(_pl), _tmp);		  \
-    clib_warning("pl:[%d:%p:%p:%s]:" _fmt,		  \
-		 fib_path_list_get_index(_pl),		  \
-		 _pl, _pl->fpl_paths, _tmp,		  \
-		 ##_args);				  \
-    vec_free(_tmp);					  \
+#define FIB_PATH_LIST_DBG(_pl, _fmt, _args...)        \
+{                                         \
+    u8 *_tmp = 0;                     \
+    _tmp = fib_path_list_format(              \
+    fib_path_list_get_index(_pl), _tmp);          \
+    clib_warning("pl:[%d:%p:%p:%s]:" _fmt,        \
+         fib_path_list_get_index(_pl),        \
+         _pl, _pl->fpl_paths, _tmp,       \
+         ##_args);                \
+    vec_free(_tmp);                   \
 }
 #else
 #define FIB_PATH_LIST_DBG(_pl, _fmt, _args...)
@@ -134,27 +134,23 @@ format_fib_path_list (u8 * s, va_list * args)
     fib_path_list_t *path_list;
 
     path_list = va_arg (*args, fib_path_list_t *);
-    
+
     s = format (s, "    index:%u", fib_path_list_get_index(path_list));
     s = format (s, " locks:%u", path_list->fpl_node.fn_locks);
 
-    if (FIB_PATH_LIST_FLAG_NONE != path_list->fpl_flags)
-    {
-	s = format (s, " flags:");
-	FOR_EACH_PATH_LIST_ATTRIBUTE(attr)
-        {
-	    if ((1<<attr) & path_list->fpl_flags)
-            {
-		s = format (s, "%s,", fib_path_list_attr_names[attr]);
-	    }
-	}
+    if (FIB_PATH_LIST_FLAG_NONE != path_list->fpl_flags) {
+        s = format (s, " flags:");
+        FOR_EACH_PATH_LIST_ATTRIBUTE(attr) {
+            if ((1<<attr) & path_list->fpl_flags) {
+                s = format (s, "%s,", fib_path_list_attr_names[attr]);
+            }
+        }
     }
     s = format (s, " %U\n", format_fib_urpf_list, path_list->fpl_urpf);
 
-    vec_foreach (path_index, path_list->fpl_paths)
-    {
-	s = fib_path_format(*path_index, s);
-	s = format(s, "\n");
+    vec_foreach (path_index, path_list->fpl_paths) {
+        s = fib_path_format(*path_index, s);
+        s = format(s, "\n");
     }
 
     return (s);
@@ -162,7 +158,7 @@ format_fib_path_list (u8 * s, va_list * args)
 
 u8 *
 fib_path_list_format (fib_node_index_t path_list_index,
-		      u8 * s)
+                      u8 * s)
 {
     fib_path_list_t *path_list;
 
@@ -181,13 +177,12 @@ fib_path_list_hash (fib_path_list_t *path_list)
 
     new_path_list_hash = old_path_list_hash = vec_len(path_list->fpl_paths);
 
-    vec_foreach (path_index, path_list->fpl_paths)
-    {
-	path_hash = fib_path_hash(*path_index);
+    vec_foreach (path_index, path_list->fpl_paths) {
+        path_hash = fib_path_hash(*path_index);
 #if uword_bits == 64
-	hash_mix64(path_hash, old_path_list_hash, new_path_list_hash);
+        hash_mix64(path_hash, old_path_list_hash, new_path_list_hash);
 #else
-	hash_mix32(path_hash, old_path_list_hash, new_path_list_hash);
+        hash_mix32(path_hash, old_path_list_hash, new_path_list_hash);
 #endif
     }
 
@@ -218,16 +213,13 @@ fib_path_list_db_get_from_hash_key (uword key)
 {
     fib_path_list_t *path_list;
 
-    if (fib_path_list_db_hash_key_is_index (key))
-    {
-	fib_node_index_t path_list_index;
+    if (fib_path_list_db_hash_key_is_index (key)) {
+        fib_node_index_t path_list_index;
 
-	path_list_index = fib_path_list_db_hash_key_2_index(key);
-	path_list = fib_path_list_get(path_list_index);
-    }
-    else
-    {       
-	path_list = uword_to_pointer (key, fib_path_list_t *);
+        path_list_index = fib_path_list_db_hash_key_2_index(key);
+        path_list = fib_path_list_get(path_list_index);
+    } else {
+        path_list = uword_to_pointer (key, fib_path_list_t *);
     }
 
     return (path_list);
@@ -235,7 +227,7 @@ fib_path_list_db_get_from_hash_key (uword key)
 
 static uword
 fib_path_list_db_hash_key_sum (hash_t * h,
-			       uword key)
+                               uword key)
 {
     fib_path_list_t *path_list;
 
@@ -246,8 +238,8 @@ fib_path_list_db_hash_key_sum (hash_t * h,
 
 static uword
 fib_path_list_db_hash_key_equal (hash_t * h,
-				 uword key1,
-				 uword key2)
+                                 uword key1,
+                                 uword key2)
 {
     fib_path_list_t *path_list1, *path_list2;
 
@@ -255,7 +247,7 @@ fib_path_list_db_hash_key_equal (hash_t * h,
     path_list2 = fib_path_list_db_get_from_hash_key(key2);
 
     return (fib_path_list_hash(path_list1) ==
-	    fib_path_list_hash(path_list2));
+            fib_path_list_hash(path_list2));
 }
 
 static fib_node_index_t
@@ -265,9 +257,8 @@ fib_path_list_db_find (fib_path_list_t *path_list)
 
     p = hash_get(fib_path_list_db, path_list);
 
-    if (NULL != p)
-    {
-	return p[0];
+    if (NULL != p) {
+        return p[0];
     }
 
     return (FIB_NODE_INDEX_INVALID);
@@ -283,8 +274,8 @@ fib_path_list_db_insert (fib_node_index_t path_list_index)
     ASSERT(FIB_NODE_INDEX_INVALID == fib_path_list_db_find(path_list));
 
     hash_set (fib_path_list_db,
-	      fib_path_list_db_hash_key_from_index(path_list_index),
-	      path_list_index);
+              fib_path_list_db_hash_key_from_index(path_list_index),
+              path_list_index);
 
     FIB_PATH_LIST_DBG(path_list, "DB-inserted");
 }
@@ -299,7 +290,7 @@ fib_path_list_db_remove (fib_node_index_t path_list_index)
     ASSERT(FIB_NODE_INDEX_INVALID != fib_path_list_db_find(path_list));
 
     hash_unset(fib_path_list_db,
-	       fib_path_list_db_hash_key_from_index(path_list_index));
+               fib_path_list_db_hash_key_from_index(path_list_index));
 
     FIB_PATH_LIST_DBG(path_list, "DB-removed");
 }
@@ -311,9 +302,8 @@ fib_path_list_destroy (fib_path_list_t *path_list)
 
     FIB_PATH_LIST_DBG(path_list, "destroy");
 
-    vec_foreach (path_index, path_list->fpl_paths)
-    {
-	fib_path_destroy(*path_index);
+    vec_foreach (path_index, path_list->fpl_paths) {
+        fib_path_destroy(*path_index);
     }
 
     vec_free(path_list->fpl_paths);
@@ -332,9 +322,8 @@ fib_path_list_last_lock_gone (fib_node_t *node)
 
     FIB_PATH_LIST_DBG(path_list, "last-lock");
 
-    if (path_list->fpl_flags & FIB_PATH_LIST_FLAG_SHARED)
-    {
-	fib_path_list_db_remove(fib_path_list_get_index(path_list));
+    if (path_list->fpl_flags & FIB_PATH_LIST_FLAG_SHARED) {
+        fib_path_list_db_remove(fib_path_list_get_index(path_list));
     }
     fib_path_list_destroy(path_list);
 }
@@ -347,16 +336,15 @@ fib_path_list_last_lock_gone (fib_node_t *node)
  */
 static void
 fib_path_list_mk_lb (fib_path_list_t *path_list,
-		     fib_forward_chain_type_t fct,
-		     dpo_id_t *dpo)
+                     fib_forward_chain_type_t fct,
+                     dpo_id_t *dpo)
 {
     load_balance_path_t *nhs;
     fib_node_index_t *path_index;
 
     nhs  = NULL;
 
-    if (!dpo_id_is_valid(dpo))
-    {
+    if (!dpo_id_is_valid(dpo)) {
         /*
          * first time create
          */
@@ -364,18 +352,17 @@ fib_path_list_mk_lb (fib_path_list_t *path_list,
                 DPO_LOAD_BALANCE,
                 fib_forw_chain_type_to_dpo_proto(fct),
                 load_balance_create(0,
-				    fib_forw_chain_type_to_dpo_proto(fct),
-				    0 /* FIXME FLOW HASH */));
+                                    fib_forw_chain_type_to_dpo_proto(fct),
+                                    0 /* FIXME FLOW HASH */));
     }
 
     /*
      * We gather the DPOs from resolved paths.
      */
-    vec_foreach (path_index, path_list->fpl_paths)
-    {
-	nhs = fib_path_append_nh_for_multipath_hash(*path_index,
-                                                    fct,
-                                                    nhs);
+    vec_foreach (path_index, path_list->fpl_paths) {
+        nhs = fib_path_append_nh_for_multipath_hash(*path_index,
+                fct,
+                nhs);
     }
 
     /*
@@ -407,9 +394,8 @@ fib_path_list_mk_urpf (fib_path_list_t *path_list)
     fib_urpf_list_unlock(path_list->fpl_urpf);
     path_list->fpl_urpf = fib_urpf_list_alloc_and_lock();
 
-    vec_foreach (path_index, path_list->fpl_paths)
-    {
-	fib_path_contribute_urpf(*path_index, path_list->fpl_urpf);
+    vec_foreach (path_index, path_list->fpl_paths) {
+        fib_path_contribute_urpf(*path_index, path_list->fpl_urpf);
     }
 
     fib_urpf_list_bake(path_list->fpl_urpf);
@@ -421,7 +407,7 @@ fib_path_list_mk_urpf (fib_path_list_t *path_list)
  */
 void
 fib_path_list_contribute_urpf (fib_node_index_t path_list_index,
-			       index_t urpf)
+                               index_t urpf)
 {
     fib_path_list_t *path_list;
 
@@ -451,7 +437,7 @@ fib_path_list_get_urpf (fib_node_index_t path_list_index)
  */
 void
 fib_path_list_back_walk (fib_node_index_t path_list_index,
-			 fib_node_back_walk_ctx_t *ctx)
+                         fib_node_back_walk_ctx_t *ctx)
 {
     fib_path_list_t *path_list;
 
@@ -462,8 +448,7 @@ fib_path_list_back_walk (fib_node_index_t path_list_index,
     /*
      * propagate the backwalk further
      */
-    if (path_list->fpl_flags & FIB_PATH_LIST_FLAG_POPULAR)
-    {
+    if (path_list->fpl_flags & FIB_PATH_LIST_FLAG_POPULAR) {
         /*
          * many children. schedule a async walk
          */
@@ -471,13 +456,11 @@ fib_path_list_back_walk (fib_node_index_t path_list_index,
                        path_list_index,
                        FIB_WALK_PRIORITY_LOW,
                        ctx);
-    }
-    else
-    {
+    } else {
         /*
          * only a few children. continue the walk synchronously
          */
-	fib_walk_sync(FIB_NODE_TYPE_PATH_LIST, path_list_index, ctx);
+        fib_walk_sync(FIB_NODE_TYPE_PATH_LIST, path_list_index, ctx);
     }
 }
 
@@ -488,7 +471,7 @@ fib_path_list_back_walk (fib_node_index_t path_list_index,
  */
 static fib_node_back_walk_rc_t
 fib_path_list_back_walk_notify (fib_node_t *node,
-				fib_node_back_walk_ctx_t *ctx)
+                                fib_node_back_walk_ctx_t *ctx)
 {
     /*
      * the path-list is not a direct child of any other node type
@@ -507,9 +490,9 @@ static void
 fib_path_list_memory_show (void)
 {
     fib_show_memory_usage("Path-list",
-			  pool_elts(fib_path_list_pool),
-			  pool_len(fib_path_list_pool),
-			  sizeof(fib_path_list_t));
+                          pool_elts(fib_path_list_pool),
+                          pool_len(fib_path_list_pool),
+                          sizeof(fib_path_list_t));
     fib_urpf_list_show_mem();
 }
 
@@ -532,7 +515,7 @@ fib_path_list_alloc (fib_node_index_t *path_list_index)
     memset(path_list, 0, sizeof(*path_list));
 
     fib_node_init(&path_list->fpl_node,
-		  FIB_NODE_TYPE_PATH_LIST);
+                  FIB_NODE_TYPE_PATH_LIST);
     path_list->fpl_urpf = INDEX_INVALID;
     path_list->fpl_paths = NULL;
 
@@ -559,9 +542,8 @@ fib_path_list_resolve (fib_path_list_t *path_list)
     path_list_index = fib_path_list_get_index(path_list);
     paths = vec_dup(path_list->fpl_paths);
 
-    vec_foreach (path_index, paths)
-    {
-	fib_path_resolve(*path_index);
+    vec_foreach (path_index, paths) {
+        fib_path_resolve(*path_index);
     }
 
     vec_free(paths);
@@ -569,8 +551,7 @@ fib_path_list_resolve (fib_path_list_t *path_list)
 
     FIB_PATH_LIST_DBG(path_list, "resovled");
 
-    if (!(path_list->fpl_flags & FIB_PATH_LIST_FLAG_NO_URPF))
-    {
+    if (!(path_list->fpl_flags & FIB_PATH_LIST_FLAG_NO_URPF)) {
         fib_path_list_mk_urpf(path_list);
     }
     return (path_list);
@@ -581,8 +562,7 @@ fib_path_list_get_n_paths (fib_node_index_t path_list_index)
 {
     fib_path_list_t *path_list;
 
-    if (FIB_NODE_INDEX_INVALID == path_list_index)
-    {
+    if (FIB_NODE_INDEX_INVALID == path_list_index) {
         return (0);
     }
 
@@ -602,13 +582,11 @@ fib_path_list_get_resolving_interface (fib_node_index_t path_list_index)
     path_list = fib_path_list_get(path_list_index);
 
     sw_if_index = ~0;
-    vec_foreach (path_index, path_list->fpl_paths)
-    {
-	sw_if_index = fib_path_get_resolving_interface(*path_index);
-	if (~0 != sw_if_index)
-	{
-	    return (sw_if_index);
-	}
+    vec_foreach (path_index, path_list->fpl_paths) {
+        sw_if_index = fib_path_get_resolving_interface(*path_index);
+        if (~0 != sw_if_index) {
+            return (sw_if_index);
+        }
     }
 
     return (sw_if_index);
@@ -655,9 +633,8 @@ fib_path_list_flags_fixup (fib_path_list_flags_t flags)
      * we do no share drop nor exclusive path-lists
      */
     if (flags & FIB_PATH_LIST_FLAG_DROP ||
-	flags & FIB_PATH_LIST_FLAG_EXCLUSIVE)
-    {
-	flags &= ~FIB_PATH_LIST_FLAG_SHARED;
+        flags & FIB_PATH_LIST_FLAG_EXCLUSIVE) {
+        flags &= ~FIB_PATH_LIST_FLAG_SHARED;
     }
 
     return (flags);
@@ -665,7 +642,7 @@ fib_path_list_flags_fixup (fib_path_list_flags_t flags)
 
 fib_node_index_t
 fib_path_list_create (fib_path_list_flags_t flags,
-		      const fib_route_path_t *rpaths)
+                      const fib_route_path_t *rpaths)
 {
     fib_node_index_t path_list_index, old_path_list_index;
     fib_path_list_t *path_list;
@@ -675,10 +652,8 @@ fib_path_list_create (fib_path_list_flags_t flags,
     path_list = fib_path_list_alloc(&path_list_index);
     path_list->fpl_flags = flags;
 
-    if (NULL != rpaths)
-    {
-        vec_foreach_index(i, rpaths)
-        {
+    if (NULL != rpaths) {
+        vec_foreach_index(i, rpaths) {
             vec_add1(path_list->fpl_paths,
                      fib_path_create(path_list_index,
                                      &rpaths[i]));
@@ -688,8 +663,7 @@ fib_path_list_create (fib_path_list_flags_t flags,
          * the description of the paths it contains. The paths need to
          * be sorted else this description will differ.
          */
-        if (vec_len(path_list->fpl_paths) > 1)
-        {
+        if (vec_len(path_list->fpl_paths) > 1) {
             vec_sort_with_function(path_list->fpl_paths,
                                    fib_path_cmp_for_sort);
         }
@@ -698,57 +672,48 @@ fib_path_list_create (fib_path_list_flags_t flags,
     /*
      * If a shared path list is requested, consult the DB for a match
      */
-    if (flags & FIB_PATH_LIST_FLAG_SHARED)
-    {
-	/*
-	 * check for a matching path-list in the DB.
-	 * If we find one then we can return the existing one and destroy the
-	 * new one just created.
-	 */
-	old_path_list_index = fib_path_list_db_find(path_list);
-	if (FIB_NODE_INDEX_INVALID != old_path_list_index)
-	{
-	    fib_path_list_destroy(path_list);
-	
-	    path_list_index = old_path_list_index;
-	}
-	else
-	{
-	    /*
-	     * if there was not a matching path-list, then this
-	     * new one will need inserting into the DB and resolving.
-	     */
-	    fib_path_list_db_insert(path_list_index);
-	    path_list = fib_path_list_resolve(path_list);
-	}
-    }
-    else
-    {
-	/*
-	 * no shared path list requested. resolve and use the one
-	 * just created.
-	 */
-	path_list = fib_path_list_resolve(path_list);
+    if (flags & FIB_PATH_LIST_FLAG_SHARED) {
+        /*
+         * check for a matching path-list in the DB.
+         * If we find one then we can return the existing one and destroy the
+         * new one just created.
+         */
+        old_path_list_index = fib_path_list_db_find(path_list);
+        if (FIB_NODE_INDEX_INVALID != old_path_list_index) {
+            fib_path_list_destroy(path_list);
+
+            path_list_index = old_path_list_index;
+        } else {
+            /*
+             * if there was not a matching path-list, then this
+             * new one will need inserting into the DB and resolving.
+             */
+            fib_path_list_db_insert(path_list_index);
+            path_list = fib_path_list_resolve(path_list);
+        }
+    } else {
+        /*
+         * no shared path list requested. resolve and use the one
+         * just created.
+         */
+        path_list = fib_path_list_resolve(path_list);
     }
 
     return (path_list_index);
 }
 
-static fib_path_cfg_flags_t 
+static fib_path_cfg_flags_t
 fib_path_list_flags_2_path_flags (fib_path_list_flags_t plf)
 {
     fib_path_cfg_flags_t pf = FIB_PATH_CFG_FLAG_NONE;
 
-    if (plf & FIB_PATH_LIST_FLAG_DROP)
-    {
-	pf |= FIB_PATH_CFG_FLAG_DROP;
+    if (plf & FIB_PATH_LIST_FLAG_DROP) {
+        pf |= FIB_PATH_CFG_FLAG_DROP;
     }
-    if (plf & FIB_PATH_LIST_FLAG_EXCLUSIVE)
-    {
-	pf |= FIB_PATH_CFG_FLAG_EXCLUSIVE;
+    if (plf & FIB_PATH_LIST_FLAG_EXCLUSIVE) {
+        pf |= FIB_PATH_CFG_FLAG_EXCLUSIVE;
     }
-    if (plf & FIB_PATH_LIST_FLAG_LOCAL)
-    {
+    if (plf & FIB_PATH_LIST_FLAG_LOCAL) {
         pf |= FIB_PATH_CFG_FLAG_LOCAL;
     }
 
@@ -757,8 +722,8 @@ fib_path_list_flags_2_path_flags (fib_path_list_flags_t plf)
 
 fib_node_index_t
 fib_path_list_create_special (dpo_proto_t nh_proto,
-			      fib_path_list_flags_t flags,
-			      const dpo_id_t *dpo)
+                              fib_path_list_flags_t flags,
+                              const dpo_id_t *dpo)
 {
     fib_node_index_t path_index, path_list_index;
     fib_path_list_t *path_list;
@@ -767,10 +732,10 @@ fib_path_list_create_special (dpo_proto_t nh_proto,
     path_list->fpl_flags = flags;
 
     path_index =
-	fib_path_create_special(path_list_index,
+        fib_path_create_special(path_list_index,
                                 nh_proto,
-				fib_path_list_flags_2_path_flags(flags),
-				dpo);
+                                fib_path_list_flags_2_path_flags(flags),
+                                dpo);
     vec_add1(path_list->fpl_paths, path_index);
 
     /*
@@ -794,10 +759,8 @@ fib_path_list_find_rpath (fib_node_index_t path_list_index,
 
     path_list = fib_path_list_get(path_list_index);
 
-    vec_foreach_index (ii, path_list->fpl_paths)
-    {
-        if (!fib_path_cmp_w_route_path(path_list->fpl_paths[ii], rpath))
-        {
+    vec_foreach_index (ii, path_list->fpl_paths) {
+        if (!fib_path_cmp_w_route_path(path_list->fpl_paths[ii], rpath)) {
             return (ii);
         }
     }
@@ -833,13 +796,11 @@ fib_path_list_path_add (fib_node_index_t path_list_index,
     new_path_index = fib_path_create(path_list_index,
                                      rpaths);
 
-    vec_foreach (orig_path_index, path_list->fpl_paths)
-    {
+    vec_foreach (orig_path_index, path_list->fpl_paths) {
         /*
          * don't add duplicate paths
          */
-	if (0 == fib_path_cmp(new_path_index, *orig_path_index))
-        {
+        if (0 == fib_path_cmp(new_path_index, *orig_path_index)) {
             fib_path_destroy(new_path_index);
             return (*orig_path_index);
         }
@@ -893,20 +854,16 @@ fib_path_list_copy_and_path_add (fib_node_index_t orig_path_list_index,
     new_path_index = fib_path_create(path_list_index,
                                      rpaths);
 
-    vec_foreach (orig_path_index, orig_path_list->fpl_paths)
-    {
+    vec_foreach (orig_path_index, orig_path_list->fpl_paths) {
         /*
          * don't add duplicate paths
          * In the unlikely event the path is a duplicate, then we'll
          * find a matching path-list later and this one will be toast.
          */
-	if (0 != fib_path_cmp(new_path_index, *orig_path_index))
-        {
+        if (0 != fib_path_cmp(new_path_index, *orig_path_index)) {
             path_index = fib_path_copy(*orig_path_index, path_list_index);
             path_list->fpl_paths[pi++] = path_index;
-        }
-        else
-        {
+        } else {
             _vec_len(path_list->fpl_paths) = vec_len(orig_path_list->fpl_paths);
         }
     }
@@ -927,17 +884,13 @@ fib_path_list_copy_and_path_add (fib_node_index_t orig_path_list_index,
      * If we find one then we can return the existing one and destroy the
      * new one just created.
      */
-    if (path_list->fpl_flags & FIB_PATH_LIST_FLAG_SHARED)
-    {
+    if (path_list->fpl_flags & FIB_PATH_LIST_FLAG_SHARED) {
         exist_path_list_index = fib_path_list_db_find(path_list);
-        if (FIB_NODE_INDEX_INVALID != exist_path_list_index)
-        {
+        if (FIB_NODE_INDEX_INVALID != exist_path_list_index) {
             fib_path_list_destroy(path_list);
-	
+
             path_list_index = exist_path_list_index;
-        }
-        else
-        {
+        } else {
             /*
              * if there was not a matching path-list, then this
              * new one will need inserting into the DB and resolving.
@@ -946,9 +899,7 @@ fib_path_list_copy_and_path_add (fib_node_index_t orig_path_list_index,
 
             path_list = fib_path_list_resolve(path_list);
         }
-    }
-    else
-    {
+    } else {
         /*
          * no shared path list requested. resolve and use the one
          * just created.
@@ -982,21 +933,19 @@ fib_path_list_path_remove (fib_node_index_t path_list_index,
      * can be used as a comparison object during the copy.
      */
     tmp_path_index = fib_path_create(path_list_index,
-				     rpaths);
+                                     rpaths);
     match_path_index = FIB_NODE_INDEX_INVALID;
 
-    vec_foreach_index (pi, path_list->fpl_paths)
-    {
-	if (0 == fib_path_cmp(tmp_path_index,
-                              path_list->fpl_paths[pi]))
-        {
+    vec_foreach_index (pi, path_list->fpl_paths) {
+        if (0 == fib_path_cmp(tmp_path_index,
+                              path_list->fpl_paths[pi])) {
             /*
              * match - remove it
              */
             match_path_index = path_list->fpl_paths[pi];
             fib_path_destroy(match_path_index);
             vec_del1(path_list->fpl_paths, pi);
-	}
+        }
     }
 
     /*
@@ -1016,8 +965,8 @@ fib_path_list_path_remove (fib_node_index_t path_list_index,
  */
 fib_node_index_t
 fib_path_list_copy_and_path_remove (fib_node_index_t orig_path_list_index,
-				    fib_path_list_flags_t flags,
-				    const fib_route_path_t *rpaths)
+                                    fib_path_list_flags_t flags,
+                                    const fib_route_path_t *rpaths)
 {
     fib_node_index_t path_index, *orig_path_index, path_list_index, tmp_path_index;
     fib_path_list_t *path_list,  *orig_path_list;
@@ -1037,9 +986,8 @@ fib_path_list_copy_and_path_remove (fib_node_index_t orig_path_list_index,
      * allocate as many paths as we might need in one go, rather than
      * using vec_add to do a few at a time.
      */
-    if (vec_len(orig_path_list->fpl_paths) > 1)
-    {
-	vec_validate(path_list->fpl_paths, vec_len(orig_path_list->fpl_paths) - 2);
+    if (vec_len(orig_path_list->fpl_paths) > 1) {
+        vec_validate(path_list->fpl_paths, vec_len(orig_path_list->fpl_paths) - 2);
     }
     pi = 0;
 
@@ -1048,28 +996,24 @@ fib_path_list_copy_and_path_remove (fib_node_index_t orig_path_list_index,
      * can be used as a comparison object during the copy.
      */
     tmp_path_index = fib_path_create(path_list_index,
-				     rpaths);
+                                     rpaths);
 
-    vec_foreach (orig_path_index, orig_path_list->fpl_paths)
-    {
-	if (0 != fib_path_cmp(tmp_path_index, *orig_path_index)) {
-	    path_index = fib_path_copy(*orig_path_index, path_list_index);
-	    if (pi < vec_len(path_list->fpl_paths))
-	    {
-		path_list->fpl_paths[pi++] = path_index;
-	    }
-	    else
-	    {
-		/*
-		 * this is the unlikely case that the path being
-		 * removed does not match one in the path-list, so
-		 * we end up with as many paths as we started with.
-		 * the paths vector was sized above with the expectation
-		 * that we would have 1 less.
-		 */
-		vec_add1(path_list->fpl_paths, path_index);
-	    }
-	}
+    vec_foreach (orig_path_index, orig_path_list->fpl_paths) {
+        if (0 != fib_path_cmp(tmp_path_index, *orig_path_index)) {
+            path_index = fib_path_copy(*orig_path_index, path_list_index);
+            if (pi < vec_len(path_list->fpl_paths)) {
+                path_list->fpl_paths[pi++] = path_index;
+            } else {
+                /*
+                 * this is the unlikely case that the path being
+                 * removed does not match one in the path-list, so
+                 * we end up with as many paths as we started with.
+                 * the paths vector was sized above with the expectation
+                 * that we would have 1 less.
+                 */
+                vec_add1(path_list->fpl_paths, path_index);
+            }
+        }
     }
 
     /*
@@ -1081,57 +1025,51 @@ fib_path_list_copy_and_path_remove (fib_node_index_t orig_path_list_index,
      * if there are no paths, then the new path-list is aborted
      */
     if (0 == vec_len(path_list->fpl_paths)) {
-	FIB_PATH_LIST_DBG(path_list, "last-path-removed");
+        FIB_PATH_LIST_DBG(path_list, "last-path-removed");
 
-	fib_path_list_destroy(path_list);
+        fib_path_list_destroy(path_list);
 
-	path_list_index = FIB_NODE_INDEX_INVALID;
+        path_list_index = FIB_NODE_INDEX_INVALID;
     } else {
-	/*
-	 * we sort the paths since the key for the path-list is
-	 * the description of the paths it contains. The paths need to
-	 * be sorted else this description will differ.
-	 */
-	vec_sort_with_function(path_list->fpl_paths, fib_path_cmp_for_sort);
-    
-	/*
-	 * If a shared path list is requested, consult the DB for a match
-	 */
-	if (path_list->fpl_flags & FIB_PATH_LIST_FLAG_SHARED)
-	{
-	    fib_node_index_t exist_path_list_index;
+        /*
+         * we sort the paths since the key for the path-list is
+         * the description of the paths it contains. The paths need to
+         * be sorted else this description will differ.
+         */
+        vec_sort_with_function(path_list->fpl_paths, fib_path_cmp_for_sort);
+
+        /*
+         * If a shared path list is requested, consult the DB for a match
+         */
+        if (path_list->fpl_flags & FIB_PATH_LIST_FLAG_SHARED) {
+            fib_node_index_t exist_path_list_index;
 
             /*
-	     * check for a matching path-list in the DB.
-	     * If we find one then we can return the existing one and destroy the
-	     * new one just created.
-	     */
-	    exist_path_list_index = fib_path_list_db_find(path_list);
-	    if (FIB_NODE_INDEX_INVALID != exist_path_list_index)
-	    {
-		fib_path_list_destroy(path_list);
-	
-		path_list_index = exist_path_list_index;
-	    }
-	    else
-	    {
-		/*
-		 * if there was not a matching path-list, then this
-		 * new one will need inserting into the DB and resolving.
-		 */
-		fib_path_list_db_insert(path_list_index);
+            * check for a matching path-list in the DB.
+            * If we find one then we can return the existing one and destroy the
+            * new one just created.
+            */
+            exist_path_list_index = fib_path_list_db_find(path_list);
+            if (FIB_NODE_INDEX_INVALID != exist_path_list_index) {
+                fib_path_list_destroy(path_list);
 
-		path_list = fib_path_list_resolve(path_list);
-	    }
-	}
-	else
-	{
-	    /*
-	     * no shared path list requested. resolve and use the one
-	     * just created.
-	     */
-	    path_list = fib_path_list_resolve(path_list);
-	}
+                path_list_index = exist_path_list_index;
+            } else {
+                /*
+                 * if there was not a matching path-list, then this
+                 * new one will need inserting into the DB and resolving.
+                 */
+                fib_path_list_db_insert(path_list_index);
+
+                path_list = fib_path_list_resolve(path_list);
+            }
+        } else {
+            /*
+             * no shared path list requested. resolve and use the one
+             * just created.
+             */
+            path_list = fib_path_list_resolve(path_list);
+        }
     }
 
     return (path_list_index);
@@ -1145,8 +1083,8 @@ fib_path_list_copy_and_path_remove (fib_node_index_t orig_path_list_index,
  */
 void
 fib_path_list_contribute_forwarding (fib_node_index_t path_list_index,
-				     fib_forward_chain_type_t fct,
-				     dpo_id_t *dpo)
+                                     fib_forward_chain_type_t fct,
+                                     dpo_id_t *dpo)
 {
     fib_path_list_t *path_list;
 
@@ -1163,7 +1101,7 @@ fib_path_list_contribute_forwarding (fib_node_index_t path_list_index,
  */
 adj_index_t
 fib_path_list_get_adj (fib_node_index_t path_list_index,
-		       fib_forward_chain_type_t type)
+                       fib_forward_chain_type_t type)
 {
     fib_path_list_t *path_list;
 
@@ -1173,7 +1111,7 @@ fib_path_list_get_adj (fib_node_index_t path_list_index,
 
 int
 fib_path_list_recursive_loop_detect (fib_node_index_t path_list_index,
-				     fib_node_index_t **entry_indicies)
+                                     fib_node_index_t **entry_indicies)
 {
     fib_node_index_t *path_index;
     int is_looped, list_looped;
@@ -1182,32 +1120,28 @@ fib_path_list_recursive_loop_detect (fib_node_index_t path_list_index,
     list_looped = 0;
     path_list = fib_path_list_get(path_list_index);
 
-    vec_foreach (path_index, path_list->fpl_paths)
-    {
-	fib_node_index_t *copy, **copy_ptr;
+    vec_foreach (path_index, path_list->fpl_paths) {
+        fib_node_index_t *copy, **copy_ptr;
 
-	/*
-	 * we need a copy of the nodes visited so that when we add entries
-	 * we explore on the nth path and a looped is detected, those entries
-	 * are not again searched for n+1 path and so finding a loop that does
-	 * not exist.
-	 */
-	copy = vec_dup(*entry_indicies);
-	copy_ptr = &copy;
+        /*
+         * we need a copy of the nodes visited so that when we add entries
+         * we explore on the nth path and a looped is detected, those entries
+         * are not again searched for n+1 path and so finding a loop that does
+         * not exist.
+         */
+        copy = vec_dup(*entry_indicies);
+        copy_ptr = &copy;
 
-	is_looped  = fib_path_recursive_loop_detect(*path_index, copy_ptr);
-	list_looped += is_looped;
+        is_looped  = fib_path_recursive_loop_detect(*path_index, copy_ptr);
+        list_looped += is_looped;
     }
 
     FIB_PATH_LIST_DBG(path_list, "loop-detect: eval:%d", eval);
 
-    if (list_looped)
-    {
-	path_list->fpl_flags |= FIB_PATH_LIST_FLAG_LOOPED;
-    }
-    else
-    {
-	path_list->fpl_flags &= ~FIB_PATH_LIST_FLAG_LOOPED;
+    if (list_looped) {
+        path_list->fpl_flags |= FIB_PATH_LIST_FLAG_LOOPED;
+    } else {
+        path_list->fpl_flags &= ~FIB_PATH_LIST_FLAG_LOOPED;
     }
 
     return (list_looped);
@@ -1215,8 +1149,8 @@ fib_path_list_recursive_loop_detect (fib_node_index_t path_list_index,
 
 u32
 fib_path_list_child_add (fib_node_index_t path_list_index,
-			 fib_node_type_t child_type,
-			 fib_node_index_t child_index)
+                         fib_node_type_t child_type,
+                         fib_node_index_t child_index)
 {
     u32 sibling;
 
@@ -1226,8 +1160,7 @@ fib_path_list_child_add (fib_node_index_t path_list_index,
                                  child_index);
 
     if (FIB_PATH_LIST_POPULAR == fib_node_get_n_children(FIB_NODE_TYPE_PATH_LIST,
-                                                         path_list_index))
-    {
+            path_list_index)) {
         /*
          * Set the popular flag on the path-list once we pass the magic
          * threshold. then walk children to update.
@@ -1246,7 +1179,7 @@ fib_path_list_child_add (fib_node_index_t path_list_index,
         path_list = fib_path_list_get(path_list_index);
         path_list->fpl_flags |= FIB_PATH_LIST_FLAG_POPULAR;
 
-	fib_walk_sync(FIB_NODE_TYPE_PATH_LIST, path_list_index, &ctx);
+        fib_walk_sync(FIB_NODE_TYPE_PATH_LIST, path_list_index, &ctx);
     }
 
     return (sibling);
@@ -1254,7 +1187,7 @@ fib_path_list_child_add (fib_node_index_t path_list_index,
 
 void
 fib_path_list_child_remove (fib_node_index_t path_list_index,
-			    u32 si)
+                            u32 si)
 {
     fib_node_child_remove(FIB_NODE_TYPE_PATH_LIST,
                           path_list_index,
@@ -1266,12 +1199,11 @@ fib_path_list_lock(fib_node_index_t path_list_index)
 {
     fib_path_list_t *path_list;
 
-    if (FIB_NODE_INDEX_INVALID != path_list_index)
-    {
-	path_list = fib_path_list_get(path_list_index);
+    if (FIB_NODE_INDEX_INVALID != path_list_index) {
+        path_list = fib_path_list_get(path_list_index);
 
-	fib_node_lock(&path_list->fpl_node);
-	FIB_PATH_LIST_DBG(path_list, "lock");
+        fib_node_lock(&path_list->fpl_node);
+        FIB_PATH_LIST_DBG(path_list, "lock");
     }
 }
 
@@ -1280,19 +1212,18 @@ fib_path_list_unlock (fib_node_index_t path_list_index)
 {
     fib_path_list_t *path_list;
 
-    if (FIB_NODE_INDEX_INVALID != path_list_index)
-    {
-	path_list = fib_path_list_get(path_list_index);
-	FIB_PATH_LIST_DBG(path_list, "unlock");
-    
-	fib_node_unlock(&path_list->fpl_node);
+    if (FIB_NODE_INDEX_INVALID != path_list_index) {
+        path_list = fib_path_list_get(path_list_index);
+        FIB_PATH_LIST_DBG(path_list, "unlock");
+
+        fib_node_unlock(&path_list->fpl_node);
     }
 }
 
 u32
 fib_path_list_pool_size (void)
 {
-    return (pool_elts(fib_path_list_pool));    
+    return (pool_elts(fib_path_list_pool));
 }
 
 u32
@@ -1303,20 +1234,19 @@ fib_path_list_db_size (void)
 
 void
 fib_path_list_walk (fib_node_index_t path_list_index,
-		    fib_path_list_walk_fn_t func,
-		    void *ctx)
+                    fib_path_list_walk_fn_t func,
+                    void *ctx)
 {
     fib_node_index_t *path_index;
     fib_path_list_t *path_list;
 
     path_list = fib_path_list_get(path_list_index);
 
-    vec_foreach(path_index, path_list->fpl_paths)
-    {
-	if (FIB_PATH_LIST_WALK_STOP == func(path_list_index,
+    vec_foreach(path_index, path_list->fpl_paths) {
+        if (FIB_PATH_LIST_WALK_STOP == func(path_list_index,
                                             *path_index,
                                             ctx))
-	    break;
+            break;
     }
 }
 
@@ -1327,57 +1257,51 @@ fib_path_list_module_init (void)
     fib_node_register_type (FIB_NODE_TYPE_PATH_LIST, &fib_path_list_vft);
 
     fib_path_list_db = hash_create2 (/* elts */ 0,
-    				     /* user */ 0,
-    				     /* value_bytes */ sizeof (fib_node_index_t),
-    				     fib_path_list_db_hash_key_sum,
-    				     fib_path_list_db_hash_key_equal,
-    				     /* format pair/arg */
-    				     0, 0);
+                       /* user */ 0,
+                       /* value_bytes */ sizeof (fib_node_index_t),
+                       fib_path_list_db_hash_key_sum,
+                       fib_path_list_db_hash_key_equal,
+                       /* format pair/arg */
+                       0, 0);
 }
 
 static clib_error_t *
 show_fib_path_list_command (vlib_main_t * vm,
-			    unformat_input_t * input,
-			    vlib_cli_command_t * cmd)
+                            unformat_input_t * input,
+                            vlib_cli_command_t * cmd)
 {
     fib_path_list_t *path_list;
     fib_node_index_t pli;
 
-    if (unformat (input, "%d", &pli))
-    {
-	/*
-	 * show one in detail
-	 */
-	if (!pool_is_free_index(fib_path_list_pool, pli))
-	{
-	    path_list = fib_path_list_get(pli);
-	    u8 *s = fib_path_list_format(pli, NULL);
-	    s = format(s, "children:");
-	    s = fib_node_children_format(path_list->fpl_node.fn_children, s);
-	    vlib_cli_output (vm, "%s", s);
-	    vec_free(s);
-	}
-	else
-	{
-	    vlib_cli_output (vm, "path list %d invalid", pli);
-	}
-    }
-    else
-    {
-	/*
-	 * show all
-	 */
-	vlib_cli_output (vm, "FIB Path Lists");
-	pool_foreach(path_list, fib_path_list_pool,
-	({
-	    vlib_cli_output (vm, "%U", format_fib_path_list, path_list);
-	}));
+    if (unformat (input, "%d", &pli)) {
+        /*
+         * show one in detail
+         */
+        if (!pool_is_free_index(fib_path_list_pool, pli)) {
+            path_list = fib_path_list_get(pli);
+            u8 *s = fib_path_list_format(pli, NULL);
+            s = format(s, "children:");
+            s = fib_node_children_format(path_list->fpl_node.fn_children, s);
+            vlib_cli_output (vm, "%s", s);
+            vec_free(s);
+        } else {
+            vlib_cli_output (vm, "path list %d invalid", pli);
+        }
+    } else {
+        /*
+         * show all
+         */
+        vlib_cli_output (vm, "FIB Path Lists");
+        pool_foreach(path_list, fib_path_list_pool,
+        ({
+            vlib_cli_output (vm, "%U", format_fib_path_list, path_list);
+        }));
     }
     return (NULL);
 }
 
 VLIB_CLI_COMMAND (show_fib_path_list, static) = {
-  .path = "show fib path-lists",
-  .function = show_fib_path_list_command,
-  .short_help = "show fib path-lists",
+    .path = "show fib path-lists",
+    .function = show_fib_path_list_command,
+    .short_help = "show fib path-lists",
 };

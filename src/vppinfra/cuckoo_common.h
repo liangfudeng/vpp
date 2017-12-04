@@ -33,18 +33,16 @@
   F (CLIB_CUCKOO_ERROR_NOT_FOUND, -1, "object not found") \
   F (CLIB_CUCKOO_ERROR_AGAIN, -2, "object busy")
 
-typedef enum
-{
+typedef enum {
 #define F(n, v, s) n = v,
-  foreach_clib_cuckoo_error (F)
+    foreach_clib_cuckoo_error (F)
 #undef F
 } clib_cuckoo_error_e;
 
-typedef struct
-{
-  uword bucket1;
-  uword bucket2;
-  u8 reduced_hash;
+typedef struct {
+    uword bucket1;
+    uword bucket2;
+    u8 reduced_hash;
 } clib_cuckoo_lookup_info_t;
 
 #endif /* __included_cuckoo_common_h__ */

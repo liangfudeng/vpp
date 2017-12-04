@@ -26,19 +26,15 @@ fib_entry_delegate_find_i (const fib_entry_t *fib_entry,
     int ii;
 
     ii = 0;
-    vec_foreach(delegate, fib_entry->fe_delegates)
-    {
-	if (delegate->fd_type == type)
-	{
+    vec_foreach(delegate, fib_entry->fe_delegates) {
+        if (delegate->fd_type == type) {
             if (NULL != index)
                 *index = ii;
 
-	    return (delegate);
-	}
-	else
-	{
-	    ii++;
-	}
+            return (delegate);
+        } else {
+            ii++;
+        }
     }
 
     return (NULL);
@@ -80,13 +76,13 @@ fib_entry_delegate_init (fib_entry_t *fib_entry,
 
 {
     fib_entry_delegate_t delegate = {
-	.fd_entry_index = fib_entry_get_index(fib_entry),
-	.fd_type = type,
+        .fd_entry_index = fib_entry_get_index(fib_entry),
+        .fd_type = type,
     };
 
     vec_add1(fib_entry->fe_delegates, delegate);
     vec_sort_with_function(fib_entry->fe_delegates,
-			   fib_entry_delegate_cmp_for_sort);
+                           fib_entry_delegate_cmp_for_sort);
 }
 
 fib_entry_delegate_t *
@@ -97,9 +93,8 @@ fib_entry_delegate_find_or_add (fib_entry_t *fib_entry,
 
     delegate = fib_entry_delegate_get(fib_entry, fdt);
 
-    if (NULL == delegate)
-    {
-	fib_entry_delegate_init(fib_entry, fdt);
+    if (NULL == delegate) {
+        fib_entry_delegate_init(fib_entry, fdt);
     }
 
     return (fib_entry_delegate_get(fib_entry, fdt));
@@ -108,24 +103,23 @@ fib_entry_delegate_find_or_add (fib_entry_t *fib_entry,
 fib_entry_delegate_type_t
 fib_entry_chain_type_to_delegate_type (fib_forward_chain_type_t fct)
 {
-    switch (fct)
-    {
-    case FIB_FORW_CHAIN_TYPE_UNICAST_IP4:
-        return (FIB_ENTRY_DELEGATE_CHAIN_UNICAST_IP4);
-    case FIB_FORW_CHAIN_TYPE_UNICAST_IP6:
-        return (FIB_ENTRY_DELEGATE_CHAIN_UNICAST_IP6);
-    case FIB_FORW_CHAIN_TYPE_MPLS_EOS:
-        return (FIB_ENTRY_DELEGATE_CHAIN_MPLS_EOS);
-    case FIB_FORW_CHAIN_TYPE_MPLS_NON_EOS:
-        return (FIB_ENTRY_DELEGATE_CHAIN_MPLS_NON_EOS);
-    case FIB_FORW_CHAIN_TYPE_ETHERNET:
-        return (FIB_ENTRY_DELEGATE_CHAIN_ETHERNET);
-    case FIB_FORW_CHAIN_TYPE_MCAST_IP4:
-    case FIB_FORW_CHAIN_TYPE_MCAST_IP6:
-    case FIB_FORW_CHAIN_TYPE_BIER:
-        break;
-    case FIB_FORW_CHAIN_TYPE_NSH:
-        return (FIB_ENTRY_DELEGATE_CHAIN_NSH);
+    switch (fct) {
+        case FIB_FORW_CHAIN_TYPE_UNICAST_IP4:
+            return (FIB_ENTRY_DELEGATE_CHAIN_UNICAST_IP4);
+        case FIB_FORW_CHAIN_TYPE_UNICAST_IP6:
+            return (FIB_ENTRY_DELEGATE_CHAIN_UNICAST_IP6);
+        case FIB_FORW_CHAIN_TYPE_MPLS_EOS:
+            return (FIB_ENTRY_DELEGATE_CHAIN_MPLS_EOS);
+        case FIB_FORW_CHAIN_TYPE_MPLS_NON_EOS:
+            return (FIB_ENTRY_DELEGATE_CHAIN_MPLS_NON_EOS);
+        case FIB_FORW_CHAIN_TYPE_ETHERNET:
+            return (FIB_ENTRY_DELEGATE_CHAIN_ETHERNET);
+        case FIB_FORW_CHAIN_TYPE_MCAST_IP4:
+        case FIB_FORW_CHAIN_TYPE_MCAST_IP6:
+        case FIB_FORW_CHAIN_TYPE_BIER:
+            break;
+        case FIB_FORW_CHAIN_TYPE_NSH:
+            return (FIB_ENTRY_DELEGATE_CHAIN_NSH);
     }
     ASSERT(0);
     return (FIB_ENTRY_DELEGATE_CHAIN_UNICAST_IP4);
@@ -134,25 +128,24 @@ fib_entry_chain_type_to_delegate_type (fib_forward_chain_type_t fct)
 fib_forward_chain_type_t
 fib_entry_delegate_type_to_chain_type (fib_entry_delegate_type_t fdt)
 {
-    switch (fdt)
-    {
-    case FIB_ENTRY_DELEGATE_CHAIN_UNICAST_IP4:
-        return (FIB_FORW_CHAIN_TYPE_UNICAST_IP4);
-    case FIB_ENTRY_DELEGATE_CHAIN_UNICAST_IP6:
-        return (FIB_FORW_CHAIN_TYPE_UNICAST_IP6);
-    case FIB_ENTRY_DELEGATE_CHAIN_MPLS_EOS:
-        return (FIB_FORW_CHAIN_TYPE_MPLS_EOS);
-    case FIB_ENTRY_DELEGATE_CHAIN_MPLS_NON_EOS:
-        return (FIB_FORW_CHAIN_TYPE_MPLS_NON_EOS);
-    case FIB_ENTRY_DELEGATE_CHAIN_ETHERNET:
-        return (FIB_FORW_CHAIN_TYPE_ETHERNET);
-    case FIB_ENTRY_DELEGATE_CHAIN_NSH:
-        return (FIB_FORW_CHAIN_TYPE_NSH);
-    case FIB_ENTRY_DELEGATE_COVERED:
-    case FIB_ENTRY_DELEGATE_ATTACHED_IMPORT:
-    case FIB_ENTRY_DELEGATE_ATTACHED_EXPORT:
-    case FIB_ENTRY_DELEGATE_BFD:
-        break;
+    switch (fdt) {
+        case FIB_ENTRY_DELEGATE_CHAIN_UNICAST_IP4:
+            return (FIB_FORW_CHAIN_TYPE_UNICAST_IP4);
+        case FIB_ENTRY_DELEGATE_CHAIN_UNICAST_IP6:
+            return (FIB_FORW_CHAIN_TYPE_UNICAST_IP6);
+        case FIB_ENTRY_DELEGATE_CHAIN_MPLS_EOS:
+            return (FIB_FORW_CHAIN_TYPE_MPLS_EOS);
+        case FIB_ENTRY_DELEGATE_CHAIN_MPLS_NON_EOS:
+            return (FIB_FORW_CHAIN_TYPE_MPLS_NON_EOS);
+        case FIB_ENTRY_DELEGATE_CHAIN_ETHERNET:
+            return (FIB_FORW_CHAIN_TYPE_ETHERNET);
+        case FIB_ENTRY_DELEGATE_CHAIN_NSH:
+            return (FIB_FORW_CHAIN_TYPE_NSH);
+        case FIB_ENTRY_DELEGATE_COVERED:
+        case FIB_ENTRY_DELEGATE_ATTACHED_IMPORT:
+        case FIB_ENTRY_DELEGATE_ATTACHED_EXPORT:
+        case FIB_ENTRY_DELEGATE_BFD:
+            break;
     }
     ASSERT(0);
     return (FIB_FORW_CHAIN_TYPE_UNICAST_IP4);
@@ -162,7 +155,7 @@ fib_entry_delegate_type_to_chain_type (fib_entry_delegate_type_t fdt)
  * typedef for printing a delegate
  */
 typedef u8 * (*fib_entry_delegate_format_t)(const fib_entry_delegate_t *fed,
-                                            u8 *s);
+        u8 *s);
 
 /**
  * Print a delegate that represents a forwarding chain
@@ -184,7 +177,7 @@ fib_entry_delegate_fmt_fwd_chain (const fib_entry_delegate_t *fed,
  */
 static u8 *
 fib_entry_delegate_fmt_covered (const fib_entry_delegate_t *fed,
-                                  u8 *s)
+                                u8 *s)
 {
     s = format(s, "covered:[");
     s = fib_node_children_format(fed->fd_list, s);
@@ -222,7 +215,7 @@ fib_entry_delegate_fmt_export (const fib_entry_delegate_t *fed,
  */
 static u8 *
 fib_entry_delegate_fmt_bfd (const fib_entry_delegate_t *fed,
-                               u8 *s)
+                            u8 *s)
 {
     s = format(s, "BFD:%d", fed->fd_bfd_state);
 
@@ -232,8 +225,7 @@ fib_entry_delegate_fmt_bfd (const fib_entry_delegate_t *fed,
 /**
  * A delegate type to formatter map
  */
-static fib_entry_delegate_format_t fed_formatters[] =
-{
+static fib_entry_delegate_format_t fed_formatters[] = {
     [FIB_ENTRY_DELEGATE_CHAIN_UNICAST_IP4] = fib_entry_delegate_fmt_fwd_chain,
     [FIB_ENTRY_DELEGATE_CHAIN_UNICAST_IP6] = fib_entry_delegate_fmt_fwd_chain,
     [FIB_ENTRY_DELEGATE_CHAIN_MPLS_EOS] = fib_entry_delegate_fmt_fwd_chain,

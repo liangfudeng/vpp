@@ -18,95 +18,96 @@
 
 #include "vom/interface.hpp"
 
-namespace VOM {
-/**
- * A tap-interface. e.g. a tap interface
- */
-class tap_interface : public interface
+namespace VOM
 {
-public:
-  tap_interface(const std::string& name,
-                admin_state_t state,
-                route::prefix_t prefix);
-
-  tap_interface(const std::string& name,
-                admin_state_t state,
-                route::prefix_t prefix,
-                const l2_address_t& l2_address);
-
-  ~tap_interface();
-  tap_interface(const tap_interface& o);
-
-  /**
-   * Return the matching 'singular instance' of the TAP interface
-   */
-  std::shared_ptr<tap_interface> singular() const;
-
-private:
-  /**
-   * Class definition for listeners to OM events
-   */
-  class event_handler : public OM::listener, public inspect::command_handler
-  {
-  public:
-    event_handler();
-    virtual ~event_handler() = default;
-
     /**
-     * Handle a populate event
+     * A tap-interface. e.g. a tap interface
      */
-    void handle_populate(const client_db::key_t& key);
+    class tap_interface : public interface
+        {
+        public:
+            tap_interface(const std::string& name,
+                          admin_state_t state,
+                          route::prefix_t prefix);
 
-    /**
-     * Handle a replay event
-     */
-    void handle_replay();
+            tap_interface(const std::string& name,
+                          admin_state_t state,
+                          route::prefix_t prefix,
+                          const l2_address_t& l2_address);
 
-    /**
-     * Show the object in the Singular DB
-     */
-    void show(std::ostream& os);
+            ~tap_interface();
+            tap_interface(const tap_interface& o);
 
-    /**
-     * Get the sortable Id of the listener
-     */
-    dependency_t order() const;
-  };
-  static event_handler m_evh;
+            /**
+             * Return the matching 'singular instance' of the TAP interface
+             */
+            std::shared_ptr<tap_interface> singular() const;
 
-  /**
-   * Ip Prefix
-   */
-  route::prefix_t m_prefix;
+        private:
+            /**
+             * Class definition for listeners to OM events
+             */
+            class event_handler : public OM::listener, public inspect::command_handler
+            {
+            public:
+                event_handler();
+                virtual ~event_handler() = default;
 
-  l2_address_t m_l2_address;
+                /**
+                 * Handle a populate event
+                 */
+                void handle_populate(const client_db::key_t& key);
 
-  /**
-   * interface is a friend so it can construct with handles
-   */
-  friend class interface;
+                /**
+                 * Handle a replay event
+                 */
+                void handle_replay();
 
-  /**
-   * Return the matching 'instance' of the sub-interface
-   *  over-ride from the base class
-   */
-  std::shared_ptr<interface> singular_i() const;
+                /**
+                 * Show the object in the Singular DB
+                 */
+                void show(std::ostream& os);
 
-  /**
-   * Virtual functions to construct an interface create commands.
-   */
-  virtual std::queue<cmd*>& mk_create_cmd(std::queue<cmd*>& cmds);
+                /**
+                 * Get the sortable Id of the listener
+                 */
+                dependency_t order() const;
+            };
+            static event_handler m_evh;
 
-  /**
-   * Virtual functions to construct an interface delete commands.
-   */
-  virtual std::queue<cmd*>& mk_delete_cmd(std::queue<cmd*>& cmds);
+            /**
+             * Ip Prefix
+             */
+            route::prefix_t m_prefix;
 
-  /*
-   * It's the OM class that call singular()
-   */
-  friend class OM;
-};
+            l2_address_t m_l2_address;
+
+            /**
+             * interface is a friend so it can construct with handles
+             */
+            friend class interface;
+
+            /**
+             * Return the matching 'instance' of the sub-interface
+             *  over-ride from the base class
+             */
+            std::shared_ptr<interface> singular_i() const;
+
+            /**
+             * Virtual functions to construct an interface create commands.
+             */
+            virtual std::queue<cmd*>& mk_create_cmd(std::queue<cmd*>& cmds);
+
+            /**
+             * Virtual functions to construct an interface delete commands.
+             */
+            virtual std::queue<cmd*>& mk_delete_cmd(std::queue<cmd*>& cmds);
+
+            /*
+             * It's the OM class that call singular()
+             */
+            friend class OM;
+        };
 }
 
 /*

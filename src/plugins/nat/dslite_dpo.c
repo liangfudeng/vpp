@@ -21,16 +21,16 @@ dpo_type_t dslite_dpo_type;
 void
 dslite_dpo_create (dpo_proto_t dproto, u32 aftr_index, dpo_id_t * dpo)
 {
-  dpo_set (dpo, dslite_dpo_type, dproto, aftr_index);
+    dpo_set (dpo, dslite_dpo_type, dproto, aftr_index);
 }
 
 u8 *
 format_dslite_dpo (u8 * s, va_list * args)
 {
-  index_t index = va_arg (*args, index_t);
-  CLIB_UNUSED (u32 indent) = va_arg (*args, u32);
+    index_t index = va_arg (*args, index_t);
+    CLIB_UNUSED (u32 indent) = va_arg (*args, u32);
 
-  return (format (s, "DS-Lite: AFTR:%d", index));
+    return (format (s, "DS-Lite: AFTR:%d", index));
 }
 
 static void
@@ -44,31 +44,31 @@ dslite_dpo_unlock (dpo_id_t * dpo)
 }
 
 const static dpo_vft_t dslite_dpo_vft = {
-  .dv_lock = dslite_dpo_lock,
-  .dv_unlock = dslite_dpo_unlock,
-  .dv_format = format_dslite_dpo,
+    .dv_lock = dslite_dpo_lock,
+    .dv_unlock = dslite_dpo_unlock,
+    .dv_format = format_dslite_dpo,
 };
 
 const static char *const dslite_ip4_nodes[] = {
-  "dslite-out2in",
-  NULL,
+    "dslite-out2in",
+    NULL,
 };
 
 const static char *const dslite_ip6_nodes[] = {
-  "dslite-in2out",
-  NULL,
+    "dslite-in2out",
+    NULL,
 };
 
 const static char *const *const dslite_nodes[DPO_PROTO_NUM] = {
-  [DPO_PROTO_IP4] = dslite_ip4_nodes,
-  [DPO_PROTO_IP6] = dslite_ip6_nodes,
-  [DPO_PROTO_MPLS] = NULL,
+    [DPO_PROTO_IP4] = dslite_ip4_nodes,
+    [DPO_PROTO_IP6] = dslite_ip6_nodes,
+    [DPO_PROTO_MPLS] = NULL,
 };
 
 void
 dslite_dpo_module_init (void)
 {
-  dslite_dpo_type = dpo_register_new_type (&dslite_dpo_vft, dslite_nodes);
+    dslite_dpo_type = dpo_register_new_type (&dslite_dpo_vft, dslite_nodes);
 }
 
 /*

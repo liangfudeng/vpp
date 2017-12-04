@@ -42,51 +42,48 @@
 
 #include <vppinfra/pool.h>
 
-typedef struct
-{
-  /* CPU time stamp trace was made. */
-  u64 time;
+typedef struct {
+    /* CPU time stamp trace was made. */
+    u64 time;
 
-  /* Node which generated this trace. */
-  u32 node_index;
+    /* Node which generated this trace. */
+    u32 node_index;
 
-  /* Number of data words in this trace. */
-  u32 n_data;
+    /* Number of data words in this trace. */
+    u32 n_data;
 
-  /* Trace data follows. */
-  u8 data[0];
+    /* Trace data follows. */
+    u8 data[0];
 } vlib_trace_header_t;
 
-typedef struct
-{
-  /* Current number of traces in buffer. */
-  u32 count;
+typedef struct {
+    /* Current number of traces in buffer. */
+    u32 count;
 
-  /* Max. number of traces to be added to buffer. */
-  u32 limit;
+    /* Max. number of traces to be added to buffer. */
+    u32 limit;
 } vlib_trace_node_t;
 
-typedef struct
-{
-  /* Pool of trace buffers. */
-  vlib_trace_header_t **trace_buffer_pool;
+typedef struct {
+    /* Pool of trace buffers. */
+    vlib_trace_header_t **trace_buffer_pool;
 
-  u32 last_main_loop_count;
-  u32 filter_node_index;
-  u32 filter_flag;
+    u32 last_main_loop_count;
+    u32 filter_node_index;
+    u32 filter_flag;
 #define FILTER_FLAG_NONE    0
 #define FILTER_FLAG_INCLUDE 1
 #define FILTER_FLAG_EXCLUDE 2
-  u32 filter_count;
+    u32 filter_count;
 
-  /* set on trace add, cleared on clear trace */
-  u32 trace_active_hint;
+    /* set on trace add, cleared on clear trace */
+    u32 trace_active_hint;
 
-  /* Per node trace counts. */
-  vlib_trace_node_t *nodes;
+    /* Per node trace counts. */
+    vlib_trace_node_t *nodes;
 
-  /* verbosity */
-  int verbose;
+    /* verbosity */
+    int verbose;
 } vlib_trace_main_t;
 
 #endif /* included_vlib_trace_h */

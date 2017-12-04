@@ -63,9 +63,8 @@ receive_dpo_add_or_lock (dpo_proto_t proto,
     rd = receive_dpo_alloc();
 
     rd->rd_sw_if_index = sw_if_index;
-    if (NULL != nh_addr)
-    {
-	rd->rd_addr = *nh_addr;
+    if (NULL != nh_addr) {
+        rd->rd_addr = *nh_addr;
     }
 
     dpo_set(dpo, DPO_RECEIVE, proto, (rd - receive_dpo_pool));
@@ -88,8 +87,7 @@ receive_dpo_unlock (dpo_id_t *dpo)
     rd = receive_dpo_get_from_dpo(dpo);
     rd->rd_locks--;
 
-    if (0 == rd->rd_locks)
-    {
+    if (0 == rd->rd_locks) {
         pool_put(receive_dpo_pool, rd);
     }
 }
@@ -102,22 +100,18 @@ format_receive_dpo (u8 *s, va_list *ap)
     vnet_main_t * vnm = vnet_get_main();
     receive_dpo_t *rd;
 
-    if (pool_is_free_index(receive_dpo_pool, index))
-    {
+    if (pool_is_free_index(receive_dpo_pool, index)) {
         return (format(s, "dpo-receive DELETED"));
     }
 
     rd = receive_dpo_get(index);
 
-    if (~0 != rd->rd_sw_if_index)
-    {
+    if (~0 != rd->rd_sw_if_index) {
         return (format(s, "dpo-receive: %U on %U",
                        format_ip46_address, &rd->rd_addr, IP46_TYPE_ANY,
                        format_vnet_sw_interface_name, vnm,
                        vnet_get_sw_interface(vnm, rd->rd_sw_if_index)));
-    }
-    else
-    {
+    } else {
         return (format(s, "dpo-receive"));
     }
 }
@@ -126,9 +120,9 @@ static void
 receive_dpo_mem_show (void)
 {
     fib_show_memory_usage("Receive",
-			  pool_elts(receive_dpo_pool),
-			  pool_len(receive_dpo_pool),
-			  sizeof(receive_dpo_t));
+                          pool_elts(receive_dpo_pool),
+                          pool_len(receive_dpo_pool),
+                          sizeof(receive_dpo_t));
 }
 
 const static dpo_vft_t receive_vft = {
@@ -145,19 +139,16 @@ const static dpo_vft_t receive_vft = {
  * this means that these graph nodes are ones from which a receive is the
  * parent object in the DPO-graph.
  */
-const static char* const receive_ip4_nodes[] =
-{
+const static char* const receive_ip4_nodes[] = {
     "ip4-local",
     NULL,
 };
-const static char* const receive_ip6_nodes[] =
-{
+const static char* const receive_ip6_nodes[] = {
     "ip6-local",
     NULL,
 };
 
-const static char* const * const receive_nodes[DPO_PROTO_NUM] =
-{
+const static char* const * const receive_nodes[DPO_PROTO_NUM] = {
     [DPO_PROTO_IP4]  = receive_ip4_nodes,
     [DPO_PROTO_IP6]  = receive_ip6_nodes,
     [DPO_PROTO_MPLS] = NULL,

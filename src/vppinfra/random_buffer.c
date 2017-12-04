@@ -41,39 +41,36 @@
 void
 clib_random_buffer_fill (clib_random_buffer_t * b, uword n_words)
 {
-  uword *w, n = n_words;
+    uword *w, n = n_words;
 
-  if (n < 256)
-    n = 256;
+    if (n < 256)
+        n = 256;
 
-  n = round_pow2 (n, 2 << ISAAC_LOG2_SIZE);
+    n = round_pow2 (n, 2 << ISAAC_LOG2_SIZE);
 
-  vec_add2 (b->buffer, w, n);
-  do
-    {
-      isaac2 (b->ctx, w);
-      w += 2 * ISAAC_SIZE;
-      n -= 2 * ISAAC_SIZE;
-    }
-  while (n > 0);
+    vec_add2 (b->buffer, w, n);
+    do {
+        isaac2 (b->ctx, w);
+        w += 2 * ISAAC_SIZE;
+        n -= 2 * ISAAC_SIZE;
+    } while (n > 0);
 }
 
 void
 clib_random_buffer_init (clib_random_buffer_t * b, uword seed)
 {
-  uword i, j;
+    uword i, j;
 
-  memset (b, 0, sizeof (b[0]));
+    memset (b, 0, sizeof (b[0]));
 
-  /* Seed ISAAC. */
-  for (i = 0; i < ARRAY_LEN (b->ctx); i++)
-    {
-      uword s[ISAAC_SIZE];
+    /* Seed ISAAC. */
+    for (i = 0; i < ARRAY_LEN (b->ctx); i++) {
+        uword s[ISAAC_SIZE];
 
-      for (j = 0; j < ARRAY_LEN (s); j++)
-	s[j] = ARRAY_LEN (b->ctx) * (seed + j) + i;
+        for (j = 0; j < ARRAY_LEN (s); j++)
+            s[j] = ARRAY_LEN (b->ctx) * (seed + j) + i;
 
-      isaac_init (&b->ctx[i], s);
+        isaac_init (&b->ctx[i], s);
     }
 }
 

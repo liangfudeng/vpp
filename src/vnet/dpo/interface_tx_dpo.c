@@ -71,7 +71,7 @@ interface_tx_dpo_get_next_node (const dpo_id_t *dpo)
      */
     vec_add1(node_indices,
              vnet_tx_node_index_for_sw_interface(vnet_get_main(),
-                                                 dpo->dpoi_index));
+                     dpo->dpoi_index));
 
     return (node_indices);
 }

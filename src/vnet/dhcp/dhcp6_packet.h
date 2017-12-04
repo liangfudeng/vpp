@@ -31,7 +31,7 @@
 /*
  * DHCPv6 message types
  */
-typedef enum dhcpv6_msg_type_{
+typedef enum dhcpv6_msg_type_ {
     DHCPV6_MSG_SOLICIT              = 1,
     DHCPV6_MSG_ADVERTISE            = 2,
     DHCPV6_MSG_REQUEST              = 3,
@@ -72,7 +72,7 @@ enum {
     DHCPV6_OPTION_RECONF_ACCEPT = 20,
     DHCPV6_OPTION_REMOTEID      = 37, // relay agent fills this
     DHCPV6_OPTION_VSS      = 68, // relay agent fills this
-    DHCPV6_OPTION_CLIENT_LINK_LAYER_ADDRESS = 79, 
+    DHCPV6_OPTION_CLIENT_LINK_LAYER_ADDRESS = 79,
     DHCPV6_OPTION_MAX
 };
 
@@ -102,7 +102,7 @@ typedef struct dhcpv6_hdr_ {
     union {
         u8 msg_type; //DHCP msg type
         u32 xid;     // transaction id
-    }u;
+    } u;
     u8  data[0];
 } dhcpv6_header_t;
 
@@ -152,32 +152,32 @@ typedef enum dhcpv6_stats_drop_reason_ {
 } dhcpv6_stats_drop_reason_t;
 
 typedef CLIB_PACKED (struct {
-  u16 option;
-  u16 length;
-  u8 data[0];
+    u16 option;
+    u16 length;
+    u8 data[0];
 }) dhcpv6_option_t;
 
 typedef CLIB_PACKED (struct {
-  dhcpv6_option_t opt;
-  u32 int_idx;
+    dhcpv6_option_t opt;
+    u32 int_idx;
 }) dhcpv6_int_id_t;
 
 typedef CLIB_PACKED (struct {
-  dhcpv6_option_t opt;
-  u8 vss_type;
-  u8 data[0];
+    dhcpv6_option_t opt;
+    u8 vss_type;
+    u8 data[0];
 }) dhcpv6_vss_t;
 
 typedef CLIB_PACKED (struct {
-  dhcpv6_option_t opt;
-  u32 ent_num;
-  u32 rmt_id;
+    dhcpv6_option_t opt;
+    u32 ent_num;
+    u32 rmt_id;
 }) dhcpv6_rmt_id_t;
 
 typedef CLIB_PACKED (struct {
-  dhcpv6_option_t opt;
-  u16 link_type;
-  u8 data[6];  // data[0]:data[5]: MAC address
+    dhcpv6_option_t opt;
+    u16 link_type;
+    u8 data[6];  // data[0]:data[5]: MAC address
 }) dhcpv6_client_mac_t;
 
 

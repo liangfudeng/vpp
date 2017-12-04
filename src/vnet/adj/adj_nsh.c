@@ -40,16 +40,15 @@ format_adj_nsh_trace (u8 * s, va_list * args)
     return s;
 }
 
-typedef enum adj_nsh_rewrite_next_t_
-{
+typedef enum adj_nsh_rewrite_next_t_ {
     ADJ_NSH_REWRITE_NEXT_DROP,
 } adj_gpe_rewrite_next_t;
 
 always_inline uword
 adj_nsh_rewrite_inline (vlib_main_t * vm,
-                       vlib_node_runtime_t * node,
-                       vlib_frame_t * frame,
-                       int is_midchain)
+                        vlib_node_runtime_t * node,
+                        vlib_frame_t * frame,
+                        int is_midchain)
 {
     u32 * from = vlib_frame_vector_args (frame);
     u32 n_left_from, n_left_to_next, * to_next, next_index;
@@ -58,12 +57,10 @@ adj_nsh_rewrite_inline (vlib_main_t * vm,
     n_left_from = frame->n_vectors;
     next_index = node->cached_next_index;
 
-    while (n_left_from > 0)
-    {
+    while (n_left_from > 0) {
         vlib_get_next_frame (vm, node, next_index, to_next, n_left_to_next);
 
-        while (n_left_from > 0 && n_left_to_next > 0)
-        {
+        while (n_left_from > 0 && n_left_to_next > 0) {
             ip_adjacency_t * adj0;
             vlib_buffer_t * p0;
             char *h0;
@@ -101,16 +98,14 @@ adj_nsh_rewrite_inline (vlib_main_t * vm,
 
             /* Check MTU of outgoing interface. */
             if (PREDICT_TRUE((vlib_buffer_length_in_chain (vm, p0)  <=
-                              adj0[0].rewrite_header.max_l3_packet_bytes)))
-            {
+                              adj0[0].rewrite_header.max_l3_packet_bytes))) {
                 /* Don't adjust the buffer for ttl issue; icmp-error node wants
                  * to see the IP headerr */
                 p0->current_data -= rw_len0;
                 p0->current_length += rw_len0;
                 tx_sw_if_index0 = adj0[0].rewrite_header.sw_if_index;
 
-                if (is_midchain)
-                {
+                if (is_midchain) {
                     adj0->sub_type.midchain.fixup_func(vm, adj0, p0);
                 }
 
@@ -122,17 +117,14 @@ adj_nsh_rewrite_inline (vlib_main_t * vm,
                  */
                 vnet_feature_arc_start (nsh_main_dummy.output_feature_arc_index,
                                         tx_sw_if_index0, &next0, p0);
-            }
-            else
-            {
+            } else {
                 /* can't fragment NSH */
                 next0 = ADJ_NSH_REWRITE_NEXT_DROP;
             }
 
-            if (PREDICT_FALSE(p0->flags & VLIB_BUFFER_IS_TRACED))
-            {
+            if (PREDICT_FALSE(p0->flags & VLIB_BUFFER_IS_TRACED)) {
                 adj_nsh_trace_t *tr = vlib_add_trace (vm, node,
-                                                     p0, sizeof (*tr));
+                                                      p0, sizeof (*tr));
                 tr->adj_index = vnet_buffer(p0)->ip.adj_index[VLIB_TX];
             }
 
@@ -149,16 +141,16 @@ adj_nsh_rewrite_inline (vlib_main_t * vm,
 
 static uword
 adj_nsh_rewrite (vlib_main_t * vm,
-                vlib_node_runtime_t * node,
-                vlib_frame_t * frame)
+                 vlib_node_runtime_t * node,
+                 vlib_frame_t * frame)
 {
     return adj_nsh_rewrite_inline (vm, node, frame, 0);
 }
 
 static uword
 adj_nsh_midchain (vlib_main_t * vm,
-                 vlib_node_runtime_t * node,
-                 vlib_frame_t * frame)
+                  vlib_node_runtime_t * node,
+                  vlib_frame_t * frame)
 {
     return adj_nsh_rewrite_inline (vm, node, frame, 1);
 }

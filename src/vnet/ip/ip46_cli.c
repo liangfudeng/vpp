@@ -50,23 +50,22 @@
 int
 ip4_address_compare (ip4_address_t * a1, ip4_address_t * a2)
 {
-  return clib_net_to_host_u32 (a1->data_u32) -
-    clib_net_to_host_u32 (a2->data_u32);
+    return clib_net_to_host_u32 (a1->data_u32) -
+           clib_net_to_host_u32 (a2->data_u32);
 }
 
 int
 ip6_address_compare (ip6_address_t * a1, ip6_address_t * a2)
 {
-  int i;
-  for (i = 0; i < ARRAY_LEN (a1->as_u16); i++)
-    {
-      int cmp =
-	clib_net_to_host_u16 (a1->as_u16[i]) -
-	clib_net_to_host_u16 (a2->as_u16[i]);
-      if (cmp != 0)
-	return cmp;
+    int i;
+    for (i = 0; i < ARRAY_LEN (a1->as_u16); i++) {
+        int cmp =
+            clib_net_to_host_u16 (a1->as_u16[i]) -
+            clib_net_to_host_u16 (a2->as_u16[i]);
+        if (cmp != 0)
+            return cmp;
     }
-  return 0;
+    return 0;
 }
 
 /* *INDENT-OFF* */
@@ -79,14 +78,14 @@ VLIB_CLI_COMMAND (set_interface_ip_command, static) = {
 void
 ip_del_all_interface_addresses (vlib_main_t * vm, u32 sw_if_index)
 {
-  ip4_main_t *im4 = &ip4_main;
-  ip4_address_t *ip4_addrs = 0;
-  u32 *ip4_masks = 0;
-  ip6_main_t *im6 = &ip6_main;
-  ip6_address_t *ip6_addrs = 0;
-  u32 *ip6_masks = 0;
-  ip_interface_address_t *ia;
-  int i;
+    ip4_main_t *im4 = &ip4_main;
+    ip4_address_t *ip4_addrs = 0;
+    u32 *ip4_masks = 0;
+    ip6_main_t *im6 = &ip6_main;
+    ip6_address_t *ip6_addrs = 0;
+    u32 *ip6_masks = 0;
+    ip_interface_address_t *ia;
+    int i;
 
   /* *INDENT-OFF* */
   foreach_ip_interface_address (&im4->lookup_main, ia, sw_if_index,
@@ -110,77 +109,75 @@ ip_del_all_interface_addresses (vlib_main_t * vm, u32 sw_if_index)
   }));
   /* *INDENT-ON* */
 
-  for (i = 0; i < vec_len (ip4_addrs); i++)
-    ip4_add_del_interface_address (vm, sw_if_index, &ip4_addrs[i],
-				   ip4_masks[i], 1 /* is_del */ );
-  for (i = 0; i < vec_len (ip6_addrs); i++)
-    ip6_add_del_interface_address (vm, sw_if_index, &ip6_addrs[i],
-				   ip6_masks[i], 1 /* is_del */ );
+    for (i = 0; i < vec_len (ip4_addrs); i++)
+        ip4_add_del_interface_address (vm, sw_if_index, &ip4_addrs[i],
+                                       ip4_masks[i], 1 /* is_del */ );
+    for (i = 0; i < vec_len (ip6_addrs); i++)
+        ip6_add_del_interface_address (vm, sw_if_index, &ip6_addrs[i],
+                                       ip6_masks[i], 1 /* is_del */ );
 
-  vec_free (ip4_addrs);
-  vec_free (ip4_masks);
-  vec_free (ip6_addrs);
-  vec_free (ip6_masks);
+    vec_free (ip4_addrs);
+    vec_free (ip4_masks);
+    vec_free (ip6_addrs);
+    vec_free (ip6_masks);
 }
 
 static clib_error_t *
 ip_address_delete_cleanup (vnet_main_t * vnm, u32 hw_if_index, u32 is_create)
 {
-  vlib_main_t *vm = vlib_get_main ();
-  vnet_hw_interface_t *hw;
+    vlib_main_t *vm = vlib_get_main ();
+    vnet_hw_interface_t *hw;
 
-  if (is_create)
+    if (is_create)
+        return 0;
+
+    hw = vnet_get_hw_interface (vnm, hw_if_index);
+
+    ip_del_all_interface_addresses (vm, hw->sw_if_index);
     return 0;
-
-  hw = vnet_get_hw_interface (vnm, hw_if_index);
-
-  ip_del_all_interface_addresses (vm, hw->sw_if_index);
-  return 0;
 }
 
 VNET_HW_INTERFACE_ADD_DEL_FUNCTION (ip_address_delete_cleanup);
 
 static clib_error_t *
 add_del_ip_address (vlib_main_t * vm,
-		    unformat_input_t * input, vlib_cli_command_t * cmd)
+                    unformat_input_t * input, vlib_cli_command_t * cmd)
 {
-  vnet_main_t *vnm = vnet_get_main ();
-  ip4_address_t a4;
-  ip6_address_t a6;
-  clib_error_t *error = 0;
-  u32 sw_if_index, length, is_del;
+    vnet_main_t *vnm = vnet_get_main ();
+    ip4_address_t a4;
+    ip6_address_t a6;
+    clib_error_t *error = 0;
+    u32 sw_if_index, length, is_del;
 
-  sw_if_index = ~0;
-  is_del = 0;
+    sw_if_index = ~0;
+    is_del = 0;
 
-  if (unformat (input, "del"))
-    is_del = 1;
+    if (unformat (input, "del"))
+        is_del = 1;
 
-  if (!unformat_user (input, unformat_vnet_sw_interface, vnm, &sw_if_index))
-    {
-      error = clib_error_return (0, "unknown interface `%U'",
-				 format_unformat_error, input);
-      goto done;
+    if (!unformat_user (input, unformat_vnet_sw_interface, vnm, &sw_if_index)) {
+        error = clib_error_return (0, "unknown interface `%U'",
+                                   format_unformat_error, input);
+        goto done;
     }
 
-  if (is_del && unformat (input, "all"))
-    ip_del_all_interface_addresses (vm, sw_if_index);
-  else if (unformat (input, "%U/%d", unformat_ip4_address, &a4, &length))
-    error = ip4_add_del_interface_address (vm, sw_if_index, &a4, length,
-					   is_del);
-  else if (unformat (input, "%U/%d", unformat_ip6_address, &a6, &length))
-    error = ip6_add_del_interface_address (vm, sw_if_index, &a6, length,
-					   is_del);
-  else
-    {
-      error = clib_error_return (0, "expected IP4/IP6 address/length `%U'",
-				 format_unformat_error, input);
-      goto done;
+    if (is_del && unformat (input, "all"))
+        ip_del_all_interface_addresses (vm, sw_if_index);
+    else if (unformat (input, "%U/%d", unformat_ip4_address, &a4, &length))
+        error = ip4_add_del_interface_address (vm, sw_if_index, &a4, length,
+                                               is_del);
+    else if (unformat (input, "%U/%d", unformat_ip6_address, &a6, &length))
+        error = ip6_add_del_interface_address (vm, sw_if_index, &a6, length,
+                                               is_del);
+    else {
+        error = clib_error_return (0, "expected IP4/IP6 address/length `%U'",
+                                   format_unformat_error, input);
+        goto done;
     }
 
 
 done:
-  return error;
+    return error;
 }
 
 /*?
@@ -222,7 +219,7 @@ VLIB_CLI_COMMAND (set_interface_ip_address_command, static) = {
 static clib_error_t *
 ip4_cli_init (vlib_main_t * vm)
 {
-  return 0;
+    return 0;
 }
 
 VLIB_INIT_FUNCTION (ip4_cli_init);

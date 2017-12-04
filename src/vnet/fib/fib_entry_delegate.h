@@ -82,8 +82,7 @@ typedef enum fib_entry_delegate_type_t_ {
  * Distillation of the BFD session states into a go/no-go for using
  * the associated tracked FIB entry
  */
-typedef enum fib_bfd_state_t_
-{
+typedef enum fib_bfd_state_t_ {
     FIB_BFD_STATE_UP,
     FIB_BFD_STATE_DOWN,
 } fib_bfd_state_t;
@@ -94,8 +93,7 @@ typedef enum fib_bfd_state_t_
  * These 'other' objects are delegates. Delagates are thus attached to other FIB objects
  * to extend their functionality.
  */
-typedef struct fib_entry_delegate_t_
-{
+typedef struct fib_entry_delegate_t_ {
     /**
      * The FIB entry object to which the delagate is attached
      */
@@ -113,8 +111,7 @@ typedef struct fib_entry_delegate_t_
      * i.e. store an index, that's ok for large delegates, like the attached export
      * but for the chain delegates it's excessive
      */
-    union
-    {
+    union {
         /**
          * Valid for the forwarding chain delegates. The LB that is built.
          */
@@ -143,15 +140,15 @@ extern void fib_entry_delegate_remove(struct fib_entry_t_ *fib_entry,
                                       fib_entry_delegate_type_t type);
 
 extern fib_entry_delegate_t *fib_entry_delegate_find_or_add(struct fib_entry_t_ *fib_entry,
-                                                            fib_entry_delegate_type_t fdt);
+        fib_entry_delegate_type_t fdt);
 extern fib_entry_delegate_t *fib_entry_delegate_get(const struct fib_entry_t_ *fib_entry,
-                                                    fib_entry_delegate_type_t type);
+        fib_entry_delegate_type_t type);
 
 extern fib_forward_chain_type_t fib_entry_delegate_type_to_chain_type(
     fib_entry_delegate_type_t type);
 
 extern fib_entry_delegate_type_t fib_entry_chain_type_to_delegate_type(
-     fib_forward_chain_type_t type);
+    fib_forward_chain_type_t type);
 
 extern u8 *format_fib_entry_deletegate(u8 * s, va_list * args);
 

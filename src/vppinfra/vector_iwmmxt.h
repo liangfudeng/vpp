@@ -38,66 +38,66 @@
 #ifndef included_vector_iwmmxt_h
 #define included_vector_iwmmxt_h
 
-#include <vppinfra/error.h>	/* for ASSERT */
+#include <vppinfra/error.h> /* for ASSERT */
 
 /* 64 bit interleaves. */
 always_inline u8x8
 u8x8_interleave_hi (u8x8 a, u8x8 b)
 {
-  return __builtin_arm_wunpckihb (a, b);
+    return __builtin_arm_wunpckihb (a, b);
 }
 
 always_inline u8x8
 u8x8_interleave_lo (u8x8 a, u8x8 b)
 {
-  return __builtin_arm_wunpckilb (a, b);
+    return __builtin_arm_wunpckilb (a, b);
 }
 
 always_inline u16x4
 u16x4_interleave_hi (u16x4 a, u16x4 b)
 {
-  return __builtin_arm_wunpckihh (a, b);
+    return __builtin_arm_wunpckihh (a, b);
 }
 
 always_inline u16x4
 u16x4_interleave_lo (u16x4 a, u16x4 b)
 {
-  return __builtin_arm_wunpckilh (a, b);
+    return __builtin_arm_wunpckilh (a, b);
 }
 
 always_inline u32x2
 u32x2_interleave_hi (u32x2 a, u32x2 b)
 {
-  return __builtin_arm_wunpckihw (a, b);
+    return __builtin_arm_wunpckihw (a, b);
 }
 
 always_inline u32x2
 u32x2_interleave_lo (u32x2 a, u32x2 b)
 {
-  return __builtin_arm_wunpckilw (a, b);
+    return __builtin_arm_wunpckilw (a, b);
 }
 
 always_inline u32x2
 u32x2_splat (u32 a)
 {
-  u32x2 x = { a };
-  x = u32x2_interleave_lo (x, x);
-  return x;
+    u32x2 x = { a };
+    x = u32x2_interleave_lo (x, x);
+    return x;
 }
 
 always_inline u16x4
 u16x4_splat (u16 a)
 {
-  u32 t = (u32) a | ((u32) a << 16);
-  return u32x2_splat (t);
+    u32 t = (u32) a | ((u32) a << 16);
+    return u32x2_splat (t);
 }
 
 always_inline u8x8
 u8x8_splat (u8 a)
 {
-  u32 t = (u32) a | ((u32) a << 8);
-  t |= t << 16;
-  return u32x2_splat (t);
+    u32 t = (u32) a | ((u32) a << 8);
+    t |= t << 16;
+    return u32x2_splat (t);
 }
 
 #define i32x2_splat u32x2_splat
@@ -108,15 +108,15 @@ u8x8_splat (u8 a)
 
 /* As of July 2008 the __builtin_arm shifts cause gcc-4.3.1 to crash
    so we use asm versions. */
-#define _(t,u,lr,f)				\
-  always_inline t				\
-  t##_##lr (t x, int i)				\
-  {						\
-    i16x4 y;					\
-    asm (#f " %[y], %[x], %[shift]"		\
-	 : [y] "=y" (y)				\
-	 : [x] "y" (x), [shift] "i" (i * u));	\
-    return y;					\
+#define _(t,u,lr,f)             \
+  always_inline t               \
+  t##_##lr (t x, int i)             \
+  {                     \
+    i16x4 y;                    \
+    asm (#f " %[y], %[x], %[shift]"     \
+     : [y] "=y" (y)             \
+     : [x] "y" (x), [shift] "i" (i * u));   \
+    return y;                   \
   }
 
 _(u16x4, 1, shift_left, wsllhi)
@@ -127,7 +127,7 @@ _(i16x4, 1, shift_left, wsllhi)
 _(i32x2, 1, shift_left, wsllwi)
 _(i16x4, 1, shift_right, wsrahi) _(i32x2, 1, shift_right, wsrawi)
 /* Word shifts. */
-  _(u8x8, 8, word_shift_left, wslldi)
+_(u8x8, 8, word_shift_left, wslldi)
 _(u16x4, 16, word_shift_left, wslldi)
 _(u32x2, 32, word_shift_left, wslldi)
 _(u8x8, 8, word_shift_right, wsrldi)

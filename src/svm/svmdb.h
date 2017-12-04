@@ -22,71 +22,63 @@
 
 #include "svm.h"
 
-typedef enum
-{
-  SVMDB_ACTION_ILLEGAL = 0,
-  SVMDB_ACTION_GET,		/* not clear why anyone would care */
-  SVMDB_ACTION_SET,
-  SVMDB_ACTION_UNSET,
+typedef enum {
+    SVMDB_ACTION_ILLEGAL = 0,
+    SVMDB_ACTION_GET,     /* not clear why anyone would care */
+    SVMDB_ACTION_SET,
+    SVMDB_ACTION_UNSET,
 } svmdb_action_t;
 
-typedef struct
-{
-  int pid;
-  int signum;
-  u32 action:4;
-  u32 opaque:28;
+typedef struct {
+    int pid;
+    int signum;
+    u32 action:4;
+    u32 opaque:28;
 } svmdb_notify_t;
 
-typedef struct
-{
-  u8 *value;
-  svmdb_notify_t *notifications;
-  u32 elsize;
+typedef struct {
+    u8 *value;
+    svmdb_notify_t *notifications;
+    u32 elsize;
 } svmdb_value_t;
 
-typedef enum
-{
-  SVMDB_NAMESPACE_STRING = 0,
-  SVMDB_NAMESPACE_VEC,
-  SVMDB_N_NAMESPACES,
+typedef enum {
+    SVMDB_NAMESPACE_STRING = 0,
+    SVMDB_NAMESPACE_VEC,
+    SVMDB_N_NAMESPACES,
 } svmdb_namespace_t;
 
-typedef struct
-{
-  uword version;
-  /* pool of values */
-  svmdb_value_t *values;
-  uword *namespaces[SVMDB_N_NAMESPACES];
+typedef struct {
+    uword version;
+    /* pool of values */
+    svmdb_value_t *values;
+    uword *namespaces[SVMDB_N_NAMESPACES];
 } svmdb_shm_hdr_t;
 
 #define SVMDB_SHM_VERSION 2
 
-typedef struct
-{
-  int flags;
-  int pid;
-  svm_region_t *db_rp;
-  svmdb_shm_hdr_t *shm;
+typedef struct {
+    int flags;
+    int pid;
+    svm_region_t *db_rp;
+    svmdb_shm_hdr_t *shm;
 } svmdb_client_t;
 
-typedef struct
-{
-  int add_del;
-  svmdb_namespace_t nspace;
-  char *var;
-  u32 elsize;
-  int signum;
-  u32 action:4;
-  u32 opaque:28;
+typedef struct {
+    int add_del;
+    svmdb_namespace_t nspace;
+    char *var;
+    u32 elsize;
+    int signum;
+    u32 action:4;
+    u32 opaque:28;
 } svmdb_notification_args_t;
 
-typedef struct
-{
-  const char *root_path;
-  uword size;
-  u32 uid;
-  u32 gid;
+typedef struct {
+    const char *root_path;
+    uword size;
+    u32 uid;
+    u32 gid;
 } svmdb_map_args_t;
 
 /*
@@ -100,25 +92,25 @@ svmdb_client_t *svmdb_map (svmdb_map_args_t *);
 void svmdb_unmap (svmdb_client_t * client);
 void svmdb_local_unset_string_variable (svmdb_client_t * client, char *var);
 void svmdb_local_set_string_variable (svmdb_client_t * client,
-				      char *var, char *val);
+                                      char *var, char *val);
 char *svmdb_local_get_string_variable (svmdb_client_t * client, char *var);
 void *svmdb_local_get_variable_reference (svmdb_client_t * client,
-					  svmdb_namespace_t ns, char *var);
+        svmdb_namespace_t ns, char *var);
 
 void svmdb_local_dump_strings (svmdb_client_t * client);
 
 void svmdb_local_unset_vec_variable (svmdb_client_t * client, char *var);
 void svmdb_local_set_vec_variable (svmdb_client_t * client,
-				   char *var, void *val, u32 elsize);
+                                   char *var, void *val, u32 elsize);
 void *svmdb_local_get_vec_variable (svmdb_client_t * client, char *var,
-				    u32 elsize);
+                                    u32 elsize);
 void svmdb_local_dump_vecs (svmdb_client_t * client);
 
 int svmdb_local_add_del_notification (svmdb_client_t * client,
-				      svmdb_notification_args_t * args);
+                                      svmdb_notification_args_t * args);
 
 void *svmdb_local_find_or_add_vec_variable (svmdb_client_t * client,
-					    char *var, u32 nbytes);
+        char *var, u32 nbytes);
 
 int svmdb_local_serialize_strings (svmdb_client_t * client, char *filename);
 int svmdb_local_unserialize_strings (svmdb_client_t * client, char *filename);

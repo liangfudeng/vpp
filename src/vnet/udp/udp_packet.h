@@ -40,17 +40,16 @@
 #ifndef included_udp_packet_h
 #define included_udp_packet_h
 
-typedef struct
-{
-  /* Source and destination port. */
-  u16 src_port, dst_port;
+typedef struct {
+    /* Source and destination port. */
+    u16 src_port, dst_port;
 
-  /* Length of UDP header plus payload. */
-  u16 length;
+    /* Length of UDP header plus payload. */
+    u16 length;
 
-  /* Checksum of UDP pseudo-header and data or
-     zero if checksum is disabled. */
-  u16 checksum;
+    /* Checksum of UDP pseudo-header and data or
+       zero if checksum is disabled. */
+    u16 checksum;
 } udp_header_t;
 
 #endif /* included_udp_packet_h */

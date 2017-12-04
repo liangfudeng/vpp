@@ -55,37 +55,36 @@ vlib_pci_main_t pci_main;
 vlib_pci_device_t *
 vlib_get_pci_device (vlib_pci_addr_t * addr)
 {
-  vlib_pci_main_t *pm = &pci_main;
-  uword *p;
-  p = hash_get (pm->pci_dev_index_by_pci_addr, addr->as_u32);
+    vlib_pci_main_t *pm = &pci_main;
+    uword *p;
+    p = hash_get (pm->pci_dev_index_by_pci_addr, addr->as_u32);
 
-  if (p == 0)
-    return 0;
+    if (p == 0)
+        return 0;
 
-  return vec_elt_at_index (pm->pci_devs, p[0]);
+    return vec_elt_at_index (pm->pci_devs, p[0]);
 }
 
 static clib_error_t *
 show_pci_fn (vlib_main_t * vm,
-	     unformat_input_t * input, vlib_cli_command_t * cmd)
+             unformat_input_t * input, vlib_cli_command_t * cmd)
 {
-  vlib_pci_main_t *pm = &pci_main;
-  vlib_pci_device_t *d;
-  int show_all = 0;
-  u8 *s = 0;
+    vlib_pci_main_t *pm = &pci_main;
+    vlib_pci_device_t *d;
+    int show_all = 0;
+    u8 *s = 0;
 
-  while (unformat_check_input (input) != UNFORMAT_END_OF_INPUT)
-    {
-      if (unformat (input, "all"))
-	show_all = 1;
-      else
-	return clib_error_return (0, "unknown input `%U'",
-				  format_unformat_error, input);
+    while (unformat_check_input (input) != UNFORMAT_END_OF_INPUT) {
+        if (unformat (input, "all"))
+            show_all = 1;
+        else
+            return clib_error_return (0, "unknown input `%U'",
+                                      format_unformat_error, input);
     }
 
-  vlib_cli_output (vm, "%-13s%-5s%-12s%-13s%-16s%-32s%s",
-		   "Address", "Sock", "VID:PID", "Link Speed", "Driver",
-		   "Product Name", "Vital Product Data");
+    vlib_cli_output (vm, "%-13s%-5s%-12s%-13s%-16s%-32s%s",
+                     "Address", "Sock", "VID:PID", "Link Speed", "Driver",
+                     "Product Name", "Vital Product Data");
 
   /* *INDENT-OFF* */
   pool_foreach (d, pm->pci_devs, ({
@@ -108,134 +107,126 @@ show_pci_fn (vlib_main_t * vm,
   }));
 /* *INDENT-ON* */
 
-  vec_free (s);
-  return 0;
+    vec_free (s);
+    return 0;
 }
 
 uword
 unformat_vlib_pci_addr (unformat_input_t * input, va_list * args)
 {
-  vlib_pci_addr_t *addr = va_arg (*args, vlib_pci_addr_t *);
-  u32 x[4];
+    vlib_pci_addr_t *addr = va_arg (*args, vlib_pci_addr_t *);
+    u32 x[4];
 
-  if (!unformat (input, "%x:%x:%x.%x", &x[0], &x[1], &x[2], &x[3]))
-    return 0;
+    if (!unformat (input, "%x:%x:%x.%x", &x[0], &x[1], &x[2], &x[3]))
+        return 0;
 
-  addr->domain = x[0];
-  addr->bus = x[1];
-  addr->slot = x[2];
-  addr->function = x[3];
+    addr->domain = x[0];
+    addr->bus = x[1];
+    addr->slot = x[2];
+    addr->function = x[3];
 
-  return 1;
+    return 1;
 }
 
 u8 *
 format_vlib_pci_addr (u8 * s, va_list * va)
 {
-  vlib_pci_addr_t *addr = va_arg (*va, vlib_pci_addr_t *);
-  return format (s, "%04x:%02x:%02x.%x", addr->domain, addr->bus,
-		 addr->slot, addr->function);
+    vlib_pci_addr_t *addr = va_arg (*va, vlib_pci_addr_t *);
+    return format (s, "%04x:%02x:%02x.%x", addr->domain, addr->bus,
+                   addr->slot, addr->function);
 }
 
 u8 *
 format_vlib_pci_handle (u8 * s, va_list * va)
 {
-  vlib_pci_addr_t *addr = va_arg (*va, vlib_pci_addr_t *);
-  return format (s, "%x/%x/%x", addr->bus, addr->slot, addr->function);
+    vlib_pci_addr_t *addr = va_arg (*va, vlib_pci_addr_t *);
+    return format (s, "%x/%x/%x", addr->bus, addr->slot, addr->function);
 }
 
 u8 *
 format_vlib_pci_link_speed (u8 * s, va_list * va)
 {
-  vlib_pci_device_t *d = va_arg (*va, vlib_pci_device_t *);
-  pcie_config_regs_t *r =
-    pci_config_find_capability (&d->config0, PCI_CAP_ID_PCIE);
-  int width;
+    vlib_pci_device_t *d = va_arg (*va, vlib_pci_device_t *);
+    pcie_config_regs_t *r =
+        pci_config_find_capability (&d->config0, PCI_CAP_ID_PCIE);
+    int width;
 
-  if (!r)
+    if (!r)
+        return format (s, "unknown");
+
+    width = (r->link_status >> 4) & 0x3f;
+
+    if ((r->link_status & 0xf) == 1)
+        return format (s, "2.5 GT/s x%u", width);
+    if ((r->link_status & 0xf) == 2)
+        return format (s, "5.0 GT/s x%u", width);
+    if ((r->link_status & 0xf) == 3)
+        return format (s, "8.0 GT/s x%u", width);
     return format (s, "unknown");
-
-  width = (r->link_status >> 4) & 0x3f;
-
-  if ((r->link_status & 0xf) == 1)
-    return format (s, "2.5 GT/s x%u", width);
-  if ((r->link_status & 0xf) == 2)
-    return format (s, "5.0 GT/s x%u", width);
-  if ((r->link_status & 0xf) == 3)
-    return format (s, "8.0 GT/s x%u", width);
-  return format (s, "unknown");
 }
 
 u8 *
 format_vlib_pci_vpd (u8 * s, va_list * args)
 {
-  u8 *data = va_arg (*args, u8 *);
-  u8 *id = va_arg (*args, u8 *);
-  u32 indent = format_get_indent (s);
-  char *string_types[] = { "PN", "EC", "SN", "MN", 0 };
-  uword p = 0;
-  int first_line = 1;
+    u8 *data = va_arg (*args, u8 *);
+    u8 *id = va_arg (*args, u8 *);
+    u32 indent = format_get_indent (s);
+    char *string_types[] = { "PN", "EC", "SN", "MN", 0 };
+    uword p = 0;
+    int first_line = 1;
 
-  if (vec_len (data) < 3)
-    return s;
+    if (vec_len (data) < 3)
+        return s;
 
-  while (p + 3 < vec_len (data))
-    {
+    while (p + 3 < vec_len (data)) {
 
-      if (data[p] == 0 && data[p + 1] == 0)
-	return s;
+        if (data[p] == 0 && data[p + 1] == 0)
+            return s;
 
-      if (p + data[p + 2] > vec_len (data))
-	return s;
+        if (p + data[p + 2] > vec_len (data))
+            return s;
 
-      if (id == 0)
-	{
-	  int is_string = 0;
-	  char **c = string_types;
+        if (id == 0) {
+            int is_string = 0;
+            char **c = string_types;
 
-	  while (c[0])
-	    {
-	      if (*(u16 *) & data[p] == *(u16 *) c[0])
-		is_string = 1;
-	      c++;
-	    }
+            while (c[0]) {
+                if (*(u16 *) & data[p] == *(u16 *) c[0])
+                    is_string = 1;
+                c++;
+            }
 
-	  if (data[p + 2])
-	    {
-	      if (!first_line)
-		s = format (s, "\n%U", format_white_space, indent);
-	      else
-		{
-		  first_line = 0;
-		  s = format (s, " ");
-		}
+            if (data[p + 2]) {
+                if (!first_line)
+                    s = format (s, "\n%U", format_white_space, indent);
+                else {
+                    first_line = 0;
+                    s = format (s, " ");
+                }
 
-	      s = format (s, "%c%c: ", data[p], data[p + 1]);
-	      if (is_string)
-		vec_add (s, data + p + 3, data[p + 2]);
-	      else
-		{
-		  int i;
-		  const int max_bytes = 8;
-		  s = format (s, "0x");
-		  for (i = 0; i < clib_min (data[p + 2], max_bytes); i++)
-		    s = format (s, " %02x", data[p + 3 + i]);
+                s = format (s, "%c%c: ", data[p], data[p + 1]);
+                if (is_string)
+                    vec_add (s, data + p + 3, data[p + 2]);
+                else {
+                    int i;
+                    const int max_bytes = 8;
+                    s = format (s, "0x");
+                    for (i = 0; i < clib_min (data[p + 2], max_bytes); i++)
+                        s = format (s, " %02x", data[p + 3 + i]);
 
-		  if (data[p + 2] > max_bytes)
-		    s = format (s, " ...");
-		}
-	    }
-	}
-      else if (*(u16 *) & data[p] == *(u16 *) id)
-	{
-	  vec_add (s, data + p + 3, data[p + 2]);
-	  return s;
-	}
+                    if (data[p + 2] > max_bytes)
+                        s = format (s, " ...");
+                }
+            }
+        } else if (*(u16 *) & data[p] == *(u16 *) id) {
+            vec_add (s, data + p + 3, data[p + 2]);
+            return s;
+        }
 
-      p += 3 + data[p + 2];
+        p += 3 + data[p + 2];
     }
 
-  return s;
+    return s;
 }
 
 
@@ -250,7 +241,7 @@ VLIB_CLI_COMMAND (show_pci_command, static) = {
 clib_error_t *
 pci_bus_init (vlib_main_t * vm)
 {
-  return 0;
+    return 0;
 }
 
 VLIB_INIT_FUNCTION (pci_bus_init);

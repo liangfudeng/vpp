@@ -32,15 +32,13 @@
 
 #define MMA_TABLE_INVALID_INDEX ((u32)~0)
 
-typedef struct
-{
-  u64 as_u64[MMA_RT_TYPE / 8];
+typedef struct {
+    u64 as_u64[MMA_RT_TYPE / 8];
 } RTT (mma_mask_or_match);
 
-typedef struct
-{
-  u32 action_index;
-  u32 *next_indices;
+typedef struct {
+    u32 action_index;
+    u32 *next_indices;
   /* *INDENT-OFF* */
   RTT (mma_mask_or_match) mask;
   RTT (mma_mask_or_match) match;
@@ -49,13 +47,12 @@ typedef struct
 } RTT (mma_rule);
 
 typedef int (*RTT (rule_cmp_fn)) (RTT (mma_rule) * rule1,
-				  RTT (mma_rule) * rule2);
-typedef struct
-{
-  /** Root for rules tree */
-  u32 root_index;
+                                  RTT (mma_rule) * rule2);
+typedef struct {
+    /** Root for rules tree */
+    u32 root_index;
 
-  /** Rules pool */
+    /** Rules pool */
     RTT (mma_rule) * rules;
 
     RTT (rule_cmp_fn) rule_cmp_fn;
@@ -63,15 +60,15 @@ typedef struct
 
 u32
 RT (mma_table_lookup) (RTT (mma_rules_table) * srt,
-		       RTT (mma_mask_or_match) * key, u32 rule_index);
+                       RTT (mma_mask_or_match) * key, u32 rule_index);
 u32
 RT (mma_table_lookup_rule) (RTT (mma_rules_table) * srt,
-			    RTT (mma_mask_or_match) * key, u32 rule_index);
+                            RTT (mma_mask_or_match) * key, u32 rule_index);
 int
 RT (mma_table_add_rule) (RTT (mma_rules_table) * srt, RTT (mma_rule) * rule);
 int
 RT (mma_table_del_rule) (RTT (mma_rules_table) * srt,
-			 RTT (mma_rule) * rule, u32 rule_index);
+                         RTT (mma_rule) * rule, u32 rule_index);
 RTT (mma_rule) *
 RT (mma_rules_table_rule_alloc) (RTT (mma_rules_table) * srt);
 RTT (mma_rule) *
@@ -80,7 +77,7 @@ RTT (mma_rule) *
 RT (mma_table_get_rule) (RTT (mma_rules_table) * srt, u32 srt_index);
 u32
 RT (mma_rules_table_rule_index) (RTT (mma_rules_table) * srt,
-				 RTT (mma_rule) * sr);
+                                 RTT (mma_rule) * sr);
 #endif /* SRC_VNET_SESSION_MMA_TEMPLATE_H_ */
 
 /*

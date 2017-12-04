@@ -22,8 +22,7 @@
 /**
  * A representation of a 6RD DPO
  */
-typedef struct sixrd_dpo_t
-{
+typedef struct sixrd_dpo_t {
     /**
      * The dat-plane protocol
      */
@@ -41,8 +40,8 @@ typedef struct sixrd_dpo_t
 } sixrd_dpo_t;
 
 extern void sixrd_dpo_create (dpo_proto_t dproto,
-			      u32 domain_index,
-			      dpo_id_t *dpo);
+                              u32 domain_index,
+                              dpo_id_t *dpo);
 
 /*
  * Encapsulation violation for fast data-path access

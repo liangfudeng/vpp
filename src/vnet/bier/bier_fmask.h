@@ -60,8 +60,7 @@ typedef struct bier_fmask_bits_t_ {
 /**
  * Flags on fmask
  */
-typedef enum bier_fmask_attributes_t_
-{
+typedef enum bier_fmask_attributes_t_ {
     BIER_FMASK_ATTR_FIRST,
     BIER_FMASK_ATTR_FORWARDING = BIER_FMASK_ATTR_FIRST,
     BIER_FMASK_ATTR_DISP,
@@ -78,8 +77,7 @@ typedef enum bier_fmask_attributes_t_
          _item <= BIER_FMASK_ATTR_LAST;          \
          _item++)
 
-typedef enum bier_fmask_flags_t_
-{
+typedef enum bier_fmask_flags_t_ {
     BIER_FMASK_FLAG_FORWARDING = (1 << BIER_FMASK_ATTR_FORWARDING),
     BIER_FMASK_FLAG_DISP = (1 << BIER_FMASK_ATTR_DISP),
 } bier_fmask_flags_t;
@@ -110,8 +108,7 @@ typedef struct bier_fmask_t_ {
      */
     bier_fmask_bits_t bfm_bits;
 
-    struct
-    {
+    struct {
         /**
          * The key to this fmask - used for store/lookup in the DB
          */
@@ -123,13 +120,11 @@ typedef struct bier_fmask_t_ {
         index_t bfm_fib_index;
     };
 
-    union
-    {
+    union {
         /**
          * For forwarding via a next-hop
          */
-        struct
-        {
+        struct {
             /**
              * The parent fib entry
              */
@@ -143,8 +138,7 @@ typedef struct bier_fmask_t_ {
         /**
          * For disposition
          */
-        struct
-        {
+        struct {
             /**
              * The parent disposition table object
              */
@@ -170,13 +164,13 @@ extern void bier_fmask_unlock(index_t bfmi);
 extern void bier_fmask_lock(index_t bfmi);
 
 extern index_t bier_fmask_create_and_lock(const bier_fmask_id_t *fmid,
-                                          index_t bti,
-                                          const fib_route_path_t *rpath);
+        index_t bti,
+        const fib_route_path_t *rpath);
 
 extern u8* format_bier_fmask(u8 *s, va_list *ap);
 
 extern void bier_fmask_contribute_forwarding(index_t bfmi,
-                                             dpo_id_t *dpo);
+        dpo_id_t *dpo);
 
 extern u32 bier_fmask_child_add (fib_node_index_t fib_entry_index,
                                  fib_node_type_t child_type,

@@ -43,122 +43,121 @@
 #include <vppinfra/byte_order.h>
 #include <vppinfra/error.h>
 
-typedef enum
-{
-  PCI_CLASS_NOT_DEFINED = 0x0000,
-  PCI_CLASS_NOT_DEFINED_VGA = 0x0001,
+typedef enum {
+    PCI_CLASS_NOT_DEFINED = 0x0000,
+    PCI_CLASS_NOT_DEFINED_VGA = 0x0001,
 
-  PCI_CLASS_STORAGE_SCSI = 0x0100,
-  PCI_CLASS_STORAGE_IDE = 0x0101,
-  PCI_CLASS_STORAGE_FLOPPY = 0x0102,
-  PCI_CLASS_STORAGE_IPI = 0x0103,
-  PCI_CLASS_STORAGE_RAID = 0x0104,
-  PCI_CLASS_STORAGE_OTHER = 0x0180,
-  PCI_CLASS_STORAGE = 0x0100,
+    PCI_CLASS_STORAGE_SCSI = 0x0100,
+    PCI_CLASS_STORAGE_IDE = 0x0101,
+    PCI_CLASS_STORAGE_FLOPPY = 0x0102,
+    PCI_CLASS_STORAGE_IPI = 0x0103,
+    PCI_CLASS_STORAGE_RAID = 0x0104,
+    PCI_CLASS_STORAGE_OTHER = 0x0180,
+    PCI_CLASS_STORAGE = 0x0100,
 
-  PCI_CLASS_NETWORK_ETHERNET = 0x0200,
-  PCI_CLASS_NETWORK_TOKEN_RING = 0x0201,
-  PCI_CLASS_NETWORK_FDDI = 0x0202,
-  PCI_CLASS_NETWORK_ATM = 0x0203,
-  PCI_CLASS_NETWORK_OTHER = 0x0280,
-  PCI_CLASS_NETWORK = 0x0200,
+    PCI_CLASS_NETWORK_ETHERNET = 0x0200,
+    PCI_CLASS_NETWORK_TOKEN_RING = 0x0201,
+    PCI_CLASS_NETWORK_FDDI = 0x0202,
+    PCI_CLASS_NETWORK_ATM = 0x0203,
+    PCI_CLASS_NETWORK_OTHER = 0x0280,
+    PCI_CLASS_NETWORK = 0x0200,
 
-  PCI_CLASS_DISPLAY_VGA = 0x0300,
-  PCI_CLASS_DISPLAY_XGA = 0x0301,
-  PCI_CLASS_DISPLAY_3D = 0x0302,
-  PCI_CLASS_DISPLAY_OTHER = 0x0380,
-  PCI_CLASS_DISPLAY = 0x0300,
+    PCI_CLASS_DISPLAY_VGA = 0x0300,
+    PCI_CLASS_DISPLAY_XGA = 0x0301,
+    PCI_CLASS_DISPLAY_3D = 0x0302,
+    PCI_CLASS_DISPLAY_OTHER = 0x0380,
+    PCI_CLASS_DISPLAY = 0x0300,
 
-  PCI_CLASS_MULTIMEDIA_VIDEO = 0x0400,
-  PCI_CLASS_MULTIMEDIA_AUDIO = 0x0401,
-  PCI_CLASS_MULTIMEDIA_PHONE = 0x0402,
-  PCI_CLASS_MULTIMEDIA_OTHER = 0x0480,
-  PCI_CLASS_MULTIMEDIA = 0x0400,
+    PCI_CLASS_MULTIMEDIA_VIDEO = 0x0400,
+    PCI_CLASS_MULTIMEDIA_AUDIO = 0x0401,
+    PCI_CLASS_MULTIMEDIA_PHONE = 0x0402,
+    PCI_CLASS_MULTIMEDIA_OTHER = 0x0480,
+    PCI_CLASS_MULTIMEDIA = 0x0400,
 
-  PCI_CLASS_MEMORY_RAM = 0x0500,
-  PCI_CLASS_MEMORY_FLASH = 0x0501,
-  PCI_CLASS_MEMORY_OTHER = 0x0580,
-  PCI_CLASS_MEMORY = 0x0500,
+    PCI_CLASS_MEMORY_RAM = 0x0500,
+    PCI_CLASS_MEMORY_FLASH = 0x0501,
+    PCI_CLASS_MEMORY_OTHER = 0x0580,
+    PCI_CLASS_MEMORY = 0x0500,
 
-  PCI_CLASS_BRIDGE_HOST = 0x0600,
-  PCI_CLASS_BRIDGE_ISA = 0x0601,
-  PCI_CLASS_BRIDGE_EISA = 0x0602,
-  PCI_CLASS_BRIDGE_MC = 0x0603,
-  PCI_CLASS_BRIDGE_PCI = 0x0604,
-  PCI_CLASS_BRIDGE_PCMCIA = 0x0605,
-  PCI_CLASS_BRIDGE_NUBUS = 0x0606,
-  PCI_CLASS_BRIDGE_CARDBUS = 0x0607,
-  PCI_CLASS_BRIDGE_RACEWAY = 0x0608,
-  PCI_CLASS_BRIDGE_OTHER = 0x0680,
-  PCI_CLASS_BRIDGE = 0x0600,
+    PCI_CLASS_BRIDGE_HOST = 0x0600,
+    PCI_CLASS_BRIDGE_ISA = 0x0601,
+    PCI_CLASS_BRIDGE_EISA = 0x0602,
+    PCI_CLASS_BRIDGE_MC = 0x0603,
+    PCI_CLASS_BRIDGE_PCI = 0x0604,
+    PCI_CLASS_BRIDGE_PCMCIA = 0x0605,
+    PCI_CLASS_BRIDGE_NUBUS = 0x0606,
+    PCI_CLASS_BRIDGE_CARDBUS = 0x0607,
+    PCI_CLASS_BRIDGE_RACEWAY = 0x0608,
+    PCI_CLASS_BRIDGE_OTHER = 0x0680,
+    PCI_CLASS_BRIDGE = 0x0600,
 
-  PCI_CLASS_COMMUNICATION_SERIAL = 0x0700,
-  PCI_CLASS_COMMUNICATION_PARALLEL = 0x0701,
-  PCI_CLASS_COMMUNICATION_MULTISERIAL = 0x0702,
-  PCI_CLASS_COMMUNICATION_MODEM = 0x0703,
-  PCI_CLASS_COMMUNICATION_OTHER = 0x0780,
-  PCI_CLASS_COMMUNICATION = 0x0700,
+    PCI_CLASS_COMMUNICATION_SERIAL = 0x0700,
+    PCI_CLASS_COMMUNICATION_PARALLEL = 0x0701,
+    PCI_CLASS_COMMUNICATION_MULTISERIAL = 0x0702,
+    PCI_CLASS_COMMUNICATION_MODEM = 0x0703,
+    PCI_CLASS_COMMUNICATION_OTHER = 0x0780,
+    PCI_CLASS_COMMUNICATION = 0x0700,
 
-  PCI_CLASS_SYSTEM_PIC = 0x0800,
-  PCI_CLASS_SYSTEM_DMA = 0x0801,
-  PCI_CLASS_SYSTEM_TIMER = 0x0802,
-  PCI_CLASS_SYSTEM_RTC = 0x0803,
-  PCI_CLASS_SYSTEM_PCI_HOTPLUG = 0x0804,
-  PCI_CLASS_SYSTEM_OTHER = 0x0880,
-  PCI_CLASS_SYSTEM = 0x0800,
+    PCI_CLASS_SYSTEM_PIC = 0x0800,
+    PCI_CLASS_SYSTEM_DMA = 0x0801,
+    PCI_CLASS_SYSTEM_TIMER = 0x0802,
+    PCI_CLASS_SYSTEM_RTC = 0x0803,
+    PCI_CLASS_SYSTEM_PCI_HOTPLUG = 0x0804,
+    PCI_CLASS_SYSTEM_OTHER = 0x0880,
+    PCI_CLASS_SYSTEM = 0x0800,
 
-  PCI_CLASS_INPUT_KEYBOARD = 0x0900,
-  PCI_CLASS_INPUT_PEN = 0x0901,
-  PCI_CLASS_INPUT_MOUSE = 0x0902,
-  PCI_CLASS_INPUT_SCANNER = 0x0903,
-  PCI_CLASS_INPUT_GAMEPORT = 0x0904,
-  PCI_CLASS_INPUT_OTHER = 0x0980,
-  PCI_CLASS_INPUT = 0x0900,
+    PCI_CLASS_INPUT_KEYBOARD = 0x0900,
+    PCI_CLASS_INPUT_PEN = 0x0901,
+    PCI_CLASS_INPUT_MOUSE = 0x0902,
+    PCI_CLASS_INPUT_SCANNER = 0x0903,
+    PCI_CLASS_INPUT_GAMEPORT = 0x0904,
+    PCI_CLASS_INPUT_OTHER = 0x0980,
+    PCI_CLASS_INPUT = 0x0900,
 
-  PCI_CLASS_DOCKING_GENERIC = 0x0a00,
-  PCI_CLASS_DOCKING_OTHER = 0x0a80,
-  PCI_CLASS_DOCKING = 0x0a00,
+    PCI_CLASS_DOCKING_GENERIC = 0x0a00,
+    PCI_CLASS_DOCKING_OTHER = 0x0a80,
+    PCI_CLASS_DOCKING = 0x0a00,
 
-  PCI_CLASS_PROCESSOR_386 = 0x0b00,
-  PCI_CLASS_PROCESSOR_486 = 0x0b01,
-  PCI_CLASS_PROCESSOR_PENTIUM = 0x0b02,
-  PCI_CLASS_PROCESSOR_ALPHA = 0x0b10,
-  PCI_CLASS_PROCESSOR_POWERPC = 0x0b20,
-  PCI_CLASS_PROCESSOR_MIPS = 0x0b30,
-  PCI_CLASS_PROCESSOR_CO = 0x0b40,
-  PCI_CLASS_PROCESSOR = 0x0b00,
+    PCI_CLASS_PROCESSOR_386 = 0x0b00,
+    PCI_CLASS_PROCESSOR_486 = 0x0b01,
+    PCI_CLASS_PROCESSOR_PENTIUM = 0x0b02,
+    PCI_CLASS_PROCESSOR_ALPHA = 0x0b10,
+    PCI_CLASS_PROCESSOR_POWERPC = 0x0b20,
+    PCI_CLASS_PROCESSOR_MIPS = 0x0b30,
+    PCI_CLASS_PROCESSOR_CO = 0x0b40,
+    PCI_CLASS_PROCESSOR = 0x0b00,
 
-  PCI_CLASS_SERIAL_FIREWIRE = 0x0c00,
-  PCI_CLASS_SERIAL_ACCESS = 0x0c01,
-  PCI_CLASS_SERIAL_SSA = 0x0c02,
-  PCI_CLASS_SERIAL_USB = 0x0c03,
-  PCI_CLASS_SERIAL_FIBER = 0x0c04,
-  PCI_CLASS_SERIAL_SMBUS = 0x0c05,
-  PCI_CLASS_SERIAL = 0x0c00,
+    PCI_CLASS_SERIAL_FIREWIRE = 0x0c00,
+    PCI_CLASS_SERIAL_ACCESS = 0x0c01,
+    PCI_CLASS_SERIAL_SSA = 0x0c02,
+    PCI_CLASS_SERIAL_USB = 0x0c03,
+    PCI_CLASS_SERIAL_FIBER = 0x0c04,
+    PCI_CLASS_SERIAL_SMBUS = 0x0c05,
+    PCI_CLASS_SERIAL = 0x0c00,
 
-  PCI_CLASS_INTELLIGENT_I2O = 0x0e00,
-  PCI_CLASS_INTELLIGENT = 0x0e00,
+    PCI_CLASS_INTELLIGENT_I2O = 0x0e00,
+    PCI_CLASS_INTELLIGENT = 0x0e00,
 
-  PCI_CLASS_SATELLITE_TV = 0x0f00,
-  PCI_CLASS_SATELLITE_AUDIO = 0x0f01,
-  PCI_CLASS_SATELLITE_VOICE = 0x0f03,
-  PCI_CLASS_SATELLITE_DATA = 0x0f04,
-  PCI_CLASS_SATELLITE = 0x0f00,
+    PCI_CLASS_SATELLITE_TV = 0x0f00,
+    PCI_CLASS_SATELLITE_AUDIO = 0x0f01,
+    PCI_CLASS_SATELLITE_VOICE = 0x0f03,
+    PCI_CLASS_SATELLITE_DATA = 0x0f04,
+    PCI_CLASS_SATELLITE = 0x0f00,
 
-  PCI_CLASS_CRYPT_NETWORK = 0x1000,
-  PCI_CLASS_CRYPT_ENTERTAINMENT = 0x1001,
-  PCI_CLASS_CRYPT_OTHER = 0x1080,
-  PCI_CLASS_CRYPT = 0x1000,
+    PCI_CLASS_CRYPT_NETWORK = 0x1000,
+    PCI_CLASS_CRYPT_ENTERTAINMENT = 0x1001,
+    PCI_CLASS_CRYPT_OTHER = 0x1080,
+    PCI_CLASS_CRYPT = 0x1000,
 
-  PCI_CLASS_SP_DPIO = 0x1100,
-  PCI_CLASS_SP_OTHER = 0x1180,
-  PCI_CLASS_SP = 0x1100,
+    PCI_CLASS_SP_DPIO = 0x1100,
+    PCI_CLASS_SP_OTHER = 0x1180,
+    PCI_CLASS_SP = 0x1100,
 } pci_device_class_t;
 
 static inline pci_device_class_t
 pci_device_class_base (pci_device_class_t c)
 {
-  return c & ~0xff;
+    return c & ~0xff;
 }
 
 /*
@@ -172,242 +171,238 @@ pci_device_class_base (pci_device_class_t c)
  * Under PCI, each device has 256 bytes of configuration address space,
  * of which the first 64 bytes are standardized as follows:
  */
-typedef struct
-{
-  u16 vendor_id;
-  u16 device_id;
+typedef struct {
+    u16 vendor_id;
+    u16 device_id;
 
-  u16 command;
-#define PCI_COMMAND_IO		(1 << 0)	/* Enable response in I/O space */
-#define PCI_COMMAND_MEMORY	(1 << 1)	/* Enable response in Memory space */
-#define PCI_COMMAND_BUS_MASTER	(1 << 2)	/* Enable bus mastering */
-#define PCI_COMMAND_SPECIAL	(1 << 3)	/* Enable response to special cycles */
-#define PCI_COMMAND_WRITE_INVALIDATE (1 << 4)	/* Use memory write and invalidate */
+    u16 command;
+#define PCI_COMMAND_IO      (1 << 0)    /* Enable response in I/O space */
+#define PCI_COMMAND_MEMORY  (1 << 1)    /* Enable response in Memory space */
+#define PCI_COMMAND_BUS_MASTER  (1 << 2)    /* Enable bus mastering */
+#define PCI_COMMAND_SPECIAL (1 << 3)    /* Enable response to special cycles */
+#define PCI_COMMAND_WRITE_INVALIDATE (1 << 4)   /* Use memory write and invalidate */
 #define PCI_COMMAND_VGA_PALETTE_SNOOP (1 << 5)
-#define PCI_COMMAND_PARITY	(1 << 6)
-#define PCI_COMMAND_WAIT 	(1 << 7)	/* Enable address/data stepping */
-#define PCI_COMMAND_SERR	(1 << 8)	/* Enable SERR */
+#define PCI_COMMAND_PARITY  (1 << 6)
+#define PCI_COMMAND_WAIT    (1 << 7)    /* Enable address/data stepping */
+#define PCI_COMMAND_SERR    (1 << 8)    /* Enable SERR */
 #define PCI_COMMAND_BACK_TO_BACK_WRITE (1 << 9)
-#define PCI_COMMAND_INTX_DISABLE (1 << 10)	/* INTx Emulation Disable */
+#define PCI_COMMAND_INTX_DISABLE (1 << 10)  /* INTx Emulation Disable */
 
-  u16 status;
+    u16 status;
 #define PCI_STATUS_INTX_PENDING (1 << 3)
 #define PCI_STATUS_CAPABILITY_LIST (1 << 4)
-#define PCI_STATUS_66MHZ	(1 << 5)	/* Support 66 Mhz PCI 2.1 bus */
-#define PCI_STATUS_UDF		(1 << 6)	/* Support User Definable Features (obsolete) */
-#define PCI_STATUS_BACK_TO_BACK_WRITE (1 << 7)	/* Accept fast-back to back */
-#define PCI_STATUS_PARITY_ERROR	(1 << 8)	/* Detected parity error */
-#define PCI_STATUS_DEVSEL_GET(x) ((x >> 9) & 3)	/* DEVSEL timing */
+#define PCI_STATUS_66MHZ    (1 << 5)    /* Support 66 Mhz PCI 2.1 bus */
+#define PCI_STATUS_UDF      (1 << 6)    /* Support User Definable Features (obsolete) */
+#define PCI_STATUS_BACK_TO_BACK_WRITE (1 << 7)  /* Accept fast-back to back */
+#define PCI_STATUS_PARITY_ERROR (1 << 8)    /* Detected parity error */
+#define PCI_STATUS_DEVSEL_GET(x) ((x >> 9) & 3) /* DEVSEL timing */
 #define PCI_STATUS_DEVSEL_FAST (0 << 9)
 #define PCI_STATUS_DEVSEL_MEDIUM (1 << 9)
 #define PCI_STATUS_DEVSEL_SLOW (2 << 9)
-#define PCI_STATUS_SIG_TARGET_ABORT (1 << 11)	/* Set on target abort */
-#define PCI_STATUS_REC_TARGET_ABORT (1 << 12)	/* Master ack of " */
-#define PCI_STATUS_REC_MASTER_ABORT (1 << 13)	/* Set on master abort */
-#define PCI_STATUS_SIG_SYSTEM_ERROR (1 << 14)	/* Set when we drive SERR */
+#define PCI_STATUS_SIG_TARGET_ABORT (1 << 11)   /* Set on target abort */
+#define PCI_STATUS_REC_TARGET_ABORT (1 << 12)   /* Master ack of " */
+#define PCI_STATUS_REC_MASTER_ABORT (1 << 13)   /* Set on master abort */
+#define PCI_STATUS_SIG_SYSTEM_ERROR (1 << 14)   /* Set when we drive SERR */
 #define PCI_STATUS_DETECTED_PARITY_ERROR (1 << 15)
 
-  u8 revision_id;
-  u8 programming_interface_class;	/* Reg. Level Programming Interface */
+    u8 revision_id;
+    u8 programming_interface_class;   /* Reg. Level Programming Interface */
 
-  pci_device_class_t device_class:16;
+    pci_device_class_t device_class:16;
 
-  u8 cache_size;
-  u8 latency_timer;
+    u8 cache_size;
+    u8 latency_timer;
 
-  u8 header_type;
-#define PCI_HEADER_TYPE_NORMAL	0
+    u8 header_type;
+#define PCI_HEADER_TYPE_NORMAL  0
 #define PCI_HEADER_TYPE_BRIDGE 1
 #define PCI_HEADER_TYPE_CARDBUS 2
 
-  u8 bist;
-#define PCI_BIST_CODE_MASK	0x0f	/* Return result */
-#define PCI_BIST_START		0x40	/* 1 to start BIST, 2 secs or less */
-#define PCI_BIST_CAPABLE	0x80	/* 1 if BIST capable */
+    u8 bist;
+#define PCI_BIST_CODE_MASK  0x0f    /* Return result */
+#define PCI_BIST_START      0x40    /* 1 to start BIST, 2 secs or less */
+#define PCI_BIST_CAPABLE    0x80    /* 1 if BIST capable */
 } pci_config_header_t;
 
 /* Byte swap config header. */
 always_inline void
 pci_config_header_little_to_host (pci_config_header_t * r)
 {
-  if (!CLIB_ARCH_IS_BIG_ENDIAN)
-    return;
+    if (!CLIB_ARCH_IS_BIG_ENDIAN)
+        return;
 #define _(f,t) r->f = clib_byte_swap_##t (r->f)
-  _(vendor_id, u16);
-  _(device_id, u16);
-  _(command, u16);
-  _(status, u16);
-  _(device_class, u16);
+    _(vendor_id, u16);
+    _(device_id, u16);
+    _(command, u16);
+    _(status, u16);
+    _(device_class, u16);
 #undef _
 }
 
 /* Header type 0 (normal devices) */
-typedef struct
-{
-  pci_config_header_t header;
+typedef struct {
+    pci_config_header_t header;
 
-  /*
-   * Base addresses specify locations in memory or I/O space.
-   * Decoded size can be determined by writing a value of
-   * 0xffffffff to the register, and reading it back. Only
-   * 1 bits are decoded.
-   */
-  u32 base_address[6];
+    /*
+     * Base addresses specify locations in memory or I/O space.
+     * Decoded size can be determined by writing a value of
+     * 0xffffffff to the register, and reading it back. Only
+     * 1 bits are decoded.
+     */
+    u32 base_address[6];
 
-  u16 cardbus_cis;
+    u16 cardbus_cis;
 
-  u16 subsystem_vendor_id;
-  u16 subsystem_id;
+    u16 subsystem_vendor_id;
+    u16 subsystem_id;
 
-  u32 rom_address;
-#define PCI_ROM_ADDRESS		0x30	/* Bits 31..11 are address, 10..1 reserved */
-#define PCI_ROM_ADDRESS_ENABLE	0x01
-#define PCI_ROM_ADDRESS_MASK	(~0x7ffUL)
+    u32 rom_address;
+#define PCI_ROM_ADDRESS     0x30    /* Bits 31..11 are address, 10..1 reserved */
+#define PCI_ROM_ADDRESS_ENABLE  0x01
+#define PCI_ROM_ADDRESS_MASK    (~0x7ffUL)
 
-  u8 first_capability_offset;
+    u8 first_capability_offset;
     CLIB_PAD_FROM_TO (0x35, 0x3c);
 
-  u8 interrupt_line;
-  u8 interrupt_pin;
-  u8 min_grant;
-  u8 max_latency;
+    u8 interrupt_line;
+    u8 interrupt_pin;
+    u8 min_grant;
+    u8 max_latency;
 
-  u8 capability_data[0];
+    u8 capability_data[0];
 } pci_config_type0_regs_t;
 
 always_inline void
 pci_config_type0_little_to_host (pci_config_type0_regs_t * r)
 {
-  int i;
-  if (!CLIB_ARCH_IS_BIG_ENDIAN)
-    return;
-  pci_config_header_little_to_host (&r->header);
+    int i;
+    if (!CLIB_ARCH_IS_BIG_ENDIAN)
+        return;
+    pci_config_header_little_to_host (&r->header);
 #define _(f,t) r->f = clib_byte_swap_##t (r->f)
-  for (i = 0; i < ARRAY_LEN (r->base_address); i++)
-    _(base_address[i], u32);
-  _(cardbus_cis, u16);
-  _(subsystem_vendor_id, u16);
-  _(subsystem_id, u16);
-  _(rom_address, u32);
+    for (i = 0; i < ARRAY_LEN (r->base_address); i++)
+        _(base_address[i], u32);
+    _(cardbus_cis, u16);
+    _(subsystem_vendor_id, u16);
+    _(subsystem_id, u16);
+    _(rom_address, u32);
 #undef _
 }
 
 /* Header type 1 (PCI-to-PCI bridges) */
-typedef struct
-{
-  pci_config_header_t header;
+typedef struct {
+    pci_config_header_t header;
 
-  u32 base_address[2];
+    u32 base_address[2];
 
-  /* Primary/secondary bus number. */
-  u8 primary_bus;
-  u8 secondary_bus;
+    /* Primary/secondary bus number. */
+    u8 primary_bus;
+    u8 secondary_bus;
 
-  /* Highest bus number behind the bridge */
-  u8 subordinate_bus;
+    /* Highest bus number behind the bridge */
+    u8 subordinate_bus;
 
-  u8 secondary_bus_latency_timer;
+    u8 secondary_bus_latency_timer;
 
-  /* I/O range behind bridge. */
-  u8 io_base, io_limit;
+    /* I/O range behind bridge. */
+    u8 io_base, io_limit;
 
-  /* Secondary status register, only bit 14 used */
-  u16 secondary_status;
+    /* Secondary status register, only bit 14 used */
+    u16 secondary_status;
 
-  /* Memory range behind bridge in units of 64k bytes. */
-  u16 memory_base, memory_limit;
+    /* Memory range behind bridge in units of 64k bytes. */
+    u16 memory_base, memory_limit;
 #define PCI_MEMORY_RANGE_TYPE_MASK 0x0fUL
-#define PCI_MEMORY_RANGE_MASK	(~0x0fUL)
+#define PCI_MEMORY_RANGE_MASK   (~0x0fUL)
 
-  u16 prefetchable_memory_base, prefetchable_memory_limit;
+    u16 prefetchable_memory_base, prefetchable_memory_limit;
 #define PCI_PREF_RANGE_TYPE_MASK 0x0fUL
-#define PCI_PREF_RANGE_TYPE_32	0x00
-#define PCI_PREF_RANGE_TYPE_64	0x01
-#define PCI_PREF_RANGE_MASK	(~0x0fUL)
+#define PCI_PREF_RANGE_TYPE_32  0x00
+#define PCI_PREF_RANGE_TYPE_64  0x01
+#define PCI_PREF_RANGE_MASK (~0x0fUL)
 
-  u32 prefetchable_memory_base_upper_32bits;
-  u32 prefetchable_memory_limit_upper_32bits;
-  u16 io_base_upper_16bits;
-  u16 io_limit_upper_16bits;
+    u32 prefetchable_memory_base_upper_32bits;
+    u32 prefetchable_memory_limit_upper_32bits;
+    u16 io_base_upper_16bits;
+    u16 io_limit_upper_16bits;
 
-  /* Same as for type 0. */
-  u8 capability_list_offset;
+    /* Same as for type 0. */
+    u8 capability_list_offset;
     CLIB_PAD_FROM_TO (0x35, 0x37);
 
-  u32 rom_address;
+    u32 rom_address;
     CLIB_PAD_FROM_TO (0x3c, 0x3e);
 
-  u16 bridge_control;
-#define PCI_BRIDGE_CTL_PARITY	0x01	/* Enable parity detection on secondary interface */
-#define PCI_BRIDGE_CTL_SERR	0x02	/* The same for SERR forwarding */
-#define PCI_BRIDGE_CTL_NO_ISA	0x04	/* Disable bridging of ISA ports */
-#define PCI_BRIDGE_CTL_VGA	0x08	/* Forward VGA addresses */
-#define PCI_BRIDGE_CTL_MASTER_ABORT 0x20	/* Report master aborts */
-#define PCI_BRIDGE_CTL_BUS_RESET 0x40	/* Secondary bus reset */
-#define PCI_BRIDGE_CTL_FAST_BACK 0x80	/* Fast Back2Back enabled on secondary interface */
+    u16 bridge_control;
+#define PCI_BRIDGE_CTL_PARITY   0x01    /* Enable parity detection on secondary interface */
+#define PCI_BRIDGE_CTL_SERR 0x02    /* The same for SERR forwarding */
+#define PCI_BRIDGE_CTL_NO_ISA   0x04    /* Disable bridging of ISA ports */
+#define PCI_BRIDGE_CTL_VGA  0x08    /* Forward VGA addresses */
+#define PCI_BRIDGE_CTL_MASTER_ABORT 0x20    /* Report master aborts */
+#define PCI_BRIDGE_CTL_BUS_RESET 0x40   /* Secondary bus reset */
+#define PCI_BRIDGE_CTL_FAST_BACK 0x80   /* Fast Back2Back enabled on secondary interface */
 
-  u8 capability_data[0];
+    u8 capability_data[0];
 } pci_config_type1_regs_t;
 
 always_inline void
 pci_config_type1_little_to_host (pci_config_type1_regs_t * r)
 {
-  int i;
-  if (!CLIB_ARCH_IS_BIG_ENDIAN)
-    return;
-  pci_config_header_little_to_host (&r->header);
+    int i;
+    if (!CLIB_ARCH_IS_BIG_ENDIAN)
+        return;
+    pci_config_header_little_to_host (&r->header);
 #define _(f,t) r->f = clib_byte_swap_##t (r->f)
-  for (i = 0; i < ARRAY_LEN (r->base_address); i++)
-    _(base_address[i], u32);
-  _(secondary_status, u16);
-  _(memory_base, u16);
-  _(memory_limit, u16);
-  _(prefetchable_memory_base, u16);
-  _(prefetchable_memory_limit, u16);
-  _(prefetchable_memory_base_upper_32bits, u32);
-  _(prefetchable_memory_limit_upper_32bits, u32);
-  _(io_base_upper_16bits, u16);
-  _(io_limit_upper_16bits, u16);
-  _(rom_address, u32);
-  _(bridge_control, u16);
+    for (i = 0; i < ARRAY_LEN (r->base_address); i++)
+        _(base_address[i], u32);
+    _(secondary_status, u16);
+    _(memory_base, u16);
+    _(memory_limit, u16);
+    _(prefetchable_memory_base, u16);
+    _(prefetchable_memory_limit, u16);
+    _(prefetchable_memory_base_upper_32bits, u32);
+    _(prefetchable_memory_limit_upper_32bits, u32);
+    _(io_base_upper_16bits, u16);
+    _(io_limit_upper_16bits, u16);
+    _(rom_address, u32);
+    _(bridge_control, u16);
 #undef _
 }
 
 /* Capabilities. */
-typedef enum pci_capability_type
-{
-  /* Power Management */
-  PCI_CAP_ID_PM = 1,
+typedef enum pci_capability_type {
+    /* Power Management */
+    PCI_CAP_ID_PM = 1,
 
-  /* Accelerated Graphics Port */
-  PCI_CAP_ID_AGP = 2,
+    /* Accelerated Graphics Port */
+    PCI_CAP_ID_AGP = 2,
 
-  /* Vital Product Data */
-  PCI_CAP_ID_VPD = 3,
+    /* Vital Product Data */
+    PCI_CAP_ID_VPD = 3,
 
-  /* Slot Identification */
-  PCI_CAP_ID_SLOTID = 4,
+    /* Slot Identification */
+    PCI_CAP_ID_SLOTID = 4,
 
-  /* Message Signalled Interrupts */
-  PCI_CAP_ID_MSI = 5,
+    /* Message Signalled Interrupts */
+    PCI_CAP_ID_MSI = 5,
 
-  /* CompactPCI HotSwap */
-  PCI_CAP_ID_CHSWP = 6,
+    /* CompactPCI HotSwap */
+    PCI_CAP_ID_CHSWP = 6,
 
-  /* PCI-X */
-  PCI_CAP_ID_PCIX = 7,
+    /* PCI-X */
+    PCI_CAP_ID_PCIX = 7,
 
-  /* Hypertransport. */
-  PCI_CAP_ID_HYPERTRANSPORT = 8,
+    /* Hypertransport. */
+    PCI_CAP_ID_HYPERTRANSPORT = 8,
 
-  /* PCI Standard Hot-Plug Controller */
-  PCI_CAP_ID_SHPC = 0xc,
+    /* PCI Standard Hot-Plug Controller */
+    PCI_CAP_ID_SHPC = 0xc,
 
-  /* PCI Express */
-  PCI_CAP_ID_PCIE = 0x10,
+    /* PCI Express */
+    PCI_CAP_ID_PCIE = 0x10,
 
-  /* MSI-X */
-  PCI_CAP_ID_MSIX = 0x11,
+    /* MSI-X */
+    PCI_CAP_ID_MSIX = 0x11,
 } pci_capability_type_t;
 
 /* Common header for capabilities. */
@@ -421,24 +416,23 @@ typedef CLIB_PACKED (struct
 always_inline void *
 pci_config_find_capability (pci_config_type0_regs_t * t, int cap_type)
 {
-  pci_capability_regs_t *c;
-  u32 next_offset;
-  u32 ttl = 48;
+    pci_capability_regs_t *c;
+    u32 next_offset;
+    u32 ttl = 48;
 
-  if (!(t->header.status & PCI_STATUS_CAPABILITY_LIST))
-    return 0;
+    if (!(t->header.status & PCI_STATUS_CAPABILITY_LIST))
+        return 0;
 
-  next_offset = t->first_capability_offset;
-  while (ttl-- && next_offset >= 0x40)
-    {
-      c = (void *) t + (next_offset & ~3);
-      if ((u8) c->type == 0xff)
-	break;
-      if (c->type == cap_type)
-	return c;
-      next_offset = c->next_offset;
+    next_offset = t->first_capability_offset;
+    while (ttl-- && next_offset >= 0x40) {
+        c = (void *) t + (next_offset & ~3);
+        if ((u8) c->type == 0xff)
+            break;
+        if (c->type == cap_type)
+            return c;
+        next_offset = c->next_offset;
     }
-  return 0;
+    return 0;
 }
 
 /* Power Management Registers */
@@ -578,17 +572,17 @@ typedef CLIB_PACKED (struct
 static inline int
 pcie_size_to_code (int bytes)
 {
-  ASSERT (is_pow2 (bytes));
-  ASSERT (bytes <= 4096);
-  return min_log2 (bytes) - 7;
+    ASSERT (is_pow2 (bytes));
+    ASSERT (bytes <= 4096);
+    return min_log2 (bytes) - 7;
 }
 
 static inline int
 pcie_code_to_size (int code)
 {
-  int size = 1 << (code + 7);
-  ASSERT (size <= 4096);
-  return size;
+    int size = 1 << (code + 7);
+    ASSERT (size <= 4096);
+    return size;
 }
 
 /* PCI Express capability registers */
@@ -658,12 +652,11 @@ typedef CLIB_PACKED (struct
 /* *INDENT-ON* */
 
 /* PCI express extended capabilities. */
-typedef enum pcie_capability_type
-{
-  PCIE_CAP_ADVANCED_ERROR = 1,
-  PCIE_CAP_VC = 2,
-  PCIE_CAP_DSN = 3,
-  PCIE_CAP_PWR = 4,
+typedef enum pcie_capability_type {
+    PCIE_CAP_ADVANCED_ERROR = 1,
+    PCIE_CAP_VC = 2,
+    PCIE_CAP_DSN = 3,
+    PCIE_CAP_PWR = 4,
 } pcie_capability_type_t;
 
 /* Common header for capabilities. */
@@ -707,25 +700,25 @@ typedef CLIB_PACKED (struct
 /* *INDENT-ON* */
 
 /* Virtual Channel */
-#define PCI_VC_PORT_REG1	4
-#define PCI_VC_PORT_REG2	8
-#define PCI_VC_PORT_CTRL	12
-#define PCI_VC_PORT_STATUS	14
-#define PCI_VC_RES_CAP		16
-#define PCI_VC_RES_CTRL		20
-#define PCI_VC_RES_STATUS	26
+#define PCI_VC_PORT_REG1    4
+#define PCI_VC_PORT_REG2    8
+#define PCI_VC_PORT_CTRL    12
+#define PCI_VC_PORT_STATUS  14
+#define PCI_VC_RES_CAP      16
+#define PCI_VC_RES_CTRL     20
+#define PCI_VC_RES_STATUS   26
 
 /* Power Budgeting */
-#define PCI_PWR_DSR		4	/* Data Select Register */
-#define PCI_PWR_DATA		8	/* Data Register */
-#define PCI_PWR_DATA_BASE(x)	((x) & 0xff)	/* Base Power */
-#define PCI_PWR_DATA_SCALE(x)	(((x) >> 8) & 3)	/* Data Scale */
-#define PCI_PWR_DATA_PM_SUB(x)	(((x) >> 10) & 7)	/* PM Sub State */
-#define PCI_PWR_DATA_PM_STATE(x) (((x) >> 13) & 3)	/* PM State */
-#define PCI_PWR_DATA_TYPE(x)	(((x) >> 15) & 7)	/* Type */
-#define PCI_PWR_DATA_RAIL(x)	(((x) >> 18) & 7)	/* Power Rail */
-#define PCI_PWR_CAP		12	/* Capability */
-#define PCI_PWR_CAP_BUDGET(x)	((x) & 1)	/* Included in system budget */
+#define PCI_PWR_DSR     4   /* Data Select Register */
+#define PCI_PWR_DATA        8   /* Data Register */
+#define PCI_PWR_DATA_BASE(x)    ((x) & 0xff)    /* Base Power */
+#define PCI_PWR_DATA_SCALE(x)   (((x) >> 8) & 3)    /* Data Scale */
+#define PCI_PWR_DATA_PM_SUB(x)  (((x) >> 10) & 7)   /* PM Sub State */
+#define PCI_PWR_DATA_PM_STATE(x) (((x) >> 13) & 3)  /* PM State */
+#define PCI_PWR_DATA_TYPE(x)    (((x) >> 15) & 7)   /* Type */
+#define PCI_PWR_DATA_RAIL(x)    (((x) >> 18) & 7)   /* Power Rail */
+#define PCI_PWR_CAP     12  /* Capability */
+#define PCI_PWR_CAP_BUDGET(x)   ((x) & 1)   /* Included in system budget */
 
 #endif /* included_vlib_pci_config_h */
 

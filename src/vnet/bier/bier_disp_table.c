@@ -45,8 +45,7 @@ bier_disp_table_find(u32 table_id)
 
     p = hash_get(bier_disp_table_id_to_index, table_id);
 
-    if (NULL != p)
-    {
+    if (NULL != p) {
         return (p[0]);
     }
 
@@ -61,8 +60,7 @@ bier_disp_table_add_or_lock (u32 table_id)
 
     bdti = bier_disp_table_find(table_id);
 
-    if (INDEX_INVALID == bdti)
-    {
+    if (INDEX_INVALID == bdti) {
         pool_get_aligned(bier_disp_table_pool, bdt,
                          CLIB_CACHE_LINE_BYTES);
 
@@ -76,9 +74,7 @@ bier_disp_table_add_or_lock (u32 table_id)
          * Set the result for each entry in the DB to be invalid
          */
         memset(bdt->bdt_db, 0xff, sizeof(bdt->bdt_db));
-    }
-    else
-    {
+    } else {
         bdt = pool_elt_at_index(bier_disp_table_pool, bdti);
     }
 
@@ -94,8 +90,7 @@ bier_disp_table_unlock_w_table_id (u32 table_id)
 
     bdti = bier_disp_table_find(table_id);
 
-    if (INDEX_INVALID != bdti)
-    {
+    if (INDEX_INVALID != bdti) {
         bier_disp_table_unlock(bdti);
     }
 }
@@ -109,12 +104,10 @@ bier_disp_table_unlock (index_t bdti)
 
     bdt->bdt_locks--;
 
-    if (0 == bdt->bdt_locks)
-    {
+    if (0 == bdt->bdt_locks) {
         u32 ii;
 
-        for (ii = 0; ii < BIER_BP_MAX; ii++)
-        {
+        for (ii = 0; ii < BIER_BP_MAX; ii++) {
             bier_disp_entry_unlock(bdt->bdt_db[ii]);
         }
         hash_unset(bier_disp_table_id_to_index, bdt->bdt_table_id);
@@ -152,14 +145,11 @@ format_bier_disp_table (u8* s, va_list *ap)
     s = format(s, "bier-disp-table:[%d]; table-id:%d locks:%d",
                bdti, bdt->bdt_table_id, bdt->bdt_locks);
 
-    if (flags & BIER_SHOW_DETAIL)
-    {
+    if (flags & BIER_SHOW_DETAIL) {
         u32 ii;
 
-        for (ii = 0; ii < BIER_BP_MAX; ii++)
-        {
-            if (INDEX_INVALID != bdt->bdt_db[ii])
-            {
+        for (ii = 0; ii < BIER_BP_MAX; ii++) {
+            if (INDEX_INVALID != bdt->bdt_db[ii]) {
                 u16 src = ii;
                 s = format(s, "\n%Usrc:%d", format_white_space, indent,
                            clib_host_to_net_u16(src));
@@ -223,15 +213,13 @@ bier_disp_table_entry_path_add (u32 table_id,
 
     bdti = bier_disp_table_find(table_id);
 
-    if (INDEX_INVALID == bdti)
-    {
+    if (INDEX_INVALID == bdti) {
         return;
     }
 
     bdei = bier_disp_table_lookup_hton(bdti, src);
 
-    if (INDEX_INVALID == bdei)
-    {
+    if (INDEX_INVALID == bdei) {
         bdei = bier_disp_entry_add_or_lock();
         bier_disp_table_entry_insert(bdti, src, bdei);
     }
@@ -249,21 +237,18 @@ bier_disp_table_entry_path_remove (u32 table_id,
 
     bdti = bier_disp_table_find(table_id);
 
-    if (INDEX_INVALID == bdti)
-    {
+    if (INDEX_INVALID == bdti) {
         return;
     }
 
     bdei = bier_disp_table_lookup_hton(bdti, src);
 
-    if (INDEX_INVALID != bdei)
-    {
+    if (INDEX_INVALID != bdei) {
         int remove;
 
         remove = bier_disp_entry_path_remove(bdei, payload_proto, rpath);
 
-        if (remove)
-        {
+        if (remove) {
             bier_disp_table_entry_remove(bdti, src);
             bier_disp_entry_unlock(bdei);
         }
@@ -282,14 +267,11 @@ bier_disp_table_walk (u32 table_id,
 
     bdti = bier_disp_table_find(table_id);
 
-    if (INDEX_INVALID != bdti)
-    {
+    if (INDEX_INVALID != bdti) {
         bdt = bier_disp_table_get(bdti);
 
-        for (ii = 0; ii < BIER_BP_MAX; ii++)
-        {
-            if (INDEX_INVALID != bdt->bdt_db[ii])
-            {
+        for (ii = 0; ii < BIER_BP_MAX; ii++) {
+            if (INDEX_INVALID != bdt->bdt_db[ii]) {
                 u16 src = ii;
 
                 bde = bier_disp_entry_get(bdt->bdt_db[ii]);
@@ -328,14 +310,12 @@ const static dpo_vft_t bier_disp_table_dpo_vft = {
     .dv_format = format_bier_disp_table_dpo,
 };
 
-const static char *const bier_disp_table_bier_nodes[] =
-{
+const static char *const bier_disp_table_bier_nodes[] = {
     "bier-disp-lookup",
     NULL
 };
 
-const static char * const * const bier_disp_table_nodes[DPO_PROTO_NUM] =
-{
+const static char * const * const bier_disp_table_nodes[DPO_PROTO_NUM] = {
     [DPO_PROTO_BIER] = bier_disp_table_bier_nodes,
 };
 
@@ -368,14 +348,12 @@ show_bier_disp_table (vlib_main_t * vm,
             ;
         else if (unformat (input, "%d", &bdti))
             ;
-        else
-        {
+        else {
             break;
         }
     }
 
-    if (INDEX_INVALID == bdti)
-    {
+    if (INDEX_INVALID == bdti) {
         pool_foreach(bdt, bier_disp_table_pool,
         ({
             vlib_cli_output(vm, "%U", format_bier_disp_table,
@@ -383,9 +361,7 @@ show_bier_disp_table (vlib_main_t * vm,
                             1,
                             BIER_SHOW_BRIEF);
         }));
-    }
-    else
-    {
+    } else {
         vlib_cli_output(vm, "%U", format_bier_disp_table, bdti, 1,
                         BIER_SHOW_DETAIL);
     }

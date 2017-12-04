@@ -42,31 +42,29 @@
 
 typedef u8 vlib_physmem_region_index_t;
 
-typedef struct
-{
-  vlib_physmem_region_index_t index;
-  void *mem;
-  uword size;
-  int fd;
-  u8 log2_page_size;
-  u16 n_pages;
-  u32 page_mask;
+typedef struct {
+    vlib_physmem_region_index_t index;
+    void *mem;
+    uword size;
+    int fd;
+    u8 log2_page_size;
+    u16 n_pages;
+    u32 page_mask;
 
-  void *heap;
-  u32 flags;
+    void *heap;
+    u32 flags;
 #define VLIB_PHYSMEM_F_INIT_MHEAP (1<<0)
 #define VLIB_PHYSMEM_F_FAKE (1<<2)
 
-  u8 numa_node;
-  u64 *page_table;
-  u8 *name;
+    u8 numa_node;
+    u64 *page_table;
+    u8 *name;
 } vlib_physmem_region_t;
 
 
 
-typedef struct
-{
-  vlib_physmem_region_t *regions;
+typedef struct {
+    vlib_physmem_region_t *regions;
 } vlib_physmem_main_t;
 
 #endif /* included_vlib_physmem_h */

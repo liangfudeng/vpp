@@ -41,15 +41,15 @@ fib_entry_src_special_remove (fib_entry_src_t *src)
 
 static void
 fib_entry_src_special_add (fib_entry_src_t *src,
-			   const fib_entry_t *entry,
-			   fib_entry_flag_t flags,
-			   dpo_proto_t proto,
-			   const dpo_id_t *dpo)
+                           const fib_entry_t *entry,
+                           fib_entry_flag_t flags,
+                           dpo_proto_t proto,
+                           const dpo_id_t *dpo)
 {
     src->fes_pl =
-	fib_path_list_create_special(proto,
-				     fib_entry_src_flags_2_path_list_flags(flags),
-				     dpo);
+        fib_path_list_create_special(proto,
+                                     fib_entry_src_flags_2_path_list_flags(flags),
+                                     dpo);
 }
 
 const static fib_entry_src_vft_t special_src_vft = {

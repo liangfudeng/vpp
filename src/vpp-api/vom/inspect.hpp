@@ -23,66 +23,67 @@
 #include <string>
 #include <vector>
 
-namespace VOM {
-/**
- * A means to inspect the state VPP has built, in total, and per-client
- */
-class inspect
+namespace VOM
 {
-public:
-  /**
-   * Constructor
-   */
-  inspect() = default;
-
-  /**
-   * Destructor to tidyup socket resources
-   */
-  ~inspect() = default;
-
-  /**
-   * handle input from the requester
-   *
-   * @param input command
-   * @param output output
-   */
-  void handle_input(const std::string& input, std::ostream& output);
-
-  /**
-   * inspect command handler Handler
-   */
-  class command_handler
-  {
-  public:
-    command_handler() = default;
-    virtual ~command_handler() = default;
-
     /**
-     * Show each object
+     * A means to inspect the state VPP has built, in total, and per-client
      */
-    virtual void show(std::ostream& os) = 0;
-  };
+    class inspect
+    {
+    public:
+        /**
+         * Constructor
+         */
+        inspect() = default;
 
-  /**
-   * Register a command handler for inspection
-   */
-  static void register_handler(const std::vector<std::string>& cmds,
-                               const std::string& help,
-                               command_handler* ch);
+        /**
+         * Destructor to tidyup socket resources
+         */
+        ~inspect() = default;
 
-private:
-  /**
-   * command handler list
-   */
-  static std::unique_ptr<std::map<std::string, command_handler*>>
-    m_cmd_handlers;
-  /**
-   * help handler list
-   */
-  static std::unique_ptr<
-    std::deque<std::pair<std::vector<std::string>, std::string>>>
-    m_help_handlers;
-};
+        /**
+         * handle input from the requester
+         *
+         * @param input command
+         * @param output output
+         */
+        void handle_input(const std::string& input, std::ostream& output);
+
+        /**
+         * inspect command handler Handler
+         */
+        class command_handler
+        {
+        public:
+            command_handler() = default;
+            virtual ~command_handler() = default;
+
+            /**
+             * Show each object
+             */
+            virtual void show(std::ostream& os) = 0;
+        };
+
+        /**
+         * Register a command handler for inspection
+         */
+        static void register_handler(const std::vector<std::string>& cmds,
+                                     const std::string& help,
+                                     command_handler* ch);
+
+    private:
+        /**
+         * command handler list
+         */
+        static std::unique_ptr<std::map<std::string, command_handler*>>
+                m_cmd_handlers;
+        /**
+         * help handler list
+         */
+        static std::unique_ptr<
+        std::deque<std::pair<std::vector<std::string>, std::string>>>
+        m_help_handlers;
+    };
 };
 
 /*

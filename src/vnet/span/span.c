@@ -23,144 +23,137 @@
 
 span_main_t span_main;
 
-typedef enum
-{
-  SPAN_DISABLE = 0,
-  SPAN_RX = 1,
-  SPAN_TX = 2,
-  SPAN_BOTH = SPAN_RX | SPAN_TX
+typedef enum {
+    SPAN_DISABLE = 0,
+    SPAN_RX = 1,
+    SPAN_TX = 2,
+    SPAN_BOTH = SPAN_RX | SPAN_TX
 } span_state_t;
 
 static_always_inline u32
 span_dst_set (span_mirror_t * sm, u32 dst_sw_if_index, int enable)
 {
-  if (dst_sw_if_index == ~0)
-    {
-      ASSERT (enable == 0);
-      clib_bitmap_zero (sm->mirror_ports);
-    }
-  else
-    sm->mirror_ports =
-      clib_bitmap_set (sm->mirror_ports, dst_sw_if_index, enable);
+    if (dst_sw_if_index == ~0) {
+        ASSERT (enable == 0);
+        clib_bitmap_zero (sm->mirror_ports);
+    } else
+        sm->mirror_ports =
+            clib_bitmap_set (sm->mirror_ports, dst_sw_if_index, enable);
 
-  u32 last = sm->num_mirror_ports;
-  sm->num_mirror_ports = clib_bitmap_count_set_bits (sm->mirror_ports);
-  return last;
+    u32 last = sm->num_mirror_ports;
+    sm->num_mirror_ports = clib_bitmap_count_set_bits (sm->mirror_ports);
+    return last;
 }
 
 int
 span_add_delete_entry (vlib_main_t * vm,
-		       u32 src_sw_if_index, u32 dst_sw_if_index, u8 state,
-		       span_feat_t sf)
+                       u32 src_sw_if_index, u32 dst_sw_if_index, u8 state,
+                       span_feat_t sf)
 {
-  span_main_t *sm = &span_main;
+    span_main_t *sm = &span_main;
 
-  if (state > SPAN_BOTH)
-    return VNET_API_ERROR_UNIMPLEMENTED;
+    if (state > SPAN_BOTH)
+        return VNET_API_ERROR_UNIMPLEMENTED;
 
-  if ((src_sw_if_index == ~0) || (dst_sw_if_index == ~0 && state > 0)
-      || (src_sw_if_index == dst_sw_if_index))
-    return VNET_API_ERROR_INVALID_INTERFACE;
+    if ((src_sw_if_index == ~0) || (dst_sw_if_index == ~0 && state > 0)
+        || (src_sw_if_index == dst_sw_if_index))
+        return VNET_API_ERROR_INVALID_INTERFACE;
 
-  vec_validate_aligned (sm->interfaces, src_sw_if_index,
-			CLIB_CACHE_LINE_BYTES);
+    vec_validate_aligned (sm->interfaces, src_sw_if_index,
+                          CLIB_CACHE_LINE_BYTES);
 
-  span_interface_t *si = vec_elt_at_index (sm->interfaces, src_sw_if_index);
+    span_interface_t *si = vec_elt_at_index (sm->interfaces, src_sw_if_index);
 
-  int rx = ! !(state & SPAN_RX);
-  int tx = ! !(state & SPAN_TX);
+    int rx = ! !(state & SPAN_RX);
+    int tx = ! !(state & SPAN_TX);
 
-  span_mirror_t *rxm = &si->mirror_rxtx[sf][VLIB_RX];
-  span_mirror_t *txm = &si->mirror_rxtx[sf][VLIB_TX];
+    span_mirror_t *rxm = &si->mirror_rxtx[sf][VLIB_RX];
+    span_mirror_t *txm = &si->mirror_rxtx[sf][VLIB_TX];
 
-  u32 last_rx_ports_count = span_dst_set (rxm, dst_sw_if_index, rx);
-  u32 last_tx_ports_count = span_dst_set (txm, dst_sw_if_index, tx);
+    u32 last_rx_ports_count = span_dst_set (rxm, dst_sw_if_index, rx);
+    u32 last_tx_ports_count = span_dst_set (txm, dst_sw_if_index, tx);
 
-  int enable_rx = last_rx_ports_count == 0 && rxm->num_mirror_ports == 1;
-  int disable_rx = last_rx_ports_count > 0 && rxm->num_mirror_ports == 0;
-  int enable_tx = last_tx_ports_count == 0 && txm->num_mirror_ports == 1;
-  int disable_tx = last_tx_ports_count > 0 && txm->num_mirror_ports == 0;
+    int enable_rx = last_rx_ports_count == 0 && rxm->num_mirror_ports == 1;
+    int disable_rx = last_rx_ports_count > 0 && rxm->num_mirror_ports == 0;
+    int enable_tx = last_tx_ports_count == 0 && txm->num_mirror_ports == 1;
+    int disable_tx = last_tx_ports_count > 0 && txm->num_mirror_ports == 0;
 
-  switch (sf)
-    {
-    case SPAN_FEAT_DEVICE:
-      if (enable_rx || disable_rx)
-	vnet_feature_enable_disable ("device-input", "span-input",
-				     src_sw_if_index, rx, 0, 0);
-      if (enable_tx || disable_tx)
-	vnet_feature_enable_disable ("interface-output", "span-output",
-				     src_sw_if_index, tx, 0, 0);
-      break;
-    case SPAN_FEAT_L2:
-      if (enable_rx || disable_rx)
-	l2input_intf_bitmap_enable (src_sw_if_index, L2INPUT_FEAT_SPAN, rx);
-      if (enable_tx || disable_tx)
-	l2output_intf_bitmap_enable (src_sw_if_index, L2OUTPUT_FEAT_SPAN, tx);
-      break;
-    default:
-      return VNET_API_ERROR_UNIMPLEMENTED;
+    switch (sf) {
+        case SPAN_FEAT_DEVICE:
+            if (enable_rx || disable_rx)
+                vnet_feature_enable_disable ("device-input", "span-input",
+                                             src_sw_if_index, rx, 0, 0);
+            if (enable_tx || disable_tx)
+                vnet_feature_enable_disable ("interface-output", "span-output",
+                                             src_sw_if_index, tx, 0, 0);
+            break;
+        case SPAN_FEAT_L2:
+            if (enable_rx || disable_rx)
+                l2input_intf_bitmap_enable (src_sw_if_index, L2INPUT_FEAT_SPAN, rx);
+            if (enable_tx || disable_tx)
+                l2output_intf_bitmap_enable (src_sw_if_index, L2OUTPUT_FEAT_SPAN, tx);
+            break;
+        default:
+            return VNET_API_ERROR_UNIMPLEMENTED;
     }
 
-  if (dst_sw_if_index != ~0 && dst_sw_if_index > sm->max_sw_if_index)
-    sm->max_sw_if_index = dst_sw_if_index;
+    if (dst_sw_if_index != ~0 && dst_sw_if_index > sm->max_sw_if_index)
+        sm->max_sw_if_index = dst_sw_if_index;
 
-  return 0;
+    return 0;
 }
 
 static uword
 unformat_span_state (unformat_input_t * input, va_list * args)
 {
-  span_state_t *state = va_arg (*args, span_state_t *);
-  if (unformat (input, "disable"))
-    *state = SPAN_DISABLE;
-  else if (unformat (input, "rx"))
-    *state = SPAN_RX;
-  else if (unformat (input, "tx"))
-    *state = SPAN_TX;
-  else if (unformat (input, "both"))
-    *state = SPAN_BOTH;
-  else
-    return 0;
-  return 1;
+    span_state_t *state = va_arg (*args, span_state_t *);
+    if (unformat (input, "disable"))
+        *state = SPAN_DISABLE;
+    else if (unformat (input, "rx"))
+        *state = SPAN_RX;
+    else if (unformat (input, "tx"))
+        *state = SPAN_TX;
+    else if (unformat (input, "both"))
+        *state = SPAN_BOTH;
+    else
+        return 0;
+    return 1;
 }
 
 static clib_error_t *
 set_interface_span_command_fn (vlib_main_t * vm,
-			       unformat_input_t * input,
-			       vlib_cli_command_t * cmd)
+                               unformat_input_t * input,
+                               vlib_cli_command_t * cmd)
 {
-  span_main_t *sm = &span_main;
-  u32 src_sw_if_index = ~0;
-  u32 dst_sw_if_index = ~0;
-  span_feat_t sf = SPAN_FEAT_DEVICE;
-  span_state_t state = SPAN_BOTH;
-  int state_set = 0;
+    span_main_t *sm = &span_main;
+    u32 src_sw_if_index = ~0;
+    u32 dst_sw_if_index = ~0;
+    span_feat_t sf = SPAN_FEAT_DEVICE;
+    span_state_t state = SPAN_BOTH;
+    int state_set = 0;
 
-  while (unformat_check_input (input) != UNFORMAT_END_OF_INPUT)
-    {
-      if (unformat (input, "%U", unformat_vnet_sw_interface,
-		    sm->vnet_main, &src_sw_if_index))
-	;
-      else if (unformat (input, "destination %U", unformat_vnet_sw_interface,
-			 sm->vnet_main, &dst_sw_if_index))
-	;
-      else if (unformat (input, "%U", unformat_span_state, &state))
-	{
-	  if (state_set)
-	    return clib_error_return (0, "Multiple mirror states in input");
-	  state_set = 1;
-	}
-      else if (unformat (input, "l2"))
-	sf = SPAN_FEAT_L2;
-      else
-	return clib_error_return (0, "Invalid input");
+    while (unformat_check_input (input) != UNFORMAT_END_OF_INPUT) {
+        if (unformat (input, "%U", unformat_vnet_sw_interface,
+                      sm->vnet_main, &src_sw_if_index))
+            ;
+        else if (unformat (input, "destination %U", unformat_vnet_sw_interface,
+                           sm->vnet_main, &dst_sw_if_index))
+            ;
+        else if (unformat (input, "%U", unformat_span_state, &state)) {
+            if (state_set)
+                return clib_error_return (0, "Multiple mirror states in input");
+            state_set = 1;
+        } else if (unformat (input, "l2"))
+            sf = SPAN_FEAT_L2;
+        else
+            return clib_error_return (0, "Invalid input");
     }
 
-  int rv =
-    span_add_delete_entry (vm, src_sw_if_index, dst_sw_if_index, state, sf);
-  if (rv == VNET_API_ERROR_INVALID_INTERFACE)
-    return clib_error_return (0, "Invalid interface");
-  return 0;
+    int rv =
+        span_add_delete_entry (vm, src_sw_if_index, dst_sw_if_index, state, sf);
+    if (rv == VNET_API_ERROR_INVALID_INTERFACE)
+        return clib_error_return (0, "Invalid interface");
+    return 0;
 }
 
 /* *INDENT-OFF* */
@@ -173,20 +166,20 @@ VLIB_CLI_COMMAND (set_interface_span_command, static) = {
 
 static clib_error_t *
 show_interfaces_span_command_fn (vlib_main_t * vm,
-				 unformat_input_t * input,
-				 vlib_cli_command_t * cmd)
+                                 unformat_input_t * input,
+                                 vlib_cli_command_t * cmd)
 {
-  span_main_t *sm = &span_main;
-  span_interface_t *si;
-  vnet_main_t *vnm = &vnet_main;
-  u8 header = 1;
-  static const char *states[] = {
-    [SPAN_DISABLE] = "none",
-    [SPAN_RX] = "rx",
-    [SPAN_TX] = "tx",
-    [SPAN_BOTH] = "both"
-  };
-  u8 *s = 0;
+    span_main_t *sm = &span_main;
+    span_interface_t *si;
+    vnet_main_t *vnm = &vnet_main;
+    u8 header = 1;
+    static const char *states[] = {
+        [SPAN_DISABLE] = "none",
+        [SPAN_RX] = "rx",
+        [SPAN_TX] = "tx",
+        [SPAN_BOTH] = "both"
+    };
+    u8 *s = 0;
 
   /* *INDENT-OFF* */
   vec_foreach (si, sm->interfaces)
@@ -230,8 +223,8 @@ show_interfaces_span_command_fn (vlib_main_t * vm,
       }
       }
   /* *INDENT-ON* */
-  vec_free (s);
-  return 0;
+    vec_free (s);
+    return 0;
 }
 
 /* *INDENT-OFF* */

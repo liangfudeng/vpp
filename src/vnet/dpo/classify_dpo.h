@@ -23,8 +23,7 @@
 /**
  * A representation of an MPLS label for imposition in the data-path
  */
-typedef struct classify_dpo_t
-{
+typedef struct classify_dpo_t {
     dpo_proto_t cd_proto;
 
     u32 cd_table_index;

@@ -45,39 +45,38 @@
 always_inline void
 vlib_error_elog_count (vlib_main_t * vm, uword counter, uword increment)
 {
-  if (VLIB_ELOG_MAIN_LOOP > 0 && increment > 0)
-    {
-      elog_main_t *em = &vm->elog_main;
-      elog (em, vec_elt_at_index (vm->error_elog_event_types, counter),
-	    increment);
+    if (VLIB_ELOG_MAIN_LOOP > 0 && increment > 0) {
+        elog_main_t *em = &vm->elog_main;
+        elog (em, vec_elt_at_index (vm->error_elog_event_types, counter),
+              increment);
     }
 }
 
 always_inline void
 vlib_error_count (vlib_main_t * vm, uword node_index,
-		  uword counter, uword increment)
+                  uword counter, uword increment)
 {
-  vlib_node_t *n = vlib_get_node (vm, node_index);
-  vlib_error_main_t *em = &vm->error_main;
+    vlib_node_t *n = vlib_get_node (vm, node_index);
+    vlib_error_main_t *em = &vm->error_main;
 
-  ASSERT (counter < n->n_errors);
-  counter += n->error_heap_index;
+    ASSERT (counter < n->n_errors);
+    counter += n->error_heap_index;
 
-  ASSERT (counter < vec_len (em->counters));
-  em->counters[counter] += increment;
+    ASSERT (counter < vec_len (em->counters));
+    em->counters[counter] += increment;
 
-  vlib_error_elog_count (vm, counter, increment);
+    vlib_error_elog_count (vm, counter, increment);
 }
 
 /* Drop all buffers in frame with given error code. */
 uword
 vlib_error_drop_buffers (vlib_main_t * vm,
-			 vlib_node_runtime_t * node,
-			 u32 * buffers,
-			 u32 next_buffer_stride,
-			 u32 n_buffers,
-			 u32 error_next_index,
-			 u32 error_node, u32 error_code);
+                         vlib_node_runtime_t * node,
+                         u32 * buffers,
+                         u32 next_buffer_stride,
+                         u32 n_buffers,
+                         u32 error_next_index,
+                         u32 error_node, u32 error_code);
 
 #endif /* included_vlib_error_funcs_h */
 

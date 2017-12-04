@@ -31,7 +31,7 @@ typedef struct {
     /* convenience */
     vlib_main_t * vlib_main;
     vnet_main_t * vnet_main;
-    
+
     /* DPO type */
     dpo_type_t srv6_localsid_sample_dpo_type;
 
@@ -45,7 +45,7 @@ typedef struct {
  * the user instantiates
  */
 typedef struct {
-	u32 fib_table;	/* Stupid index used as an example.. */
+    u32 fib_table;  /* Stupid index used as an example.. */
 } srv6_localsid_sample_per_sid_memory_t ;
 
 extern srv6_localsid_sample_main_t srv6_localsid_sample_main;

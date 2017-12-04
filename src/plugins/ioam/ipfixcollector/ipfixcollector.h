@@ -27,58 +27,55 @@
 
 /** @brief Structure other nodes to use for registering with IP-FIX collector.
 */
-typedef struct
-{
-  /** String containing name of the client interested in getting
-      ip-fix packets. */
-  u8 *client_name;
+typedef struct {
+    /** String containing name of the client interested in getting
+        ip-fix packets. */
+    u8 *client_name;
 
-  /** Node index where packets have to be redirected. */
-  u32 client_node;
+    /** Node index where packets have to be redirected. */
+    u32 client_node;
 
-  /** Setid of IPFix for which client is intereseted in getting packets. */
-  u16 ipfix_setid;
+    /** Setid of IPFix for which client is intereseted in getting packets. */
+    u16 ipfix_setid;
 
-  /** Add(0) or del(1) operation. */
-  u16 del;
+    /** Add(0) or del(1) operation. */
+    u16 del;
 } ipfix_client_add_del_t;
 
 /** @brief IP-FIX collector internal client structure to store SetID to
      client node ID.
 */
-typedef struct
-{
-  /** String containing name of the client interested in getting
-        ip-fix packets. */
-  u8 *client_name;
+typedef struct {
+    /** String containing name of the client interested in getting
+          ip-fix packets. */
+    u8 *client_name;
 
-  /** Node index where packets have to be redirected. */
-  u32 client_node;
+    /** Node index where packets have to be redirected. */
+    u32 client_node;
 
-  /** ipfix-collector next index where packets have to be redirected. */
-  u32 client_next_node;
+    /** ipfix-collector next index where packets have to be redirected. */
+    u32 client_next_node;
 
-  /** Setid of IPFix for which client is intereseted in getting packets. */
-  u16 set_id;
+    /** Setid of IPFix for which client is intereseted in getting packets. */
+    u16 set_id;
 } ipfix_client;
 
 /** @brief IP-FIX collector main structure to SetID to client node ID mapping.
     @note cache aligned.
 */
-typedef struct
-{
-  /** Hash table to map IP-FIX setid to a client registration pool. SetId is
-      key to hash map. */
-  uword *client_reg_table;
+typedef struct {
+    /** Hash table to map IP-FIX setid to a client registration pool. SetId is
+        key to hash map. */
+    uword *client_reg_table;
 
-  /** Pool of Client node information for the IP-FIX SetID. */
-  ipfix_client *client_reg_pool;
+    /** Pool of Client node information for the IP-FIX SetID. */
+    ipfix_client *client_reg_pool;
 
-  /** Pointer to VLib main for the node - ipfix-collector. */
-  vlib_main_t *vlib_main;
+    /** Pointer to VLib main for the node - ipfix-collector. */
+    vlib_main_t *vlib_main;
 
-  /** Pointer to vnet main for convenience. */
-  vnet_main_t *vnet_main;
+    /** Pointer to vnet main for convenience. */
+    vnet_main_t *vnet_main;
 } ipfix_collector_main_t;
 
 extern vlib_node_registration_t ipfix_collector_node;
@@ -106,11 +103,11 @@ ipfix_collector_reg_setid (vlib_main_t * vm, ipfix_client_add_del_t * info);
 always_inline ipfix_client *
 ipfix_collector_get_client (u16 set_id)
 {
-  ipfix_collector_main_t *cm = &ipfix_collector_main;
-  uword *p;
+    ipfix_collector_main_t *cm = &ipfix_collector_main;
+    uword *p;
 
-  p = hash_get (cm->client_reg_table, set_id);
-  return (p ? pool_elt_at_index (cm->client_reg_pool, (*p)) : NULL);
+    p = hash_get (cm->client_reg_table, set_id);
+    return (p ? pool_elt_at_index (cm->client_reg_pool, (*p)) : NULL);
 }
 
 #endif /* PLUGINS_IPFIXCOLLECTOR_PLUGIN_IPFIXCOLLECTOR_IPFIXCOLLECTOR_H_ */

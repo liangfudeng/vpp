@@ -25,32 +25,31 @@ void register_tuntap_inject_node_name (char *name);
 /** arguments structure for vnet_tap_connect, vnet_tap_connect_renumber, etc.
  */
 
-typedef struct
-{
-  /** Interface name */
-  u8 *intfc_name;
-  /** Mac address */
-  u8 *hwaddr_arg;
-  /** Please set the indicated ip4 address/mask on the interface */
-  u8 ip4_address_set;
-  /** Please set the indicated ip4 address/mask on the interface */
-  u8 ip6_address_set;
-  /** Renumber the (existing) interface */
-  u8 renumber;
-  /** (optional) ip4 address to set */
-  ip4_address_t *ip4_address;
-  /** (optional) ip4 mask width to set */
-  u32 ip4_mask_width;
-  /** (optional) ip6 address to set */
-  ip6_address_t *ip6_address;
-  /** (optional) ip6 mask width to set */
-  u32 ip6_mask_width;
-  /** Output parameter: result sw_if_index */
-  u32 *sw_if_indexp;
-  /** Custom device instance */
-  u32 custom_dev_instance;
-  /** original sw_if_index (renumber) */
-  u32 orig_sw_if_index;
+typedef struct {
+    /** Interface name */
+    u8 *intfc_name;
+    /** Mac address */
+    u8 *hwaddr_arg;
+    /** Please set the indicated ip4 address/mask on the interface */
+    u8 ip4_address_set;
+    /** Please set the indicated ip4 address/mask on the interface */
+    u8 ip6_address_set;
+    /** Renumber the (existing) interface */
+    u8 renumber;
+    /** (optional) ip4 address to set */
+    ip4_address_t *ip4_address;
+    /** (optional) ip4 mask width to set */
+    u32 ip4_mask_width;
+    /** (optional) ip6 address to set */
+    ip6_address_t *ip6_address;
+    /** (optional) ip6 mask width to set */
+    u32 ip6_mask_width;
+    /** Output parameter: result sw_if_index */
+    u32 *sw_if_indexp;
+    /** Custom device instance */
+    u32 custom_dev_instance;
+    /** original sw_if_index (renumber) */
+    u32 orig_sw_if_index;
 } vnet_tap_connect_args_t;
 
 /** Connect a tap interface */

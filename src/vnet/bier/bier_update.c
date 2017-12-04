@@ -51,12 +51,9 @@ vnet_bier_table_cmd (vlib_main_t * vm,
     // FIXME
     bti.bti_type = BIER_TABLE_MPLS_SPF;
 
-    if (is_add)
-    {
+    if (is_add) {
         bier_table_add_or_lock(&bti, local_label);
-    }
-    else
-    {
+    } else {
         bier_table_unlock(&bti);
     }
 
@@ -65,9 +62,9 @@ done:
 }
 
 VLIB_CLI_COMMAND (bier_table_command) = {
-  .path = "bier table",
-  .short_help = "Add/delete BIER Tables",
-  .function = vnet_bier_table_cmd,
+    .path = "bier table",
+    .short_help = "Add/delete BIER Tables",
+    .function = vnet_bier_table_cmd,
 };
 
 clib_error_t *
@@ -108,12 +105,9 @@ vnet_bier_route_cmd (vlib_main_t * vm,
     // FIXME
     bti.bti_type    = BIER_TABLE_MPLS_SPF;
 
-    if (add)
-    {
+    if (add) {
         bier_table_route_add(&bti, bp, &brp);
-    }
-    else
-    {
+    } else {
         bier_table_route_remove(&bti, bp, &brp);
     }
 
@@ -123,9 +117,9 @@ done:
 }
 
 VLIB_CLI_COMMAND (bier_route_command) = {
-  .path = "bier route",
-  .short_help = "bier route sd <sud-domain> set <set> bsl <bit-string-length> bp <bit-position> via [next-hop-address] [next-hop-interface] [next-hop-table <value>] [weight <value>] [preference <value>] [udp-encap-id <value>] [ip4-lookup-in-table <value>] [ip6-lookup-in-table <value>] [mpls-lookup-in-table <value>] [resolve-via-host] [resolve-via-connected] [rx-ip4 <interface>] [out-labels <value value value>]",
-  .function = vnet_bier_route_cmd,
+    .path = "bier route",
+    .short_help = "bier route sd <sud-domain> set <set> bsl <bit-string-length> bp <bit-position> via [next-hop-address] [next-hop-interface] [next-hop-table <value>] [weight <value>] [preference <value>] [udp-encap-id <value>] [ip4-lookup-in-table <value>] [ip6-lookup-in-table <value>] [mpls-lookup-in-table <value>] [resolve-via-host] [resolve-via-connected] [rx-ip4 <interface>] [out-labels <value value value>]",
+    .function = vnet_bier_route_cmd,
 };
 
 static clib_error_t *
@@ -142,34 +136,22 @@ show_bier_fib_command_fn (vlib_main_t * vm,
     flags = BIER_SHOW_BRIEF;
 
     while (unformat_check_input (input) != UNFORMAT_END_OF_INPUT) {
-        if (unformat (input, "%d %d", &bti, &bp))
-        {
-             flags = BIER_SHOW_DETAIL;
-        }
-        else if (unformat (input, "%d", &bti))
-        {
-              flags = BIER_SHOW_DETAIL;
-        }
-        else
-        {
+        if (unformat (input, "%d %d", &bti, &bp)) {
+            flags = BIER_SHOW_DETAIL;
+        } else if (unformat (input, "%d", &bti)) {
+            flags = BIER_SHOW_DETAIL;
+        } else {
             break;
         }
     }
 
-    if (INDEX_INVALID == bti)
-    {
+    if (INDEX_INVALID == bti) {
         bier_table_show_all(vm, flags);
-    }
-    else
-    {
-        if (!pool_is_free_index(bier_table_pool, bti))
-        {
-            if (BIER_BP_INVALID == bp)
-            {
+    } else {
+        if (!pool_is_free_index(bier_table_pool, bti)) {
+            if (BIER_BP_INVALID == bp) {
                 vlib_cli_output (vm, "%U", format_bier_table, bti, flags);
-            }
-            else
-            {
+            } else {
                 vlib_cli_output (vm, "%U", format_bier_table_entry, bti, bp);
             }
         }

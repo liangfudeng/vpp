@@ -17,41 +17,42 @@
 
 #include "vom/connection.hpp"
 
-namespace VOM {
-connection::connection()
-  : m_vapi_conn(new vapi::Connection())
-  , m_app_name("VOM")
+namespace VOM
 {
-}
+    connection::connection()
+        : m_vapi_conn(new vapi::Connection())
+        , m_app_name("VOM")
+    {
+    }
 
-connection::~connection()
-{
-  disconnect();
-}
+    connection::~connection()
+    {
+        disconnect();
+    }
 
-void
-connection::disconnect()
-{
-  m_vapi_conn->disconnect();
-}
+    void
+    connection::disconnect()
+    {
+        m_vapi_conn->disconnect();
+    }
 
-void
-connection::connect()
-{
-  vapi_error_e rv;
+    void
+    connection::connect()
+    {
+        vapi_error_e rv;
 
-  do {
-    rv = m_vapi_conn->connect(m_app_name.c_str(),
-                              NULL, // m_api_prefix.c_str(),
-                              128, 128);
-  } while (VAPI_OK != rv);
-}
+        do {
+            rv = m_vapi_conn->connect(m_app_name.c_str(),
+                                      NULL, // m_api_prefix.c_str(),
+                                      128, 128);
+        } while (VAPI_OK != rv);
+    }
 
-vapi::Connection&
-connection::ctx()
-{
-  return (*m_vapi_conn);
-}
+    vapi::Connection&
+    connection::ctx()
+    {
+        return (*m_vapi_conn);
+    }
 }
 
 /*

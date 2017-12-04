@@ -40,34 +40,30 @@
  Should be called by the init function of each feature graph node.
 */
 always_inline void
-feat_bitmap_init_next_nodes (vlib_main_t * vm, u32 node_index,	/* the current graph node index  */
-			     u32 num_features,	/* number of entries in feat_names */
-			     char **feat_names,	/* array of feature graph node names */
-			     u32 * next_nodes)	/* array of 32 next indexes to init */
+feat_bitmap_init_next_nodes (vlib_main_t * vm, u32 node_index,  /* the current graph node index  */
+                             u32 num_features,  /* number of entries in feat_names */
+                             char **feat_names, /* array of feature graph node names */
+                             u32 * next_nodes)  /* array of 32 next indexes to init */
 {
-  u32 idx;
+    u32 idx;
 
-  ASSERT (num_features <= FEAT_MAX);
+    ASSERT (num_features <= FEAT_MAX);
 
-  for (idx = 0; idx < num_features; idx++)
-    {
-      if (vlib_get_node_by_name (vm, (u8 *) feat_names[idx]))
-	{
-	  next_nodes[idx] =
-	    vlib_node_add_named_next (vm, node_index, feat_names[idx]);
-	}
-      else
-	{			// Node may be in plugin which is not installed, use drop node
-	  next_nodes[idx] =
-	    vlib_node_add_named_next (vm, node_index, "feature-bitmap-drop");
-	}
+    for (idx = 0; idx < num_features; idx++) {
+        if (vlib_get_node_by_name (vm, (u8 *) feat_names[idx])) {
+            next_nodes[idx] =
+                vlib_node_add_named_next (vm, node_index, feat_names[idx]);
+        } else {
+            // Node may be in plugin which is not installed, use drop node
+            next_nodes[idx] =
+                vlib_node_add_named_next (vm, node_index, "feature-bitmap-drop");
+        }
     }
 
-  /* All unassigned bits go to the drop node */
-  for (; idx < FEAT_MAX; idx++)
-    {
-      next_nodes[idx] = vlib_node_add_named_next (vm, node_index,
-						  "feature-bitmap-drop");
+    /* All unassigned bits go to the drop node */
+    for (; idx < FEAT_MAX; idx++) {
+        next_nodes[idx] = vlib_node_add_named_next (vm, node_index,
+                          "feature-bitmap-drop");
     }
 }
 
@@ -78,11 +74,11 @@ feat_bitmap_init_next_nodes (vlib_main_t * vm, u32 node_index,	/* the current gr
 always_inline u32
 feat_bitmap_get_next_node_index (u32 * next_nodes, u32 bitmap)
 {
-  u32 first_bit;
+    u32 first_bit;
 
-  count_leading_zeros (first_bit, bitmap);
-  first_bit = uword_bits - 1 - first_bit;
-  return next_nodes[first_bit];
+    count_leading_zeros (first_bit, bitmap);
+    first_bit = uword_bits - 1 - first_bit;
+    return next_nodes[first_bit];
 }
 
 /**
@@ -93,10 +89,10 @@ feat_bitmap_get_next_node_index (u32 * next_nodes, u32 bitmap)
 always_inline u32
 vnet_l2_feature_next (vlib_buffer_t * b, u32 * next_nodes, u32 feat_bit)
 {
-  vnet_buffer (b)->l2.feature_bitmap &= ~feat_bit;
-  u32 fb = vnet_buffer (b)->l2.feature_bitmap;
-  ASSERT (fb != 0);
-  return feat_bitmap_get_next_node_index (next_nodes, fb);
+    vnet_buffer (b)->l2.feature_bitmap &= ~feat_bit;
+    u32 fb = vnet_buffer (b)->l2.feature_bitmap;
+    ASSERT (fb != 0);
+    return feat_bitmap_get_next_node_index (next_nodes, fb);
 }
 
 #endif /* included_vnet_l2_feat_bitmap_h */

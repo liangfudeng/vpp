@@ -17,95 +17,97 @@
 
 #include <vapi/vpe.api.vapi.hpp>
 
-namespace VOM {
-namespace ip_unnumbered_cmds {
-
-config_cmd::config_cmd(HW::item<bool>& item,
-                       const handle_t& itf,
-                       const handle_t& l3_itf)
-  : rpc_cmd(item)
-  , m_itf(itf)
-  , m_l3_itf(l3_itf)
+namespace VOM
 {
-}
+    namespace ip_unnumbered_cmds
+    {
 
-bool
-config_cmd::operator==(const config_cmd& o) const
-{
-  return ((m_itf == o.m_itf) && (m_l3_itf == o.m_l3_itf));
-}
+        config_cmd::config_cmd(HW::item<bool>& item,
+                               const handle_t& itf,
+                               const handle_t& l3_itf)
+            : rpc_cmd(item)
+            , m_itf(itf)
+            , m_l3_itf(l3_itf)
+        {
+        }
 
-rc_t
-config_cmd::issue(connection& con)
-{
-  msg_t req(con.ctx(), std::ref(*this));
+        bool
+        config_cmd::operator==(const config_cmd& o) const
+        {
+            return ((m_itf == o.m_itf) && (m_l3_itf == o.m_l3_itf));
+        }
 
-  auto& payload = req.get_request().get_payload();
-  payload.is_add = 1;
-  payload.sw_if_index = m_l3_itf.value();
-  payload.unnumbered_sw_if_index = m_itf.value();
+        rc_t
+        config_cmd::issue(connection& con)
+        {
+            msg_t req(con.ctx(), std::ref(*this));
 
-  VAPI_CALL(req.execute());
+            auto& payload = req.get_request().get_payload();
+            payload.is_add = 1;
+            payload.sw_if_index = m_l3_itf.value();
+            payload.unnumbered_sw_if_index = m_itf.value();
 
-  m_hw_item.set(wait());
+            VAPI_CALL(req.execute());
 
-  return rc_t::OK;
-}
+            m_hw_item.set(wait());
 
-std::string
-config_cmd::to_string() const
-{
-  std::ostringstream s;
-  s << "IP-unnumberd-config: " << m_hw_item.to_string()
-    << " itf:" << m_itf.to_string() << " l3-itf:" << m_l3_itf.to_string();
+            return rc_t::OK;
+        }
 
-  return (s.str());
-}
+        std::string
+        config_cmd::to_string() const
+        {
+            std::ostringstream s;
+            s << "IP-unnumberd-config: " << m_hw_item.to_string()
+              << " itf:" << m_itf.to_string() << " l3-itf:" << m_l3_itf.to_string();
 
-unconfig_cmd::unconfig_cmd(HW::item<bool>& item,
-                           const handle_t& itf,
-                           const handle_t& l3_itf)
-  : rpc_cmd(item)
-  , m_itf(itf)
-  , m_l3_itf(l3_itf)
-{
-}
+            return (s.str());
+        }
 
-bool
-unconfig_cmd::operator==(const unconfig_cmd& o) const
-{
-  return ((m_itf == o.m_itf) && (m_l3_itf == o.m_l3_itf));
-}
+        unconfig_cmd::unconfig_cmd(HW::item<bool>& item,
+                                   const handle_t& itf,
+                                   const handle_t& l3_itf)
+            : rpc_cmd(item)
+            , m_itf(itf)
+            , m_l3_itf(l3_itf)
+        {
+        }
 
-rc_t
-unconfig_cmd::issue(connection& con)
-{
-  msg_t req(con.ctx(), std::ref(*this));
+        bool
+        unconfig_cmd::operator==(const unconfig_cmd& o) const
+        {
+            return ((m_itf == o.m_itf) && (m_l3_itf == o.m_l3_itf));
+        }
 
-  auto& payload = req.get_request().get_payload();
-  payload.is_add = 0;
-  payload.sw_if_index = m_l3_itf.value();
-  payload.unnumbered_sw_if_index = m_itf.value();
+        rc_t
+        unconfig_cmd::issue(connection& con)
+        {
+            msg_t req(con.ctx(), std::ref(*this));
 
-  VAPI_CALL(req.execute());
+            auto& payload = req.get_request().get_payload();
+            payload.is_add = 0;
+            payload.sw_if_index = m_l3_itf.value();
+            payload.unnumbered_sw_if_index = m_itf.value();
 
-  wait();
-  m_hw_item.set(rc_t::NOOP);
+            VAPI_CALL(req.execute());
 
-  return rc_t::OK;
-}
+            wait();
+            m_hw_item.set(rc_t::NOOP);
 
-std::string
-unconfig_cmd::to_string() const
-{
-  std::ostringstream s;
-  s << "IP-unnumberd-unconfig: " << m_hw_item.to_string()
-    << " itf:" << m_itf.to_string() << " l3-itf:" << m_l3_itf.to_string();
+            return rc_t::OK;
+        }
 
-  return (s.str());
-}
+        std::string
+        unconfig_cmd::to_string() const
+        {
+            std::ostringstream s;
+            s << "IP-unnumberd-unconfig: " << m_hw_item.to_string()
+              << " itf:" << m_itf.to_string() << " l3-itf:" << m_l3_itf.to_string();
 
-}; // namespace ip_unnumbered_cmds
+            return (s.str());
+        }
+
+    }; // namespace ip_unnumbered_cmds
 }; // namespace VOM
 
 /*

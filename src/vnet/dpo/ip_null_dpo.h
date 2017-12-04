@@ -32,24 +32,23 @@
 /**
  * @brief Actions to take when a packet encounters the NULL DPO
  */
-typedef enum ip_null_dpo_action_t_
-{
+typedef enum ip_null_dpo_action_t_ {
     IP_NULL_ACTION_NONE,
     IP_NULL_ACTION_SEND_ICMP_UNREACH,
     IP_NULL_ACTION_SEND_ICMP_PROHIBIT,
 } ip_null_dpo_action_t;
 
-#define IP_NULL_ACTIONS {						\
-    [IP_NULL_ACTION_NONE] = "discard",					\
-    [IP_NULL_ACTION_SEND_ICMP_UNREACH] = "send-unreachable",		\
-    [IP_NULL_ACTION_SEND_ICMP_PROHIBIT] = "send-prohibited",		\
+#define IP_NULL_ACTIONS {                       \
+    [IP_NULL_ACTION_NONE] = "discard",                  \
+    [IP_NULL_ACTION_SEND_ICMP_UNREACH] = "send-unreachable",        \
+    [IP_NULL_ACTION_SEND_ICMP_PROHIBIT] = "send-prohibited",        \
 }
 
 #define IP_NULL_DPO_ACTION_NUM (IP_NULL_ACTION_SEND_ICMP_PROHIBIT+1)
 
 extern void ip_null_dpo_add_and_lock (dpo_proto_t proto,
-				      ip_null_dpo_action_t action,
-				      dpo_id_t *dpo);
+                                      ip_null_dpo_action_t action,
+                                      dpo_id_t *dpo);
 
 extern void ip_null_dpo_module_init(void);
 

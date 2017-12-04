@@ -107,7 +107,7 @@ _(dstTrafficIndex, 93, u32)                                             \
 _(applicationDescription, 94, string)                                   \
 _(applicationId, 95, octetArray)                                        \
 _(applicationName, 96, string)                                          \
-_(Assigned, 97, for NetFlow v9 compatibility	)                       \
+_(Assigned, 97, for NetFlow v9 compatibility    )                       \
 _(postIpDiffServCodePoint, 98, u8)                                      \
 _(multicastReplicationFactor, 99, u32)                                  \
 _(className, 100, string)                                               \
@@ -421,10 +421,9 @@ _(pseudoWireDestinationIPv4Address, 432, ip4_address_t)                 \
 _(ignoredLayer2FrameTotalCount, 433, u64)                               \
 _(natQuotaExceededEvent, 466, u32)
 
-typedef enum
-{
+typedef enum {
 #define _(n,v,t) n = v,
-  foreach_ipfix_info_element_t
+    foreach_ipfix_info_element_t
 #undef _
 } ipfix_info_element_id_t;
 

@@ -32,14 +32,14 @@ typedef enum {
 #define dhcp_proxy_error(n,s) DHCP_PROXY_ERROR_##n,
 #include <vnet/dhcp/dhcp4_proxy_error.def>
 #undef dhcp_proxy_error
-  DHCP_PROXY_N_ERROR,
+    DHCP_PROXY_N_ERROR,
 } dhcp_proxy_error_t;
 
 typedef enum {
 #define dhcpv6_proxy_error(n,s) DHCPV6_PROXY_ERROR_##n,
 #include <vnet/dhcp/dhcp6_proxy_error.def>
 #undef dhcpv6_proxy_error
-  DHCPV6_PROXY_N_ERROR,
+    DHCPV6_PROXY_N_ERROR,
 } dhcpv6_proxy_error_t;
 
 
@@ -49,7 +49,7 @@ typedef enum {
 typedef struct dhcp_vss_t_ {
     /**
      * @brief VSS type as defined in RFC 6607:
-     *	 0 for NVT ASCII VPN Identifier
+     *   0 for NVT ASCII VPN Identifier
      *   1 for RFC 2685 VPN-ID of 7 octects - 3 bytes OUI & 4 bytes VPN index
      *   255 for global default VPN
      */
@@ -71,8 +71,7 @@ typedef struct dhcp_vss_t_ {
 /**
  * @brief A representation of a single DHCP Server within a given VRF config
  */
-typedef struct dhcp_server_t_
-{
+typedef struct dhcp_server_t_ {
     /**
      * @brief The address of the DHCP server to which to relay the client's
      *        messages
@@ -128,19 +127,19 @@ typedef struct dhcp_proxy_t_ {
  * @brief Collection of global DHCP proxy data
  */
 typedef struct {
-  /* Pool of DHCP servers */
-  dhcp_proxy_t *dhcp_servers[DHCP_N_PROTOS];
+    /* Pool of DHCP servers */
+    dhcp_proxy_t *dhcp_servers[DHCP_N_PROTOS];
 
-  /* Pool of selected DHCP server. Zero is the default server */
-  u32 * dhcp_server_index_by_rx_fib_index[DHCP_N_PROTOS];
+    /* Pool of selected DHCP server. Zero is the default server */
+    u32 * dhcp_server_index_by_rx_fib_index[DHCP_N_PROTOS];
 
-  /* to drop pkts in server-to-client direction */
-  u32 error_drop_node_index;
+    /* to drop pkts in server-to-client direction */
+    u32 error_drop_node_index;
 
-  dhcp_vss_t *vss[DHCP_N_PROTOS];
+    dhcp_vss_t *vss[DHCP_N_PROTOS];
 
-  /* hash lookup specific vrf_id -> option 82 vss suboption  */
-  u32 *vss_index_by_rx_fib_index[DHCP_N_PROTOS];
+    /* hash lookup specific vrf_id -> option 82 vss suboption  */
+    u32 *vss_index_by_rx_fib_index[DHCP_N_PROTOS];
 } dhcp_proxy_main_t;
 
 extern dhcp_proxy_main_t dhcp_proxy_main;
@@ -165,11 +164,11 @@ int dhcp_vss_show_walk (dhcp_vss_t *vss,
  */
 int dhcp_proxy_set_vss (fib_protocol_t proto,
                         u32 tbl_id,
-			u8 vss_type,
-			u8 *vpn_ascii_id,
+                        u8 vss_type,
+                        u8 *vpn_ascii_id,
                         u32 oui,
                         u32 vpn_index,
-			u8 is_del);
+                        u8 is_del);
 
 /**
  * @brief Dump the proxy configs to the API
@@ -251,17 +250,16 @@ dhcp_get_vss_info (dhcp_proxy_main_t *dm,
                    u32 rx_fib_index,
                    fib_protocol_t proto)
 {
-  dhcp_vss_t *v = NULL;
+    dhcp_vss_t *v = NULL;
 
-  if (vec_len(dm->vss_index_by_rx_fib_index[proto]) > rx_fib_index &&
-      dm->vss_index_by_rx_fib_index[proto][rx_fib_index] != ~0)
-  {
-      v = pool_elt_at_index (
-              dm->vss[proto],
-              dm->vss_index_by_rx_fib_index[proto][rx_fib_index]);
-  }
+    if (vec_len(dm->vss_index_by_rx_fib_index[proto]) > rx_fib_index &&
+        dm->vss_index_by_rx_fib_index[proto][rx_fib_index] != ~0) {
+        v = pool_elt_at_index (
+                dm->vss[proto],
+                dm->vss_index_by_rx_fib_index[proto][rx_fib_index]);
+    }
 
-  return (v);
+    return (v);
 }
 
 /**
@@ -272,17 +270,16 @@ dhcp_get_proxy (dhcp_proxy_main_t *dm,
                 u32 rx_fib_index,
                 fib_protocol_t proto)
 {
-  dhcp_proxy_t *s = NULL;
+    dhcp_proxy_t *s = NULL;
 
-  if (vec_len(dm->dhcp_server_index_by_rx_fib_index[proto]) > rx_fib_index &&
-      dm->dhcp_server_index_by_rx_fib_index[proto][rx_fib_index] != ~0)
-  {
-      s = pool_elt_at_index (
-              dm->dhcp_servers[proto],
-              dm->dhcp_server_index_by_rx_fib_index[proto][rx_fib_index]);
-  }
+    if (vec_len(dm->dhcp_server_index_by_rx_fib_index[proto]) > rx_fib_index &&
+        dm->dhcp_server_index_by_rx_fib_index[proto][rx_fib_index] != ~0) {
+        s = pool_elt_at_index (
+                dm->dhcp_servers[proto],
+                dm->dhcp_server_index_by_rx_fib_index[proto][rx_fib_index]);
+    }
 
-  return (s);
+    return (s);
 }
 
 int dhcp6_proxy_set_server (ip46_address_t *addr,

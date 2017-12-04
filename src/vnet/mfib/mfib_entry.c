@@ -25,24 +25,24 @@
  * Debug macro
  */
 #ifdef MFIB_DEBUG
-#DEFIne MFIB_ENTRY_DBG(_e, _fmt, _args...)		\
+#DEFIne MFIB_ENTRY_DBG(_e, _fmt, _args...)      \
 {                                                       \
-    u8*__tmp = NULL;					\
+    u8*__tmp = NULL;                    \
     __tmp = format(__tmp, "e:[%d:%U",                   \
-                   mfib_entry_get_index(_e),		\
-                   format_ip46_address,			\
-                   &_e->mfe_prefix.fp_grp_addr,		\
-                   IP46_TYPE_ANY);			\
-    __tmp = format(__tmp, "/%d,",			\
-                   _e->mfe_prefix.fp_len);		\
+                   mfib_entry_get_index(_e),        \
+                   format_ip46_address,         \
+                   &_e->mfe_prefix.fp_grp_addr,     \
+                   IP46_TYPE_ANY);          \
+    __tmp = format(__tmp, "/%d,",           \
+                   _e->mfe_prefix.fp_len);      \
     __tmp = format(__tmp, "%U]",                        \
-                   mfib_entry_get_index(_e),		\
-                   format_ip46_address,			\
-                   &_e->mfe_prefix.fp_src_addr,		\
-                   IP46_TYPE_ANY);			\
-    __tmp = format(__tmp, _fmt, ##_args);		\
-    clib_warning("%s", __tmp);				\
-    vec_free(__tmp);					\
+                   mfib_entry_get_index(_e),        \
+                   format_ip46_address,         \
+                   &_e->mfe_prefix.fp_src_addr,     \
+                   IP46_TYPE_ANY);          \
+    __tmp = format(__tmp, _fmt, ##_args);       \
+    clib_warning("%s", __tmp);              \
+    vec_free(__tmp);                    \
 }
 #else
 #define MFIB_ENTRY_DBG(_e, _fmt, _args...)
@@ -51,8 +51,7 @@
 /**
  * MFIB extensions to each path
  */
-typedef struct mfib_path_ext_t_
-{
+typedef struct mfib_path_ext_t_ {
     mfib_itf_flags_t mfpe_flags;
     fib_node_index_t mfpe_path;
 } mfib_path_ext_t;
@@ -60,8 +59,7 @@ typedef struct mfib_path_ext_t_
 /**
  * The source of an MFIB entry
  */
-typedef struct mfib_entry_src_t_
-{
+typedef struct mfib_entry_src_t_ {
     /**
      * Which source this is
      */
@@ -125,15 +123,14 @@ mfib_entry_get_proto (const mfib_entry_t * mfib_entry)
 fib_forward_chain_type_t
 mfib_entry_get_default_chain_type (const mfib_entry_t *mfib_entry)
 {
-    switch (mfib_entry->mfe_prefix.fp_proto)
-    {
-    case FIB_PROTOCOL_IP4:
-        return (FIB_FORW_CHAIN_TYPE_MCAST_IP4);
-    case FIB_PROTOCOL_IP6:
-        return (FIB_FORW_CHAIN_TYPE_MCAST_IP6);
-    case FIB_PROTOCOL_MPLS:
-        ASSERT(0);
-        break;
+    switch (mfib_entry->mfe_prefix.fp_proto) {
+        case FIB_PROTOCOL_IP4:
+            return (FIB_FORW_CHAIN_TYPE_MCAST_IP4);
+        case FIB_PROTOCOL_IP6:
+            return (FIB_FORW_CHAIN_TYPE_MCAST_IP6);
+        case FIB_PROTOCOL_MPLS:
+            ASSERT(0);
+            break;
     }
     return (FIB_FORW_CHAIN_TYPE_MCAST_IP4);
 }
@@ -183,20 +180,17 @@ format_mfib_entry (u8 * s, va_list * args)
     s = format (s, "%U", format_mfib_prefix, &mfib_entry->mfe_prefix);
     s = format (s, ": %U", format_mfib_entry_flags, mfib_entry->mfe_flags);
 
-    if (level >= MFIB_ENTRY_FORMAT_DETAIL)
-    {
+    if (level >= MFIB_ENTRY_FORMAT_DETAIL) {
         fib_node_index_t path_index, mpi;
 
         s = format (s, "\n");
         s = format (s, " fib:%d", mfib_entry->mfe_fib_index);
         s = format (s, " index:%d", mfib_entry_get_index(mfib_entry));
         s = format (s, " locks:%d\n", mfib_entry->mfe_node.fn_locks);
-        vec_foreach(msrc, mfib_entry->mfe_srcs)
-        {
+        vec_foreach(msrc, mfib_entry->mfe_srcs) {
             s = format (s, "  src:%s", mfib_source_names[msrc->mfes_src]);
             s = format (s, ": %U\n", format_mfib_entry_flags, msrc->mfes_flags);
-            if (FIB_NODE_INDEX_INVALID != msrc->mfes_pl)
-            {
+            if (FIB_NODE_INDEX_INVALID != msrc->mfes_pl) {
                 s = fib_path_list_format(msrc->mfes_pl, s);
             }
             s = format (s, "    Extensions:\n");
@@ -226,8 +220,7 @@ format_mfib_entry (u8 * s, va_list * args)
                2);
     s = format(s, "\n");
 
-    if (level >= MFIB_ENTRY_FORMAT_DETAIL2)
-    {
+    if (level >= MFIB_ENTRY_FORMAT_DETAIL2) {
         s = format(s, "\nchildren:");
         s = fib_node_children_format(mfib_entry->mfe_node.fn_children, s);
     }
@@ -269,26 +262,21 @@ mfib_entry_src_init (mfib_entry_t *mfib_entry,
 
 static mfib_entry_src_t *
 mfib_entry_src_find (const mfib_entry_t *mfib_entry,
-                    mfib_source_t source,
-                    u32 *index)
+                     mfib_source_t source,
+                     u32 *index)
 
 {
     mfib_entry_src_t *esrc;
     int ii;
 
     ii = 0;
-    vec_foreach(esrc, mfib_entry->mfe_srcs)
-    {
-        if (esrc->mfes_src == source)
-        {
-            if (NULL != index)
-            {
+    vec_foreach(esrc, mfib_entry->mfe_srcs) {
+        if (esrc->mfes_src == source) {
+            if (NULL != index) {
                 *index = ii;
             }
             return (esrc);
-        }
-        else
-        {
+        } else {
             ii++;
         }
     }
@@ -304,8 +292,7 @@ mfib_entry_src_find_or_create (mfib_entry_t *mfib_entry,
 
     esrc = mfib_entry_src_find(mfib_entry, source, NULL);
 
-    if (NULL == esrc)
-    {
+    if (NULL == esrc) {
         mfib_entry_src_init(mfib_entry, source);
     }
 
@@ -320,12 +307,9 @@ mfib_entry_get_best_src (const mfib_entry_t *mfib_entry)
     /*
      * the enum of sources is deliberately arranged in priority order
      */
-    if (0 == vec_len(mfib_entry->mfe_srcs))
-    {
+    if (0 == vec_len(mfib_entry->mfe_srcs)) {
         bsrc = NULL;
-    }
-    else
-    {
+    } else {
         bsrc = vec_elt_at_index(mfib_entry->mfe_srcs, 0);
     }
 
@@ -368,8 +352,7 @@ mfib_entry_src_remove (mfib_entry_t *mfib_entry,
 
     msrc = mfib_entry_src_find(mfib_entry, source, &index);
 
-    if (NULL != msrc)
-    {
+    if (NULL != msrc) {
         mfib_entry_src_flush(msrc);
         vec_del1(mfib_entry->mfe_srcs, index);
     }
@@ -436,8 +419,7 @@ mfib_entry_path_ext_find (mfib_path_ext_t *exts,
 
     p = hash_get(exts, path_index);
 
-    if (NULL != p)
-    {
+    if (NULL != p) {
         return (mfib_entry_path_ext_get(p[0]));
     }
 
@@ -474,8 +456,7 @@ mfib_path_ext_remove (mfib_entry_src_t *msrc,
     pool_put(mfib_path_ext_pool, path_ext);
 }
 
-typedef struct mfib_entry_collect_forwarding_ctx_t_
-{
+typedef struct mfib_entry_collect_forwarding_ctx_t_ {
     load_balance_path_t * next_hops;
     fib_forward_chain_type_t fct;
     mfib_entry_src_t *msrc;
@@ -494,8 +475,7 @@ mfib_entry_src_collect_forwarding (fib_node_index_t pl_index,
     /*
      * if the path is not resolved, don't include it.
      */
-    if (!fib_path_is_resolved(path_index))
-    {
+    if (!fib_path_is_resolved(path_index)) {
         return (FIB_PATH_LIST_WALK_CONTINUE);
     }
 
@@ -503,39 +483,37 @@ mfib_entry_src_collect_forwarding (fib_node_index_t pl_index,
      * If the path is not forwarding to use it
      */
     mfib_path_ext_t *path_ext;
-    
+
     path_ext = mfib_entry_path_ext_find(ctx->msrc->mfes_exts,
                                         path_index);
 
     if (NULL != path_ext &&
-        !(path_ext->mfpe_flags & MFIB_ITF_FLAG_FORWARD))
-    {
+        !(path_ext->mfpe_flags & MFIB_ITF_FLAG_FORWARD)) {
         return (FIB_PATH_LIST_WALK_CONTINUE);
     }
-    
-    switch (ctx->fct)
-    {
-    case FIB_FORW_CHAIN_TYPE_MCAST_IP4:
-    case FIB_FORW_CHAIN_TYPE_MCAST_IP6:
-        /*
-         * EOS traffic with no label to stack, we need the IP Adj
-         */
-        vec_add2(ctx->next_hops, nh, 1);
 
-        nh->path_index = path_index;
-        nh->path_weight = fib_path_get_weight(path_index);
-        fib_path_contribute_forwarding(path_index, ctx->fct, &nh->path_dpo);
-        break;
+    switch (ctx->fct) {
+        case FIB_FORW_CHAIN_TYPE_MCAST_IP4:
+        case FIB_FORW_CHAIN_TYPE_MCAST_IP6:
+            /*
+             * EOS traffic with no label to stack, we need the IP Adj
+             */
+            vec_add2(ctx->next_hops, nh, 1);
 
-    case FIB_FORW_CHAIN_TYPE_UNICAST_IP4:
-    case FIB_FORW_CHAIN_TYPE_UNICAST_IP6:
-    case FIB_FORW_CHAIN_TYPE_MPLS_NON_EOS:
-    case FIB_FORW_CHAIN_TYPE_MPLS_EOS:
-    case FIB_FORW_CHAIN_TYPE_ETHERNET:
-    case FIB_FORW_CHAIN_TYPE_NSH:
-    case FIB_FORW_CHAIN_TYPE_BIER:
-        ASSERT(0);
-        break;
+            nh->path_index = path_index;
+            nh->path_weight = fib_path_get_weight(path_index);
+            fib_path_contribute_forwarding(path_index, ctx->fct, &nh->path_dpo);
+            break;
+
+        case FIB_FORW_CHAIN_TYPE_UNICAST_IP4:
+        case FIB_FORW_CHAIN_TYPE_UNICAST_IP6:
+        case FIB_FORW_CHAIN_TYPE_MPLS_NON_EOS:
+        case FIB_FORW_CHAIN_TYPE_MPLS_EOS:
+        case FIB_FORW_CHAIN_TYPE_ETHERNET:
+        case FIB_FORW_CHAIN_TYPE_NSH:
+        case FIB_FORW_CHAIN_TYPE_BIER:
+            ASSERT(0);
+            break;
     }
 
     return (FIB_PATH_LIST_WALK_CONTINUE);
@@ -552,15 +530,13 @@ mfib_entry_stack (mfib_entry_t *mfib_entry,
     /*
      * unlink the enty from the previous path list.
      */
-    if (FIB_NODE_INDEX_INVALID != mfib_entry->mfe_pl)
-    {
+    if (FIB_NODE_INDEX_INVALID != mfib_entry->mfe_pl) {
         fib_path_list_child_remove(mfib_entry->mfe_pl,
                                    mfib_entry->mfe_sibling);
     }
 
     if (NULL != msrc &&
-        FIB_NODE_INDEX_INVALID != msrc->mfes_pl)
-    {
+        FIB_NODE_INDEX_INVALID != msrc->mfes_pl) {
         mfib_entry_collect_forwarding_ctx_t ctx = {
             .next_hops = NULL,
             .fct = mfib_entry_get_default_chain_type(mfib_entry),
@@ -571,26 +547,21 @@ mfib_entry_stack (mfib_entry_t *mfib_entry,
                            mfib_entry_src_collect_forwarding,
                            &ctx);
 
-        if (!(MFIB_ENTRY_FLAG_EXCLUSIVE & mfib_entry->mfe_flags))
-        {
-            if (NULL == ctx.next_hops)
-            {
+        if (!(MFIB_ENTRY_FLAG_EXCLUSIVE & mfib_entry->mfe_flags)) {
+            if (NULL == ctx.next_hops) {
                 /*
                  * no next-hops, stack directly on the drop
                  */
                 dpo_stack(DPO_MFIB_ENTRY, dp,
                           &mfib_entry->mfe_rep,
                           drop_dpo_get(dp));
-            }
-            else
-            {
+            } else {
                 /*
                  * each path contirbutes a next-hop. form a replicate
                  * from those choices.
                  */
                 if (!dpo_id_is_valid(&mfib_entry->mfe_rep) ||
-                    dpo_is_drop(&mfib_entry->mfe_rep))
-                {
+                    dpo_is_drop(&mfib_entry->mfe_rep)) {
                     dpo_id_t tmp_dpo = DPO_INVALID;
 
                     dpo_set(&tmp_dpo,
@@ -606,9 +577,7 @@ mfib_entry_stack (mfib_entry_t *mfib_entry,
                 replicate_multipath_update(&mfib_entry->mfe_rep,
                                            ctx.next_hops);
             }
-        }
-        else
-        {
+        } else {
             /*
              * for exclusive routes the source provided a replicate DPO
              * we we stashed inthe special path list with one path
@@ -633,9 +602,7 @@ mfib_entry_stack (mfib_entry_t *mfib_entry,
             fib_path_list_child_add(mfib_entry->mfe_pl,
                                     FIB_NODE_TYPE_MFIB_ENTRY,
                                     mfib_entry_get_index(mfib_entry));
-    }
-    else
-    {
+    } else {
         dpo_stack(DPO_MFIB_ENTRY, dp,
                   &mfib_entry->mfe_rep,
                   drop_dpo_get(dp));
@@ -657,8 +624,7 @@ mfib_entry_src_path_add (mfib_entry_src_t *msrc,
     rpaths = NULL;
     vec_add1(rpaths, rpath[0]);
 
-    if (FIB_NODE_INDEX_INVALID == msrc->mfes_pl)
-    {
+    if (FIB_NODE_INDEX_INVALID == msrc->mfes_pl) {
         /* A non-shared path-list */
         msrc->mfes_pl = fib_path_list_create(FIB_PATH_LIST_FLAG_NO_URPF,
                                              NULL);
@@ -704,8 +670,7 @@ mfib_entry_recalculate_forwarding (mfib_entry_t *mfib_entry)
      */
     bsrc = mfib_entry_get_best_src(mfib_entry);
 
-    if (NULL != bsrc)
-    {
+    if (NULL != bsrc) {
         mfib_entry->mfe_flags = bsrc->mfes_flags;
         mfib_entry->mfe_itfs = bsrc->mfes_itfs;
         mfib_entry->mfe_rpf_id = bsrc->mfes_rpf_id;
@@ -765,8 +730,7 @@ mfib_entry_update (fib_node_index_t mfib_entry_index,
     msrc->mfes_flags = entry_flags;
     msrc->mfes_rpf_id = rpf_id;
 
-    if (INDEX_INVALID != repi)
-    {
+    if (INDEX_INVALID != repi) {
         /*
          * The source is providing its own replicate DPO.
          * Create a sepcial path-list to manage it, that way
@@ -792,8 +756,7 @@ mfib_entry_update (fib_node_index_t mfib_entry_index,
         fib_path_list_unlock(old_pl_index);
     }
 
-    if (mfib_entry_src_ok_for_delete(msrc))
-    {
+    if (mfib_entry_src_ok_for_delete(msrc)) {
         /*
          * this source has no interfaces and no flags.
          * it has nothing left to give - remove it
@@ -854,13 +817,10 @@ mfib_entry_path_update (fib_node_index_t mfib_entry_index,
      */
     path_ext = mfib_entry_path_ext_find(msrc->mfes_exts, path_index);
 
-    if (NULL == path_ext)
-    {
+    if (NULL == path_ext) {
         old = MFIB_ITF_FLAG_NONE;
         path_ext = mfib_path_ext_add(msrc, path_index, itf_flags);
-    }
-    else
-    {
+    } else {
         old = path_ext->mfpe_flags;
         path_ext->mfpe_flags = itf_flags;
     }
@@ -869,24 +829,19 @@ mfib_entry_path_update (fib_node_index_t mfib_entry_index,
      * Has the path changed its contribution to the input interface set.
      * Which only paths with interfaces can do...
      */
-    if (~0 != rpath[0].frp_sw_if_index)
-    {
+    if (~0 != rpath[0].frp_sw_if_index) {
         mfib_itf_t *mfib_itf;
 
         new = itf_flags;
 
-        if (old != new)
-        {
-            if (MFIB_ITF_FLAG_NONE == new)
-            {
+        if (old != new) {
+            if (MFIB_ITF_FLAG_NONE == new) {
                 /*
                  * no more interface flags on this path, remove
                  * from the data-plane set
                  */
                 mfib_entry_itf_remove(msrc, rpath[0].frp_sw_if_index);
-            }
-            else if (MFIB_ITF_FLAG_NONE == old)
-            {
+            } else if (MFIB_ITF_FLAG_NONE == old) {
                 /*
                  * This interface is now contributing
                  */
@@ -894,9 +849,7 @@ mfib_entry_path_update (fib_node_index_t mfib_entry_index,
                                    rpath[0].frp_sw_if_index,
                                    mfib_itf_create(rpath[0].frp_sw_if_index,
                                                    itf_flags));
-            }
-            else
-            {
+            } else {
                 /*
                  * change of flag contributions
                  */
@@ -930,8 +883,7 @@ mfib_entry_path_remove (fib_node_index_t mfib_entry_index,
     ASSERT(NULL != mfib_entry);
     msrc = mfib_entry_src_find(mfib_entry, source, NULL);
 
-    if (NULL == msrc)
-    {
+    if (NULL == msrc) {
         /*
          * there are no paths left for this source
          */
@@ -944,20 +896,17 @@ mfib_entry_path_remove (fib_node_index_t mfib_entry_index,
      */
     path_index = mfib_entry_src_path_remove(msrc, rpath);
 
-    if (FIB_NODE_INDEX_INVALID != path_index)
-    {
+    if (FIB_NODE_INDEX_INVALID != path_index) {
         /*
          * don't need the extension, nor the interface anymore
          */
         mfib_path_ext_remove(msrc, path_index);
-        if (~0 != rpath[0].frp_sw_if_index)
-        {
+        if (~0 != rpath[0].frp_sw_if_index) {
             mfib_entry_itf_remove(msrc, rpath[0].frp_sw_if_index);
         }
     }
 
-    if (mfib_entry_src_ok_for_delete(msrc))
-    {
+    if (mfib_entry_src_ok_for_delete(msrc)) {
         /*
          * this source has no interfaces and no flags.
          * it has nothing left to give - remove it
@@ -1007,15 +956,14 @@ static int
 fib_ip6_address_compare (ip6_address_t * a1,
                          ip6_address_t * a2)
 {
-  int i;
-  for (i = 0; i < ARRAY_LEN (a1->as_u16); i++)
-  {
-      int cmp = (clib_net_to_host_u16 (a1->as_u16[i]) -
-                 clib_net_to_host_u16 (a2->as_u16[i]));
-      if (cmp != 0)
-          return cmp;
-  }
-  return 0;
+    int i;
+    for (i = 0; i < ARRAY_LEN (a1->as_u16); i++) {
+        int cmp = (clib_net_to_host_u16 (a1->as_u16[i]) -
+                   clib_net_to_host_u16 (a2->as_u16[i]));
+        if (cmp != 0)
+            return cmp;
+    }
+    return 0;
 }
 
 static int
@@ -1028,32 +976,29 @@ mfib_entry_cmp (fib_node_index_t mfib_entry_index1,
     mfib_entry1 = mfib_entry_get(mfib_entry_index1);
     mfib_entry2 = mfib_entry_get(mfib_entry_index2);
 
-    switch (mfib_entry1->mfe_prefix.fp_proto)
-    {
-    case FIB_PROTOCOL_IP4:
-        cmp = fib_ip4_address_compare(&mfib_entry1->mfe_prefix.fp_grp_addr.ip4,
-                                      &mfib_entry2->mfe_prefix.fp_grp_addr.ip4);
+    switch (mfib_entry1->mfe_prefix.fp_proto) {
+        case FIB_PROTOCOL_IP4:
+            cmp = fib_ip4_address_compare(&mfib_entry1->mfe_prefix.fp_grp_addr.ip4,
+                                          &mfib_entry2->mfe_prefix.fp_grp_addr.ip4);
 
-        if (0 == cmp)
-        {
-            cmp = fib_ip4_address_compare(&mfib_entry1->mfe_prefix.fp_src_addr.ip4,
-                                          &mfib_entry2->mfe_prefix.fp_src_addr.ip4);
-        }
-        break;
-    case FIB_PROTOCOL_IP6:
-        cmp = fib_ip6_address_compare(&mfib_entry1->mfe_prefix.fp_grp_addr.ip6,
-                                      &mfib_entry2->mfe_prefix.fp_grp_addr.ip6);
+            if (0 == cmp) {
+                cmp = fib_ip4_address_compare(&mfib_entry1->mfe_prefix.fp_src_addr.ip4,
+                                              &mfib_entry2->mfe_prefix.fp_src_addr.ip4);
+            }
+            break;
+        case FIB_PROTOCOL_IP6:
+            cmp = fib_ip6_address_compare(&mfib_entry1->mfe_prefix.fp_grp_addr.ip6,
+                                          &mfib_entry2->mfe_prefix.fp_grp_addr.ip6);
 
-        if (0 == cmp)
-        {
-            cmp = fib_ip6_address_compare(&mfib_entry1->mfe_prefix.fp_src_addr.ip6,
-                                          &mfib_entry2->mfe_prefix.fp_src_addr.ip6);
-        }
-        break;
-    case FIB_PROTOCOL_MPLS:
-        ASSERT(0);
-        cmp = 0;
-        break;
+            if (0 == cmp) {
+                cmp = fib_ip6_address_compare(&mfib_entry1->mfe_prefix.fp_src_addr.ip6,
+                                              &mfib_entry2->mfe_prefix.fp_src_addr.ip6);
+            }
+            break;
+        case FIB_PROTOCOL_MPLS:
+            ASSERT(0);
+            cmp = 0;
+            break;
     }
 
     if (0 == cmp) {
@@ -1083,8 +1028,7 @@ mfib_entry_last_lock_gone (fib_node_t *node)
 
     MFIB_ENTRY_DBG(mfib_entry, "last-lock");
 
-    vec_foreach(msrc, mfib_entry->mfe_srcs)
-    {
+    vec_foreach(msrc, mfib_entry->mfe_srcs) {
         mfib_entry_src_flush(msrc);
     }
 
@@ -1101,7 +1045,7 @@ mfib_entry_last_lock_gone (fib_node_t *node)
  */
 static fib_node_back_walk_rc_t
 mfib_entry_back_walk_notify (fib_node_t *node,
-                            fib_node_back_walk_ctx_t *ctx)
+                             fib_node_back_walk_ctx_t *ctx)
 {
     mfib_entry_recalculate_forwarding(mfib_entry_from_fib_node(node));
 
@@ -1163,19 +1107,16 @@ const static dpo_vft_t mfib_entry_dpo_vft = {
     .dv_mem_show = mfib_entry_show_memory,
 };
 
-const static char* const mfib_entry_ip4_nodes[] =
-{
+const static char* const mfib_entry_ip4_nodes[] = {
     "ip4-mfib-forward-rpf",
     NULL,
 };
-const static char* const mfib_entry_ip6_nodes[] =
-{
+const static char* const mfib_entry_ip6_nodes[] = {
     "ip6-mfib-forward-rpf",
     NULL,
 };
 
-const static char* const * const mfib_entry_nodes[DPO_PROTO_NUM] =
-{
+const static char* const * const mfib_entry_nodes[DPO_PROTO_NUM] = {
     [DPO_PROTO_IP4]  = mfib_entry_ip4_nodes,
     [DPO_PROTO_IP6]  = mfib_entry_ip6_nodes,
 };
@@ -1189,7 +1130,7 @@ mfib_entry_module_init (void)
 
 void
 mfib_entry_encode (fib_node_index_t mfib_entry_index,
-                  fib_route_path_encode_t **api_rpaths)
+                   fib_route_path_encode_t **api_rpaths)
 {
     mfib_entry_t *mfib_entry;
     mfib_entry_src_t *bsrc;
@@ -1197,8 +1138,7 @@ mfib_entry_encode (fib_node_index_t mfib_entry_index,
     mfib_entry = mfib_entry_get(mfib_entry_index);
     bsrc = mfib_entry_get_best_src(mfib_entry);
 
-    if (FIB_NODE_INDEX_INVALID != bsrc->mfes_pl)
-    {
+    if (FIB_NODE_INDEX_INVALID != bsrc->mfes_pl) {
         fib_path_list_walk(bsrc->mfes_pl,
                            fib_path_encode,
                            api_rpaths);
@@ -1208,7 +1148,7 @@ mfib_entry_encode (fib_node_index_t mfib_entry_index,
 
 void
 mfib_entry_get_prefix (fib_node_index_t mfib_entry_index,
-                      mfib_prefix_t *pfx)
+                       mfib_prefix_t *pfx)
 {
     mfib_entry_t *mfib_entry;
 
@@ -1243,12 +1183,9 @@ mfib_entry_contribute_forwarding (fib_node_index_t mfib_entry_index,
 
     dp = fib_proto_to_dpo(mfib_entry->mfe_prefix.fp_proto);
 
-    if (type == fib_forw_chain_type_from_dpo_proto(dp))
-    {
+    if (type == fib_forw_chain_type_from_dpo_proto(dp)) {
         dpo_copy(dpo, &mfib_entry->mfe_rep);
-    }
-    else
-    {
+    } else {
         dpo_copy(dpo, drop_dpo_get(dp));
     }
 }
@@ -1261,30 +1198,24 @@ mfib_entry_pool_size (void)
 
 static clib_error_t *
 show_mfib_entry_command (vlib_main_t * vm,
-                        unformat_input_t * input,
-                        vlib_cli_command_t * cmd)
+                         unformat_input_t * input,
+                         vlib_cli_command_t * cmd)
 {
     fib_node_index_t fei;
 
-    if (unformat (input, "%d", &fei))
-    {
+    if (unformat (input, "%d", &fei)) {
         /*
          * show one in detail
          */
-        if (!pool_is_free_index(mfib_entry_pool, fei))
-        {
+        if (!pool_is_free_index(mfib_entry_pool, fei)) {
             vlib_cli_output (vm, "%d@%U",
                              fei,
                              format_mfib_entry, fei,
                              MFIB_ENTRY_FORMAT_DETAIL2);
-        }
-        else
-        {
+        } else {
             vlib_cli_output (vm, "entry %d invalid", fei);
         }
-    }
-    else
-    {
+    } else {
         /*
          * show all
          */
@@ -1306,7 +1237,7 @@ show_mfib_entry_command (vlib_main_t * vm,
  * numerical indentifier.
  ?*/
 VLIB_CLI_COMMAND (show_mfib_entry, static) = {
-  .path = "show mfib entry",
-  .function = show_mfib_entry_command,
-  .short_help = "show mfib entry",
+    .path = "show mfib entry",
+    .function = show_mfib_entry_command,
+    .short_help = "show mfib entry",
 };

@@ -40,64 +40,63 @@ geneve_main_t geneve_main;
 static u8 *
 format_decap_next (u8 * s, va_list * args)
 {
-  u32 next_index = va_arg (*args, u32);
+    u32 next_index = va_arg (*args, u32);
 
-  switch (next_index)
-    {
-    case GENEVE_INPUT_NEXT_DROP:
-      return format (s, "drop");
-    case GENEVE_INPUT_NEXT_L2_INPUT:
-      return format (s, "l2");
-    default:
-      return format (s, "index %d", next_index);
+    switch (next_index) {
+        case GENEVE_INPUT_NEXT_DROP:
+            return format (s, "drop");
+        case GENEVE_INPUT_NEXT_L2_INPUT:
+            return format (s, "l2");
+        default:
+            return format (s, "index %d", next_index);
     }
-  return s;
+    return s;
 }
 
 u8 *
 format_geneve_tunnel (u8 * s, va_list * args)
 {
-  geneve_tunnel_t *t = va_arg (*args, geneve_tunnel_t *);
-  geneve_main_t *ngm = &geneve_main;
+    geneve_tunnel_t *t = va_arg (*args, geneve_tunnel_t *);
+    geneve_main_t *ngm = &geneve_main;
 
-  s = format (s, "[%d] local %U remote %U vni %d sw_if_index %d ",
-	      t - ngm->tunnels,
-	      format_ip46_address, &t->local, IP46_TYPE_ANY,
-	      format_ip46_address, &t->remote, IP46_TYPE_ANY,
-	      t->vni, t->sw_if_index);
+    s = format (s, "[%d] local %U remote %U vni %d sw_if_index %d ",
+                t - ngm->tunnels,
+                format_ip46_address, &t->local, IP46_TYPE_ANY,
+                format_ip46_address, &t->remote, IP46_TYPE_ANY,
+                t->vni, t->sw_if_index);
 
-  if (ip46_address_is_multicast (&t->remote))
-    s = format (s, "mcast_sw_if_index %d ", t->mcast_sw_if_index);
+    if (ip46_address_is_multicast (&t->remote))
+        s = format (s, "mcast_sw_if_index %d ", t->mcast_sw_if_index);
 
-  s = format (s, "encap_fib_index %d fib_entry_index %d decap_next %U\n",
-	      t->encap_fib_index, t->fib_entry_index,
-	      format_decap_next, t->decap_next_index);
-  return s;
+    s = format (s, "encap_fib_index %d fib_entry_index %d decap_next %U\n",
+                t->encap_fib_index, t->fib_entry_index,
+                format_decap_next, t->decap_next_index);
+    return s;
 }
 
 static u8 *
 format_geneve_name (u8 * s, va_list * args)
 {
-  u32 dev_instance = va_arg (*args, u32);
-  return format (s, "geneve_tunnel%d", dev_instance);
+    u32 dev_instance = va_arg (*args, u32);
+    return format (s, "geneve_tunnel%d", dev_instance);
 }
 
 static uword
 dummy_interface_tx (vlib_main_t * vm,
-		    vlib_node_runtime_t * node, vlib_frame_t * frame)
+                    vlib_node_runtime_t * node, vlib_frame_t * frame)
 {
-  clib_warning ("you shouldn't be here, leaking buffers...");
-  return frame->n_vectors;
+    clib_warning ("you shouldn't be here, leaking buffers...");
+    return frame->n_vectors;
 }
 
 static clib_error_t *
 geneve_interface_admin_up_down (vnet_main_t * vnm, u32 hw_if_index, u32 flags)
 {
-  u32 hw_flags = (flags & VNET_SW_INTERFACE_FLAG_ADMIN_UP) ?
-    VNET_HW_INTERFACE_FLAG_LINK_UP : 0;
-  vnet_hw_interface_set_flags (vnm, hw_if_index, hw_flags);
+    u32 hw_flags = (flags & VNET_SW_INTERFACE_FLAG_ADMIN_UP) ?
+                   VNET_HW_INTERFACE_FLAG_LINK_UP : 0;
+    vnet_hw_interface_set_flags (vnm, hw_if_index, hw_flags);
 
-  return /* no error */ 0;
+    return /* no error */ 0;
 }
 
 /* *INDENT-OFF* */
@@ -113,9 +112,9 @@ VNET_DEVICE_CLASS (geneve_device_class, static) = {
 static u8 *
 format_geneve_header_with_length (u8 * s, va_list * args)
 {
-  u32 dev_instance = va_arg (*args, u32);
-  s = format (s, "unimplemented dev %u", dev_instance);
-  return s;
+    u32 dev_instance = va_arg (*args, u32);
+    s = format (s, "unimplemented dev %u", dev_instance);
+    return s;
 }
 
 /* *INDENT-OFF* */
@@ -129,23 +128,23 @@ VNET_HW_INTERFACE_CLASS (geneve_hw_class) = {
 static void
 geneve_tunnel_restack_dpo (geneve_tunnel_t * t)
 {
-  dpo_id_t dpo = DPO_INVALID;
-  u32 encap_index = ip46_address_is_ip4 (&t->remote) ?
-    geneve4_encap_node.index : geneve6_encap_node.index;
-  fib_forward_chain_type_t forw_type = ip46_address_is_ip4 (&t->remote) ?
-    FIB_FORW_CHAIN_TYPE_UNICAST_IP4 : FIB_FORW_CHAIN_TYPE_UNICAST_IP6;
+    dpo_id_t dpo = DPO_INVALID;
+    u32 encap_index = ip46_address_is_ip4 (&t->remote) ?
+                      geneve4_encap_node.index : geneve6_encap_node.index;
+    fib_forward_chain_type_t forw_type = ip46_address_is_ip4 (&t->remote) ?
+                                         FIB_FORW_CHAIN_TYPE_UNICAST_IP4 : FIB_FORW_CHAIN_TYPE_UNICAST_IP6;
 
-  fib_entry_contribute_forwarding (t->fib_entry_index, forw_type, &dpo);
-  dpo_stack_from_node (encap_index, &t->next_dpo, &dpo);
-  dpo_reset (&dpo);
+    fib_entry_contribute_forwarding (t->fib_entry_index, forw_type, &dpo);
+    dpo_stack_from_node (encap_index, &t->next_dpo, &dpo);
+    dpo_reset (&dpo);
 }
 
 static geneve_tunnel_t *
 geneve_tunnel_from_fib_node (fib_node_t * node)
 {
-  ASSERT (FIB_NODE_TYPE_GENEVE_TUNNEL == node->fn_type);
-  return ((geneve_tunnel_t *) (((char *) node) -
-			       STRUCT_OFFSET_OF (geneve_tunnel_t, node)));
+    ASSERT (FIB_NODE_TYPE_GENEVE_TUNNEL == node->fn_type);
+    return ((geneve_tunnel_t *) (((char *) node) -
+                                 STRUCT_OFFSET_OF (geneve_tunnel_t, node)));
 }
 
 /**
@@ -155,8 +154,8 @@ geneve_tunnel_from_fib_node (fib_node_t * node)
 static fib_node_back_walk_rc_t
 geneve_tunnel_back_walk (fib_node_t * node, fib_node_back_walk_ctx_t * ctx)
 {
-  geneve_tunnel_restack_dpo (geneve_tunnel_from_fib_node (node));
-  return (FIB_NODE_BACK_WALK_CONTINUE);
+    geneve_tunnel_restack_dpo (geneve_tunnel_from_fib_node (node));
+    return (FIB_NODE_BACK_WALK_CONTINUE);
 }
 
 /**
@@ -165,12 +164,12 @@ geneve_tunnel_back_walk (fib_node_t * node, fib_node_back_walk_ctx_t * ctx)
 static fib_node_t *
 geneve_tunnel_fib_node_get (fib_node_index_t index)
 {
-  geneve_tunnel_t *t;
-  geneve_main_t *vxm = &geneve_main;
+    geneve_tunnel_t *t;
+    geneve_main_t *vxm = &geneve_main;
 
-  t = pool_elt_at_index (vxm->tunnels, index);
+    t = pool_elt_at_index (vxm->tunnels, index);
 
-  return (&t->node);
+    return (&t->node);
 }
 
 /**
@@ -179,11 +178,11 @@ geneve_tunnel_fib_node_get (fib_node_index_t index)
 static void
 geneve_tunnel_last_lock_gone (fib_node_t * node)
 {
-  /*
-   * The GENEVE tunnel is a root of the graph. As such
-   * it never has children and thus is never locked.
-   */
-  ASSERT (0);
+    /*
+     * The GENEVE tunnel is a root of the graph. As such
+     * it never has children and thus is never locked.
+     */
+    ASSERT (0);
 }
 
 /*
@@ -191,9 +190,9 @@ geneve_tunnel_last_lock_gone (fib_node_t * node)
  * for participation in the FIB object graph.
  */
 const static fib_node_vft_t geneve_vft = {
-  .fnv_get = geneve_tunnel_fib_node_get,
-  .fnv_last_lock = geneve_tunnel_last_lock_gone,
-  .fnv_back_walk = geneve_tunnel_back_walk,
+    .fnv_get = geneve_tunnel_fib_node_get,
+    .fnv_last_lock = geneve_tunnel_last_lock_gone,
+    .fnv_back_walk = geneve_tunnel_back_walk,
 };
 
 
@@ -208,676 +207,622 @@ _(remote)
 static int
 geneve_rewrite (geneve_tunnel_t * t, bool is_ip6)
 {
-  union
-  {
-    ip4_geneve_header_t *h4;
-    ip6_geneve_header_t *h6;
-    u8 *rw;
-  } r =
-  {
-  .rw = 0};
-  int len = is_ip6 ? sizeof *r.h6 : sizeof *r.h4;
+    union {
+        ip4_geneve_header_t *h4;
+        ip6_geneve_header_t *h6;
+        u8 *rw;
+    } r = {
+        .rw = 0
+    };
+    int len = is_ip6 ? sizeof *r.h6 : sizeof *r.h4;
 #if SUPPORT_OPTIONS_HEADER==1
-  len += t->options_len;
+    len += t->options_len;
 #endif
 
-  vec_validate_aligned (r.rw, len - 1, CLIB_CACHE_LINE_BYTES);
+    vec_validate_aligned (r.rw, len - 1, CLIB_CACHE_LINE_BYTES);
 
-  udp_header_t *udp;
-  geneve_header_t *geneve;
-  /* Fixed portion of the (outer) ip header */
-  if (!is_ip6)
-    {
-      ip4_header_t *ip = &r.h4->ip4;
-      udp = &r.h4->udp, geneve = &r.h4->geneve;
-      ip->ip_version_and_header_length = 0x45;
-      ip->ttl = 254;
-      ip->protocol = IP_PROTOCOL_UDP;
+    udp_header_t *udp;
+    geneve_header_t *geneve;
+    /* Fixed portion of the (outer) ip header */
+    if (!is_ip6) {
+        ip4_header_t *ip = &r.h4->ip4;
+        udp = &r.h4->udp, geneve = &r.h4->geneve;
+        ip->ip_version_and_header_length = 0x45;
+        ip->ttl = 254;
+        ip->protocol = IP_PROTOCOL_UDP;
 
-      ip->src_address = t->local.ip4;
-      ip->dst_address = t->remote.ip4;
+        ip->src_address = t->local.ip4;
+        ip->dst_address = t->remote.ip4;
 
-      /* we fix up the ip4 header length and checksum after-the-fact */
-      ip->checksum = ip4_header_checksum (ip);
-    }
-  else
-    {
-      ip6_header_t *ip = &r.h6->ip6;
-      udp = &r.h6->udp, geneve = &r.h6->geneve;
-      ip->ip_version_traffic_class_and_flow_label =
-	clib_host_to_net_u32 (6 << 28);
-      ip->hop_limit = 255;
-      ip->protocol = IP_PROTOCOL_UDP;
+        /* we fix up the ip4 header length and checksum after-the-fact */
+        ip->checksum = ip4_header_checksum (ip);
+    } else {
+        ip6_header_t *ip = &r.h6->ip6;
+        udp = &r.h6->udp, geneve = &r.h6->geneve;
+        ip->ip_version_traffic_class_and_flow_label =
+            clib_host_to_net_u32 (6 << 28);
+        ip->hop_limit = 255;
+        ip->protocol = IP_PROTOCOL_UDP;
 
-      ip->src_address = t->local.ip6;
-      ip->dst_address = t->remote.ip6;
+        ip->src_address = t->local.ip6;
+        ip->dst_address = t->remote.ip6;
     }
 
-  /* UDP header, randomize local port on something, maybe? */
-  udp->src_port = clib_host_to_net_u16 (5251);
-  udp->dst_port = clib_host_to_net_u16 (UDP_DST_PORT_geneve);
+    /* UDP header, randomize local port on something, maybe? */
+    udp->src_port = clib_host_to_net_u16 (5251);
+    udp->dst_port = clib_host_to_net_u16 (UDP_DST_PORT_geneve);
 
-  /* GENEVE header */
-  vnet_set_geneve_version (geneve, GENEVE_VERSION);
+    /* GENEVE header */
+    vnet_set_geneve_version (geneve, GENEVE_VERSION);
 #if SUPPORT_OPTIONS_HEADER==1
-  vnet_set_geneve_options_len (geneve, t->options_len);
+    vnet_set_geneve_options_len (geneve, t->options_len);
 #else
-  vnet_set_geneve_options_len (geneve, 0);
+    vnet_set_geneve_options_len (geneve, 0);
 #endif
-  vnet_set_geneve_oamframe_bit (geneve, 0);
-  vnet_set_geneve_critical_bit (geneve, 0);
-  vnet_set_geneve_protocol (geneve, GENEVE_ETH_PROTOCOL);
+    vnet_set_geneve_oamframe_bit (geneve, 0);
+    vnet_set_geneve_critical_bit (geneve, 0);
+    vnet_set_geneve_protocol (geneve, GENEVE_ETH_PROTOCOL);
 
-  vnet_geneve_hdr_1word_hton (geneve);
+    vnet_geneve_hdr_1word_hton (geneve);
 
-  vnet_set_geneve_vni (geneve, t->vni);
+    vnet_set_geneve_vni (geneve, t->vni);
 
-  t->rewrite = r.rw;
-  return (0);
+    t->rewrite = r.rw;
+    return (0);
 }
 
 static bool
 geneve_decap_next_is_valid (geneve_main_t * vxm, u32 is_ip6,
-			    u32 decap_next_index)
+                            u32 decap_next_index)
 {
-  vlib_main_t *vm = vxm->vlib_main;
-  u32 input_idx =
-    (!is_ip6) ? geneve4_input_node.index : geneve6_input_node.index;
-  vlib_node_runtime_t *r = vlib_node_get_runtime (vm, input_idx);
+    vlib_main_t *vm = vxm->vlib_main;
+    u32 input_idx =
+        (!is_ip6) ? geneve4_input_node.index : geneve6_input_node.index;
+    vlib_node_runtime_t *r = vlib_node_get_runtime (vm, input_idx);
 
-  return decap_next_index < r->n_next_nodes;
+    return decap_next_index < r->n_next_nodes;
 }
 
 static void
 hash_set_key_copy (uword ** h, void *key, uword v)
 {
-  size_t ksz = hash_header (*h)->user;
-  void *copy = clib_mem_alloc (ksz);
-  clib_memcpy (copy, key, ksz);
-  hash_set_mem (*h, copy, v);
+    size_t ksz = hash_header (*h)->user;
+    void *copy = clib_mem_alloc (ksz);
+    clib_memcpy (copy, key, ksz);
+    hash_set_mem (*h, copy, v);
 }
 
 static void
 hash_unset_key_free (uword ** h, void *key)
 {
-  hash_pair_t *hp = hash_get_pair_mem (*h, key);
-  ASSERT (hp);
-  key = uword_to_pointer (hp->key, void *);
-  hash_unset_mem (*h, key);
-  clib_mem_free (key);
+    hash_pair_t *hp = hash_get_pair_mem (*h, key);
+    ASSERT (hp);
+    key = uword_to_pointer (hp->key, void *);
+    hash_unset_mem (*h, key);
+    clib_mem_free (key);
 }
 
 static uword
 vtep_addr_ref (ip46_address_t * ip)
 {
-  uword *vtep = ip46_address_is_ip4 (ip) ?
-    hash_get (geneve_main.vtep4, ip->ip4.as_u32) :
-    hash_get_mem (geneve_main.vtep6, &ip->ip6);
-  if (vtep)
-    return ++(*vtep);
-  ip46_address_is_ip4 (ip) ?
+    uword *vtep = ip46_address_is_ip4 (ip) ?
+                  hash_get (geneve_main.vtep4, ip->ip4.as_u32) :
+                  hash_get_mem (geneve_main.vtep6, &ip->ip6);
+    if (vtep)
+        return ++(*vtep);
+    ip46_address_is_ip4 (ip) ?
     hash_set (geneve_main.vtep4, ip->ip4.as_u32, 1) :
     hash_set_key_copy (&geneve_main.vtep6, &ip->ip6, 1);
-  return 1;
+    return 1;
 }
 
 static uword
 vtep_addr_unref (ip46_address_t * ip)
 {
-  uword *vtep = ip46_address_is_ip4 (ip) ?
-    hash_get (geneve_main.vtep4, ip->ip4.as_u32) :
-    hash_get_mem (geneve_main.vtep6, &ip->ip6);
-  ASSERT (vtep);
-  if (--(*vtep) != 0)
-    return *vtep;
-  ip46_address_is_ip4 (ip) ?
+    uword *vtep = ip46_address_is_ip4 (ip) ?
+                  hash_get (geneve_main.vtep4, ip->ip4.as_u32) :
+                  hash_get_mem (geneve_main.vtep6, &ip->ip6);
+    ASSERT (vtep);
+    if (--(*vtep) != 0)
+        return *vtep;
+    ip46_address_is_ip4 (ip) ?
     hash_unset (geneve_main.vtep4, ip->ip4.as_u32) :
     hash_unset_key_free (&geneve_main.vtep6, &ip->ip6);
-  return 0;
+    return 0;
 }
 
-typedef CLIB_PACKED (union
-		     {
-		     struct
-		     {
-		     fib_node_index_t mfib_entry_index;
-		     adj_index_t mcast_adj_index;
-		     }; u64 as_u64;
-		     }) mcast_shared_t;
+typedef CLIB_PACKED (union {
+    struct
+    {
+        fib_node_index_t mfib_entry_index;
+        adj_index_t mcast_adj_index;
+    }; u64 as_u64;
+}) mcast_shared_t;
 
 static inline mcast_shared_t
 mcast_shared_get (ip46_address_t * ip)
 {
-  ASSERT (ip46_address_is_multicast (ip));
-  uword *p = hash_get_mem (geneve_main.mcast_shared, ip);
-  ASSERT (p);
-  return (mcast_shared_t)
-  {
-  .as_u64 = *p};
+    ASSERT (ip46_address_is_multicast (ip));
+    uword *p = hash_get_mem (geneve_main.mcast_shared, ip);
+    ASSERT (p);
+    return (mcast_shared_t) {
+        .as_u64 = *p
+    };
 }
 
 static inline void
 mcast_shared_add (ip46_address_t * remote,
-		  fib_node_index_t mfei, adj_index_t ai)
+                  fib_node_index_t mfei, adj_index_t ai)
 {
-  mcast_shared_t new_ep = {
-    .mcast_adj_index = ai,
-    .mfib_entry_index = mfei,
-  };
+    mcast_shared_t new_ep = {
+        .mcast_adj_index = ai,
+        .mfib_entry_index = mfei,
+    };
 
-  hash_set_key_copy (&geneve_main.mcast_shared, remote, new_ep.as_u64);
+    hash_set_key_copy (&geneve_main.mcast_shared, remote, new_ep.as_u64);
 }
 
 static inline void
 mcast_shared_remove (ip46_address_t * remote)
 {
-  mcast_shared_t ep = mcast_shared_get (remote);
+    mcast_shared_t ep = mcast_shared_get (remote);
 
-  adj_unlock (ep.mcast_adj_index);
-  mfib_table_entry_delete_index (ep.mfib_entry_index, MFIB_SOURCE_GENEVE);
+    adj_unlock (ep.mcast_adj_index);
+    mfib_table_entry_delete_index (ep.mfib_entry_index, MFIB_SOURCE_GENEVE);
 
-  hash_unset_key_free (&geneve_main.mcast_shared, remote);
+    hash_unset_key_free (&geneve_main.mcast_shared, remote);
 }
 
 static inline fib_protocol_t
 fib_ip_proto (bool is_ip6)
 {
-  return (is_ip6) ? FIB_PROTOCOL_IP6 : FIB_PROTOCOL_IP4;
+    return (is_ip6) ? FIB_PROTOCOL_IP6 : FIB_PROTOCOL_IP4;
 }
 
 int vnet_geneve_add_del_tunnel
-  (vnet_geneve_add_del_tunnel_args_t * a, u32 * sw_if_indexp)
+(vnet_geneve_add_del_tunnel_args_t * a, u32 * sw_if_indexp)
 {
-  geneve_main_t *vxm = &geneve_main;
-  geneve_tunnel_t *t = 0;
-  vnet_main_t *vnm = vxm->vnet_main;
-  uword *p;
-  u32 hw_if_index = ~0;
-  u32 sw_if_index = ~0;
-  int rv;
-  geneve4_tunnel_key_t key4;
-  geneve6_tunnel_key_t key6;
-  u32 is_ip6 = a->is_ip6;
+    geneve_main_t *vxm = &geneve_main;
+    geneve_tunnel_t *t = 0;
+    vnet_main_t *vnm = vxm->vnet_main;
+    uword *p;
+    u32 hw_if_index = ~0;
+    u32 sw_if_index = ~0;
+    int rv;
+    geneve4_tunnel_key_t key4;
+    geneve6_tunnel_key_t key6;
+    u32 is_ip6 = a->is_ip6;
 
-  if (!is_ip6)
-    {
-      key4.remote = a->remote.ip4.as_u32;
-      key4.vni =
-	clib_host_to_net_u32 ((a->vni << GENEVE_VNI_SHIFT) & GENEVE_VNI_MASK);
-      p = hash_get (vxm->geneve4_tunnel_by_key, key4.as_u64);
-    }
-  else
-    {
-      key6.remote = a->remote.ip6;
-      key6.vni =
-	clib_host_to_net_u32 ((a->vni << GENEVE_VNI_SHIFT) & GENEVE_VNI_MASK);
-      p = hash_get_mem (vxm->geneve6_tunnel_by_key, &key6);
+    if (!is_ip6) {
+        key4.remote = a->remote.ip4.as_u32;
+        key4.vni =
+            clib_host_to_net_u32 ((a->vni << GENEVE_VNI_SHIFT) & GENEVE_VNI_MASK);
+        p = hash_get (vxm->geneve4_tunnel_by_key, key4.as_u64);
+    } else {
+        key6.remote = a->remote.ip6;
+        key6.vni =
+            clib_host_to_net_u32 ((a->vni << GENEVE_VNI_SHIFT) & GENEVE_VNI_MASK);
+        p = hash_get_mem (vxm->geneve6_tunnel_by_key, &key6);
     }
 
-  if (a->is_add)
-    {
-      l2input_main_t *l2im = &l2input_main;
+    if (a->is_add) {
+        l2input_main_t *l2im = &l2input_main;
 
-      /* adding a tunnel: tunnel must not already exist */
-      if (p)
-	return VNET_API_ERROR_TUNNEL_EXIST;
+        /* adding a tunnel: tunnel must not already exist */
+        if (p)
+            return VNET_API_ERROR_TUNNEL_EXIST;
 
-      /*if not set explicitly, default to l2 */
-      if (a->decap_next_index == ~0)
-	a->decap_next_index = GENEVE_INPUT_NEXT_L2_INPUT;
-      if (!geneve_decap_next_is_valid (vxm, is_ip6, a->decap_next_index))
-	return VNET_API_ERROR_INVALID_DECAP_NEXT;
+        /*if not set explicitly, default to l2 */
+        if (a->decap_next_index == ~0)
+            a->decap_next_index = GENEVE_INPUT_NEXT_L2_INPUT;
+        if (!geneve_decap_next_is_valid (vxm, is_ip6, a->decap_next_index))
+            return VNET_API_ERROR_INVALID_DECAP_NEXT;
 
-      pool_get_aligned (vxm->tunnels, t, CLIB_CACHE_LINE_BYTES);
-      memset (t, 0, sizeof (*t));
+        pool_get_aligned (vxm->tunnels, t, CLIB_CACHE_LINE_BYTES);
+        memset (t, 0, sizeof (*t));
 
-      /* copy from arg structure */
+        /* copy from arg structure */
 #define _(x) t->x = a->x;
-      foreach_copy_field;
+        foreach_copy_field;
 #undef _
 
-      rv = geneve_rewrite (t, is_ip6);
-      if (rv)
-	{
-	  pool_put (vxm->tunnels, t);
-	  return rv;
-	}
+        rv = geneve_rewrite (t, is_ip6);
+        if (rv) {
+            pool_put (vxm->tunnels, t);
+            return rv;
+        }
 
-      /* copy the key */
-      if (is_ip6)
-	hash_set_key_copy (&vxm->geneve6_tunnel_by_key, &key6,
-			   t - vxm->tunnels);
-      else
-	hash_set (vxm->geneve4_tunnel_by_key, key4.as_u64, t - vxm->tunnels);
+        /* copy the key */
+        if (is_ip6)
+            hash_set_key_copy (&vxm->geneve6_tunnel_by_key, &key6,
+                               t - vxm->tunnels);
+        else
+            hash_set (vxm->geneve4_tunnel_by_key, key4.as_u64, t - vxm->tunnels);
 
-      vnet_hw_interface_t *hi;
-      if (vec_len (vxm->free_geneve_tunnel_hw_if_indices) > 0)
-	{
-	  vnet_interface_main_t *im = &vnm->interface_main;
-	  hw_if_index = vxm->free_geneve_tunnel_hw_if_indices
-	    [vec_len (vxm->free_geneve_tunnel_hw_if_indices) - 1];
-	  _vec_len (vxm->free_geneve_tunnel_hw_if_indices) -= 1;
+        vnet_hw_interface_t *hi;
+        if (vec_len (vxm->free_geneve_tunnel_hw_if_indices) > 0) {
+            vnet_interface_main_t *im = &vnm->interface_main;
+            hw_if_index = vxm->free_geneve_tunnel_hw_if_indices
+                          [vec_len (vxm->free_geneve_tunnel_hw_if_indices) - 1];
+            _vec_len (vxm->free_geneve_tunnel_hw_if_indices) -= 1;
 
-	  hi = vnet_get_hw_interface (vnm, hw_if_index);
-	  hi->dev_instance = t - vxm->tunnels;
-	  hi->hw_instance = hi->dev_instance;
+            hi = vnet_get_hw_interface (vnm, hw_if_index);
+            hi->dev_instance = t - vxm->tunnels;
+            hi->hw_instance = hi->dev_instance;
 
-	  /* clear old stats of freed tunnel before reuse */
-	  sw_if_index = hi->sw_if_index;
-	  vnet_interface_counter_lock (im);
-	  vlib_zero_combined_counter
-	    (&im->combined_sw_if_counters[VNET_INTERFACE_COUNTER_TX],
-	     sw_if_index);
-	  vlib_zero_combined_counter (&im->combined_sw_if_counters
-				      [VNET_INTERFACE_COUNTER_RX],
-				      sw_if_index);
-	  vlib_zero_simple_counter (&im->sw_if_counters
-				    [VNET_INTERFACE_COUNTER_DROP],
-				    sw_if_index);
-	  vnet_interface_counter_unlock (im);
-	}
-      else
-	{
-	  hw_if_index = vnet_register_interface
-	    (vnm, geneve_device_class.index, t - vxm->tunnels,
-	     geneve_hw_class.index, t - vxm->tunnels);
-	  hi = vnet_get_hw_interface (vnm, hw_if_index);
-	}
+            /* clear old stats of freed tunnel before reuse */
+            sw_if_index = hi->sw_if_index;
+            vnet_interface_counter_lock (im);
+            vlib_zero_combined_counter
+            (&im->combined_sw_if_counters[VNET_INTERFACE_COUNTER_TX],
+             sw_if_index);
+            vlib_zero_combined_counter (&im->combined_sw_if_counters
+                                        [VNET_INTERFACE_COUNTER_RX],
+                                        sw_if_index);
+            vlib_zero_simple_counter (&im->sw_if_counters
+                                      [VNET_INTERFACE_COUNTER_DROP],
+                                      sw_if_index);
+            vnet_interface_counter_unlock (im);
+        } else {
+            hw_if_index = vnet_register_interface
+                          (vnm, geneve_device_class.index, t - vxm->tunnels,
+                           geneve_hw_class.index, t - vxm->tunnels);
+            hi = vnet_get_hw_interface (vnm, hw_if_index);
+        }
 
-      t->hw_if_index = hw_if_index;
-      t->sw_if_index = sw_if_index = hi->sw_if_index;
+        t->hw_if_index = hw_if_index;
+        t->sw_if_index = sw_if_index = hi->sw_if_index;
 
-      vec_validate_init_empty (vxm->tunnel_index_by_sw_if_index, sw_if_index,
-			       ~0);
-      vxm->tunnel_index_by_sw_if_index[sw_if_index] = t - vxm->tunnels;
+        vec_validate_init_empty (vxm->tunnel_index_by_sw_if_index, sw_if_index,
+                                 ~0);
+        vxm->tunnel_index_by_sw_if_index[sw_if_index] = t - vxm->tunnels;
 
-      /* setup l2 input config with l2 feature and bd 0 to drop packet */
-      vec_validate (l2im->configs, sw_if_index);
-      l2im->configs[sw_if_index].feature_bitmap = L2INPUT_FEAT_DROP;
-      l2im->configs[sw_if_index].bd_index = 0;
+        /* setup l2 input config with l2 feature and bd 0 to drop packet */
+        vec_validate (l2im->configs, sw_if_index);
+        l2im->configs[sw_if_index].feature_bitmap = L2INPUT_FEAT_DROP;
+        l2im->configs[sw_if_index].bd_index = 0;
 
-      vnet_sw_interface_t *si = vnet_get_sw_interface (vnm, sw_if_index);
-      si->flags &= ~VNET_SW_INTERFACE_FLAG_HIDDEN;
-      vnet_sw_interface_set_flags (vnm, sw_if_index,
-				   VNET_SW_INTERFACE_FLAG_ADMIN_UP);
+        vnet_sw_interface_t *si = vnet_get_sw_interface (vnm, sw_if_index);
+        si->flags &= ~VNET_SW_INTERFACE_FLAG_HIDDEN;
+        vnet_sw_interface_set_flags (vnm, sw_if_index,
+                                     VNET_SW_INTERFACE_FLAG_ADMIN_UP);
 
-      fib_node_init (&t->node, FIB_NODE_TYPE_GENEVE_TUNNEL);
-      fib_prefix_t tun_remote_pfx;
-      u32 encap_index = !is_ip6 ?
-	geneve4_encap_node.index : geneve6_encap_node.index;
-      vnet_flood_class_t flood_class = VNET_FLOOD_CLASS_TUNNEL_NORMAL;
+        fib_node_init (&t->node, FIB_NODE_TYPE_GENEVE_TUNNEL);
+        fib_prefix_t tun_remote_pfx;
+        u32 encap_index = !is_ip6 ?
+                          geneve4_encap_node.index : geneve6_encap_node.index;
+        vnet_flood_class_t flood_class = VNET_FLOOD_CLASS_TUNNEL_NORMAL;
 
-      fib_prefix_from_ip46_addr (&t->remote, &tun_remote_pfx);
-      if (!ip46_address_is_multicast (&t->remote))
-	{
-	  /* Unicast tunnel -
-	   * source the FIB entry for the tunnel's destination
-	   * and become a child thereof. The tunnel will then get poked
-	   * when the forwarding for the entry updates, and the tunnel can
-	   * re-stack accordingly
-	   */
-	  vtep_addr_ref (&t->local);
-	  t->fib_entry_index = fib_table_entry_special_add
-	    (t->encap_fib_index, &tun_remote_pfx, FIB_SOURCE_RR,
-	     FIB_ENTRY_FLAG_NONE);
-	  t->sibling_index = fib_entry_child_add
-	    (t->fib_entry_index, FIB_NODE_TYPE_GENEVE_TUNNEL,
-	     t - vxm->tunnels);
-	  geneve_tunnel_restack_dpo (t);
-	}
-      else
-	{
-	  /* Multicast tunnel -
-	   * as the same mcast group can be used for mutiple mcast tunnels
-	   * with different VNIs, create the output fib adjecency only if
-	   * it does not already exist
-	   */
-	  fib_protocol_t fp = fib_ip_proto (is_ip6);
+        fib_prefix_from_ip46_addr (&t->remote, &tun_remote_pfx);
+        if (!ip46_address_is_multicast (&t->remote)) {
+            /* Unicast tunnel -
+             * source the FIB entry for the tunnel's destination
+             * and become a child thereof. The tunnel will then get poked
+             * when the forwarding for the entry updates, and the tunnel can
+             * re-stack accordingly
+             */
+            vtep_addr_ref (&t->local);
+            t->fib_entry_index = fib_table_entry_special_add
+                                 (t->encap_fib_index, &tun_remote_pfx, FIB_SOURCE_RR,
+                                  FIB_ENTRY_FLAG_NONE);
+            t->sibling_index = fib_entry_child_add
+                               (t->fib_entry_index, FIB_NODE_TYPE_GENEVE_TUNNEL,
+                                t - vxm->tunnels);
+            geneve_tunnel_restack_dpo (t);
+        } else {
+            /* Multicast tunnel -
+             * as the same mcast group can be used for mutiple mcast tunnels
+             * with different VNIs, create the output fib adjecency only if
+             * it does not already exist
+             */
+            fib_protocol_t fp = fib_ip_proto (is_ip6);
 
-	  if (vtep_addr_ref (&t->remote) == 1)
-	    {
-	      fib_node_index_t mfei;
-	      adj_index_t ai;
-	      fib_route_path_t path = {
-		.frp_proto = fib_proto_to_dpo (fp),
-		.frp_addr = zero_addr,
-		.frp_sw_if_index = 0xffffffff,
-		.frp_fib_index = ~0,
-		.frp_weight = 0,
-		.frp_flags = FIB_ROUTE_PATH_LOCAL,
-	      };
-	      const mfib_prefix_t mpfx = {
-		.fp_proto = fp,
-		.fp_len = (is_ip6 ? 128 : 32),
-		.fp_grp_addr = tun_remote_pfx.fp_addr,
-	      };
+            if (vtep_addr_ref (&t->remote) == 1) {
+                fib_node_index_t mfei;
+                adj_index_t ai;
+                fib_route_path_t path = {
+                    .frp_proto = fib_proto_to_dpo (fp),
+                    .frp_addr = zero_addr,
+                    .frp_sw_if_index = 0xffffffff,
+                    .frp_fib_index = ~0,
+                    .frp_weight = 0,
+                    .frp_flags = FIB_ROUTE_PATH_LOCAL,
+                };
+                const mfib_prefix_t mpfx = {
+                    .fp_proto = fp,
+                    .fp_len = (is_ip6 ? 128 : 32),
+                    .fp_grp_addr = tun_remote_pfx.fp_addr,
+                };
 
-	      /*
-	       * Setup the (*,G) to receive traffic on the mcast group
-	       *  - the forwarding interface is for-us
-	       *  - the accepting interface is that from the API
-	       */
-	      mfib_table_entry_path_update (t->encap_fib_index,
-					    &mpfx,
-					    MFIB_SOURCE_GENEVE,
-					    &path, MFIB_ITF_FLAG_FORWARD);
+                /*
+                 * Setup the (*,G) to receive traffic on the mcast group
+                 *  - the forwarding interface is for-us
+                 *  - the accepting interface is that from the API
+                 */
+                mfib_table_entry_path_update (t->encap_fib_index,
+                                              &mpfx,
+                                              MFIB_SOURCE_GENEVE,
+                                              &path, MFIB_ITF_FLAG_FORWARD);
 
-	      path.frp_sw_if_index = a->mcast_sw_if_index;
-	      path.frp_flags = FIB_ROUTE_PATH_FLAG_NONE;
-	      mfei = mfib_table_entry_path_update (t->encap_fib_index,
-						   &mpfx,
-						   MFIB_SOURCE_GENEVE,
-						   &path,
-						   MFIB_ITF_FLAG_ACCEPT);
+                path.frp_sw_if_index = a->mcast_sw_if_index;
+                path.frp_flags = FIB_ROUTE_PATH_FLAG_NONE;
+                mfei = mfib_table_entry_path_update (t->encap_fib_index,
+                                                     &mpfx,
+                                                     MFIB_SOURCE_GENEVE,
+                                                     &path,
+                                                     MFIB_ITF_FLAG_ACCEPT);
 
-	      /*
-	       * Create the mcast adjacency to send traffic to the group
-	       */
-	      ai = adj_mcast_add_or_lock (fp,
-					  fib_proto_to_link (fp),
-					  a->mcast_sw_if_index);
+                /*
+                 * Create the mcast adjacency to send traffic to the group
+                 */
+                ai = adj_mcast_add_or_lock (fp,
+                                            fib_proto_to_link (fp),
+                                            a->mcast_sw_if_index);
 
-	      /*
-	       * create a new end-point
-	       */
-	      mcast_shared_add (&t->remote, mfei, ai);
-	    }
+                /*
+                 * create a new end-point
+                 */
+                mcast_shared_add (&t->remote, mfei, ai);
+            }
 
-	  dpo_id_t dpo = DPO_INVALID;
-	  mcast_shared_t ep = mcast_shared_get (&t->remote);
+            dpo_id_t dpo = DPO_INVALID;
+            mcast_shared_t ep = mcast_shared_get (&t->remote);
 
-	  /* Stack shared mcast remote mac addr rewrite on encap */
-	  dpo_set (&dpo, DPO_ADJACENCY_MCAST,
-		   fib_proto_to_dpo (fp), ep.mcast_adj_index);
+            /* Stack shared mcast remote mac addr rewrite on encap */
+            dpo_set (&dpo, DPO_ADJACENCY_MCAST,
+                     fib_proto_to_dpo (fp), ep.mcast_adj_index);
 
-	  dpo_stack_from_node (encap_index, &t->next_dpo, &dpo);
-	  dpo_reset (&dpo);
-	  flood_class = VNET_FLOOD_CLASS_TUNNEL_MASTER;
-	}
+            dpo_stack_from_node (encap_index, &t->next_dpo, &dpo);
+            dpo_reset (&dpo);
+            flood_class = VNET_FLOOD_CLASS_TUNNEL_MASTER;
+        }
 
-      /* Set geneve tunnel output node */
-      hi->output_node_index = encap_index;
+        /* Set geneve tunnel output node */
+        hi->output_node_index = encap_index;
 
-      vnet_get_sw_interface (vnet_get_main (), sw_if_index)->flood_class =
-	flood_class;
-    }
-  else
-    {
-      /* deleting a tunnel: tunnel must exist */
-      if (!p)
-	return VNET_API_ERROR_NO_SUCH_ENTRY;
+        vnet_get_sw_interface (vnet_get_main (), sw_if_index)->flood_class =
+            flood_class;
+    } else {
+        /* deleting a tunnel: tunnel must exist */
+        if (!p)
+            return VNET_API_ERROR_NO_SUCH_ENTRY;
 
-      t = pool_elt_at_index (vxm->tunnels, p[0]);
+        t = pool_elt_at_index (vxm->tunnels, p[0]);
 
-      sw_if_index = t->sw_if_index;
-      vnet_sw_interface_set_flags (vnm, t->sw_if_index, 0 /* down */ );
-      vnet_sw_interface_t *si = vnet_get_sw_interface (vnm, t->sw_if_index);
-      si->flags |= VNET_SW_INTERFACE_FLAG_HIDDEN;
+        sw_if_index = t->sw_if_index;
+        vnet_sw_interface_set_flags (vnm, t->sw_if_index, 0 /* down */ );
+        vnet_sw_interface_t *si = vnet_get_sw_interface (vnm, t->sw_if_index);
+        si->flags |= VNET_SW_INTERFACE_FLAG_HIDDEN;
 
-      /* make sure tunnel is removed from l2 bd or xconnect */
-      set_int_l2_mode (vxm->vlib_main, vnm, MODE_L3, t->sw_if_index, 0, 0, 0,
-		       0);
-      vec_add1 (vxm->free_geneve_tunnel_hw_if_indices, t->hw_if_index);
+        /* make sure tunnel is removed from l2 bd or xconnect */
+        set_int_l2_mode (vxm->vlib_main, vnm, MODE_L3, t->sw_if_index, 0, 0, 0,
+                         0);
+        vec_add1 (vxm->free_geneve_tunnel_hw_if_indices, t->hw_if_index);
 
-      vxm->tunnel_index_by_sw_if_index[t->sw_if_index] = ~0;
+        vxm->tunnel_index_by_sw_if_index[t->sw_if_index] = ~0;
 
-      if (!is_ip6)
-	hash_unset (vxm->geneve4_tunnel_by_key, key4.as_u64);
-      else
-	hash_unset_key_free (&vxm->geneve6_tunnel_by_key, &key6);
+        if (!is_ip6)
+            hash_unset (vxm->geneve4_tunnel_by_key, key4.as_u64);
+        else
+            hash_unset_key_free (&vxm->geneve6_tunnel_by_key, &key6);
 
-      if (!ip46_address_is_multicast (&t->remote))
-	{
-	  vtep_addr_unref (&t->local);
-	  fib_entry_child_remove (t->fib_entry_index, t->sibling_index);
-	  fib_table_entry_delete_index (t->fib_entry_index, FIB_SOURCE_RR);
-	}
-      else if (vtep_addr_unref (&t->remote) == 0)
-	{
-	  mcast_shared_remove (&t->remote);
-	}
+        if (!ip46_address_is_multicast (&t->remote)) {
+            vtep_addr_unref (&t->local);
+            fib_entry_child_remove (t->fib_entry_index, t->sibling_index);
+            fib_table_entry_delete_index (t->fib_entry_index, FIB_SOURCE_RR);
+        } else if (vtep_addr_unref (&t->remote) == 0) {
+            mcast_shared_remove (&t->remote);
+        }
 
-      fib_node_deinit (&t->node);
-      vec_free (t->rewrite);
-      pool_put (vxm->tunnels, t);
+        fib_node_deinit (&t->node);
+        vec_free (t->rewrite);
+        pool_put (vxm->tunnels, t);
     }
 
-  if (sw_if_indexp)
-    *sw_if_indexp = sw_if_index;
+    if (sw_if_indexp)
+        *sw_if_indexp = sw_if_index;
 
-  return 0;
+    return 0;
 }
 
 static uword
 get_decap_next_for_node (u32 node_index, u32 ipv4_set)
 {
-  geneve_main_t *vxm = &geneve_main;
-  vlib_main_t *vm = vxm->vlib_main;
-  uword input_node = (ipv4_set) ? geneve4_input_node.index :
-    geneve6_input_node.index;
+    geneve_main_t *vxm = &geneve_main;
+    vlib_main_t *vm = vxm->vlib_main;
+    uword input_node = (ipv4_set) ? geneve4_input_node.index :
+                       geneve6_input_node.index;
 
-  return vlib_node_add_next (vm, input_node, node_index);
+    return vlib_node_add_next (vm, input_node, node_index);
 }
 
 static uword
 unformat_decap_next (unformat_input_t * input, va_list * args)
 {
-  u32 *result = va_arg (*args, u32 *);
-  u32 ipv4_set = va_arg (*args, int);
-  geneve_main_t *vxm = &geneve_main;
-  vlib_main_t *vm = vxm->vlib_main;
-  u32 node_index;
-  u32 tmp;
+    u32 *result = va_arg (*args, u32 *);
+    u32 ipv4_set = va_arg (*args, int);
+    geneve_main_t *vxm = &geneve_main;
+    vlib_main_t *vm = vxm->vlib_main;
+    u32 node_index;
+    u32 tmp;
 
-  if (unformat (input, "l2"))
-    *result = GENEVE_INPUT_NEXT_L2_INPUT;
-  else if (unformat (input, "node %U", unformat_vlib_node, vm, &node_index))
-    *result = get_decap_next_for_node (node_index, ipv4_set);
-  else if (unformat (input, "%d", &tmp))
-    *result = tmp;
-  else
-    return 0;
-  return 1;
+    if (unformat (input, "l2"))
+        *result = GENEVE_INPUT_NEXT_L2_INPUT;
+    else if (unformat (input, "node %U", unformat_vlib_node, vm, &node_index))
+        *result = get_decap_next_for_node (node_index, ipv4_set);
+    else if (unformat (input, "%d", &tmp))
+        *result = tmp;
+    else
+        return 0;
+    return 1;
 }
 
 static clib_error_t *
 geneve_add_del_tunnel_command_fn (vlib_main_t * vm,
-				  unformat_input_t * input,
-				  vlib_cli_command_t * cmd)
+                                  unformat_input_t * input,
+                                  vlib_cli_command_t * cmd)
 {
-  unformat_input_t _line_input, *line_input = &_line_input;
-  ip46_address_t local, remote;
-  u8 is_add = 1;
-  u8 local_set = 0;
-  u8 remote_set = 0;
-  u8 grp_set = 0;
-  u8 ipv4_set = 0;
-  u8 ipv6_set = 0;
-  u32 encap_fib_index = 0;
-  u32 mcast_sw_if_index = ~0;
-  u32 decap_next_index = GENEVE_INPUT_NEXT_L2_INPUT;
-  u32 vni = 0;
-  u32 tmp;
-  int rv;
-  vnet_geneve_add_del_tunnel_args_t _a, *a = &_a;
-  u32 tunnel_sw_if_index;
-  clib_error_t *error = NULL;
+    unformat_input_t _line_input, *line_input = &_line_input;
+    ip46_address_t local, remote;
+    u8 is_add = 1;
+    u8 local_set = 0;
+    u8 remote_set = 0;
+    u8 grp_set = 0;
+    u8 ipv4_set = 0;
+    u8 ipv6_set = 0;
+    u32 encap_fib_index = 0;
+    u32 mcast_sw_if_index = ~0;
+    u32 decap_next_index = GENEVE_INPUT_NEXT_L2_INPUT;
+    u32 vni = 0;
+    u32 tmp;
+    int rv;
+    vnet_geneve_add_del_tunnel_args_t _a, *a = &_a;
+    u32 tunnel_sw_if_index;
+    clib_error_t *error = NULL;
 
-  /* Cant "universally zero init" (={0}) due to GCC bug 53119 */
-  memset (&local, 0, sizeof local);
-  memset (&remote, 0, sizeof remote);
+    /* Cant "universally zero init" (={0}) due to GCC bug 53119 */
+    memset (&local, 0, sizeof local);
+    memset (&remote, 0, sizeof remote);
 
-  /* Get a line of input. */
-  if (!unformat_user (input, unformat_line_input, line_input))
-    return 0;
+    /* Get a line of input. */
+    if (!unformat_user (input, unformat_line_input, line_input))
+        return 0;
 
-  while (unformat_check_input (line_input) != UNFORMAT_END_OF_INPUT)
-    {
-      if (unformat (line_input, "del"))
-	{
-	  is_add = 0;
-	}
-      else if (unformat (line_input, "local %U",
-			 unformat_ip4_address, &local.ip4))
-	{
-	  local_set = 1;
-	  ipv4_set = 1;
-	}
-      else if (unformat (line_input, "remote %U",
-			 unformat_ip4_address, &remote.ip4))
-	{
-	  remote_set = 1;
-	  ipv4_set = 1;
-	}
-      else if (unformat (line_input, "local %U",
-			 unformat_ip6_address, &local.ip6))
-	{
-	  local_set = 1;
-	  ipv6_set = 1;
-	}
-      else if (unformat (line_input, "remote %U",
-			 unformat_ip6_address, &remote.ip6))
-	{
-	  remote_set = 1;
-	  ipv6_set = 1;
-	}
-      else if (unformat (line_input, "group %U %U",
-			 unformat_ip4_address, &remote.ip4,
-			 unformat_vnet_sw_interface,
-			 vnet_get_main (), &mcast_sw_if_index))
-	{
-	  grp_set = remote_set = 1;
-	  ipv4_set = 1;
-	}
-      else if (unformat (line_input, "group %U %U",
-			 unformat_ip6_address, &remote.ip6,
-			 unformat_vnet_sw_interface,
-			 vnet_get_main (), &mcast_sw_if_index))
-	{
-	  grp_set = remote_set = 1;
-	  ipv6_set = 1;
-	}
-      else if (unformat (line_input, "encap-vrf-id %d", &tmp))
-	{
-	  encap_fib_index = fib_table_find (fib_ip_proto (ipv6_set), tmp);
-	  if (encap_fib_index == ~0)
-	    {
-	      error =
-		clib_error_return (0, "nonexistent encap-vrf-id %d", tmp);
-	      goto done;
-	    }
-	}
-      else if (unformat (line_input, "decap-next %U", unformat_decap_next,
-			 &decap_next_index, ipv4_set))
-	;
-      else if (unformat (line_input, "vni %d", &vni))
-	{
-	  if (vni >> 24)
-	    {
-	      error = clib_error_return (0, "vni %d out of range", vni);
-	      goto done;
-	    }
-	}
-      else
-	{
-	  error = clib_error_return (0, "parse error: '%U'",
-				     format_unformat_error, line_input);
-	  goto done;
-	}
+    while (unformat_check_input (line_input) != UNFORMAT_END_OF_INPUT) {
+        if (unformat (line_input, "del")) {
+            is_add = 0;
+        } else if (unformat (line_input, "local %U",
+                             unformat_ip4_address, &local.ip4)) {
+            local_set = 1;
+            ipv4_set = 1;
+        } else if (unformat (line_input, "remote %U",
+                             unformat_ip4_address, &remote.ip4)) {
+            remote_set = 1;
+            ipv4_set = 1;
+        } else if (unformat (line_input, "local %U",
+                             unformat_ip6_address, &local.ip6)) {
+            local_set = 1;
+            ipv6_set = 1;
+        } else if (unformat (line_input, "remote %U",
+                             unformat_ip6_address, &remote.ip6)) {
+            remote_set = 1;
+            ipv6_set = 1;
+        } else if (unformat (line_input, "group %U %U",
+                             unformat_ip4_address, &remote.ip4,
+                             unformat_vnet_sw_interface,
+                             vnet_get_main (), &mcast_sw_if_index)) {
+            grp_set = remote_set = 1;
+            ipv4_set = 1;
+        } else if (unformat (line_input, "group %U %U",
+                             unformat_ip6_address, &remote.ip6,
+                             unformat_vnet_sw_interface,
+                             vnet_get_main (), &mcast_sw_if_index)) {
+            grp_set = remote_set = 1;
+            ipv6_set = 1;
+        } else if (unformat (line_input, "encap-vrf-id %d", &tmp)) {
+            encap_fib_index = fib_table_find (fib_ip_proto (ipv6_set), tmp);
+            if (encap_fib_index == ~0) {
+                error =
+                    clib_error_return (0, "nonexistent encap-vrf-id %d", tmp);
+                goto done;
+            }
+        } else if (unformat (line_input, "decap-next %U", unformat_decap_next,
+                             &decap_next_index, ipv4_set))
+            ;
+        else if (unformat (line_input, "vni %d", &vni)) {
+            if (vni >> 24) {
+                error = clib_error_return (0, "vni %d out of range", vni);
+                goto done;
+            }
+        } else {
+            error = clib_error_return (0, "parse error: '%U'",
+                                       format_unformat_error, line_input);
+            goto done;
+        }
     }
 
-  if (local_set == 0)
-    {
-      error = clib_error_return (0, "tunnel local address not specified");
-      goto done;
+    if (local_set == 0) {
+        error = clib_error_return (0, "tunnel local address not specified");
+        goto done;
     }
 
-  if (remote_set == 0)
-    {
-      error = clib_error_return (0, "tunnel remote address not specified");
-      goto done;
+    if (remote_set == 0) {
+        error = clib_error_return (0, "tunnel remote address not specified");
+        goto done;
     }
 
-  if (grp_set && !ip46_address_is_multicast (&remote))
-    {
-      error = clib_error_return (0, "tunnel group address not multicast");
-      goto done;
+    if (grp_set && !ip46_address_is_multicast (&remote)) {
+        error = clib_error_return (0, "tunnel group address not multicast");
+        goto done;
     }
 
-  if (grp_set == 0 && ip46_address_is_multicast (&remote))
-    {
-      error = clib_error_return (0, "remote address must be unicast");
-      goto done;
+    if (grp_set == 0 && ip46_address_is_multicast (&remote)) {
+        error = clib_error_return (0, "remote address must be unicast");
+        goto done;
     }
 
-  if (grp_set && mcast_sw_if_index == ~0)
-    {
-      error = clib_error_return (0, "tunnel nonexistent multicast device");
-      goto done;
+    if (grp_set && mcast_sw_if_index == ~0) {
+        error = clib_error_return (0, "tunnel nonexistent multicast device");
+        goto done;
     }
 
-  if (ipv4_set && ipv6_set)
-    {
-      error = clib_error_return (0, "both IPv4 and IPv6 addresses specified");
-      goto done;
+    if (ipv4_set && ipv6_set) {
+        error = clib_error_return (0, "both IPv4 and IPv6 addresses specified");
+        goto done;
     }
 
-  if (ip46_address_cmp (&local, &remote) == 0)
-    {
-      error =
-	clib_error_return (0, "local and remote addresses are identical");
-      goto done;
+    if (ip46_address_cmp (&local, &remote) == 0) {
+        error =
+            clib_error_return (0, "local and remote addresses are identical");
+        goto done;
     }
 
-  if (decap_next_index == ~0)
-    {
-      error = clib_error_return (0, "next node not found");
-      goto done;
+    if (decap_next_index == ~0) {
+        error = clib_error_return (0, "next node not found");
+        goto done;
     }
 
-  if (vni == 0)
-    {
-      error = clib_error_return (0, "vni not specified");
-      goto done;
+    if (vni == 0) {
+        error = clib_error_return (0, "vni not specified");
+        goto done;
     }
 
-  memset (a, 0, sizeof (*a));
+    memset (a, 0, sizeof (*a));
 
-  a->is_add = is_add;
-  a->is_ip6 = ipv6_set;
+    a->is_add = is_add;
+    a->is_ip6 = ipv6_set;
 
 #define _(x) a->x = x;
-  foreach_copy_field;
+    foreach_copy_field;
 #undef _
 
-  rv = vnet_geneve_add_del_tunnel (a, &tunnel_sw_if_index);
+    rv = vnet_geneve_add_del_tunnel (a, &tunnel_sw_if_index);
 
-  switch (rv)
-    {
-    case 0:
-      if (is_add)
-	vlib_cli_output (vm, "%U\n", format_vnet_sw_if_index_name,
-			 vnet_get_main (), tunnel_sw_if_index);
-      break;
+    switch (rv) {
+        case 0:
+            if (is_add)
+                vlib_cli_output (vm, "%U\n", format_vnet_sw_if_index_name,
+                                 vnet_get_main (), tunnel_sw_if_index);
+            break;
 
-    case VNET_API_ERROR_TUNNEL_EXIST:
-      error = clib_error_return (0, "tunnel already exists...");
-      goto done;
+        case VNET_API_ERROR_TUNNEL_EXIST:
+            error = clib_error_return (0, "tunnel already exists...");
+            goto done;
 
-    case VNET_API_ERROR_NO_SUCH_ENTRY:
-      error = clib_error_return (0, "tunnel does not exist...");
-      goto done;
+        case VNET_API_ERROR_NO_SUCH_ENTRY:
+            error = clib_error_return (0, "tunnel does not exist...");
+            goto done;
 
-    default:
-      error = clib_error_return
-	(0, "vnet_geneve_add_del_tunnel returned %d", rv);
-      goto done;
+        default:
+            error = clib_error_return
+                    (0, "vnet_geneve_add_del_tunnel returned %d", rv);
+            goto done;
     }
 
 done:
-  unformat_free (line_input);
+    unformat_free (line_input);
 
-  return error;
+    return error;
 }
 
 /*?
@@ -913,23 +858,22 @@ VLIB_CLI_COMMAND (create_geneve_tunnel_command, static) = {
 
 static clib_error_t *
 show_geneve_tunnel_command_fn (vlib_main_t * vm,
-			       unformat_input_t * input,
-			       vlib_cli_command_t * cmd)
+                               unformat_input_t * input,
+                               vlib_cli_command_t * cmd)
 {
-  geneve_main_t *vxm = &geneve_main;
-  geneve_tunnel_t *t;
+    geneve_main_t *vxm = &geneve_main;
+    geneve_tunnel_t *t;
 
-  if (pool_elts (vxm->tunnels) == 0)
-    vlib_cli_output (vm, "No geneve tunnels configured...");
+    if (pool_elts (vxm->tunnels) == 0)
+        vlib_cli_output (vm, "No geneve tunnels configured...");
 
-  pool_foreach (t, vxm->tunnels, (
-				   {
-				   vlib_cli_output (vm, "%U",
-						    format_geneve_tunnel, t);
-				   }
-		));
+    pool_foreach (t, vxm->tunnels, ( {
+        vlib_cli_output (vm, "%U",
+                         format_geneve_tunnel, t);
+    }
+                                   ));
 
-  return 0;
+    return 0;
 }
 
 /*?
@@ -953,64 +897,61 @@ VLIB_CLI_COMMAND (show_geneve_tunnel_command, static) = {
 void
 vnet_int_geneve_bypass_mode (u32 sw_if_index, u8 is_ip6, u8 is_enable)
 {
-  if (is_ip6)
-    vnet_feature_enable_disable ("ip6-unicast", "ip6-geneve-bypass",
-				 sw_if_index, is_enable, 0, 0);
-  else
-    vnet_feature_enable_disable ("ip4-unicast", "ip4-geneve-bypass",
-				 sw_if_index, is_enable, 0, 0);
+    if (is_ip6)
+        vnet_feature_enable_disable ("ip6-unicast", "ip6-geneve-bypass",
+                                     sw_if_index, is_enable, 0, 0);
+    else
+        vnet_feature_enable_disable ("ip4-unicast", "ip4-geneve-bypass",
+                                     sw_if_index, is_enable, 0, 0);
 }
 
 
 static clib_error_t *
 set_ip_geneve_bypass (u32 is_ip6,
-		      unformat_input_t * input, vlib_cli_command_t * cmd)
+                      unformat_input_t * input, vlib_cli_command_t * cmd)
 {
-  unformat_input_t _line_input, *line_input = &_line_input;
-  vnet_main_t *vnm = vnet_get_main ();
-  clib_error_t *error = 0;
-  u32 sw_if_index, is_enable;
+    unformat_input_t _line_input, *line_input = &_line_input;
+    vnet_main_t *vnm = vnet_get_main ();
+    clib_error_t *error = 0;
+    u32 sw_if_index, is_enable;
 
-  sw_if_index = ~0;
-  is_enable = 1;
+    sw_if_index = ~0;
+    is_enable = 1;
 
-  if (!unformat_user (input, unformat_line_input, line_input))
-    return 0;
+    if (!unformat_user (input, unformat_line_input, line_input))
+        return 0;
 
-  while (unformat_check_input (line_input) != UNFORMAT_END_OF_INPUT)
-    {
-      if (unformat_user
-	  (line_input, unformat_vnet_sw_interface, vnm, &sw_if_index))
-	;
-      else if (unformat (line_input, "del"))
-	is_enable = 0;
-      else
-	{
-	  error = unformat_parse_error (line_input);
-	  goto done;
-	}
+    while (unformat_check_input (line_input) != UNFORMAT_END_OF_INPUT) {
+        if (unformat_user
+            (line_input, unformat_vnet_sw_interface, vnm, &sw_if_index))
+            ;
+        else if (unformat (line_input, "del"))
+            is_enable = 0;
+        else {
+            error = unformat_parse_error (line_input);
+            goto done;
+        }
     }
 
-  if (~0 == sw_if_index)
-    {
-      error = clib_error_return (0, "unknown interface `%U'",
-				 format_unformat_error, line_input);
-      goto done;
+    if (~0 == sw_if_index) {
+        error = clib_error_return (0, "unknown interface `%U'",
+                                   format_unformat_error, line_input);
+        goto done;
     }
 
-  vnet_int_geneve_bypass_mode (sw_if_index, is_ip6, is_enable);
+    vnet_int_geneve_bypass_mode (sw_if_index, is_ip6, is_enable);
 
 done:
-  unformat_free (line_input);
+    unformat_free (line_input);
 
-  return error;
+    return error;
 }
 
 static clib_error_t *
 set_ip4_geneve_bypass (vlib_main_t * vm,
-		       unformat_input_t * input, vlib_cli_command_t * cmd)
+                       unformat_input_t * input, vlib_cli_command_t * cmd)
 {
-  return set_ip_geneve_bypass (0, input, cmd);
+    return set_ip_geneve_bypass (0, input, cmd);
 }
 
 /*?
@@ -1065,9 +1006,9 @@ VLIB_CLI_COMMAND (set_interface_ip_geneve_bypass_command, static) = {
 
 static clib_error_t *
 set_ip6_geneve_bypass (vlib_main_t * vm,
-		       unformat_input_t * input, vlib_cli_command_t * cmd)
+                       unformat_input_t * input, vlib_cli_command_t * cmd)
 {
-  return set_ip_geneve_bypass (1, input, cmd);
+    return set_ip_geneve_bypass (1, input, cmd);
 }
 
 /*?
@@ -1123,28 +1064,28 @@ VLIB_CLI_COMMAND (set_interface_ip6_geneve_bypass_command, static) = {
 clib_error_t *
 geneve_init (vlib_main_t * vm)
 {
-  geneve_main_t *vxm = &geneve_main;
+    geneve_main_t *vxm = &geneve_main;
 
-  vxm->vnet_main = vnet_get_main ();
-  vxm->vlib_main = vm;
+    vxm->vnet_main = vnet_get_main ();
+    vxm->vlib_main = vm;
 
-  /* initialize the ip6 hash */
-  vxm->geneve6_tunnel_by_key = hash_create_mem (0,
-						sizeof (geneve6_tunnel_key_t),
-						sizeof (uword));
-  vxm->vtep6 = hash_create_mem (0, sizeof (ip6_address_t), sizeof (uword));
-  vxm->mcast_shared = hash_create_mem (0,
-				       sizeof (ip46_address_t),
-				       sizeof (mcast_shared_t));
+    /* initialize the ip6 hash */
+    vxm->geneve6_tunnel_by_key = hash_create_mem (0,
+                                 sizeof (geneve6_tunnel_key_t),
+                                 sizeof (uword));
+    vxm->vtep6 = hash_create_mem (0, sizeof (ip6_address_t), sizeof (uword));
+    vxm->mcast_shared = hash_create_mem (0,
+                                         sizeof (ip46_address_t),
+                                         sizeof (mcast_shared_t));
 
-  udp_register_dst_port (vm, UDP_DST_PORT_geneve,
-			 geneve4_input_node.index, /* is_ip4 */ 1);
-  udp_register_dst_port (vm, UDP_DST_PORT_geneve6,
-			 geneve6_input_node.index, /* is_ip4 */ 0);
+    udp_register_dst_port (vm, UDP_DST_PORT_geneve,
+                           geneve4_input_node.index, /* is_ip4 */ 1);
+    udp_register_dst_port (vm, UDP_DST_PORT_geneve6,
+                           geneve6_input_node.index, /* is_ip4 */ 0);
 
-  fib_node_register_type (FIB_NODE_TYPE_GENEVE_TUNNEL, &geneve_vft);
+    fib_node_register_type (FIB_NODE_TYPE_GENEVE_TUNNEL, &geneve_vft);
 
-  return 0;
+    return 0;
 }
 
 VLIB_INIT_FUNCTION (geneve_init);

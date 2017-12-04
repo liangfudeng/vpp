@@ -40,14 +40,14 @@ _(BUFFER_ALLOCATION_FAILURE, "Buffer Allocation Failure")
 
 typedef enum {
 #define _(sym,str) REPLICATE_DPO_ERROR_##sym,
-  foreach_replicate_dpo_error
+    foreach_replicate_dpo_error
 #undef _
-  REPLICATE_DPO_N_ERROR,
+    REPLICATE_DPO_N_ERROR,
 } replicate_dpo_error_t;
 
 static char * replicate_dpo_error_strings[] = {
 #define _(sym,string) string,
-  foreach_replicate_dpo_error
+    foreach_replicate_dpo_error
 #undef _
 };
 
@@ -70,12 +70,9 @@ replicate_get_index (const replicate_t *rep)
 static inline dpo_id_t*
 replicate_get_buckets (replicate_t *rep)
 {
-    if (REP_HAS_INLINE_BUCKETS(rep))
-    {
+    if (REP_HAS_INLINE_BUCKETS(rep)) {
         return (rep->rep_buckets_inline);
-    }
-    else
-    {
+    } else {
         return (rep->rep_buckets);
     }
 }
@@ -116,8 +113,7 @@ replicate_format (index_t repi,
     s = format(s, "[index:%d buckets:%d ", repi, rep->rep_n_buckets);
     s = format(s, "to:[%Ld:%Ld]]", to.packets, to.bytes);
 
-    for (i = 0; i < rep->rep_n_buckets; i++)
-    {
+    for (i = 0; i < rep->rep_n_buckets; i++) {
         s = format(s, "\n%U", format_white_space, indent+2);
         s = format(s, "[%d]", i);
         s = format(s, " %U", format_dpo_id, &buckets[i], indent+6);
@@ -153,8 +149,7 @@ replicate_create_i (u32 num_buckets,
     rep->rep_n_buckets = num_buckets;
     rep->rep_proto = rep_proto;
 
-    if (!REP_HAS_INLINE_BUCKETS(rep))
-    {
+    if (!REP_HAS_INLINE_BUCKETS(rep)) {
         vec_validate_aligned(rep->rep_buckets,
                              rep->rep_n_buckets - 1,
                              CLIB_CACHE_LINE_BYTES);
@@ -210,8 +205,7 @@ replicate_is_drop (const dpo_id_t *dpo)
     repi = dpo->dpoi_index & ~MPLS_IS_REPLICATE;
     rep = replicate_get(repi);
 
-    if (1 == rep->rep_n_buckets)
-    {
+    if (1 == rep->rep_n_buckets) {
         return (dpo_is_drop(replicate_get_bucket_i(rep, 0)));
     }
     return (0);
@@ -234,8 +228,7 @@ static load_balance_path_t *
 replicate_multipath_next_hop_fixup (load_balance_path_t *nhs,
                                     dpo_proto_t drop_proto)
 {
-    if (0 == vec_len(nhs))
-    {
+    if (0 == vec_len(nhs)) {
         load_balance_path_t *nh;
 
         /*
@@ -269,8 +262,7 @@ replicate_fill_buckets (replicate_t *rep,
      * the next-hops have normalised weights. that means their sum is the number
      * of buckets we need to fill.
      */
-    vec_foreach (nh, nhs)
-    {
+    vec_foreach (nh, nhs) {
         ASSERT(bucket < n_buckets);
         replicate_set_bucket_i(rep, bucket++, buckets, &nh->path_dpo);
     }
@@ -297,11 +289,10 @@ replicate_multipath_update (const dpo_id_t *dpo,
     repi = dpo->dpoi_index & ~MPLS_IS_REPLICATE;
     rep = replicate_get(repi);
     nhs = replicate_multipath_next_hop_fixup(next_hops,
-                                             rep->rep_proto);
+            rep->rep_proto);
     n_buckets = vec_len(nhs);
 
-    if (0 == rep->rep_n_buckets)
-    {
+    if (0 == rep->rep_n_buckets) {
         /*
          * first time initialisation. no packets inflight, so we can write
          * at leisure.
@@ -316,9 +307,7 @@ replicate_multipath_update (const dpo_id_t *dpo,
         replicate_fill_buckets(rep, nhs,
                                replicate_get_buckets(rep),
                                n_buckets);
-    }
-    else
-    {
+    } else {
         /*
          * This is a modification of an existing replicate.
          * We need to ensure that packets in flight see a consistent state, that
@@ -327,8 +316,7 @@ replicate_multipath_update (const dpo_id_t *dpo,
          * number of buckets is increasing, we must update the bucket array first,
          * then the reported number. vice-versa if the number of buckets goes down.
          */
-        if (n_buckets == rep->rep_n_buckets)
-        {
+        if (n_buckets == rep->rep_n_buckets) {
             /*
              * no change in the number of buckets. we can simply fill what
              * is new over what is old.
@@ -336,17 +324,14 @@ replicate_multipath_update (const dpo_id_t *dpo,
             replicate_fill_buckets(rep, nhs,
                                    replicate_get_buckets(rep),
                                    n_buckets);
-        }
-        else if (n_buckets > rep->rep_n_buckets)
-        {
+        } else if (n_buckets > rep->rep_n_buckets) {
             /*
              * we have more buckets. the old replicate map (if there is one)
              * will remain valid, i.e. mapping to indices within range, so we
              * update it last.
              */
             if (n_buckets > REP_NUM_INLINE_BUCKETS &&
-                rep->rep_n_buckets <= REP_NUM_INLINE_BUCKETS)
-            {
+                rep->rep_n_buckets <= REP_NUM_INLINE_BUCKETS) {
                 /*
                  * the new increased number of buckets is crossing the threshold
                  * from the inline storage to out-line. Alloc the outline buckets
@@ -365,15 +350,11 @@ replicate_multipath_update (const dpo_id_t *dpo,
 
                 CLIB_MEMORY_BARRIER();
 
-                for (ii = 0; ii < REP_NUM_INLINE_BUCKETS; ii++)
-                {
+                for (ii = 0; ii < REP_NUM_INLINE_BUCKETS; ii++) {
                     dpo_reset(&rep->rep_buckets_inline[ii]);
                 }
-            }
-            else
-            {
-                if (n_buckets <= REP_NUM_INLINE_BUCKETS)
-                {
+            } else {
+                if (n_buckets <= REP_NUM_INLINE_BUCKETS) {
                     /*
                      * we are not crossing the threshold and it's still inline buckets.
                      * we can write the new on the old..
@@ -383,9 +364,7 @@ replicate_multipath_update (const dpo_id_t *dpo,
                                            n_buckets);
                     CLIB_MEMORY_BARRIER();
                     replicate_set_n_buckets(rep, n_buckets);
-                }
-                else
-                {
+                } else {
                     /*
                      * we are not crossing the threshold. We need a new bucket array to
                      * hold the increased number of choices.
@@ -405,22 +384,18 @@ replicate_multipath_update (const dpo_id_t *dpo,
                     CLIB_MEMORY_BARRIER();
                     replicate_set_n_buckets(rep, n_buckets);
 
-                    vec_foreach(tmp_dpo, old_buckets)
-                    {
+                    vec_foreach(tmp_dpo, old_buckets) {
                         dpo_reset(tmp_dpo);
                     }
                     vec_free(old_buckets);
                 }
             }
-        }
-        else
-        {
+        } else {
             /*
              * bucket size shrinkage.
              */
             if (n_buckets <= REP_NUM_INLINE_BUCKETS &&
-                rep->rep_n_buckets > REP_NUM_INLINE_BUCKETS)
-            {
+                rep->rep_n_buckets > REP_NUM_INLINE_BUCKETS) {
                 /*
                  * the new decreased number of buckets is crossing the threshold
                  * from out-line storage to inline:
@@ -436,14 +411,11 @@ replicate_multipath_update (const dpo_id_t *dpo,
                 replicate_set_n_buckets(rep, n_buckets);
                 CLIB_MEMORY_BARRIER();
 
-                vec_foreach(tmp_dpo, rep->rep_buckets)
-                {
+                vec_foreach(tmp_dpo, rep->rep_buckets) {
                     dpo_reset(tmp_dpo);
                 }
                 vec_free(rep->rep_buckets);
-            }
-            else
-            {
+            } else {
                 /*
                  * not crossing the threshold.
                  *  1 - update the number to the smaller size
@@ -463,16 +435,14 @@ replicate_multipath_update (const dpo_id_t *dpo,
                                        buckets,
                                        n_buckets);
 
-                for (ii = n_buckets; ii < old_n_buckets; ii++)
-                {
+                for (ii = n_buckets; ii < old_n_buckets; ii++) {
                     dpo_reset(&buckets[ii]);
                 }
             }
         }
     }
 
-    vec_foreach (nh, nhs)
-    {
+    vec_foreach (nh, nhs) {
         dpo_reset(&nh->path_dpo);
     }
     vec_free(nhs);
@@ -496,14 +466,12 @@ replicate_destroy (replicate_t *rep)
 
     buckets = replicate_get_buckets(rep);
 
-    for (i = 0; i < rep->rep_n_buckets; i++)
-    {
+    for (i = 0; i < rep->rep_n_buckets; i++) {
         dpo_reset(&buckets[i]);
     }
 
     REP_DBG(rep, "destroy");
-    if (!REP_HAS_INLINE_BUCKETS(rep))
-    {
+    if (!REP_HAS_INLINE_BUCKETS(rep)) {
         vec_free(rep->rep_buckets);
     }
 
@@ -519,8 +487,7 @@ replicate_unlock (dpo_id_t *dpo)
 
     rep->rep_locks--;
 
-    if (0 == rep->rep_locks)
-    {
+    if (0 == rep->rep_locks) {
         replicate_destroy(rep);
     }
 }
@@ -529,9 +496,9 @@ static void
 replicate_mem_show (void)
 {
     fib_show_memory_usage("replicate",
-			  pool_elts(replicate_pool),
-			  pool_len(replicate_pool),
-			  sizeof(replicate_t));
+                          pool_elts(replicate_pool),
+                          pool_len(replicate_pool),
+                          sizeof(replicate_t));
 }
 
 const static dpo_vft_t rep_vft = {
@@ -548,24 +515,20 @@ const static dpo_vft_t rep_vft = {
  * this means that these graph nodes are ones from which a replicate is the
  * parent object in the DPO-graph.
  */
-const static char* const replicate_ip4_nodes[] =
-{
+const static char* const replicate_ip4_nodes[] = {
     "ip4-replicate",
     NULL,
 };
-const static char* const replicate_ip6_nodes[] =
-{
+const static char* const replicate_ip6_nodes[] = {
     "ip6-replicate",
     NULL,
 };
-const static char* const replicate_mpls_nodes[] =
-{
+const static char* const replicate_mpls_nodes[] = {
     "mpls-replicate",
     NULL,
 };
 
-const static char* const * const replicate_nodes[DPO_PROTO_NUM] =
-{
+const static char* const * const replicate_nodes[DPO_PROTO_NUM] = {
     [DPO_PROTO_IP4]  = replicate_ip4_nodes,
     [DPO_PROTO_IP6]  = replicate_ip6_nodes,
     [DPO_PROTO_MPLS] = replicate_mpls_nodes,
@@ -584,21 +547,17 @@ replicate_show (vlib_main_t * vm,
 {
     index_t repi = INDEX_INVALID;
 
-    while (unformat_check_input (input) != UNFORMAT_END_OF_INPUT)
-    {
+    while (unformat_check_input (input) != UNFORMAT_END_OF_INPUT) {
         if (unformat (input, "%d", &repi))
             ;
         else
             break;
     }
 
-    if (INDEX_INVALID != repi)
-    {
+    if (INDEX_INVALID != repi) {
         vlib_cli_output (vm, "%U", format_replicate, repi,
                          REPLICATE_FORMAT_DETAIL);
-    }
-    else
-    {
+    } else {
         replicate_t *rep;
 
         pool_foreach(rep, replicate_pool,
@@ -618,8 +577,7 @@ VLIB_CLI_COMMAND (replicate_show_command, static) = {
     .function = replicate_show,
 };
 
-typedef struct replicate_trace_t_
-{
+typedef struct replicate_trace_t_ {
     index_t rep_index;
     dpo_id_t dpo;
 } replicate_trace_t;
@@ -637,21 +595,19 @@ replicate_inline (vlib_main_t * vm,
     from = vlib_frame_vector_args (frame);
     n_left_from = frame->n_vectors;
     next_index = node->cached_next_index;
-  
-    while (n_left_from > 0)
-    {
+
+    while (n_left_from > 0) {
         u32 n_left_to_next;
 
         vlib_get_next_frame (vm, node, next_index,
                              to_next, n_left_to_next);
 
-        while (n_left_from > 0 && n_left_to_next > 0)
-	{
+        while (n_left_from > 0 && n_left_to_next > 0) {
             u32 next0, ci0, bi0, bucket, repi0;
             const replicate_t *rep0;
             vlib_buffer_t * b0, *c0;
             const dpo_id_t *dpo0;
-	    u8 num_cloned;
+            u8 num_cloned;
 
             bi0 = from[0];
             from += 1;
@@ -665,19 +621,17 @@ replicate_inline (vlib_main_t * vm,
                 cm, thread_index, repi0, 1,
                 vlib_buffer_length_in_chain(vm, b0));
 
-	    vec_validate (rm->clones[thread_index], rep0->rep_n_buckets - 1);
+            vec_validate (rm->clones[thread_index], rep0->rep_n_buckets - 1);
 
-	    num_cloned = vlib_buffer_clone (vm, bi0, rm->clones[thread_index], rep0->rep_n_buckets, 128);
+            num_cloned = vlib_buffer_clone (vm, bi0, rm->clones[thread_index], rep0->rep_n_buckets, 128);
 
-	    if (num_cloned != rep0->rep_n_buckets)
-	      {
-		vlib_node_increment_counter
-		  (vm, node->node_index,
-		   REPLICATE_DPO_ERROR_BUFFER_ALLOCATION_FAILURE, 1);
-	      }
+            if (num_cloned != rep0->rep_n_buckets) {
+                vlib_node_increment_counter
+                (vm, node->node_index,
+                 REPLICATE_DPO_ERROR_BUFFER_ALLOCATION_FAILURE, 1);
+            }
 
-            for (bucket = 0; bucket < num_cloned; bucket++)
-            {
+            for (bucket = 0; bucket < num_cloned; bucket++) {
                 ci0 = rm->clones[thread_index][bucket];
                 c0 = vlib_get_buffer(vm, ci0);
 
@@ -689,8 +643,7 @@ replicate_inline (vlib_main_t * vm,
                 next0 = dpo0->dpoi_next_node;
                 vnet_buffer (c0)->ip.adj_index[VLIB_TX] = dpo0->dpoi_index;
 
-                if (PREDICT_FALSE(c0->flags & VLIB_BUFFER_IS_TRACED))
-                {
+                if (PREDICT_FALSE(c0->flags & VLIB_BUFFER_IS_TRACED)) {
                     replicate_trace_t *t;
 
                     vlib_trace_buffer (vm, node, next0, c0, 0);
@@ -702,13 +655,12 @@ replicate_inline (vlib_main_t * vm,
                 vlib_validate_buffer_enqueue_x1 (vm, node, next_index,
                                                  to_next, n_left_to_next,
                                                  ci0, next0);
-		if (PREDICT_FALSE (n_left_to_next == 0))
-		  {
-		    vlib_put_next_frame (vm, node, next_index, n_left_to_next);
-		    vlib_get_next_frame (vm, node, next_index, to_next, n_left_to_next);
-		  }
+                if (PREDICT_FALSE (n_left_to_next == 0)) {
+                    vlib_put_next_frame (vm, node, next_index, n_left_to_next);
+                    vlib_get_next_frame (vm, node, next_index, to_next, n_left_to_next);
+                }
             }
-	    vec_reset_length (rm->clones[thread_index]);
+            vec_reset_length (rm->clones[thread_index]);
         }
 
         vlib_put_next_frame (vm, node, next_index, n_left_to_next);
@@ -720,14 +672,14 @@ replicate_inline (vlib_main_t * vm,
 static u8 *
 format_replicate_trace (u8 * s, va_list * args)
 {
-  CLIB_UNUSED (vlib_main_t * vm) = va_arg (*args, vlib_main_t *);
-  CLIB_UNUSED (vlib_node_t * node) = va_arg (*args, vlib_node_t *);
-  replicate_trace_t *t = va_arg (*args, replicate_trace_t *);
+    CLIB_UNUSED (vlib_main_t * vm) = va_arg (*args, vlib_main_t *);
+    CLIB_UNUSED (vlib_node_t * node) = va_arg (*args, vlib_node_t *);
+    replicate_trace_t *t = va_arg (*args, replicate_trace_t *);
 
-  s = format (s, "replicate: %d via %U",
-              t->rep_index,
-              format_dpo_id, &t->dpo, 0);
-  return s;
+    s = format (s, "replicate: %d via %U",
+                t->rep_index,
+                format_dpo_id, &t->dpo, 0);
+    return s;
 }
 
 static uword
@@ -742,18 +694,18 @@ ip4_replicate (vlib_main_t * vm,
  * @brief IP4 replication node
  */
 VLIB_REGISTER_NODE (ip4_replicate_node) = {
-  .function = ip4_replicate,
-  .name = "ip4-replicate",
-  .vector_size = sizeof (u32),
+    .function = ip4_replicate,
+    .name = "ip4-replicate",
+    .vector_size = sizeof (u32),
 
-  .n_errors = ARRAY_LEN(replicate_dpo_error_strings),
-  .error_strings = replicate_dpo_error_strings,
+    .n_errors = ARRAY_LEN(replicate_dpo_error_strings),
+    .error_strings = replicate_dpo_error_strings,
 
-  .format_trace = format_replicate_trace,
-  .n_next_nodes = 1,
-  .next_nodes = {
-      [0] = "ip4-drop",
-  },
+    .format_trace = format_replicate_trace,
+    .n_next_nodes = 1,
+    .next_nodes = {
+        [0] = "ip4-drop",
+    },
 };
 
 static uword
@@ -768,18 +720,18 @@ ip6_replicate (vlib_main_t * vm,
  * @brief IPv6 replication node
  */
 VLIB_REGISTER_NODE (ip6_replicate_node) = {
-  .function = ip6_replicate,
-  .name = "ip6-replicate",
-  .vector_size = sizeof (u32),
+    .function = ip6_replicate,
+    .name = "ip6-replicate",
+    .vector_size = sizeof (u32),
 
-  .n_errors = ARRAY_LEN(replicate_dpo_error_strings),
-  .error_strings = replicate_dpo_error_strings,
+    .n_errors = ARRAY_LEN(replicate_dpo_error_strings),
+    .error_strings = replicate_dpo_error_strings,
 
-  .format_trace = format_replicate_trace,
-  .n_next_nodes = 1,
-  .next_nodes = {
-      [0] = "ip6-drop",
-  },
+    .format_trace = format_replicate_trace,
+    .n_next_nodes = 1,
+    .next_nodes = {
+        [0] = "ip6-drop",
+    },
 };
 
 static uword
@@ -794,28 +746,28 @@ mpls_replicate (vlib_main_t * vm,
  * @brief MPLS replication node
  */
 VLIB_REGISTER_NODE (mpls_replicate_node) = {
-  .function = mpls_replicate,
-  .name = "mpls-replicate",
-  .vector_size = sizeof (u32),
+    .function = mpls_replicate,
+    .name = "mpls-replicate",
+    .vector_size = sizeof (u32),
 
-  .n_errors = ARRAY_LEN(replicate_dpo_error_strings),
-  .error_strings = replicate_dpo_error_strings,
+    .n_errors = ARRAY_LEN(replicate_dpo_error_strings),
+    .error_strings = replicate_dpo_error_strings,
 
-  .format_trace = format_replicate_trace,
-  .n_next_nodes = 1,
-  .next_nodes = {
-      [0] = "mpls-drop",
-  },
+    .format_trace = format_replicate_trace,
+    .n_next_nodes = 1,
+    .next_nodes = {
+        [0] = "mpls-drop",
+    },
 };
 
 clib_error_t *
 replicate_dpo_init (vlib_main_t * vm)
 {
-  replicate_main_t * rm = &replicate_main;
+    replicate_main_t * rm = &replicate_main;
 
-  vec_validate (rm->clones, vlib_num_workers());
+    vec_validate (rm->clones, vlib_num_workers());
 
-  return 0;
+    return 0;
 }
 
 VLIB_INIT_FUNCTION (replicate_dpo_init);

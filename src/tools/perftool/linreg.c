@@ -1,4 +1,4 @@
-/* 
+/*
  *------------------------------------------------------------------
  * Copyright (c) 2006-2016 Cisco and/or its affiliates.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,7 +37,7 @@ void linreg (double *x, double *y, int nitems, double *a, double *b,
     int i;
 
     *b = 0.0;
-    
+
     for (i = 0; i < nitems; i++) {
         sx += x[i];
         sy += y[i];

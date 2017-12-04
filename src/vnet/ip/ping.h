@@ -20,40 +20,36 @@
 
 #include <vnet/ip/lookup.h>
 
-typedef enum
-{
-  PING_RESPONSE_IP6 = 42,
-  PING_RESPONSE_IP4,
+typedef enum {
+    PING_RESPONSE_IP6 = 42,
+    PING_RESPONSE_IP4,
 } ping_response_type_t;
 
-typedef enum
-{
-  SEND_PING_OK = 0,
-  SEND_PING_ALLOC_FAIL,
-  SEND_PING_NO_INTERFACE,
-  SEND_PING_NO_TABLE,
-  SEND_PING_NO_SRC_ADDRESS,
+typedef enum {
+    SEND_PING_OK = 0,
+    SEND_PING_ALLOC_FAIL,
+    SEND_PING_NO_INTERFACE,
+    SEND_PING_NO_TABLE,
+    SEND_PING_NO_SRC_ADDRESS,
 } send_ip46_ping_result_t;
 
 /*
  * Currently running ping command.
  */
-typedef struct ping_run_t
-{
-  u16 icmp_id;
-  u16 curr_seq;
-  uword cli_process_id;
-  uword cli_thread_index;
+typedef struct ping_run_t {
+    u16 icmp_id;
+    u16 curr_seq;
+    uword cli_process_id;
+    uword cli_thread_index;
 } ping_run_t;
 
-typedef struct ping_main_t
-{
-  ip6_main_t *ip6_main;
-  ip4_main_t *ip4_main;
-  ping_run_t *ping_runs;
-  /* hash table to find back the CLI process for a reply */
-  // uword *cli_proc_by_icmp_id;
-  ping_run_t *ping_run_by_icmp_id;
+typedef struct ping_main_t {
+    ip6_main_t *ip6_main;
+    ip4_main_t *ip4_main;
+    ping_run_t *ping_runs;
+    /* hash table to find back the CLI process for a reply */
+    // uword *cli_proc_by_icmp_id;
+    ping_run_t *ping_run_by_icmp_id;
 } ping_main_t;
 
 extern ping_main_t ping_main;
@@ -88,28 +84,25 @@ typedef CLIB_PACKED (struct {
 /* *INDENT-ON* */
 
 
-typedef struct
-{
-  u16 id;
-  u16 seq;
-  u8 bound;
+typedef struct {
+    u16 id;
+    u16 seq;
+    u8 bound;
 } icmp_echo_trace_t;
 
 
 
 
-typedef enum
-{
-  ICMP6_ECHO_REPLY_NEXT_DROP,
-  ICMP6_ECHO_REPLY_NEXT_PUNT,
-  ICMP6_ECHO_REPLY_N_NEXT,
+typedef enum {
+    ICMP6_ECHO_REPLY_NEXT_DROP,
+    ICMP6_ECHO_REPLY_NEXT_PUNT,
+    ICMP6_ECHO_REPLY_N_NEXT,
 } icmp6_echo_reply_next_t;
 
-typedef enum
-{
-  ICMP4_ECHO_REPLY_NEXT_DROP,
-  ICMP4_ECHO_REPLY_NEXT_PUNT,
-  ICMP4_ECHO_REPLY_N_NEXT,
+typedef enum {
+    ICMP4_ECHO_REPLY_NEXT_DROP,
+    ICMP4_ECHO_REPLY_NEXT_PUNT,
+    ICMP4_ECHO_REPLY_N_NEXT,
 } icmp4_echo_reply_next_t;
 
 #endif /* included_vnet_ping_h */

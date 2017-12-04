@@ -15,99 +15,101 @@
 
 #include "vom/route_domain_cmds.hpp"
 
-namespace VOM {
-namespace route_domain_cmds {
-
-create_cmd::create_cmd(HW::item<bool>& item,
-                       l3_proto_t proto,
-                       route::table_id_t id)
-  : rpc_cmd(item)
-  , m_id(id)
-  , m_proto(proto)
+namespace VOM
 {
-}
+    namespace route_domain_cmds
+    {
 
-bool
-create_cmd::operator==(const create_cmd& other) const
-{
-  return (m_id == other.m_id);
-}
+        create_cmd::create_cmd(HW::item<bool>& item,
+                               l3_proto_t proto,
+                               route::table_id_t id)
+            : rpc_cmd(item)
+            , m_id(id)
+            , m_proto(proto)
+        {
+        }
 
-rc_t
-create_cmd::issue(connection& con)
-{
-  msg_t req(con.ctx(), std::ref(*this));
+        bool
+        create_cmd::operator==(const create_cmd& other) const
+        {
+            return (m_id == other.m_id);
+        }
 
-  auto& payload = req.get_request().get_payload();
-  payload.table_id = m_id;
-  payload.is_add = 1;
-  payload.is_ipv6 = m_proto.is_ipv6();
+        rc_t
+        create_cmd::issue(connection& con)
+        {
+            msg_t req(con.ctx(), std::ref(*this));
 
-  VAPI_CALL(req.execute());
+            auto& payload = req.get_request().get_payload();
+            payload.table_id = m_id;
+            payload.is_add = 1;
+            payload.is_ipv6 = m_proto.is_ipv6();
 
-  m_hw_item.set(wait());
+            VAPI_CALL(req.execute());
 
-  return (rc_t::OK);
-}
+            m_hw_item.set(wait());
 
-std::string
-create_cmd::to_string() const
-{
-  std::ostringstream s;
-  s << "ip-table-create: " << m_hw_item.to_string() << " id:" << m_id
-    << " af:" << m_proto.to_string();
+            return (rc_t::OK);
+        }
 
-  return (s.str());
-}
+        std::string
+        create_cmd::to_string() const
+        {
+            std::ostringstream s;
+            s << "ip-table-create: " << m_hw_item.to_string() << " id:" << m_id
+              << " af:" << m_proto.to_string();
 
-delete_cmd::delete_cmd(HW::item<bool>& item,
-                       l3_proto_t proto,
-                       route::table_id_t id)
-  : rpc_cmd(item)
-  , m_id(id)
-  , m_proto(proto)
-{
-}
+            return (s.str());
+        }
 
-bool
-delete_cmd::operator==(const delete_cmd& other) const
-{
-  return (m_id == other.m_id);
-}
+        delete_cmd::delete_cmd(HW::item<bool>& item,
+                               l3_proto_t proto,
+                               route::table_id_t id)
+            : rpc_cmd(item)
+            , m_id(id)
+            , m_proto(proto)
+        {
+        }
 
-rc_t
-delete_cmd::issue(connection& con)
-{
-  msg_t req(con.ctx(), std::ref(*this));
+        bool
+        delete_cmd::operator==(const delete_cmd& other) const
+        {
+            return (m_id == other.m_id);
+        }
 
-  auto& payload = req.get_request().get_payload();
-  payload.table_id = m_id;
-  payload.is_add = 0;
-  payload.is_ipv6 = m_proto.is_ipv6();
+        rc_t
+        delete_cmd::issue(connection& con)
+        {
+            msg_t req(con.ctx(), std::ref(*this));
 
-  VAPI_CALL(req.execute());
+            auto& payload = req.get_request().get_payload();
+            payload.table_id = m_id;
+            payload.is_add = 0;
+            payload.is_ipv6 = m_proto.is_ipv6();
 
-  wait();
-  m_hw_item.set(rc_t::NOOP);
+            VAPI_CALL(req.execute());
 
-  return (rc_t::OK);
-}
+            wait();
+            m_hw_item.set(rc_t::NOOP);
 
-std::string
-delete_cmd::to_string() const
-{
-  std::ostringstream s;
-  s << "ip-table-delete: " << m_hw_item.to_string() << " id:" << m_id
-    << " af:" << m_proto.to_string();
+            return (rc_t::OK);
+        }
 
-  return (s.str());
-}
-} // namespace route_domain_cmds
+        std::string
+        delete_cmd::to_string() const
+        {
+            std::ostringstream s;
+            s << "ip-table-delete: " << m_hw_item.to_string() << " id:" << m_id
+              << " af:" << m_proto.to_string();
+
+            return (s.str());
+        }
+    } // namespace route_domain_cmds
 } // namespace VOM
-  /*
-   * fd.io coding-style-patch-verification: ON
-   *
-   * Local Variables:
-   * eval: (c-set-style "mozilla")
-   * End:
-   */
+/*
+ * fd.io coding-style-patch-verification: ON
+ *
+ * Local Variables:
+ * eval: (c-set-style "mozilla")
+ * End:
+ */

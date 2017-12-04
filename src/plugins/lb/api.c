@@ -60,7 +60,7 @@ setup_message_id_table (lb_main_t * lbm, api_main_t * am)
 {
 #define _(id,n,crc) \
   vl_msg_api_add_msg_name_crc (am, #n "_" #crc, id + lbm->msg_id_base);
-  foreach_vl_msg_name_crc_lb;
+    foreach_vl_msg_name_crc_lb;
 #undef _
 }
 
@@ -75,28 +75,28 @@ static void
 vl_api_lb_conf_t_handler
 (vl_api_lb_conf_t * mp)
 {
-  lb_main_t *lbm = &lb_main;
-  vl_api_lb_conf_reply_t * rmp;
-  int rv = 0;
+    lb_main_t *lbm = &lb_main;
+    vl_api_lb_conf_reply_t * rmp;
+    int rv = 0;
 
-  rv = lb_conf((ip4_address_t *)&mp->ip4_src_address,
-               (ip6_address_t *)mp->ip6_src_address,
-               mp->sticky_buckets_per_core,
-               mp->flow_timeout);
+    rv = lb_conf((ip4_address_t *)&mp->ip4_src_address,
+                 (ip6_address_t *)mp->ip6_src_address,
+                 mp->sticky_buckets_per_core,
+                 mp->flow_timeout);
 
- REPLY_MACRO (VL_API_LB_CONF_REPLY);
+    REPLY_MACRO (VL_API_LB_CONF_REPLY);
 }
 
 static void *vl_api_lb_conf_t_print
 (vl_api_lb_conf_t *mp, void * handle)
 {
-  u8 * s;
-  s = format (0, "SCRIPT: lb_conf ");
-  s = format (s, "%U ", format_ip4_address, (ip4_address_t *)&mp->ip4_src_address);
-  s = format (s, "%U ", format_ip6_address, (ip6_address_t *)mp->ip6_src_address);
-  s = format (s, "%u ", mp->sticky_buckets_per_core);
-  s = format (s, "%u ", mp->flow_timeout);
-  FINISH;
+    u8 * s;
+    s = format (0, "SCRIPT: lb_conf ");
+    s = format (s, "%U ", format_ip4_address, (ip4_address_t *)&mp->ip4_src_address);
+    s = format (s, "%U ", format_ip6_address, (ip6_address_t *)mp->ip6_src_address);
+    s = format (s, "%u ", mp->sticky_buckets_per_core);
+    s = format (s, "%u ", mp->flow_timeout);
+    FINISH;
 }
 
 
@@ -104,76 +104,76 @@ static void
 vl_api_lb_add_del_vip_t_handler
 (vl_api_lb_add_del_vip_t * mp)
 {
-  lb_main_t *lbm = &lb_main;
-  vl_api_lb_conf_reply_t * rmp;
-  int rv = 0;
-  ip46_address_t prefix;
-  memcpy(&prefix.ip6, mp->ip_prefix, sizeof(prefix.ip6));
+    lb_main_t *lbm = &lb_main;
+    vl_api_lb_conf_reply_t * rmp;
+    int rv = 0;
+    ip46_address_t prefix;
+    memcpy(&prefix.ip6, mp->ip_prefix, sizeof(prefix.ip6));
 
-  if (mp->is_del) {
-    u32 vip_index;
-    if (!(rv = lb_vip_find_index(&prefix, mp->prefix_length, &vip_index)))
-      rv = lb_vip_del(vip_index);
-  } else {
-    u32 vip_index;
-    lb_vip_type_t type;
-    if (ip46_prefix_is_ip4(&prefix, mp->prefix_length)) {
-      type = mp->is_gre4?LB_VIP_TYPE_IP4_GRE4:LB_VIP_TYPE_IP4_GRE6;
+    if (mp->is_del) {
+        u32 vip_index;
+        if (!(rv = lb_vip_find_index(&prefix, mp->prefix_length, &vip_index)))
+            rv = lb_vip_del(vip_index);
     } else {
-      type = mp->is_gre4?LB_VIP_TYPE_IP6_GRE4:LB_VIP_TYPE_IP6_GRE6;
-    }
+        u32 vip_index;
+        lb_vip_type_t type;
+        if (ip46_prefix_is_ip4(&prefix, mp->prefix_length)) {
+            type = mp->is_gre4?LB_VIP_TYPE_IP4_GRE4:LB_VIP_TYPE_IP4_GRE6;
+        } else {
+            type = mp->is_gre4?LB_VIP_TYPE_IP6_GRE4:LB_VIP_TYPE_IP6_GRE6;
+        }
 
-    rv = lb_vip_add(&prefix, mp->prefix_length, type,
-                    mp->new_flows_table_length, &vip_index);
-  }
- REPLY_MACRO (VL_API_LB_CONF_REPLY);
+        rv = lb_vip_add(&prefix, mp->prefix_length, type,
+                        mp->new_flows_table_length, &vip_index);
+    }
+    REPLY_MACRO (VL_API_LB_CONF_REPLY);
 }
 
 static void *vl_api_lb_add_del_vip_t_print
 (vl_api_lb_add_del_vip_t *mp, void * handle)
 {
-  u8 * s;
-  s = format (0, "SCRIPT: lb_add_del_vip ");
-  s = format (s, "%U ", format_ip46_prefix,
-              (ip46_address_t *)mp->ip_prefix, mp->prefix_length, IP46_TYPE_ANY);
-  s = format (s, "%s ", mp->is_gre4?"gre4":"gre6");
-  s = format (s, "%u ", mp->new_flows_table_length);
-  s = format (s, "%s ", mp->is_del?"del":"add");
-  FINISH;
+    u8 * s;
+    s = format (0, "SCRIPT: lb_add_del_vip ");
+    s = format (s, "%U ", format_ip46_prefix,
+                (ip46_address_t *)mp->ip_prefix, mp->prefix_length, IP46_TYPE_ANY);
+    s = format (s, "%s ", mp->is_gre4?"gre4":"gre6");
+    s = format (s, "%u ", mp->new_flows_table_length);
+    s = format (s, "%s ", mp->is_del?"del":"add");
+    FINISH;
 }
 
 static void
 vl_api_lb_add_del_as_t_handler
 (vl_api_lb_add_del_as_t * mp)
 {
-  lb_main_t *lbm = &lb_main;
-  vl_api_lb_conf_reply_t * rmp;
-  int rv = 0;
-  u32 vip_index;
-  if ((rv = lb_vip_find_index((ip46_address_t *)mp->vip_ip_prefix,
-                              mp->vip_prefix_length, &vip_index)))
-    goto done;
+    lb_main_t *lbm = &lb_main;
+    vl_api_lb_conf_reply_t * rmp;
+    int rv = 0;
+    u32 vip_index;
+    if ((rv = lb_vip_find_index((ip46_address_t *)mp->vip_ip_prefix,
+                                mp->vip_prefix_length, &vip_index)))
+        goto done;
 
-  if (mp->is_del)
-    rv = lb_vip_del_ass(vip_index, (ip46_address_t *)mp->as_address, 1);
-  else
-    rv = lb_vip_add_ass(vip_index, (ip46_address_t *)mp->as_address, 1);
+    if (mp->is_del)
+        rv = lb_vip_del_ass(vip_index, (ip46_address_t *)mp->as_address, 1);
+    else
+        rv = lb_vip_add_ass(vip_index, (ip46_address_t *)mp->as_address, 1);
 
 done:
- REPLY_MACRO (VL_API_LB_CONF_REPLY);
+    REPLY_MACRO (VL_API_LB_CONF_REPLY);
 }
 
 static void *vl_api_lb_add_del_as_t_print
 (vl_api_lb_add_del_as_t *mp, void * handle)
 {
-  u8 * s;
-  s = format (0, "SCRIPT: lb_add_del_as ");
-  s = format (s, "%U ", format_ip46_prefix,
-              (ip46_address_t *)mp->vip_ip_prefix, mp->vip_prefix_length, IP46_TYPE_ANY);
-  s = format (s, "%U ", format_ip46_address,
+    u8 * s;
+    s = format (0, "SCRIPT: lb_add_del_as ");
+    s = format (s, "%U ", format_ip46_prefix,
+                (ip46_address_t *)mp->vip_ip_prefix, mp->vip_prefix_length, IP46_TYPE_ANY);
+    s = format (s, "%U ", format_ip46_address,
                 (ip46_address_t *)mp->as_address, IP46_TYPE_ANY);
-  s = format (s, "%s ", mp->is_del?"del":"add");
-  FINISH;
+    s = format (s, "%s ", mp->is_del?"del":"add");
+    FINISH;
 }
 
 /* List of message types that this plugin understands */
@@ -184,10 +184,10 @@ _(LB_ADD_DEL_AS, lb_add_del_as)
 
 static clib_error_t * lb_api_init (vlib_main_t * vm)
 {
-  lb_main_t *lbm = &lb_main;
-  u8 *name = format (0, "lb_%08x%c", api_version, 0);
-  lbm->msg_id_base = vl_msg_api_get_msg_ids
-      ((char *) name, VL_MSG_FIRST_AVAILABLE);
+    lb_main_t *lbm = &lb_main;
+    u8 *name = format (0, "lb_%08x%c", api_version, 0);
+    lbm->msg_id_base = vl_msg_api_get_msg_ids
+                       ((char *) name, VL_MSG_FIRST_AVAILABLE);
 
 #define _(N,n)                                                  \
     vl_msg_api_set_handlers((VL_API_##N + lbm->msg_id_base),     \
@@ -197,13 +197,13 @@ static clib_error_t * lb_api_init (vlib_main_t * vm)
                            vl_api_##n##_t_endian,               \
                            vl_api_##n##_t_print,                \
                            sizeof(vl_api_##n##_t), 1);
-  foreach_lb_plugin_api_msg;
+    foreach_lb_plugin_api_msg;
 #undef _
 
-  /* Add our API messages to the global name_crc hash table */
-  setup_message_id_table (lbm, &api_main);
+    /* Add our API messages to the global name_crc hash table */
+    setup_message_id_table (lbm, &api_main);
 
-  return 0;
+    return 0;
 }
 
 VLIB_INIT_FUNCTION (lb_api_init);

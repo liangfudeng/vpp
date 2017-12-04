@@ -45,8 +45,8 @@ sixrd_dpo_get_index (sixrd_dpo_t *sd)
 
 void
 sixrd_dpo_create (dpo_proto_t dproto,
-		u32 domain_index,
-		dpo_id_t *dpo)
+                  u32 domain_index,
+                  dpo_id_t *dpo)
 {
     sixrd_dpo_t *sd;
 
@@ -55,9 +55,9 @@ sixrd_dpo_create (dpo_proto_t dproto,
     sd->sd_proto = dproto;
 
     dpo_set(dpo,
-	    sixrd_dpo_type,
-	    dproto,
-	    sixrd_dpo_get_index(sd));
+            sixrd_dpo_type,
+            dproto,
+            sixrd_dpo_get_index(sd));
 }
 
 u8*
@@ -70,9 +70,9 @@ format_sixrd_dpo (u8 *s, va_list *args)
     sd = sixrd_dpo_get(index);
 
     return (format(s, "sixrd:[%d]:%U domain:%d",
-		   index,
+                   index,
                    format_dpo_proto, sd->sd_proto,
-		   sd->sd_domain));
+                   sd->sd_domain));
 }
 
 
@@ -95,9 +95,8 @@ sixrd_dpo_unlock (dpo_id_t *dpo)
 
     sd->sd_locks--;
 
-    if (0 == sd->sd_locks)
-    {
-	pool_put(sixrd_dpo_pool, sd);
+    if (0 == sd->sd_locks) {
+        pool_put(sixrd_dpo_pool, sd);
     }
 }
 
@@ -107,19 +106,16 @@ const static dpo_vft_t sd_vft = {
     .dv_format = format_sixrd_dpo,
 };
 
-const static char* const sixrd_ip4_nodes[] =
-{
+const static char* const sixrd_ip4_nodes[] = {
     "ip4-sixrd",
     NULL,
 };
-const static char* const sixrd_ip6_nodes[] =
-{
+const static char* const sixrd_ip6_nodes[] = {
     "ip6-sixrd",
     NULL,
 };
 
-const static char* const * const sixrd_nodes[DPO_PROTO_NUM] =
-{
+const static char* const * const sixrd_nodes[DPO_PROTO_NUM] = {
     [DPO_PROTO_IP4]  = sixrd_ip4_nodes,
     [DPO_PROTO_IP6]  = sixrd_ip6_nodes,
     [DPO_PROTO_MPLS] = NULL,

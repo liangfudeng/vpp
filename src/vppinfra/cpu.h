@@ -40,8 +40,8 @@
 #endif
 
 
-#define CLIB_MULTIARCH_ARCH_CHECK(arch, fn, tgt)			\
-  if (clib_cpu_supports_ ## arch())					\
+#define CLIB_MULTIARCH_ARCH_CHECK(arch, fn, tgt)            \
+  if (clib_cpu_supports_ ## arch())                 \
     return & fn ## _ ##arch;
 
 #define CLIB_MULTIARCH_SELECT_FN(fn,...)                               \
@@ -77,24 +77,24 @@ _ (invariant_tsc, 0x80000007, edx, 8)
 static inline int
 clib_get_cpuid (const u32 lev, u32 * eax, u32 * ebx, u32 * ecx, u32 * edx)
 {
-  if ((u32) __get_cpuid_max (0x80000000 & lev, 0) < lev)
-    return 0;
-  if (lev == 7)
-    __cpuid_count (lev, 0, *eax, *ebx, *ecx, *edx);
-  else
-    __cpuid (lev, *eax, *ebx, *ecx, *edx);
-  return 1;
+    if ((u32) __get_cpuid_max (0x80000000 & lev, 0) < lev)
+        return 0;
+    if (lev == 7)
+        __cpuid_count (lev, 0, *eax, *ebx, *ecx, *edx);
+    else
+        __cpuid (lev, *eax, *ebx, *ecx, *edx);
+    return 1;
 }
 
 
 #define _(flag, func, reg, bit) \
-static inline int							\
-clib_cpu_supports_ ## flag()						\
-{									\
-  u32 __attribute__((unused)) eax, ebx = 0, ecx = 0, edx  = 0;		\
-  clib_get_cpuid (func, &eax, &ebx, &ecx, &edx);			\
-									\
-  return ((reg & (1 << bit)) != 0);					\
+static inline int                           \
+clib_cpu_supports_ ## flag()                        \
+{                                   \
+  u32 __attribute__((unused)) eax, ebx = 0, ecx = 0, edx  = 0;      \
+  clib_get_cpuid (func, &eax, &ebx, &ecx, &edx);            \
+                                    \
+  return ((reg & (1 << bit)) != 0);                 \
 }
 foreach_x86_64_flags
 #undef _
@@ -106,7 +106,7 @@ foreach_x86_64_flags
 #undef _
 #endif
 #endif
-  format_function_t format_cpu_uarch;
+format_function_t format_cpu_uarch;
 format_function_t format_cpu_model_name;
 format_function_t format_cpu_flags;
 

@@ -24,8 +24,7 @@
 /**
  * Struct maintining the per-worker thread data for BIER lookups
  */
-typedef struct bier_lookup_main_t_
-{
+typedef struct bier_lookup_main_t_ {
     /* per-cpu vector of cloned packets */
     u32 **blm_clones;
     /* per-cpu vector of BIER fmasks */
@@ -69,8 +68,7 @@ vlib_node_registration_t bier_lookup_node;
 /**
  * @brief Packet trace recoed for a BIER lookup
  */
-typedef struct bier_lookup_trace_t_
-{
+typedef struct bier_lookup_trace_t_ {
     u32 next_index;
     index_t bt_index;
     index_t bfm_index;
@@ -89,15 +87,13 @@ bier_lookup (vlib_main_t * vm,
     n_left_from = from_frame->n_vectors;
     next_index = BIER_LOOKUP_NEXT_DROP;
 
-    while (n_left_from > 0)
-    {
+    while (n_left_from > 0) {
         u32 n_left_to_next;
 
         vlib_get_next_frame (vm, node, next_index,
                              to_next, n_left_to_next);
 
-        while (n_left_from > 0 && n_left_to_next > 0)
-        {
+        while (n_left_from > 0 && n_left_to_next > 0) {
             bier_bit_mask_bucket_t buckets_copy[BIER_HDR_BUCKETS_256];
             u32 next0, bi0, n_bytes, bti0, bfmi0;
             const bier_fmask_t *bfm0;
@@ -175,8 +171,7 @@ bier_lookup (vlib_main_t * vm,
                      */
                     bier_bit_string_clear_bit(&bbs, fbs);
 
-                    if (PREDICT_TRUE(INDEX_INVALID != bfmi0))
-                    {
+                    if (PREDICT_TRUE(INDEX_INVALID != bfmi0)) {
                         bfm0 = bier_fmask_get(bfmi0);
                         vnet_buffer (b0)->ip.adj_index[VLIB_TX] = bfmi0;
 
@@ -216,22 +211,19 @@ bier_lookup (vlib_main_t * vm,
 
             n_clones = vec_len(blm->blm_fmasks[thread_index]);
 
-            if (PREDICT_TRUE(0 != n_clones))
-            {
+            if (PREDICT_TRUE(0 != n_clones)) {
                 ASSERT(n_clones < 256);
                 num_cloned = vlib_buffer_clone(vm, bi0,
                                                blm->blm_clones[thread_index],
                                                n_clones, 128);
 
-                if (num_cloned != n_clones)
-                {
+                if (num_cloned != n_clones) {
                     vlib_node_increment_counter
-                        (vm, node->node_index,
-                         BIER_LOOKUP_ERROR_BUFFER_ALLOCATION_FAILURE, 1);
+                    (vm, node->node_index,
+                     BIER_LOOKUP_ERROR_BUFFER_ALLOCATION_FAILURE, 1);
                 }
 
-                for (clone = 0; clone < num_cloned; clone++)
-                {
+                for (clone = 0; clone < num_cloned; clone++) {
                     vlib_buffer_t *c0;
                     u32 ci0;
 
@@ -242,8 +234,7 @@ bier_lookup (vlib_main_t * vm,
                     to_next += 1;
                     n_left_to_next -= 1;
 
-                    if (PREDICT_FALSE(b0->flags & VLIB_BUFFER_IS_TRACED))
-                    {
+                    if (PREDICT_FALSE(b0->flags & VLIB_BUFFER_IS_TRACED)) {
                         bier_lookup_trace_t *tr;
 
                         vlib_trace_buffer (vm, node, next0, c0, 0);
@@ -265,17 +256,14 @@ bier_lookup (vlib_main_t * vm,
                      * one. Note that these are macros with side effects that
                      * change to_next & n_left_to_next
                      */
-                    if (PREDICT_FALSE(0 == n_left_to_next))
-                    {
+                    if (PREDICT_FALSE(0 == n_left_to_next)) {
                         vlib_put_next_frame (vm, node, next_index,
                                              n_left_to_next);
                         vlib_get_next_frame (vm, node, next_index,
                                              to_next, n_left_to_next);
                     }
                 }
-            }
-            else
-            {
+            } else {
                 /*
                  * no clones/replications required. drop this packet
                  */
@@ -284,8 +272,7 @@ bier_lookup (vlib_main_t * vm,
                 to_next += 1;
                 n_left_to_next -= 1;
 
-                if (PREDICT_FALSE(b0->flags & VLIB_BUFFER_IS_TRACED))
-                {
+                if (PREDICT_FALSE(b0->flags & VLIB_BUFFER_IS_TRACED)) {
                     bier_lookup_trace_t *tr;
 
                     tr = vlib_add_trace (vm, node, b0, sizeof (*tr));
@@ -351,8 +338,7 @@ bier_lookup_module_init (vlib_main_t * vm)
 
     for (thread_index = 0;
          thread_index <= vlib_num_workers();
-         thread_index++)
-    {
+         thread_index++) {
         /*
          *  4096 is the most we will ever need to support
          * a Bit-Mask length of 4096

@@ -83,8 +83,7 @@ bier_entry_delete (index_t bei)
     /*
      * if we still ahve a path-list, unlink from it
      */
-    if (FIB_NODE_INDEX_INVALID != be->be_path_list)
-    {
+    if (FIB_NODE_INDEX_INVALID != be->be_path_list) {
         fib_path_list_walk(be->be_path_list,
                            bier_entry_unlink_walk,
                            be);
@@ -105,8 +104,7 @@ bier_entry_table_ecmp_walk_add_fmask (index_t btei,
      * choose a fmask from the entry's resolved set to add
      * to ECMP table's lookup table
      */
-    if (FIB_NODE_INDEX_INVALID != be->be_path_list)
-    {
+    if (FIB_NODE_INDEX_INVALID != be->be_path_list) {
         const bier_table_id_t *btid;
         dpo_id_t dpo = DPO_INVALID;
         const dpo_id_t *choice;
@@ -129,13 +127,10 @@ bier_entry_table_ecmp_walk_add_fmask (index_t btei,
                                            btid->bti_ecmp &
                                            (lb->lb_n_buckets_minus_1));
 
-        if (choice->dpoi_type == DPO_BIER_FMASK)
-        {
+        if (choice->dpoi_type == DPO_BIER_FMASK) {
             bier_table_ecmp_set_fmask(btei, be->be_bp,
                                       choice->dpoi_index);
-        }
-        else
-        {
+        } else {
             /*
              * any other type results in a drop, which we represent
              * with an empty bucket
@@ -145,9 +140,7 @@ bier_entry_table_ecmp_walk_add_fmask (index_t btei,
         }
 
         dpo_reset(&dpo);
-    }
-    else
-    {
+    } else {
         /*
          * no fmasks left. insert a drop
          */
@@ -171,18 +164,15 @@ bier_entry_path_add (index_t bei,
      */
     fib_path_list_lock(old_pl_index);
 
-    if (FIB_NODE_INDEX_INVALID == be->be_path_list)
-    {
+    if (FIB_NODE_INDEX_INVALID == be->be_path_list) {
         old_pl_index = FIB_NODE_INDEX_INVALID;
         be->be_path_list = fib_path_list_create((FIB_PATH_LIST_FLAG_SHARED |
-                                                 FIB_PATH_LIST_FLAG_NO_URPF),
+                                                FIB_PATH_LIST_FLAG_NO_URPF),
                                                 rpaths);
         be->be_sibling_index = fib_path_list_child_add(be->be_path_list,
-                                                       FIB_NODE_TYPE_BIER_ENTRY,
-                                                       bier_entry_get_index(be));
-    }
-    else
-    {
+                               FIB_NODE_TYPE_BIER_ENTRY,
+                               bier_entry_get_index(be));
+    } else {
 
         old_pl_index = be->be_path_list;
 
@@ -195,8 +185,8 @@ bier_entry_path_add (index_t bei,
         fib_path_list_child_remove(old_pl_index,
                                    be->be_sibling_index);
         be->be_sibling_index = fib_path_list_child_add(be->be_path_list,
-                                                       FIB_NODE_TYPE_BIER_ENTRY,
-                                                       bier_entry_get_index(be));
+                               FIB_NODE_TYPE_BIER_ENTRY,
+                               bier_entry_get_index(be));
     }
     /*
      * link the entry's bit-position to each fmask in the new path-list
@@ -205,8 +195,7 @@ bier_entry_path_add (index_t bei,
     fib_path_list_walk(be->be_path_list,
                        bier_entry_link_walk,
                        be);
-    if (FIB_NODE_INDEX_INVALID != old_pl_index)
-    {
+    if (FIB_NODE_INDEX_INVALID != old_pl_index) {
         fib_path_list_walk(old_pl_index,
                            bier_entry_unlink_walk,
                            be);
@@ -245,16 +234,14 @@ bier_entry_path_remove (index_t bei,
                                             FIB_PATH_LIST_FLAG_NO_URPF),
                                            rpaths);
 
-    if (be->be_path_list != old_pl_index)
-    {
+    if (be->be_path_list != old_pl_index) {
         /*
          * a path was removed
          */
         fib_path_list_child_remove(old_pl_index,
                                    be->be_sibling_index);
 
-        if (FIB_NODE_INDEX_INVALID != be->be_path_list)
-        {
+        if (FIB_NODE_INDEX_INVALID != be->be_path_list) {
             /*
              * link the entry's bit-position to each fmask in the new path-list
              * then unlink from the old.
@@ -307,8 +294,7 @@ format_bier_entry (u8* s, va_list *ap)
     s = format(s, " bp:%d\n", be->be_bp);
     s = fib_path_list_format(be->be_path_list, s);
 
-    if (flags & BIER_SHOW_DETAIL)
-    {
+    if (flags & BIER_SHOW_DETAIL) {
         dpo_id_t dpo = DPO_INVALID;
 
         bier_entry_contribute_forwarding(bei, &dpo);
@@ -334,7 +320,7 @@ bier_entry_get_from_node (fib_node_t *node)
 {
     return ((bier_entry_t*)(((char*)node) -
                             STRUCT_OFFSET_OF(bier_entry_t,
-                                             be_node)));
+                                    be_node)));
 }
 
 static void

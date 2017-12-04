@@ -23,152 +23,153 @@
 #include "vom/om.hpp"
 #include "vom/singular_db.hpp"
 
-namespace VOM {
-/**
- * A representation of LLDP client configuration on an interface
- */
-class lldp_binding : public object_base
+namespace VOM
 {
-public:
-  /**
-   * Typedef for the key of a LLDP binding
-   */
-  typedef interface::key_t key_t;
-
-  /**
-   * Construct a new object matching the desried state
-   */
-  lldp_binding(const interface& itf, const std::string& hostname);
-
-  /**
-   * Copy Constructor
-   */
-  lldp_binding(const lldp_binding& o);
-
-  /**
-   * Destructor
-   */
-  ~lldp_binding();
-
-  /**
-   * Comparison operator
-   */
-  bool operator==(const lldp_binding& b) const;
-
-  /**
-   * Return this object's key
-   */
-  const key_t& key() const;
-
-  /**
-   * Return the 'singular' of the LLDP binding that matches this object
-   */
-  std::shared_ptr<lldp_binding> singular() const;
-
-  /**
-   * convert to string format for debug purposes
-   */
-  std::string to_string() const;
-
-  /**
-   * Dump all LLDP bindings into the stream provided
-   */
-  static void dump(std::ostream& os);
-
-  /**
-   * Find or add LLDP binding based on its key
-   */
-  static std::shared_ptr<lldp_binding> find(const key_t& k);
-
-private:
-  /**
-   * Class definition for listeners to OM events
-   */
-  class event_handler : public OM::listener, public inspect::command_handler
-  {
-  public:
-    event_handler();
-    virtual ~event_handler() = default;
-
     /**
-     * Handle a populate event
+     * A representation of LLDP client configuration on an interface
      */
-    void handle_populate(const client_db::key_t& key);
+    class lldp_binding : public object_base
+    {
+    public:
+        /**
+         * Typedef for the key of a LLDP binding
+         */
+        typedef interface::key_t key_t;
 
-    /**
-     * Handle a replay event
-     */
-    void handle_replay();
+        /**
+         * Construct a new object matching the desried state
+         */
+        lldp_binding(const interface& itf, const std::string& hostname);
 
-    /**
-     * Show the object in the Singular DB
-     */
-    void show(std::ostream& os);
+        /**
+         * Copy Constructor
+         */
+        lldp_binding(const lldp_binding& o);
 
-    /**
-     * Get the sortable Id of the listener
-     */
-    dependency_t order() const;
-  };
+        /**
+         * Destructor
+         */
+        ~lldp_binding();
 
-  /**
-   * event_handler to register with OM
-   */
-  static event_handler m_evh;
+        /**
+         * Comparison operator
+         */
+        bool operator==(const lldp_binding& b) const;
 
-  /**
-   * Enquue commonds to the VPP command Q for the update
-   */
-  void update(const lldp_binding& obj);
+        /**
+         * Return this object's key
+         */
+        const key_t& key() const;
 
-  /**
-   * Find or add LLDP binding to the OM
-   */
-  static std::shared_ptr<lldp_binding> find_or_add(const lldp_binding& temp);
+        /**
+         * Return the 'singular' of the LLDP binding that matches this object
+         */
+        std::shared_ptr<lldp_binding> singular() const;
 
-  /*
-   * It's the OM class that calls singular()
-   */
-  friend class OM;
+        /**
+         * convert to string format for debug purposes
+         */
+        std::string to_string() const;
 
-  /**
-   * It's the singular_db class that calls replay()
-   */
-  friend class singular_db<key_t, lldp_binding>;
+        /**
+         * Dump all LLDP bindings into the stream provided
+         */
+        static void dump(std::ostream& os);
 
-  /**
-   * Sweep/reap the object if still stale
-   */
-  void sweep(void);
+        /**
+         * Find or add LLDP binding based on its key
+         */
+        static std::shared_ptr<lldp_binding> find(const key_t& k);
 
-  /**
-   * replay the object to create it in hardware
-   */
-  void replay(void);
+    private:
+        /**
+         * Class definition for listeners to OM events
+         */
+        class event_handler : public OM::listener, public inspect::command_handler
+        {
+        public:
+            event_handler();
+            virtual ~event_handler() = default;
 
-  /**
-   * A reference counting pointer to the interface on which LLDP config
-   * resides. By holding the reference here, we can guarantee that
-   * this object will outlive the interface
-   */
-  const std::shared_ptr<interface> m_itf;
+            /**
+             * Handle a populate event
+             */
+            void handle_populate(const client_db::key_t& key);
 
-  /**
-   * The port-description in the LLDP configuration
-   */
-  const std::string m_port_desc;
+            /**
+             * Handle a replay event
+             */
+            void handle_replay();
 
-  /**
-   * HW configuration for the binding. The bool representing the
-   * do/don't bind.
-   */
-  HW::item<bool> m_binding;
+            /**
+             * Show the object in the Singular DB
+             */
+            void show(std::ostream& os);
 
-  /**
-   * A map of all Lldp bindings keyed against the interface.
-   */
-  static singular_db<key_t, lldp_binding> m_db;
-};
+            /**
+             * Get the sortable Id of the listener
+             */
+            dependency_t order() const;
+        };
+
+        /**
+         * event_handler to register with OM
+         */
+        static event_handler m_evh;
+
+        /**
+         * Enquue commonds to the VPP command Q for the update
+         */
+        void update(const lldp_binding& obj);
+
+        /**
+         * Find or add LLDP binding to the OM
+         */
+        static std::shared_ptr<lldp_binding> find_or_add(const lldp_binding& temp);
+
+        /*
+         * It's the OM class that calls singular()
+         */
+        friend class OM;
+
+        /**
+         * It's the singular_db class that calls replay()
+         */
+        friend class singular_db<key_t, lldp_binding>;
+
+        /**
+         * Sweep/reap the object if still stale
+         */
+        void sweep(void);
+
+        /**
+         * replay the object to create it in hardware
+         */
+        void replay(void);
+
+        /**
+         * A reference counting pointer to the interface on which LLDP config
+         * resides. By holding the reference here, we can guarantee that
+         * this object will outlive the interface
+         */
+        const std::shared_ptr<interface> m_itf;
+
+        /**
+         * The port-description in the LLDP configuration
+         */
+        const std::string m_port_desc;
+
+        /**
+         * HW configuration for the binding. The bool representing the
+         * do/don't bind.
+         */
+        HW::item<bool> m_binding;
+
+        /**
+         * A map of all Lldp bindings keyed against the interface.
+         */
+        static singular_db<key_t, lldp_binding> m_db;
+    };
 };
 
 /*

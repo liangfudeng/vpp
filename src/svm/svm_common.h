@@ -22,59 +22,57 @@
 #include <pthread.h>
 #include <vppinfra/types.h>
 
-#define SVM_VERSION ((1<<16) | 1)	/* set to declare region ready. */
+#define SVM_VERSION ((1<<16) | 1)   /* set to declare region ready. */
 
-#define SVM_FLAGS_MHEAP (1<<0)	/* region contains an mheap */
-#define SVM_FLAGS_FILE  (1<<1)	/* region backed by one or more files */
-#define SVM_FLAGS_NODATA (1<<2)	/* region will be further subdivided */
+#define SVM_FLAGS_MHEAP (1<<0)  /* region contains an mheap */
+#define SVM_FLAGS_FILE  (1<<1)  /* region backed by one or more files */
+#define SVM_FLAGS_NODATA (1<<2) /* region will be further subdivided */
 #define SVM_FLAGS_NEED_DATA_INIT (1<<3)
 
-#define SVM_PVT_MHEAP_SIZE (128<<10)	/* region's private mheap (128k) */
+#define SVM_PVT_MHEAP_SIZE (128<<10)    /* region's private mheap (128k) */
 
-typedef struct svm_region_
-{
-  volatile uword version;
-  pthread_mutex_t mutex;
-  pthread_cond_t condvar;
-  int mutex_owner_pid;		/* in case of trouble */
-  int mutex_owner_tag;
-  uword flags;
-  uword virtual_base;		/* base of the region object */
-  uword virtual_size;
-  void *region_heap;
-  void *data_base;		/* data portion base address */
-  void *data_heap;		/* data heap, if any */
-  volatile void *user_ctx;	/* user context pointer */
-  /* stuff allocated in the region's heap */
-  uword bitmap_size;		/* nbits in virtual alloc bitmap */
-  uword *bitmap;		/* the bitmap */
-  char *region_name;
-  char *backing_file;
-  char **filenames;
-  uword *client_pids;
-  /* pad */
+typedef struct svm_region_ {
+    volatile uword version;
+    pthread_mutex_t mutex;
+    pthread_cond_t condvar;
+    int mutex_owner_pid;      /* in case of trouble */
+    int mutex_owner_tag;
+    uword flags;
+    uword virtual_base;       /* base of the region object */
+    uword virtual_size;
+    void *region_heap;
+    void *data_base;      /* data portion base address */
+    void *data_heap;      /* data heap, if any */
+    volatile void *user_ctx;  /* user context pointer */
+    /* stuff allocated in the region's heap */
+    uword bitmap_size;        /* nbits in virtual alloc bitmap */
+    uword *bitmap;        /* the bitmap */
+    char *region_name;
+    char *backing_file;
+    char **filenames;
+    uword *client_pids;
+    /* pad */
 
-  /* next page:
-   * (64K) clib heap for the region itself
-   *
-   * data_base -> whatever is in this region
-   */
+    /* next page:
+     * (64K) clib heap for the region itself
+     *
+     * data_base -> whatever is in this region
+     */
 
 } svm_region_t;
 
-typedef struct svm_map_region_args_
-{
-  const char *root_path;	/* NULL means use the truly global arena */
-  const char *name;
-  u64 baseva;
-  u64 size;
-  u64 pvt_heap_size;
-  uword flags;
-  char *backing_file;
-  uword backing_mmap_size;
-  /* uid, gid to own the svm region(s) */
-  int uid;
-  int gid;
+typedef struct svm_map_region_args_ {
+    const char *root_path;    /* NULL means use the truly global arena */
+    const char *name;
+    u64 baseva;
+    u64 size;
+    u64 pvt_heap_size;
+    uword flags;
+    char *backing_file;
+    uword backing_mmap_size;
+    /* uid, gid to own the svm region(s) */
+    int uid;
+    int gid;
 } svm_map_region_args_t;
 
 
@@ -101,25 +99,23 @@ typedef struct svm_map_region_args_
 #define SVM_OVERLAY_REGION_SIZE   (1<<20)
 #define SVM_OVERLAY_REGION_BASENAME "/overlay_vm"
 
-typedef struct
-{
-  u8 *subregion_name;
+typedef struct {
+    u8 *subregion_name;
 } svm_subregion_t;
 
-typedef struct
-{
-  svm_subregion_t *subregions;	/* subregion pool */
-  uword *name_hash;
-  u8 *root_path;
-  int uid;
-  int gid;
+typedef struct {
+    svm_subregion_t *subregions;  /* subregion pool */
+    uword *name_hash;
+    u8 *root_path;
+    int uid;
+    int gid;
 } svm_main_region_t;
 
 
 void *svm_region_find_or_create (svm_map_region_args_t * a);
 void svm_region_init (void);
 void svm_region_init_mapped_region (svm_map_region_args_t * a,
-				    svm_region_t * rp);
+                                    svm_region_t * rp);
 int svm_region_init_chroot (const char *root_path);
 void svm_region_init_chroot_uid_gid (const char *root_path, int uid, int gid);
 void svm_region_init_args (svm_map_region_args_t * a);

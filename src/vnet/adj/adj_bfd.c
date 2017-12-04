@@ -22,14 +22,13 @@
 static adj_bfd_state_t
 adj_bfd_bfd_state_to_fib (bfd_state_e bstate)
 {
-    switch (bstate)
-    {
-    case BFD_STATE_up:
-        return (ADJ_BFD_STATE_UP);
-    case BFD_STATE_down:
-    case BFD_STATE_admin_down:
-    case BFD_STATE_init:
-        return (ADJ_BFD_STATE_DOWN);
+    switch (bstate) {
+        case BFD_STATE_up:
+            return (ADJ_BFD_STATE_UP);
+        case BFD_STATE_down:
+        case BFD_STATE_admin_down:
+        case BFD_STATE_init:
+            return (ADJ_BFD_STATE_DOWN);
     }
     return (ADJ_BFD_STATE_DOWN);
 }
@@ -61,8 +60,7 @@ adj_bfd_notify (bfd_listen_event_e event,
     adj_delegate_t *aed;
     adj_index_t ai;
 
-    if (BFD_HOP_TYPE_SINGLE != session->hop_type)
-    {
+    if (BFD_HOP_TYPE_SINGLE != session->hop_type) {
         /*
          * multi-hop BFD sessions attach directly to the FIB entry
          * single-hop adj to the associate adjacency.
@@ -84,82 +82,76 @@ adj_bfd_notify (bfd_listen_event_e event,
                              &key->peer_addr,
                              key->sw_if_index);
 
-    switch (event)
-    {
-    case BFD_LISTEN_EVENT_CREATE:
-        /*
-         * The creation of a new session
-         */
-        if ((ADJ_INDEX_INVALID != ai) &&
-            (aed = adj_delegate_get(adj_get(ai),
-                                    ADJ_DELEGATE_BFD)))
-        {
+    switch (event) {
+        case BFD_LISTEN_EVENT_CREATE:
             /*
-             * already got state for this adj
+             * The creation of a new session
              */
-        }
-        else
-        {
+            if ((ADJ_INDEX_INVALID != ai) &&
+                (aed = adj_delegate_get(adj_get(ai),
+                                        ADJ_DELEGATE_BFD))) {
+                /*
+                 * already got state for this adj
+                 */
+            } else {
+                /*
+                 * lock the adj. add the delegate.
+                 * Lockinging the adj prevents it being removed and thus maintains
+                 * the BFD derived states
+                 */
+                adj_lock(ai);
+
+                aed = adj_delegate_find_or_add(adj_get(ai), ADJ_DELEGATE_BFD);
+
+                /*
+                 * pretend the session is up and skip the walk.
+                 * If we set it down then we get traffic loss on new children.
+                 * if we walk then we lose traffic for existing children. Wait
+                 * for the first BFD UP/DOWN before we let the session's state
+                 * influence forwarding.
+                 */
+                aed->ad_bfd_state = ADJ_BFD_STATE_UP;
+                aed->ad_bfd_index = session->bs_idx;
+            }
+            break;
+
+        case BFD_LISTEN_EVENT_UPDATE:
             /*
-             * lock the adj. add the delegate.
-             * Lockinging the adj prevents it being removed and thus maintains
-             * the BFD derived states
+             * state change up/dowm and
              */
-            adj_lock(ai);
+            aed = adj_delegate_get(adj_get(ai), ADJ_DELEGATE_BFD);
 
-            aed = adj_delegate_find_or_add(adj_get(ai), ADJ_DELEGATE_BFD);
-
+            if (NULL != aed) {
+                aed->ad_bfd_state = adj_bfd_bfd_state_to_fib(session->local_state);
+                adj_bfd_update_walk(ai);
+            }
             /*
-             * pretend the session is up and skip the walk.
-             * If we set it down then we get traffic loss on new children.
-             * if we walk then we lose traffic for existing children. Wait
-             * for the first BFD UP/DOWN before we let the session's state
-             * influence forwarding.
+             * else
+             *   not an adj with BFD state
              */
-            aed->ad_bfd_state = ADJ_BFD_STATE_UP;
-            aed->ad_bfd_index = session->bs_idx;
-        }
-        break;
+            break;
 
-    case BFD_LISTEN_EVENT_UPDATE:
-        /*
-         * state change up/dowm and
-         */
-        aed = adj_delegate_get(adj_get(ai), ADJ_DELEGATE_BFD);
-
-        if (NULL != aed)
-        {
-            aed->ad_bfd_state = adj_bfd_bfd_state_to_fib(session->local_state);
-            adj_bfd_update_walk(ai);
-        }
-        /*
-         * else
-         *   not an adj with BFD state
-         */
-        break;
-
-    case BFD_LISTEN_EVENT_DELETE:
-        /*
-         * session has been removed.
-         */
-
-        if (adj_delegate_get(adj_get(ai), ADJ_DELEGATE_BFD))
-        {
+        case BFD_LISTEN_EVENT_DELETE:
             /*
-             * has an associated BFD tracking delegate
-             * remove the BFD tracking deletgate, update children, then
-             * unlock the adj
+             * session has been removed.
              */
-            adj_delegate_remove(adj_get(ai), ADJ_DELEGATE_BFD);
 
-            adj_bfd_update_walk(ai);
-            adj_unlock(ai);
-        }
-        /*
-         * else
-         *  no BFD associated state
-         */
-        break;
+            if (adj_delegate_get(adj_get(ai), ADJ_DELEGATE_BFD)) {
+                /*
+                 * has an associated BFD tracking delegate
+                 * remove the BFD tracking deletgate, update children, then
+                 * unlock the adj
+                 */
+                adj_delegate_remove(adj_get(ai), ADJ_DELEGATE_BFD);
+
+                adj_bfd_update_walk(ai);
+                adj_unlock(ai);
+            }
+            /*
+             * else
+             *  no BFD associated state
+             */
+            break;
     }
 
     /*

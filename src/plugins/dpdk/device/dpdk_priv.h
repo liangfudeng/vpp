@@ -51,32 +51,30 @@ _(proc-type)                                    \
 _(file-prefix)                                  \
 _(vdev)
 
-typedef struct
-{
-  /* must be first */
-  struct rte_pktmbuf_pool_private mbp_priv;
-  u8 buffer_pool_index;
+typedef struct {
+    /* must be first */
+    struct rte_pktmbuf_pool_private mbp_priv;
+    u8 buffer_pool_index;
 } dpdk_mempool_private_t;
 
 
 static inline void
 dpdk_get_xstats (dpdk_device_t * xd)
 {
-  int len;
-  if ((len = rte_eth_xstats_get (xd->device_index, NULL, 0)) > 0)
-    {
-      vec_validate (xd->xstats, len - 1);
-      vec_validate (xd->last_cleared_xstats, len - 1);
+    int len;
+    if ((len = rte_eth_xstats_get (xd->device_index, NULL, 0)) > 0) {
+        vec_validate (xd->xstats, len - 1);
+        vec_validate (xd->last_cleared_xstats, len - 1);
 
-      len =
-	rte_eth_xstats_get (xd->device_index, xd->xstats,
-			    vec_len (xd->xstats));
+        len =
+            rte_eth_xstats_get (xd->device_index, xd->xstats,
+                                vec_len (xd->xstats));
 
-      ASSERT (vec_len (xd->xstats) == len);
-      ASSERT (vec_len (xd->last_cleared_xstats) == len);
+        ASSERT (vec_len (xd->xstats) == len);
+        ASSERT (vec_len (xd->last_cleared_xstats) == len);
 
-      _vec_len (xd->xstats) = len;
-      _vec_len (xd->last_cleared_xstats) = len;
+        _vec_len (xd->xstats) = len;
+        _vec_len (xd->last_cleared_xstats) = len;
 
     }
 }
@@ -85,53 +83,50 @@ dpdk_get_xstats (dpdk_device_t * xd)
 static inline void
 dpdk_update_counters (dpdk_device_t * xd, f64 now)
 {
-  vlib_simple_counter_main_t *cm;
-  vnet_main_t *vnm = vnet_get_main ();
-  u32 thread_index = vlib_get_thread_index ();
-  u64 rxerrors, last_rxerrors;
+    vlib_simple_counter_main_t *cm;
+    vnet_main_t *vnm = vnet_get_main ();
+    u32 thread_index = vlib_get_thread_index ();
+    u64 rxerrors, last_rxerrors;
 
-  /* only update counters for PMD interfaces */
-  if ((xd->flags & DPDK_DEVICE_FLAG_PMD) == 0)
-    return;
+    /* only update counters for PMD interfaces */
+    if ((xd->flags & DPDK_DEVICE_FLAG_PMD) == 0)
+        return;
 
-  xd->time_last_stats_update = now ? now : xd->time_last_stats_update;
-  clib_memcpy (&xd->last_stats, &xd->stats, sizeof (xd->last_stats));
-  rte_eth_stats_get (xd->device_index, &xd->stats);
+    xd->time_last_stats_update = now ? now : xd->time_last_stats_update;
+    clib_memcpy (&xd->last_stats, &xd->stats, sizeof (xd->last_stats));
+    rte_eth_stats_get (xd->device_index, &xd->stats);
 
-  /* maybe bump interface rx no buffer counter */
-  if (PREDICT_FALSE (xd->stats.rx_nombuf != xd->last_stats.rx_nombuf))
-    {
-      cm = vec_elt_at_index (vnm->interface_main.sw_if_counters,
-			     VNET_INTERFACE_COUNTER_RX_NO_BUF);
+    /* maybe bump interface rx no buffer counter */
+    if (PREDICT_FALSE (xd->stats.rx_nombuf != xd->last_stats.rx_nombuf)) {
+        cm = vec_elt_at_index (vnm->interface_main.sw_if_counters,
+                               VNET_INTERFACE_COUNTER_RX_NO_BUF);
 
-      vlib_increment_simple_counter (cm, thread_index, xd->vlib_sw_if_index,
-				     xd->stats.rx_nombuf -
-				     xd->last_stats.rx_nombuf);
+        vlib_increment_simple_counter (cm, thread_index, xd->vlib_sw_if_index,
+                                       xd->stats.rx_nombuf -
+                                       xd->last_stats.rx_nombuf);
     }
 
-  /* missed pkt counter */
-  if (PREDICT_FALSE (xd->stats.imissed != xd->last_stats.imissed))
-    {
-      cm = vec_elt_at_index (vnm->interface_main.sw_if_counters,
-			     VNET_INTERFACE_COUNTER_RX_MISS);
+    /* missed pkt counter */
+    if (PREDICT_FALSE (xd->stats.imissed != xd->last_stats.imissed)) {
+        cm = vec_elt_at_index (vnm->interface_main.sw_if_counters,
+                               VNET_INTERFACE_COUNTER_RX_MISS);
 
-      vlib_increment_simple_counter (cm, thread_index, xd->vlib_sw_if_index,
-				     xd->stats.imissed -
-				     xd->last_stats.imissed);
+        vlib_increment_simple_counter (cm, thread_index, xd->vlib_sw_if_index,
+                                       xd->stats.imissed -
+                                       xd->last_stats.imissed);
     }
-  rxerrors = xd->stats.ierrors;
-  last_rxerrors = xd->last_stats.ierrors;
+    rxerrors = xd->stats.ierrors;
+    last_rxerrors = xd->last_stats.ierrors;
 
-  if (PREDICT_FALSE (rxerrors != last_rxerrors))
-    {
-      cm = vec_elt_at_index (vnm->interface_main.sw_if_counters,
-			     VNET_INTERFACE_COUNTER_RX_ERROR);
+    if (PREDICT_FALSE (rxerrors != last_rxerrors)) {
+        cm = vec_elt_at_index (vnm->interface_main.sw_if_counters,
+                               VNET_INTERFACE_COUNTER_RX_ERROR);
 
-      vlib_increment_simple_counter (cm, thread_index, xd->vlib_sw_if_index,
-				     rxerrors - last_rxerrors);
+        vlib_increment_simple_counter (cm, thread_index, xd->vlib_sw_if_index,
+                                       rxerrors - last_rxerrors);
     }
 
-  dpdk_get_xstats (xd);
+    dpdk_get_xstats (xd);
 }
 
 /*

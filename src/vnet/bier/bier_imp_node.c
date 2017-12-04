@@ -21,8 +21,7 @@
  * @brief A struct to hold tracing information for the BIER imposition
  * node.
  */
-typedef struct bier_imp_trace_t_
-{
+typedef struct bier_imp_trace_t_ {
     /**
      * BIER imposition object hit
      */
@@ -48,14 +47,12 @@ bier_imp_dpo_inline (vlib_main_t * vm,
 
     next_index = node->cached_next_index;
 
-    while (n_left_from > 0)
-    {
+    while (n_left_from > 0) {
         u32 n_left_to_next;
 
         vlib_get_next_frame(vm, node, next_index, to_next, n_left_to_next);
 
-        while (n_left_from > 0 && n_left_to_next > 0)
-        {
+        while (n_left_from > 0 && n_left_to_next > 0) {
             vlib_buffer_t * b0;
             bier_imp_t *bimp0;
             bier_hdr_t *hdr0;
@@ -74,8 +71,7 @@ bier_imp_dpo_inline (vlib_main_t * vm,
             bii0 = vnet_buffer(b0)->ip.adj_index[VLIB_TX];
             bimp0 = bier_imp_get(bii0);
 
-            if (FIB_PROTOCOL_IP4 == fproto)
-            {
+            if (FIB_PROTOCOL_IP4 == fproto) {
                 /*
                  * decrement the TTL on ingress to the BIER domain
                  */
@@ -91,14 +87,12 @@ bier_imp_dpo_inline (vlib_main_t * vm,
                 /*
                  * calculate an entropy
                  */
-                if (0 == vnet_buffer(b0)->ip.flow_hash)
-                {
+                if (0 == vnet_buffer(b0)->ip.flow_hash) {
                     vnet_buffer(b0)->ip.flow_hash =
                         ip4_compute_flow_hash (ip0, IP_FLOW_HASH_DEFAULT);
                 }
             }
-            if (FIB_PROTOCOL_IP6 == fproto)
-            {
+            if (FIB_PROTOCOL_IP6 == fproto) {
                 /*
                  * decrement the TTL on ingress to the BIER domain
                  */
@@ -109,8 +103,7 @@ bier_imp_dpo_inline (vlib_main_t * vm,
                 /*
                  * calculate an entropy
                  */
-                if (0 == vnet_buffer(b0)->ip.flow_hash)
-                {
+                if (0 == vnet_buffer(b0)->ip.flow_hash) {
                     vnet_buffer(b0)->ip.flow_hash =
                         ip6_compute_flow_hash (ip0, IP_FLOW_HASH_DEFAULT);
                 }
@@ -139,8 +132,7 @@ bier_imp_dpo_inline (vlib_main_t * vm,
             vnet_buffer(b0)->ip.adj_index[VLIB_TX] =
                 bimp0->bi_dpo[fproto].dpoi_index;
 
-            if (PREDICT_FALSE(b0->flags & VLIB_BUFFER_IS_TRACED))
-            {
+            if (PREDICT_FALSE(b0->flags & VLIB_BUFFER_IS_TRACED)) {
                 bier_imp_trace_t *tr =
                     vlib_add_trace (vm, node, b0, sizeof (*tr));
                 tr->imp = bii0;

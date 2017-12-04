@@ -21,116 +21,116 @@
 u8
 bfd_pkt_get_version (const bfd_pkt_t * pkt)
 {
-  return pkt->head.vers_diag >> 5;
+    return pkt->head.vers_diag >> 5;
 }
 
 void
 bfd_pkt_set_version (bfd_pkt_t * pkt, int version)
 {
-  pkt->head.vers_diag =
-    (version << 5) | (pkt->head.vers_diag & ((1 << 5) - 1));
+    pkt->head.vers_diag =
+        (version << 5) | (pkt->head.vers_diag & ((1 << 5) - 1));
 }
 
 u8
 bfd_pkt_get_diag_code (const bfd_pkt_t * pkt)
 {
-  return pkt->head.vers_diag & ((1 << 5) - 1);
+    return pkt->head.vers_diag & ((1 << 5) - 1);
 }
 
 void
 bfd_pkt_set_diag_code (bfd_pkt_t * pkt, int value)
 {
-  pkt->head.vers_diag =
-    (pkt->head.vers_diag & ~((1 << 5) - 1)) | (value & ((1 << 5) - 1));
+    pkt->head.vers_diag =
+        (pkt->head.vers_diag & ~((1 << 5) - 1)) | (value & ((1 << 5) - 1));
 }
 
 u8
 bfd_pkt_get_state (const bfd_pkt_t * pkt)
 {
-  return pkt->head.sta_flags >> 6;
+    return pkt->head.sta_flags >> 6;
 }
 
 void
 bfd_pkt_set_state (bfd_pkt_t * pkt, int value)
 {
-  pkt->head.sta_flags = (value << 6) | (pkt->head.sta_flags & ((1 << 6) - 1));
+    pkt->head.sta_flags = (value << 6) | (pkt->head.sta_flags & ((1 << 6) - 1));
 }
 
 u8
 bfd_pkt_get_poll (const bfd_pkt_t * pkt)
 {
-  return (pkt->head.sta_flags >> 5) & 1;
+    return (pkt->head.sta_flags >> 5) & 1;
 }
 
 void
 bfd_pkt_set_poll (bfd_pkt_t * pkt)
 {
-  pkt->head.sta_flags |= 1 << 5;
+    pkt->head.sta_flags |= 1 << 5;
 }
 
 u8
 bfd_pkt_get_final (const bfd_pkt_t * pkt)
 {
-  return (pkt->head.sta_flags >> 4) & 1;
+    return (pkt->head.sta_flags >> 4) & 1;
 }
 
 void
 bfd_pkt_set_final (bfd_pkt_t * pkt)
 {
-  pkt->head.sta_flags |= 1 << 4;
+    pkt->head.sta_flags |= 1 << 4;
 }
 
 u8
 bfd_pkt_get_control_plane_independent (const bfd_pkt_t * pkt)
 {
-  return (pkt->head.sta_flags >> 3) & 1;
+    return (pkt->head.sta_flags >> 3) & 1;
 }
 
 #if 0
 void
 bfd_pkt_set_control_plane_independent (bfd_pkt_t * pkt)
 {
-  pkt->head.sta_flags |= 1 << 3;
+    pkt->head.sta_flags |= 1 << 3;
 }
 #endif
 
 u8
 bfd_pkt_get_auth_present (const bfd_pkt_t * pkt)
 {
-  return (pkt->head.sta_flags >> 2) & 1;
+    return (pkt->head.sta_flags >> 2) & 1;
 }
 
 void
 bfd_pkt_set_auth_present (bfd_pkt_t * pkt)
 {
-  pkt->head.sta_flags |= 1 << 2;
+    pkt->head.sta_flags |= 1 << 2;
 }
 
 u8
 bfd_pkt_get_demand (const bfd_pkt_t * pkt)
 {
-  return (pkt->head.sta_flags >> 1) & 1;
+    return (pkt->head.sta_flags >> 1) & 1;
 }
 
 #if 0
 void
 bfd_pkt_set_demand (bfd_pkt_t * pkt)
 {
-  pkt->head.sta_flags |= 1 << 1;
+    pkt->head.sta_flags |= 1 << 1;
 }
 #endif
 
 u8
 bfd_pkt_get_multipoint (const bfd_pkt_t * pkt)
 {
-  return (pkt->head.sta_flags >> 0) & 1;
+    return (pkt->head.sta_flags >> 0) & 1;
 }
 
 #if 0
 void
 bfd_pkt_set_multipoint (bfd_pkt_t * pkt)
 {
-  pkt->head.sta_flags |= 1 << 0;
+    pkt->head.sta_flags |= 1 << 0;
 }
 #endif
 
@@ -142,9 +142,9 @@ bfd_max_key_len_for_auth_type (bfd_auth_type_e auth_type)
     {                 \
       return l;       \
     }
-  foreach_bfd_auth_type (F);
+    foreach_bfd_auth_type (F);
 #undef F
-  return 0;
+    return 0;
 }
 
 const char *
@@ -155,9 +155,9 @@ bfd_auth_type_str (bfd_auth_type_e auth_type)
     {                 \
       return s;       \
     }
-  foreach_bfd_auth_type (F);
+    foreach_bfd_auth_type (F);
 #undef F
-  return "UNKNOWN";
+    return "UNKNOWN";
 }
 
 const char *
@@ -166,10 +166,10 @@ bfd_diag_code_string (bfd_diag_code_e diag)
 #define F(n, t, s)             \
   case BFD_DIAG_CODE_NAME (t): \
     return s;
-  switch (diag)
-    {
-    foreach_bfd_diag_code (F)}
-  return "UNKNOWN";
+    switch (diag) {
+            foreach_bfd_diag_code (F)
+    }
+    return "UNKNOWN";
 #undef F
 }
 
@@ -179,10 +179,10 @@ bfd_state_string (bfd_state_e state)
 #define F(n, t, s)         \
   case BFD_STATE_NAME (t): \
     return s;
-  switch (state)
-    {
-    foreach_bfd_state (F)}
-  return "UNKNOWN";
+    switch (state) {
+            foreach_bfd_state (F)
+    }
+    return "UNKNOWN";
 #undef F
 }
 

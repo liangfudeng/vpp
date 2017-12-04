@@ -18,18 +18,17 @@
 
 #include <vppinfra/types.h>
 
-typedef struct
-{
-  /* Error message. */
-  u8 *what;
+typedef struct {
+    /* Error message. */
+    u8 *what;
 
-  /* Where error occurred (e.g. __FUNCTION__ __LINE__) */
-  const u8 *where;
+    /* Where error occurred (e.g. __FUNCTION__ __LINE__) */
+    const u8 *where;
 
-  uword flags;
+    uword flags;
 
-  /* Error code (e.g. errno for Unix errors). */
-  any code;
+    /* Error code (e.g. errno for Unix errors). */
+    any code;
 } clib_error_t;
 
 #endif

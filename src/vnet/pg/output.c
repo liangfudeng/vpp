@@ -46,44 +46,42 @@
 uword
 pg_output (vlib_main_t * vm, vlib_node_runtime_t * node, vlib_frame_t * frame)
 {
-  pg_main_t *pg = &pg_main;
-  u32 *buffers = vlib_frame_args (frame);
-  uword n_buffers = frame->n_vectors;
-  uword n_left = n_buffers;
-  vnet_interface_output_runtime_t *rd = (void *) node->runtime_data;
-  pg_interface_t *pif = pool_elt_at_index (pg->interfaces, rd->dev_instance);
+    pg_main_t *pg = &pg_main;
+    u32 *buffers = vlib_frame_args (frame);
+    uword n_buffers = frame->n_vectors;
+    uword n_left = n_buffers;
+    vnet_interface_output_runtime_t *rd = (void *) node->runtime_data;
+    pg_interface_t *pif = pool_elt_at_index (pg->interfaces, rd->dev_instance);
 
-  if (PREDICT_FALSE (pif->lockp != 0))
-    while (__sync_lock_test_and_set (pif->lockp, 1))
-      ;
+    if (PREDICT_FALSE (pif->lockp != 0))
+        while (__sync_lock_test_and_set (pif->lockp, 1))
+            ;
 
-  while (n_left > 0)
-    {
-      n_left--;
-      u32 bi0 = buffers[0];
-      vlib_buffer_t *b = vlib_get_buffer (vm, bi0);
-      buffers++;
+    while (n_left > 0) {
+        n_left--;
+        u32 bi0 = buffers[0];
+        vlib_buffer_t *b = vlib_get_buffer (vm, bi0);
+        buffers++;
 
-      if (b->flags & VLIB_BUFFER_IS_TRACED)
-	{
-	  pg_output_trace_t *t = vlib_add_trace (vm, node, b, sizeof (*t));
-	  t->buffer_index = bi0;
-	  clib_memcpy (&t->buffer, b, sizeof (b[0]) - sizeof (b->pre_data));
-	  clib_memcpy (t->buffer.pre_data, b->data + b->current_data,
-		       sizeof (t->buffer.pre_data));
-	}
+        if (b->flags & VLIB_BUFFER_IS_TRACED) {
+            pg_output_trace_t *t = vlib_add_trace (vm, node, b, sizeof (*t));
+            t->buffer_index = bi0;
+            clib_memcpy (&t->buffer, b, sizeof (b[0]) - sizeof (b->pre_data));
+            clib_memcpy (t->buffer.pre_data, b->data + b->current_data,
+                         sizeof (t->buffer.pre_data));
+        }
 
-      if (pif->pcap_file_name != 0)
-	pcap_add_buffer (&pif->pcap_main, vm, bi0, ETHERNET_MAX_PACKET_BYTES);
+        if (pif->pcap_file_name != 0)
+            pcap_add_buffer (&pif->pcap_main, vm, bi0, ETHERNET_MAX_PACKET_BYTES);
     }
-  if (pif->pcap_file_name != 0)
-    pcap_write (&pif->pcap_main);
+    if (pif->pcap_file_name != 0)
+        pcap_write (&pif->pcap_main);
 
 
-  vlib_buffer_free (vm, vlib_frame_args (frame), n_buffers);
-  if (PREDICT_FALSE (pif->lockp != 0))
-    *pif->lockp = 0;
-  return n_buffers;
+    vlib_buffer_free (vm, vlib_frame_args (frame), n_buffers);
+    if (PREDICT_FALSE (pif->lockp != 0))
+        *pif->lockp = 0;
+    return n_buffers;
 }
 
 /*

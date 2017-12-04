@@ -24,14 +24,13 @@
 #include <openssl/evp.h>
 
 
-typedef struct
-{
-  unsigned char nexthdr;
-  unsigned char hdrlen;
-  unsigned short reserved;
-  unsigned int spi;
-  unsigned int seq_no;
-  unsigned char auth_data[0];
+typedef struct {
+    unsigned char nexthdr;
+    unsigned char hdrlen;
+    unsigned short reserved;
+    unsigned int spi;
+    unsigned int seq_no;
+    unsigned char auth_data[0];
 } ah_header_t;
 
 

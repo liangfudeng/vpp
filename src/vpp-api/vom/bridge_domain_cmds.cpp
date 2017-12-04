@@ -17,120 +17,122 @@
 
 DEFINE_VAPI_MSG_IDS_L2_API_JSON;
 
-namespace VOM {
-namespace bridge_domain_cmds {
-create_cmd::create_cmd(HW::item<uint32_t>& item,
-                       const bridge_domain::learning_mode_t& lmode)
-  : rpc_cmd(item)
-  , m_learning_mode(lmode)
+namespace VOM
 {
-}
+    namespace bridge_domain_cmds
+    {
+        create_cmd::create_cmd(HW::item<uint32_t>& item,
+                               const bridge_domain::learning_mode_t& lmode)
+            : rpc_cmd(item)
+            , m_learning_mode(lmode)
+        {
+        }
 
-bool
-create_cmd::operator==(const create_cmd& other) const
-{
-  return (m_hw_item.data() == other.m_hw_item.data());
-}
+        bool
+        create_cmd::operator==(const create_cmd& other) const
+        {
+            return (m_hw_item.data() == other.m_hw_item.data());
+        }
 
-rc_t
-create_cmd::issue(connection& con)
-{
-  msg_t req(con.ctx(), std::ref(*this));
+        rc_t
+        create_cmd::issue(connection& con)
+        {
+            msg_t req(con.ctx(), std::ref(*this));
 
-  auto& payload = req.get_request().get_payload();
-  payload.bd_id = m_hw_item.data();
-  payload.flood = 1;
-  payload.uu_flood = 1;
-  payload.forward = 1;
-  payload.learn = m_learning_mode.value();
-  payload.arp_term = 1;
-  payload.mac_age = 0;
-  payload.is_add = 1;
+            auto& payload = req.get_request().get_payload();
+            payload.bd_id = m_hw_item.data();
+            payload.flood = 1;
+            payload.uu_flood = 1;
+            payload.forward = 1;
+            payload.learn = m_learning_mode.value();
+            payload.arp_term = 1;
+            payload.mac_age = 0;
+            payload.is_add = 1;
 
-  VAPI_CALL(req.execute());
+            VAPI_CALL(req.execute());
 
-  m_hw_item.set(wait());
+            m_hw_item.set(wait());
 
-  return (rc_t::OK);
-}
+            return (rc_t::OK);
+        }
 
-std::string
-create_cmd::to_string() const
-{
-  std::ostringstream s;
-  s << "bridge-domain-create: " << m_hw_item.to_string();
+        std::string
+        create_cmd::to_string() const
+        {
+            std::ostringstream s;
+            s << "bridge-domain-create: " << m_hw_item.to_string();
 
-  return (s.str());
-}
+            return (s.str());
+        }
 
-delete_cmd::delete_cmd(HW::item<uint32_t>& item)
-  : rpc_cmd(item)
-{
-}
+        delete_cmd::delete_cmd(HW::item<uint32_t>& item)
+            : rpc_cmd(item)
+        {
+        }
 
-bool
-delete_cmd::operator==(const delete_cmd& other) const
-{
-  return (m_hw_item == other.m_hw_item);
-}
+        bool
+        delete_cmd::operator==(const delete_cmd& other) const
+        {
+            return (m_hw_item == other.m_hw_item);
+        }
 
-rc_t
-delete_cmd::issue(connection& con)
-{
-  msg_t req(con.ctx(), std::ref(*this));
+        rc_t
+        delete_cmd::issue(connection& con)
+        {
+            msg_t req(con.ctx(), std::ref(*this));
 
-  auto& payload = req.get_request().get_payload();
-  payload.bd_id = m_hw_item.data();
-  payload.is_add = 0;
+            auto& payload = req.get_request().get_payload();
+            payload.bd_id = m_hw_item.data();
+            payload.is_add = 0;
 
-  VAPI_CALL(req.execute());
+            VAPI_CALL(req.execute());
 
-  wait();
-  m_hw_item.set(rc_t::NOOP);
+            wait();
+            m_hw_item.set(rc_t::NOOP);
 
-  return (rc_t::OK);
-}
+            return (rc_t::OK);
+        }
 
-std::string
-delete_cmd::to_string() const
-{
-  std::ostringstream s;
-  s << "bridge-domain-delete: " << m_hw_item.to_string();
+        std::string
+        delete_cmd::to_string() const
+        {
+            std::ostringstream s;
+            s << "bridge-domain-delete: " << m_hw_item.to_string();
 
-  return (s.str());
-}
+            return (s.str());
+        }
 
-dump_cmd::dump_cmd()
-{
-}
+        dump_cmd::dump_cmd()
+        {
+        }
 
-bool
-dump_cmd::operator==(const dump_cmd& other) const
-{
-  return (true);
-}
+        bool
+        dump_cmd::operator==(const dump_cmd& other) const
+        {
+            return (true);
+        }
 
-rc_t
-dump_cmd::issue(connection& con)
-{
-  m_dump.reset(new msg_t(con.ctx(), std::ref(*this)));
+        rc_t
+        dump_cmd::issue(connection& con)
+        {
+            m_dump.reset(new msg_t(con.ctx(), std::ref(*this)));
 
-  auto& payload = m_dump->get_request().get_payload();
-  payload.bd_id = ~0;
+            auto& payload = m_dump->get_request().get_payload();
+            payload.bd_id = ~0;
 
-  VAPI_CALL(m_dump->execute());
+            VAPI_CALL(m_dump->execute());
 
-  wait();
+            wait();
 
-  return rc_t::OK;
-}
+            return rc_t::OK;
+        }
 
-std::string
-dump_cmd::to_string() const
-{
-  return ("bridge-domain-dump");
-}
-}
+        std::string
+        dump_cmd::to_string() const
+        {
+            return ("bridge-domain-dump");
+        }
+    }
 }
 
 /*

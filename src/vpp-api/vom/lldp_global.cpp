@@ -16,140 +16,141 @@
 #include "vom/lldp_global.hpp"
 #include "vom/lldp_global_cmds.hpp"
 
-namespace VOM {
-/**
- * A DB of all LLDP configs
- */
-singular_db<std::string, lldp_global> lldp_global::m_db;
-
-lldp_global::event_handler lldp_global::m_evh;
-
-lldp_global::lldp_global(const std::string& system_name,
-                         uint32_t tx_hold,
-                         uint32_t tx_interval)
-  : m_system_name(system_name)
-  , m_tx_hold(tx_hold)
-  , m_tx_interval(tx_interval)
+namespace VOM
 {
-}
+    /**
+     * A DB of all LLDP configs
+     */
+    singular_db<std::string, lldp_global> lldp_global::m_db;
 
-lldp_global::lldp_global(const lldp_global& o)
-  : m_system_name(o.m_system_name)
-  , m_tx_hold(o.m_tx_hold)
-  , m_tx_interval(o.m_tx_interval)
-{
-}
+    lldp_global::event_handler lldp_global::m_evh;
 
-lldp_global::~lldp_global()
-{
-  sweep();
+    lldp_global::lldp_global(const std::string& system_name,
+                             uint32_t tx_hold,
+                             uint32_t tx_interval)
+        : m_system_name(system_name)
+        , m_tx_hold(tx_hold)
+        , m_tx_interval(tx_interval)
+    {
+    }
 
-  // not in the DB anymore.
-  m_db.release(m_system_name, this);
-}
+    lldp_global::lldp_global(const lldp_global& o)
+        : m_system_name(o.m_system_name)
+        , m_tx_hold(o.m_tx_hold)
+        , m_tx_interval(o.m_tx_interval)
+    {
+    }
 
-const lldp_global::key_t&
-lldp_global::key() const
-{
-  return (m_system_name);
-}
+    lldp_global::~lldp_global()
+    {
+        sweep();
 
-bool
-lldp_global::operator==(const lldp_global& l) const
-{
-  return ((key() == l.key()) && (m_tx_hold == l.m_tx_hold) &&
-          (m_tx_interval == l.m_tx_interval));
-}
+        // not in the DB anymore.
+        m_db.release(m_system_name, this);
+    }
 
-void
-lldp_global::sweep()
-{
-  // no means to remove this in VPP
-}
+    const lldp_global::key_t&
+    lldp_global::key() const
+    {
+        return (m_system_name);
+    }
 
-void
-lldp_global::dump(std::ostream& os)
-{
-  m_db.dump(os);
-}
+    bool
+    lldp_global::operator==(const lldp_global& l) const
+    {
+        return ((key() == l.key()) && (m_tx_hold == l.m_tx_hold) &&
+                (m_tx_interval == l.m_tx_interval));
+    }
 
-void
-lldp_global::replay()
-{
-  if (m_binding) {
-    HW::enqueue(new lldp_global_cmds::config_cmd(m_binding, m_system_name,
-                                                 m_tx_hold, m_tx_interval));
-  }
-}
+    void
+    lldp_global::sweep()
+    {
+        // no means to remove this in VPP
+    }
 
-std::string
-lldp_global::to_string() const
-{
-  std::ostringstream s;
-  s << "LLDP-global:"
-    << " system_name:" << m_system_name << " tx-hold:" << m_tx_hold
-    << " tx-interval:" << m_tx_interval;
+    void
+    lldp_global::dump(std::ostream& os)
+    {
+        m_db.dump(os);
+    }
 
-  return (s.str());
-}
+    void
+    lldp_global::replay()
+    {
+        if (m_binding) {
+            HW::enqueue(new lldp_global_cmds::config_cmd(m_binding, m_system_name,
+                        m_tx_hold, m_tx_interval));
+        }
+    }
 
-void
-lldp_global::update(const lldp_global& desired)
-{
-  if (!m_binding) {
-    HW::enqueue(new lldp_global_cmds::config_cmd(m_binding, m_system_name,
-                                                 m_tx_hold, m_tx_interval));
-  }
-}
+    std::string
+    lldp_global::to_string() const
+    {
+        std::ostringstream s;
+        s << "LLDP-global:"
+          << " system_name:" << m_system_name << " tx-hold:" << m_tx_hold
+          << " tx-interval:" << m_tx_interval;
 
-std::shared_ptr<lldp_global>
-lldp_global::find_or_add(const lldp_global& temp)
-{
-  return (m_db.find_or_add(temp.key(), temp));
-}
+        return (s.str());
+    }
 
-std::shared_ptr<lldp_global>
-lldp_global::find(const key_t& k)
-{
-  return (m_db.find(k));
-}
+    void
+    lldp_global::update(const lldp_global& desired)
+    {
+        if (!m_binding) {
+            HW::enqueue(new lldp_global_cmds::config_cmd(m_binding, m_system_name,
+                        m_tx_hold, m_tx_interval));
+        }
+    }
 
-std::shared_ptr<lldp_global>
-lldp_global::singular() const
-{
-  return find_or_add(*this);
-}
+    std::shared_ptr<lldp_global>
+    lldp_global::find_or_add(const lldp_global& temp)
+    {
+        return (m_db.find_or_add(temp.key(), temp));
+    }
 
-lldp_global::event_handler::event_handler()
-{
-  OM::register_listener(this);
-  inspect::register_handler({ "lldp-global" }, "LLDP global configurations",
-                            this);
-}
+    std::shared_ptr<lldp_global>
+    lldp_global::find(const key_t& k)
+    {
+        return (m_db.find(k));
+    }
 
-void
-lldp_global::event_handler::handle_replay()
-{
-  m_db.replay();
-}
+    std::shared_ptr<lldp_global>
+    lldp_global::singular() const
+    {
+        return find_or_add(*this);
+    }
 
-void
-lldp_global::event_handler::handle_populate(const client_db::key_t& key)
-{
-  // FIXME
-}
+    lldp_global::event_handler::event_handler()
+    {
+        OM::register_listener(this);
+        inspect::register_handler({ "lldp-global" }, "LLDP global configurations",
+                                  this);
+    }
 
-dependency_t
-lldp_global::event_handler::order() const
-{
-  return (dependency_t::GLOBAL);
-}
+    void
+    lldp_global::event_handler::handle_replay()
+    {
+        m_db.replay();
+    }
 
-void
-lldp_global::event_handler::show(std::ostream& os)
-{
-  m_db.dump(os);
-}
+    void
+    lldp_global::event_handler::handle_populate(const client_db::key_t& key)
+    {
+        // FIXME
+    }
+
+    dependency_t
+    lldp_global::event_handler::order() const
+    {
+        return (dependency_t::GLOBAL);
+    }
+
+    void
+    lldp_global::event_handler::show(std::ostream& os)
+    {
+        m_db.dump(os);
+    }
 }
 
 /*

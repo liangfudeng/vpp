@@ -22,79 +22,81 @@
 
 #include <vapi/ip.api.vapi.hpp>
 
-namespace VOM {
-namespace arp_proxy_config_cmds {
-/**
- * A command class that adds the ARP Proxy config
- */
-class config_cmd : public rpc_cmd<HW::item<bool>, rc_t, vapi::Proxy_arp_add_del>
+namespace VOM
 {
-public:
-  /**
-   * Constructor
-   */
-  config_cmd(HW::item<bool>& item,
-             const boost::asio::ip::address_v4& lo,
-             const boost::asio::ip::address_v4& high);
+    namespace arp_proxy_config_cmds
+    {
+        /**
+         * A command class that adds the ARP Proxy config
+         */
+        class config_cmd : public rpc_cmd<HW::item<bool>, rc_t, vapi::Proxy_arp_add_del>
+        {
+        public:
+            /**
+             * Constructor
+             */
+            config_cmd(HW::item<bool>& item,
+                       const boost::asio::ip::address_v4& lo,
+                       const boost::asio::ip::address_v4& high);
 
-  /**
-   * Issue the command to VPP/HW
-   */
-  rc_t issue(connection& con);
-  /**
-   * convert to string format for debug purposes
-   */
-  std::string to_string() const;
+            /**
+             * Issue the command to VPP/HW
+             */
+            rc_t issue(connection& con);
+            /**
+             * convert to string format for debug purposes
+             */
+            std::string to_string() const;
 
-  /**
-   * Comparison operator - only used for UT
-   */
-  bool operator==(const config_cmd& i) const;
+            /**
+             * Comparison operator - only used for UT
+             */
+            bool operator==(const config_cmd& i) const;
 
-private:
-  /**
-   * Address range
-   */
-  const boost::asio::ip::address_v4 m_low;
-  const boost::asio::ip::address_v4 m_high;
-};
+        private:
+            /**
+             * Address range
+             */
+            const boost::asio::ip::address_v4 m_low;
+            const boost::asio::ip::address_v4 m_high;
+        };
 
-/**
- * A cmd class that Unconfigs ArpProxy Config from an interface
- */
-class unconfig_cmd
-  : public rpc_cmd<HW::item<bool>, rc_t, vapi::Proxy_arp_add_del>
-{
-public:
-  /**
-   * Constructor
-   */
-  unconfig_cmd(HW::item<bool>& item,
-               const boost::asio::ip::address_v4& lo,
-               const boost::asio::ip::address_v4& hig);
+        /**
+         * A cmd class that Unconfigs ArpProxy Config from an interface
+         */
+        class unconfig_cmd
+            : public rpc_cmd<HW::item<bool>, rc_t, vapi::Proxy_arp_add_del>
+        {
+        public:
+            /**
+             * Constructor
+             */
+            unconfig_cmd(HW::item<bool>& item,
+                         const boost::asio::ip::address_v4& lo,
+                         const boost::asio::ip::address_v4& hig);
 
-  /**
-   * Issue the command to VPP/HW
-   */
-  rc_t issue(connection& con);
-  /**
-   * convert to string format for debug purposes
-   */
-  std::string to_string() const;
+            /**
+             * Issue the command to VPP/HW
+             */
+            rc_t issue(connection& con);
+            /**
+             * convert to string format for debug purposes
+             */
+            std::string to_string() const;
 
-  /**
-   * Comparison operator - only used for UT
-   */
-  bool operator==(const unconfig_cmd& i) const;
+            /**
+             * Comparison operator - only used for UT
+             */
+            bool operator==(const unconfig_cmd& i) const;
 
-private:
-  /**
-   * Address range
-   */
-  const boost::asio::ip::address_v4 m_low;
-  const boost::asio::ip::address_v4 m_high;
-};
-};
+        private:
+            /**
+             * Address range
+             */
+            const boost::asio::ip::address_v4 m_low;
+            const boost::asio::ip::address_v4 m_high;
+        };
+    };
 };
 
 /*

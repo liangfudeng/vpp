@@ -66,8 +66,7 @@ bier_disp_entry_add_or_lock (void)
 
     bde->bde_locks = 0;
 
-    FOR_EACH_BIER_HDR_PROTO(pproto)
-    {
+    FOR_EACH_BIER_HDR_PROTO(pproto) {
         bde->bde_fwd[pproto].bde_dpo = invalid;
         bde->bde_fwd[pproto].bde_rpf_id = ~0;
         bde->bde_pl[pproto] = FIB_NODE_INDEX_INVALID;
@@ -82,8 +81,7 @@ bier_disp_entry_unlock (index_t bdei)
 {
     bier_disp_entry_t *bde;
 
-    if (INDEX_INVALID == bdei)
-    {
+    if (INDEX_INVALID == bdei) {
         return;
     }
 
@@ -91,12 +89,10 @@ bier_disp_entry_unlock (index_t bdei)
 
     bde->bde_locks--;
 
-    if (0 == bde->bde_locks)
-    {
+    if (0 == bde->bde_locks) {
         bier_hdr_proto_id_t pproto;
 
-        FOR_EACH_BIER_HDR_PROTO(pproto)
-        {
+        FOR_EACH_BIER_HDR_PROTO(pproto) {
             dpo_unlock(&bde->bde_fwd[pproto].bde_dpo);
             bde->bde_fwd[pproto].bde_rpf_id = ~0;
             fib_path_list_unlock(bde->bde_pl[pproto]);
@@ -105,8 +101,7 @@ bier_disp_entry_unlock (index_t bdei)
     }
 }
 
-typedef struct bier_disp_entry_path_list_walk_ctx_t_
-{
+typedef struct bier_disp_entry_path_list_walk_ctx_t_ {
     u32 bdew_rpf_id;
 } bier_disp_entry_path_list_walk_ctx_t;
 
@@ -119,8 +114,7 @@ bier_disp_entry_path_list_walk (fib_node_index_t pl_index,
 
     ctx->bdew_rpf_id = fib_path_get_rpf_id(path_index);
 
-    if (~0 != ctx->bdew_rpf_id)
-    {
+    if (~0 != ctx->bdew_rpf_id) {
         return (FIB_PATH_LIST_WALK_STOP);
     }
     return (FIB_PATH_LIST_WALK_CONTINUE);
@@ -135,13 +129,10 @@ bier_disp_entry_restack (bier_disp_entry_t *bde,
 
     pli = bde->bde_pl[pproto];
 
-    if (FIB_NODE_INDEX_INVALID == pli)
-    {
+    if (FIB_NODE_INDEX_INVALID == pli) {
         dpo_copy(&via_dpo,
                  drop_dpo_get(bier_hdr_proto_to_dpo(pproto)));
-    }
-    else
-    {
+    } else {
         fib_path_list_contribute_forwarding(pli,
                                             fib_forw_chain_type_from_dpo_proto(
                                                 bier_hdr_proto_to_dpo(pproto)),
@@ -177,14 +168,11 @@ bier_disp_entry_path_add (index_t bdei,
      * create a new or update the exisitng path-list for this
      * payload protocol
      */
-    if (FIB_NODE_INDEX_INVALID == *pli)
-    {
+    if (FIB_NODE_INDEX_INVALID == *pli) {
         *pli = fib_path_list_create((FIB_PATH_LIST_FLAG_SHARED |
                                      FIB_PATH_LIST_FLAG_NO_URPF),
                                     rpaths);
-    }
-    else
-    {
+    } else {
         *pli = fib_path_list_copy_and_path_add(old_pli,
                                                (FIB_PATH_LIST_FLAG_SHARED |
                                                 FIB_PATH_LIST_FLAG_NO_URPF),
@@ -212,12 +200,11 @@ bier_disp_entry_path_remove (index_t bdei,
     /*
      * update the exisitng path-list for this payload protocol
      */
-    if (FIB_NODE_INDEX_INVALID != *pli)
-    {
+    if (FIB_NODE_INDEX_INVALID != *pli) {
         *pli = fib_path_list_copy_and_path_remove(old_pli,
-                                                  (FIB_PATH_LIST_FLAG_SHARED |
-                                                   FIB_PATH_LIST_FLAG_NO_URPF),
-                                                  rpaths);
+                (FIB_PATH_LIST_FLAG_SHARED |
+                 FIB_PATH_LIST_FLAG_NO_URPF),
+                rpaths);
 
         fib_path_list_lock(*pli);
         fib_path_list_unlock(old_pli);
@@ -231,10 +218,8 @@ bier_disp_entry_path_remove (index_t bdei,
      */
     int remove = 1;
 
-    FOR_EACH_BIER_HDR_PROTO(pproto)
-    {
-        if (FIB_NODE_INDEX_INVALID != bde->bde_pl[pproto])
-        {
+    FOR_EACH_BIER_HDR_PROTO(pproto) {
+        if (FIB_NODE_INDEX_INVALID != bde->bde_pl[pproto]) {
             remove = 0;
             break;
         }
@@ -256,15 +241,12 @@ format_bier_disp_entry (u8* s, va_list *args)
 
     s = format(s, "bier-disp:[%d]", bdei);
 
-    FOR_EACH_BIER_HDR_PROTO(pproto)
-    {
-        if (INDEX_INVALID != bde->bde_pl[pproto])
-        {
+    FOR_EACH_BIER_HDR_PROTO(pproto) {
+        if (INDEX_INVALID != bde->bde_pl[pproto]) {
             s = format(s, "\n");
             s = fib_path_list_format(bde->bde_pl[pproto], s);
 
-            if (flags & BIER_SHOW_DETAIL)
-            {
+            if (flags & BIER_SHOW_DETAIL) {
                 s = format(s, "\n%UForwarding:",
                            format_white_space, indent);
                 s = format(s, "\n%Urpf-id:%d",
@@ -286,14 +268,12 @@ bier_disp_entry_contribute_forwarding (index_t bdei,
     dpo_set(dpo, DPO_BIER_DISP_ENTRY, DPO_PROTO_BIER, bdei);
 }
 
-const static char* const bier_disp_entry_bier_nodes[] =
-{
+const static char* const bier_disp_entry_bier_nodes[] = {
     "bier-disp-dispatch",
     NULL,
 };
 
-const static char* const * const bier_disp_entry_nodes[DPO_PROTO_NUM] =
-{
+const static char* const * const bier_disp_entry_nodes[DPO_PROTO_NUM] = {
     [DPO_PROTO_BIER]  = bier_disp_entry_bier_nodes,
 };
 
@@ -350,8 +330,8 @@ VLIB_INIT_FUNCTION (bier_disp_entry_db_module_init);
 
 static clib_error_t *
 show_bier_disp_entry (vlib_main_t * vm,
-               unformat_input_t * input,
-               vlib_cli_command_t * cmd)
+                      unformat_input_t * input,
+                      vlib_cli_command_t * cmd)
 {
     index_t bdei;
 
@@ -360,18 +340,14 @@ show_bier_disp_entry (vlib_main_t * vm,
     while (unformat_check_input (input) != UNFORMAT_END_OF_INPUT) {
         if (unformat (input, "%d", &bdei))
             ;
-        else
-        {
+        else {
             break;
         }
     }
 
-    if (INDEX_INVALID == bdei)
-    {
+    if (INDEX_INVALID == bdei) {
         return (NULL);
-    }
-    else
-    {
+    } else {
         vlib_cli_output(vm, "%U", format_bier_disp_entry, bdei, 1,
                         BIER_SHOW_DETAIL);
     }

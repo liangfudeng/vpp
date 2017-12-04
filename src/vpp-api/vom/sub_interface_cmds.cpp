@@ -18,98 +18,100 @@
 
 #include <vapi/vpe.api.vapi.hpp>
 
-namespace VOM {
-namespace sub_interface_cmds {
-
-create_cmd::create_cmd(HW::item<handle_t>& item,
-                       const std::string& name,
-                       const handle_t& parent,
-                       uint16_t vlan)
-  : interface::create_cmd<vapi::Create_vlan_subif>(item, name)
-  , m_parent(parent)
-  , m_vlan(vlan)
+namespace VOM
 {
-}
+    namespace sub_interface_cmds
+    {
 
-bool
-create_cmd::operator==(const create_cmd& other) const
-{
-  return ((m_name == other.m_name) && (m_parent == other.m_parent) &&
-          (m_vlan == other.m_vlan));
-}
+        create_cmd::create_cmd(HW::item<handle_t>& item,
+                               const std::string& name,
+                               const handle_t& parent,
+                               uint16_t vlan)
+            : interface::create_cmd<vapi::Create_vlan_subif>(item, name)
+                , m_parent(parent)
+                , m_vlan(vlan)
+        {
+        }
 
-rc_t
-create_cmd::issue(connection& con)
-{
-  msg_t req(con.ctx(), std::ref(*this));
+        bool
+        create_cmd::operator==(const create_cmd& other) const
+        {
+            return ((m_name == other.m_name) && (m_parent == other.m_parent) &&
+                    (m_vlan == other.m_vlan));
+        }
 
-  auto& payload = req.get_request().get_payload();
-  payload.sw_if_index = m_parent.value();
-  payload.vlan_id = m_vlan;
+        rc_t
+        create_cmd::issue(connection& con)
+        {
+            msg_t req(con.ctx(), std::ref(*this));
 
-  VAPI_CALL(req.execute());
+            auto& payload = req.get_request().get_payload();
+            payload.sw_if_index = m_parent.value();
+            payload.vlan_id = m_vlan;
 
-  m_hw_item = wait();
+            VAPI_CALL(req.execute());
 
-  if (m_hw_item.rc() == rc_t::OK) {
-    insert_interface();
-  }
+            m_hw_item = wait();
 
-  return rc_t::OK;
-}
+            if (m_hw_item.rc() == rc_t::OK) {
+                insert_interface();
+            }
 
-std::string
-create_cmd::to_string() const
-{
-  std::ostringstream s;
-  s << "sub-itf-create: " << m_hw_item.to_string() << " parent:" << m_parent
-    << " vlan:" << m_vlan;
-  return (s.str());
-}
+            return rc_t::OK;
+        }
 
-delete_cmd::delete_cmd(HW::item<handle_t>& item)
-  : interface::delete_cmd<vapi::Delete_subif>(item)
-{
-}
+        std::string
+        create_cmd::to_string() const
+        {
+            std::ostringstream s;
+            s << "sub-itf-create: " << m_hw_item.to_string() << " parent:" << m_parent
+              << " vlan:" << m_vlan;
+            return (s.str());
+        }
 
-bool
-delete_cmd::operator==(const delete_cmd& other) const
-{
-  return (m_hw_item == other.m_hw_item);
-}
+        delete_cmd::delete_cmd(HW::item<handle_t>& item)
+            : interface::delete_cmd<vapi::Delete_subif>(item)
+        {
+        }
 
-rc_t
-delete_cmd::issue(connection& con)
-{
-  msg_t req(con.ctx(), std::ref(*this));
+        bool
+        delete_cmd::operator==(const delete_cmd& other) const
+        {
+            return (m_hw_item == other.m_hw_item);
+        }
 
-  auto& payload = req.get_request().get_payload();
-  payload.sw_if_index = m_hw_item.data().value();
+        rc_t
+        delete_cmd::issue(connection& con)
+        {
+            msg_t req(con.ctx(), std::ref(*this));
 
-  VAPI_CALL(req.execute());
+            auto& payload = req.get_request().get_payload();
+            payload.sw_if_index = m_hw_item.data().value();
 
-  wait();
-  m_hw_item.set(rc_t::NOOP);
+            VAPI_CALL(req.execute());
 
-  remove_interface();
-  return (rc_t::OK);
-}
+            wait();
+            m_hw_item.set(rc_t::NOOP);
 
-std::string
-delete_cmd::to_string() const
-{
-  std::ostringstream s;
+            remove_interface();
+            return (rc_t::OK);
+        }
 
-  s << "sub-itf-delete: " << m_hw_item.to_string();
+        std::string
+        delete_cmd::to_string() const
+        {
+            std::ostringstream s;
 
-  return (s.str());
-}
-} // namespace sub_interface_cmds
+            s << "sub-itf-delete: " << m_hw_item.to_string();
+
+            return (s.str());
+        }
+    } // namespace sub_interface_cmds
 } // namespace VOM
-  /*
-   * fd.io coding-style-patch-verification: ON
-   *
-   * Local Variables:
-   * eval: (c-set-style "mozilla")
-   * End:
-   */
+/*
+ * fd.io coding-style-patch-verification: ON
+ *
+ * Local Variables:
+ * eval: (c-set-style "mozilla")
+ * End:
+ */

@@ -27,44 +27,42 @@
 
 #include <vnet/cdp/cdp_protocol.h>
 
-typedef enum
-{
-  CDP_PACKET_TEMPLATE_ETHERNET,
-  CDP_PACKET_TEMPLATE_HDLC,
-  CDP_PACKET_TEMPLATE_SRP,
-  CDP_N_PACKET_TEMPLATES,
+typedef enum {
+    CDP_PACKET_TEMPLATE_ETHERNET,
+    CDP_PACKET_TEMPLATE_HDLC,
+    CDP_PACKET_TEMPLATE_SRP,
+    CDP_N_PACKET_TEMPLATES,
 } cdp_packet_template_id_t;
 
-typedef struct
-{
-  /* neighbor's vlib software interface index */
-  u32 sw_if_index;
+typedef struct {
+    /* neighbor's vlib software interface index */
+    u32 sw_if_index;
 
-  /* Timers */
-  f64 last_heard;
-  f64 last_sent;
+    /* Timers */
+    f64 last_heard;
+    f64 last_sent;
 
-  /* Neighbor time-to-live (usually 180s) */
-  u8 ttl_in_seconds;
+    /* Neighbor time-to-live (usually 180s) */
+    u8 ttl_in_seconds;
 
-  /* "no cdp run" or similar */
-  u8 disabled;
+    /* "no cdp run" or similar */
+    u8 disabled;
 
-  /* tx packet template id for this neighbor */
-  u8 packet_template_index;
+    /* tx packet template id for this neighbor */
+    u8 packet_template_index;
 
-  /* Jenkins hash optimization: avoid tlv scan, send short keepalive msg */
-  u8 last_packet_signature_valid;
-  uword last_packet_signature;
+    /* Jenkins hash optimization: avoid tlv scan, send short keepalive msg */
+    u8 last_packet_signature_valid;
+    uword last_packet_signature;
 
-  /* Info we actually keep about each neighbor */
-  u8 *device_name;
-  u8 *version;
-  u8 *port_id;
-  u8 *platform;
+    /* Info we actually keep about each neighbor */
+    u8 *device_name;
+    u8 *version;
+    u8 *port_id;
+    u8 *platform;
 
-  /* last received packet, for the J-hash optimization */
-  u8 *last_rx_pkt;
+    /* last received packet, for the J-hash optimization */
+    u8 *last_rx_pkt;
 } cdp_neighbor_t;
 
 #define foreach_neighbor_string_field           \
@@ -73,58 +71,54 @@ _(version)                                      \
 _(port_id)                                      \
 _(platform)
 
-typedef struct
-{
-  /* pool of cdp neighbors */
-  cdp_neighbor_t *neighbors;
+typedef struct {
+    /* pool of cdp neighbors */
+    cdp_neighbor_t *neighbors;
 
-  /* tx pcap debug enable */
-  u8 tx_pcap_debug;
+    /* tx pcap debug enable */
+    u8 tx_pcap_debug;
 
-  /* rapidly find a neighbor by vlib software interface index */
-  uword *neighbor_by_sw_if_index;
+    /* rapidly find a neighbor by vlib software interface index */
+    uword *neighbor_by_sw_if_index;
 
-  /* Background process node index */
-  u32 cdp_process_node_index;
+    /* Background process node index */
+    u32 cdp_process_node_index;
 
-  /* Packet templates for different encap types */
-  vlib_packet_template_t packet_templates[CDP_N_PACKET_TEMPLATES];
+    /* Packet templates for different encap types */
+    vlib_packet_template_t packet_templates[CDP_N_PACKET_TEMPLATES];
 
-  /* convenience variables */
-  vlib_main_t *vlib_main;
-  vnet_main_t *vnet_main;
+    /* convenience variables */
+    vlib_main_t *vlib_main;
+    vnet_main_t *vnet_main;
 } cdp_main_t;
 
 extern cdp_main_t cdp_main;
 
 /* Packet counters */
 #define foreach_cdp_error                                       \
-_ (NONE, "good cdp packets (processed)")	                \
-_ (CACHE_HIT, "good cdp packets (cache hit)")			\
+_ (NONE, "good cdp packets (processed)")                    \
+_ (CACHE_HIT, "good cdp packets (cache hit)")           \
 _ (BAD_TLV, "cdp packets with bad TLVs")                        \
 _ (PROTOCOL_VERSION, "cdp packets with bad protocol versions")  \
 _ (CHECKSUM, "cdp packets with bad checksums")                  \
 _ (DISABLED, "cdp packets received on disabled interfaces")
 
-typedef enum
-{
+typedef enum {
 #define _(sym,str) CDP_ERROR_##sym,
-  foreach_cdp_error
+    foreach_cdp_error
 #undef _
     CDP_N_ERROR,
 } cdp_error_t;
 
 /* cdp packet trace capture */
-typedef struct
-{
-  u32 len;
-  u8 data[400];
+typedef struct {
+    u32 len;
+    u8 data[400];
 } cdp_input_trace_t;
 
-typedef enum
-{
-  CDP_EVENT_SEND_NEIGHBOR,
-  CDP_EVENT_SEND_KEEPALIVE,
+typedef enum {
+    CDP_EVENT_SEND_NEIGHBOR,
+    CDP_EVENT_SEND_KEEPALIVE,
 } cdp_process_event_t;
 
 

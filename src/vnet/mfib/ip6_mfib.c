@@ -28,8 +28,7 @@
 /**
  * Key and mask for radix
  */
-typedef struct ip6_mfib_key_t_
-{
+typedef struct ip6_mfib_key_t_ {
     u8 key[IP6_MFIB_KEY_LEN];
     u8 mask[IP6_MFIB_KEY_LEN];
 } ip6_mfib_key_t;
@@ -39,8 +38,7 @@ typedef struct ip6_mfib_key_t_
  * Since it's in the tree and has pointers, it cannot realloc and so cannot
  * come from a vlib pool.
  */
-typedef struct ip6_mfib_node_t_
-{
+typedef struct ip6_mfib_node_t_ {
     struct radix_node i6mn_nodes[2];
     ip6_mfib_key_t i6mn_key;
     index_t i6mn_entry;
@@ -84,8 +82,7 @@ typedef struct ip6_mfib_special_t_ {
     u8 ims_scope;
 } ip6_mfib_special_t;
 
-static const ip6_mfib_special_t ip6_mfib_specials[] =
-{
+static const ip6_mfib_special_t ip6_mfib_specials[] = {
     {
         /*
          * Add ff02::1:ff00:0/104 via local route for all tables.
@@ -234,8 +231,7 @@ ip6_mfib_table_destroy (ip6_mfib_t *mfib)
     /*
      * remove all the specials we added when the table was created.
      */
-    FOR_EACH_IP6_SPECIAL(&pfx,
-    {
+    FOR_EACH_IP6_SPECIAL(&pfx, {
         mfib_table_entry_path_remove(mfib_table->mft_index,
                                      &pfx,
                                      MFIB_SOURCE_SPECIAL,
@@ -274,21 +270,16 @@ ip6_mfib_interface_enable_disable (u32 sw_if_index, int is_enable)
     vec_validate (ip6_main.mfib_index_by_sw_if_index, sw_if_index);
     mfib_index = ip6_mfib_table_get_index_for_sw_if_index(sw_if_index);
 
-    if (is_enable)
-    {
-        FOR_EACH_IP6_SPECIAL(&pfx,
-        {
+    if (is_enable) {
+        FOR_EACH_IP6_SPECIAL(&pfx, {
             mfib_table_entry_path_update(mfib_index,
                                          &pfx,
                                          MFIB_SOURCE_SPECIAL,
                                          &path,
                                          MFIB_ITF_FLAG_ACCEPT);
         });
-    }
-    else
-    {
-        FOR_EACH_IP6_SPECIAL(&pfx,
-        {
+    } else {
+        FOR_EACH_IP6_SPECIAL(&pfx, {
             mfib_table_entry_path_remove(mfib_index,
                                          &pfx,
                                          MFIB_SOURCE_SPECIAL,
@@ -314,8 +305,7 @@ ip6_mfib_table_find_or_create_and_lock (u32 table_id,
 u32
 ip6_mfib_table_get_index_for_sw_if_index (u32 sw_if_index)
 {
-    if (sw_if_index >= vec_len(ip6_main.mfib_index_by_sw_if_index))
-    {
+    if (sw_if_index >= vec_len(ip6_main.mfib_index_by_sw_if_index)) {
         /*
          * This is the case for interfaces that are not yet mapped to
          * a IP table
@@ -369,8 +359,7 @@ ip6_mfib_table_lookup_exact_match (const ip6_mfib_t *mfib,
     i6mn = (ip6_mfib_node_t*) rn_lookup(key.key, key.mask,
                                         (struct radix_node_head *)mfib->rhead);
 
-    if (NULL == i6mn)
-    {
+    if (NULL == i6mn) {
         return (INDEX_INVALID);
     }
 
@@ -442,8 +431,7 @@ ip6_mfib_table_entry_insert (ip6_mfib_t *mfib,
     if (NULL == rn_addroute(i6mn->i6mn_key.key,
                             i6mn->i6mn_key.mask,
                             mfib->rhead,
-                            i6mn->i6mn_nodes))
-    {
+                            i6mn->i6mn_nodes)) {
         ASSERT(0);
     }
 }
@@ -525,8 +513,7 @@ ip6_mfib_table_show_all (ip6_mfib_t *mfib,
 
     vec_sort_with_function(ctx.entries, mfib_entry_cmp_for_sort);
 
-    vec_foreach(mfib_entry_index, ctx.entries)
-    {
+    vec_foreach(mfib_entry_index, ctx.entries) {
         vlib_cli_output(vm, "%U",
                         format_mfib_entry,
                         *mfib_entry_index,
@@ -536,8 +523,7 @@ ip6_mfib_table_show_all (ip6_mfib_t *mfib,
     vec_free(ctx.entries);
 }
 
-typedef struct ip6_mfib_radix_walk_ctx_t_
-{
+typedef struct ip6_mfib_radix_walk_ctx_t_ {
     mfib_table_walk_fn_t user_fn;
     void *user_ctx;
 } ip6_mfib_radix_walk_ctx_t;
@@ -586,31 +572,24 @@ ip6_show_mfib (vlib_main_t * vm,
     verbose = 1;
     matching = 0;
 
-    while (unformat_check_input (input) != UNFORMAT_END_OF_INPUT)
-    {
+    while (unformat_check_input (input) != UNFORMAT_END_OF_INPUT) {
         if (unformat (input, "brief") || unformat (input, "summary")
             || unformat (input, "sum"))
             verbose = 0;
 
         else if (unformat (input, "%U %U",
                            unformat_ip6_address, &src,
-                           unformat_ip6_address, &grp))
-        {
+                           unformat_ip6_address, &grp)) {
             matching = 1;
             mask = 256;
-        }
-        else if (unformat (input, "%U/%d", unformat_ip6_address, &grp, &mask))
-        {
+        } else if (unformat (input, "%U/%d", unformat_ip6_address, &grp, &mask)) {
             memset(&src, 0, sizeof(src));
             matching = 1;
-        }
-        else if (unformat (input, "%U", unformat_ip6_address, &grp))
-        {
+        } else if (unformat (input, "%U", unformat_ip6_address, &grp)) {
             memset(&src, 0, sizeof(src));
             matching = 1;
             mask = 128;
-        }
-        else if (unformat (input, "table %d", &table_id))
+        } else if (unformat (input, "table %d", &table_id))
             ;
         else if (unformat (input, "index %d", &fib_index))
             ;
@@ -648,8 +627,7 @@ ip6_show_mfib (vlib_main_t * vm,
         if (!matching)
         {
             ip6_mfib_table_show_all(mfib, vm);
-        }
-        else
+        } else
         {
             ip6_mfib_table_show_one(mfib, vm, &src, &grp, mask);
         }

@@ -40,87 +40,85 @@
  *
  *
  */
-typedef struct lisp_gpe_adjacency_t_
-{
-  /**
-   * The LISP adj is a part of the FIB control plane graph.
-   */
-  fib_node_t fib_node;
+typedef struct lisp_gpe_adjacency_t_ {
+    /**
+     * The LISP adj is a part of the FIB control plane graph.
+     */
+    fib_node_t fib_node;
 
-  /**
-   * remote RLOC. The adjacency's next-hop
-   */
-  ip_address_t remote_rloc;
+    /**
+     * remote RLOC. The adjacency's next-hop
+     */
+    ip_address_t remote_rloc;
 
-  /**
-   * The VNI. Used in combination with the local-rloc to get the sub-interface
-   */
-  u32 vni;
+    /**
+     * The VNI. Used in combination with the local-rloc to get the sub-interface
+     */
+    u32 vni;
 
-  /**
-   * The number of locks/reference counts on the adjacency.
-   */
-  u32 locks;
+    /**
+     * The number of locks/reference counts on the adjacency.
+     */
+    u32 locks;
 
-  /**
-   * The index of the LISP L3 subinterface
-   */
-  u32 lisp_l3_sub_index;
+    /**
+     * The index of the LISP L3 subinterface
+     */
+    u32 lisp_l3_sub_index;
 
-  /**
-   * The SW IF index of the sub-interface this adjacency uses.
-   * Cached for convenience from the LISP L3 sub-interface
-   */
-  u32 sw_if_index;
+    /**
+     * The SW IF index of the sub-interface this adjacency uses.
+     * Cached for convenience from the LISP L3 sub-interface
+     */
+    u32 sw_if_index;
 
-  /**
-   * The index of the LISP GPE tunnel that provides the transport
-   * in the underlay.
-   */
-  u32 tunnel_index;
+    /**
+     * The index of the LISP GPE tunnel that provides the transport
+     * in the underlay.
+     */
+    u32 tunnel_index;
 
-  /**
-   * This adjacency is a child of the FIB entry to reach the RLOC.
-   * This is so when the reachability of that RLOC changes, we can restack
-   * the FIB adjacnecies.
-   */
-  u32 fib_entry_child_index;
+    /**
+     * This adjacency is a child of the FIB entry to reach the RLOC.
+     * This is so when the reachability of that RLOC changes, we can restack
+     * the FIB adjacnecies.
+     */
+    u32 fib_entry_child_index;
 
-  /**
-   * LISP header fields in HOST byte order
-   */
-  u8 flags;
-  u8 ver_res;
-  u8 res;
-  u8 next_protocol;
+    /**
+     * LISP header fields in HOST byte order
+     */
+    u8 flags;
+    u8 ver_res;
+    u8 res;
+    u8 next_protocol;
 
 } lisp_gpe_adjacency_t;
 
 extern index_t lisp_gpe_adjacency_find_or_create_and_lock (const
-							   locator_pair_t *
-							   pair,
-							   u32 rloc_fib_index,
-							   u32 vni);
+        locator_pair_t *
+        pair,
+        u32 rloc_fib_index,
+        u32 vni);
 
 extern void lisp_gpe_adjacency_unlock (index_t l3si);
 
 extern const lisp_gpe_adjacency_t *lisp_gpe_adjacency_get (index_t l3si);
 
 extern void lisp_gpe_update_adjacency (vnet_main_t * vnm,
-				       u32 sw_if_index, adj_index_t ai);
+                                       u32 sw_if_index, adj_index_t ai);
 extern u8 *lisp_gpe_build_rewrite (vnet_main_t * vnm,
-				   u32 sw_if_index,
-				   vnet_link_t link_type,
-				   const void *dst_address);
+                                   u32 sw_if_index,
+                                   vnet_link_t link_type,
+                                   const void *dst_address);
 
 
 /**
  * @brief Flags for displaying the adjacency
  */
-typedef enum lisp_gpe_adjacency_format_flags_t_
-{
-  LISP_GPE_ADJ_FORMAT_FLAG_NONE,
-  LISP_GPE_ADJ_FORMAT_FLAG_DETAIL,
+typedef enum lisp_gpe_adjacency_format_flags_t_ {
+    LISP_GPE_ADJ_FORMAT_FLAG_NONE,
+    LISP_GPE_ADJ_FORMAT_FLAG_DETAIL,
 } lisp_gpe_adjacency_format_flags_t;
 
 extern u8 *format_lisp_gpe_adjacency (u8 * s, va_list * args);

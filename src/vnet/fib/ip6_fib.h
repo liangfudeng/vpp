@@ -24,35 +24,35 @@
 #include <vnet/dpo/load_balance.h>
 
 extern fib_node_index_t ip6_fib_table_lookup(u32 fib_index,
-					     const ip6_address_t *addr,
-					     u32 len);
+        const ip6_address_t *addr,
+        u32 len);
 extern fib_node_index_t ip6_fib_table_lookup_exact_match(u32 fib_index,
-							 const ip6_address_t *addr,
-							 u32 len);
+        const ip6_address_t *addr,
+        u32 len);
 
 extern void ip6_fib_table_entry_remove(u32 fib_index,
-				       const ip6_address_t *addr,
-				       u32 len);
+                                       const ip6_address_t *addr,
+                                       u32 len);
 
 extern void ip6_fib_table_entry_insert(u32 fib_index,
-				       const ip6_address_t *addr,
-				       u32 len,
-				       fib_node_index_t fib_entry_index);
+                                       const ip6_address_t *addr,
+                                       u32 len,
+                                       fib_node_index_t fib_entry_index);
 extern void ip6_fib_table_destroy(u32 fib_index);
 
 extern void ip6_fib_table_fwding_dpo_update(u32 fib_index,
-					    const ip6_address_t *addr,
-					    u32 len,
-					    const dpo_id_t *dpo);
+        const ip6_address_t *addr,
+        u32 len,
+        const dpo_id_t *dpo);
 
 extern void ip6_fib_table_fwding_dpo_remove(u32 fib_index,
-					    const ip6_address_t *addr,
-					    u32 len,
-					    const dpo_id_t *dpo);
+        const ip6_address_t *addr,
+        u32 len,
+        const dpo_id_t *dpo);
 
 u32 ip6_fib_table_fwding_lookup_with_if_index(ip6_main_t * im,
-					      u32 sw_if_index,
-					      const ip6_address_t * dst);
+        u32 sw_if_index,
+        const ip6_address_t * dst);
 
 /**
  * @brief Walk all entries in a FIB table
@@ -81,20 +81,19 @@ ip6_fib_table_fwding_lookup (ip6_main_t * im,
     kv.key[1] = dst->as_u64[1];
     fib = ((u64)((fib_index))<<32);
 
-    for (i = 0; i < len; i++)
-    {
-	int dst_address_length = table->prefix_lengths_in_search_order[i];
-	ip6_address_t * mask = &ip6_main.fib_masks[dst_address_length];
+    for (i = 0; i < len; i++) {
+        int dst_address_length = table->prefix_lengths_in_search_order[i];
+        ip6_address_t * mask = &ip6_main.fib_masks[dst_address_length];
 
-	ASSERT(dst_address_length >= 0 && dst_address_length <= 128);
-	//As lengths are decreasing, masks are increasingly specific.
-	kv.key[0] &= mask->as_u64[0];
-	kv.key[1] &= mask->as_u64[1];
-	kv.key[2] = fib | dst_address_length;
+        ASSERT(dst_address_length >= 0 && dst_address_length <= 128);
+        //As lengths are decreasing, masks are increasingly specific.
+        kv.key[0] &= mask->as_u64[0];
+        kv.key[1] &= mask->as_u64[1];
+        kv.key[2] = fib | dst_address_length;
 
-	rv = BV(clib_bihash_search_inline_2)(&table->ip6_hash, &kv, &value);
-	if (rv == 0)
-	    return value.value;
+        rv = BV(clib_bihash_search_inline_2)(&table->ip6_hash, &kv, &value);
+        if (rv == 0)
+            return value.value;
     }
 
     /* default route is always present */
@@ -110,8 +109,7 @@ ip6_src_lookup_for_packet (ip6_main_t * im,
                            vlib_buffer_t * b,
                            ip6_header_t * i)
 {
-    if (vnet_buffer (b)->ip.adj_index[VLIB_RX] == ~0)
-    {
+    if (vnet_buffer (b)->ip.adj_index[VLIB_RX] == ~0) {
         const dpo_id_t *dpo;
         index_t lbi;
 
@@ -122,8 +120,7 @@ ip6_src_lookup_for_packet (ip6_main_t * im,
 
         dpo = load_balance_get_bucket_i(load_balance_get(lbi), 0);
 
-        if (dpo_is_adj(dpo))
-        {
+        if (dpo_is_adj(dpo)) {
             vnet_buffer (b)->ip.adj_index[VLIB_RX] = dpo->dpoi_index;
         }
     }
@@ -145,7 +142,7 @@ ip6_src_lookup_for_packet (ip6_main_t * im,
  *
  */
 extern u32 ip6_fib_table_find_or_create_and_lock(u32 table_id,
-                                                 fib_source_t src);
+        fib_source_t src);
 extern u32 ip6_fib_table_create_and_lock(fib_source_t src);
 
 extern u8 *format_ip6_fib_table_memory(u8 * s, va_list * args);
@@ -157,17 +154,17 @@ ip6_fib_get (fib_node_index_t index)
     return (pool_elt_at_index (ip6_main.v6_fibs, index));
 }
 
-static inline 
+static inline
 u32 ip6_fib_index_from_table_id (u32 table_id)
 {
-  ip6_main_t * im = &ip6_main;
-  uword * p;
+    ip6_main_t * im = &ip6_main;
+    uword * p;
 
-  p = hash_get (im->fib_index_by_table_id, table_id);
-  if (!p)
-    return ~0;
+    p = hash_get (im->fib_index_by_table_id, table_id);
+    if (!p)
+        return ~0;
 
-  return p[0];
+    return p[0];
 }
 
 extern u32 ip6_fib_table_get_index_for_sw_if_index(u32 sw_if_index);

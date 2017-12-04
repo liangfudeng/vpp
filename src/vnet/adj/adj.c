@@ -38,9 +38,8 @@ int adj_per_adj_counters;
 always_inline void
 adj_poison (ip_adjacency_t * adj)
 {
-    if (CLIB_DEBUG > 0)
-    {
-	memset (adj, 0xfe, sizeof (adj[0]));
+    if (CLIB_DEBUG > 0) {
+        memset (adj, 0xfe, sizeof (adj[0]));
     }
 }
 
@@ -79,7 +78,7 @@ static int
 adj_index_is_special (adj_index_t adj_index)
 {
     if (ADJ_INDEX_INVALID == adj_index)
-	return (!0);
+        return (!0);
 
     return (0);
 }
@@ -102,48 +101,45 @@ format_ip_adjacency (u8 * s, va_list * args)
     adj_index = va_arg (*args, u32);
     fiaf = va_arg (*args, format_ip_adjacency_flags_t);
     adj = adj_get(adj_index);
-  
-    switch (adj->lookup_next_index)
-    {
-    case IP_LOOKUP_NEXT_REWRITE:
-	s = format (s, "%U", format_adj_nbr, adj_index, 0);
-	break;
-    case IP_LOOKUP_NEXT_ARP:
-	s = format (s, "%U", format_adj_nbr_incomplete, adj_index, 0);
-	break;
-    case IP_LOOKUP_NEXT_GLEAN:
-	s = format (s, "%U", format_adj_glean, adj_index, 0);
-	break;
-    case IP_LOOKUP_NEXT_MIDCHAIN:
-	s = format (s, "%U", format_adj_midchain, adj_index, 2);
-	break;
-    case IP_LOOKUP_NEXT_MCAST:
-	s = format (s, "%U", format_adj_mcast, adj_index, 0);
-	break;
-    case IP_LOOKUP_NEXT_MCAST_MIDCHAIN:
-	s = format (s, "%U", format_adj_mcast_midchain, adj_index, 0);
-	break;
-    default:
-	break;
+
+    switch (adj->lookup_next_index) {
+        case IP_LOOKUP_NEXT_REWRITE:
+            s = format (s, "%U", format_adj_nbr, adj_index, 0);
+            break;
+        case IP_LOOKUP_NEXT_ARP:
+            s = format (s, "%U", format_adj_nbr_incomplete, adj_index, 0);
+            break;
+        case IP_LOOKUP_NEXT_GLEAN:
+            s = format (s, "%U", format_adj_glean, adj_index, 0);
+            break;
+        case IP_LOOKUP_NEXT_MIDCHAIN:
+            s = format (s, "%U", format_adj_midchain, adj_index, 2);
+            break;
+        case IP_LOOKUP_NEXT_MCAST:
+            s = format (s, "%U", format_adj_mcast, adj_index, 0);
+            break;
+        case IP_LOOKUP_NEXT_MCAST_MIDCHAIN:
+            s = format (s, "%U", format_adj_mcast_midchain, adj_index, 0);
+            break;
+        default:
+            break;
     }
 
-    if (fiaf & FORMAT_IP_ADJACENCY_DETAIL)
-    {
+    if (fiaf & FORMAT_IP_ADJACENCY_DETAIL) {
         adj_delegate_type_t adt;
         adj_delegate_t *aed;
         vlib_counter_t counts;
 
         vlib_get_combined_counter(&adjacency_counters, adj_index, &counts);
         s = format (s, "\n counts:[%Ld:%Ld]", counts.packets, counts.bytes);
-	s = format (s, "\n locks:%d", adj->ia_node.fn_locks);
-	s = format(s, "\n delegates:\n  ");
-        FOR_EACH_ADJ_DELEGATE(adj, adt, aed,
-        {
+        s = format (s, "\n locks:%d", adj->ia_node.fn_locks);
+        s = format(s, "\n delegates:\n  ");
+        FOR_EACH_ADJ_DELEGATE(adj, adt, aed, {
             s = format(s, "  %U\n", format_adj_deletegate, aed);
         });
 
-	s = format(s, "\n children:\n  ");
-	s = fib_node_children_format(adj->ia_node.fn_children, s);
+        s = format(s, "\n children:\n  ");
+        s = fib_node_children_format(adj->ia_node.fn_children, s);
     }
 
     return s;
@@ -164,40 +160,39 @@ adj_last_lock_gone (ip_adjacency_t *adj)
 
     vlib_worker_thread_barrier_sync (vm);
 
-    switch (adj->lookup_next_index)
-    {
-    case IP_LOOKUP_NEXT_MIDCHAIN:
-        dpo_reset(&adj->sub_type.midchain.next_dpo);
+    switch (adj->lookup_next_index) {
+        case IP_LOOKUP_NEXT_MIDCHAIN:
+            dpo_reset(&adj->sub_type.midchain.next_dpo);
         /* FALL THROUGH */
-    case IP_LOOKUP_NEXT_ARP:
-    case IP_LOOKUP_NEXT_REWRITE:
-	/*
-	 * complete and incomplete nbr adjs
-	 */
-	adj_nbr_remove(adj_get_index(adj),
-                       adj->ia_nh_proto,
-		       adj->ia_link,
-		       &adj->sub_type.nbr.next_hop,
-		       adj->rewrite_header.sw_if_index);
-	break;
-    case IP_LOOKUP_NEXT_GLEAN:
-	adj_glean_remove(adj->ia_nh_proto,
-			 adj->rewrite_header.sw_if_index);
-	break;
-    case IP_LOOKUP_NEXT_MCAST:
-    case IP_LOOKUP_NEXT_MCAST_MIDCHAIN:
-	adj_mcast_remove(adj->ia_nh_proto,
-			 adj->rewrite_header.sw_if_index);
-	break;
-    case IP_LOOKUP_NEXT_DROP:
-    case IP_LOOKUP_NEXT_PUNT:
-    case IP_LOOKUP_NEXT_LOCAL:
-    case IP_LOOKUP_NEXT_ICMP_ERROR:
-    case IP_LOOKUP_N_NEXT:
-	/*
-	 * type not stored in any DB from which we need to remove it
-	 */
-	break;
+        case IP_LOOKUP_NEXT_ARP:
+        case IP_LOOKUP_NEXT_REWRITE:
+            /*
+             * complete and incomplete nbr adjs
+             */
+            adj_nbr_remove(adj_get_index(adj),
+                           adj->ia_nh_proto,
+                           adj->ia_link,
+                           &adj->sub_type.nbr.next_hop,
+                           adj->rewrite_header.sw_if_index);
+            break;
+        case IP_LOOKUP_NEXT_GLEAN:
+            adj_glean_remove(adj->ia_nh_proto,
+                             adj->rewrite_header.sw_if_index);
+            break;
+        case IP_LOOKUP_NEXT_MCAST:
+        case IP_LOOKUP_NEXT_MCAST_MIDCHAIN:
+            adj_mcast_remove(adj->ia_nh_proto,
+                             adj->rewrite_header.sw_if_index);
+            break;
+        case IP_LOOKUP_NEXT_DROP:
+        case IP_LOOKUP_NEXT_PUNT:
+        case IP_LOOKUP_NEXT_LOCAL:
+        case IP_LOOKUP_NEXT_ICMP_ERROR:
+        case IP_LOOKUP_N_NEXT:
+            /*
+             * type not stored in any DB from which we need to remove it
+             */
+            break;
     }
 
     vlib_worker_thread_barrier_release(vm);
@@ -223,9 +218,8 @@ adj_lock (adj_index_t adj_index)
 {
     ip_adjacency_t *adj;
 
-    if (adj_index_is_special(adj_index))
-    {
-	return;
+    if (adj_index_is_special(adj_index)) {
+        return;
     }
 
     adj = adj_get(adj_index);
@@ -240,9 +234,8 @@ adj_unlock (adj_index_t adj_index)
 {
     ip_adjacency_t *adj;
 
-    if (adj_index_is_special(adj_index))
-    {
-	return;
+    if (adj_index_is_special(adj_index)) {
+        return;
     }
 
     adj = adj_get(adj_index);
@@ -256,13 +249,12 @@ adj_unlock (adj_index_t adj_index)
 
 u32
 adj_child_add (adj_index_t adj_index,
-	       fib_node_type_t child_type,
-	       fib_node_index_t child_index)
+               fib_node_type_t child_type,
+               fib_node_index_t child_index)
 {
     ASSERT(ADJ_INDEX_INVALID != adj_index);
-    if (adj_index_is_special(adj_index))
-    {
-	return (~0);
+    if (adj_index_is_special(adj_index)) {
+        return (~0);
     }
 
     return (fib_node_child_add(FIB_NODE_TYPE_ADJ,
@@ -273,11 +265,10 @@ adj_child_add (adj_index_t adj_index,
 
 void
 adj_child_remove (adj_index_t adj_index,
-		  u32 sibling_index)
+                  u32 sibling_index)
 {
-    if (adj_index_is_special(adj_index))
-    {
-	return;
+    if (adj_index_is_special(adj_index)) {
+        return;
     }
 
     fib_node_child_remove(FIB_NODE_TYPE_ADJ,
@@ -288,8 +279,7 @@ adj_child_remove (adj_index_t adj_index,
 /*
  * Context for the walk to update the cached feture flags.
  */
-typedef struct adj_feature_update_t_
-{
+typedef struct adj_feature_update_t_ {
     u8 arc;
     u8 enable;
 } adj_feature_update_ctx_t;
@@ -312,8 +302,7 @@ adj_feature_update_walk_cb (adj_index_t ai,
         ((ctx->arc == ip4_main.lookup_main.output_feature_arc_index) &&
          (VNET_LINK_IP4 == adj->ia_link)) ||
         ((ctx->arc == mpls_main.output_feature_arc_index) &&
-         (VNET_LINK_MPLS == adj->ia_link)))
-    {
+         (VNET_LINK_MPLS == adj->ia_link))) {
         if (ctx->enable)
             adj->rewrite_header.flags |= VNET_REWRITE_HAS_FEATURES;
         else
@@ -351,8 +340,7 @@ adj_walk (u32 sw_if_index,
      */
     fib_protocol_t proto;
 
-    FOR_EACH_FIB_IP_PROTOCOL(proto)
-    {
+    FOR_EACH_FIB_IP_PROTOCOL(proto) {
         adj_nbr_walk(sw_if_index, proto, cb, ctx);
         adj_mcast_walk(sw_if_index, proto, cb, ctx);
     }
@@ -368,7 +356,7 @@ adj_get_link_type (adj_index_t ai)
 
     adj = adj_get(ai);
 
-    return (adj->ia_link); 
+    return (adj->ia_link);
 }
 
 /**
@@ -395,15 +383,12 @@ adj_is_up (adj_index_t ai)
 
     aed = adj_delegate_get(adj_get(ai), ADJ_DELEGATE_BFD);
 
-    if (NULL == aed)
-    {
+    if (NULL == aed) {
         /*
          * no BFD tracking - resolved
          */
         return (!0);
-    }
-    else
-    {
+    } else {
         /*
          * defer to the state of the BFD tracking
          */
@@ -438,7 +423,7 @@ adj_get_node (fib_node_index_t index)
     return (&adj->ia_node);
 }
 
-#define ADJ_FROM_NODE(_node)						\
+#define ADJ_FROM_NODE(_node)                        \
     ((ip_adjacency_t*)((char*)_node - STRUCT_OFFSET_OF(ip_adjacency_t, ia_node)))
 
 static void
@@ -449,7 +434,7 @@ adj_node_last_lock_gone (fib_node_t *node)
 
 static fib_node_back_walk_rc_t
 adj_back_walk_notify (fib_node_t *node,
-		      fib_node_back_walk_ctx_t *ctx)
+                      fib_node_back_walk_ctx_t *ctx)
 {
     /*
      * Que pasa. yo soj en el final!
@@ -485,43 +470,37 @@ VLIB_INIT_FUNCTION (adj_module_init);
 
 static clib_error_t *
 adj_show (vlib_main_t * vm,
-	  unformat_input_t * input,
-	  vlib_cli_command_t * cmd)
+          unformat_input_t * input,
+          vlib_cli_command_t * cmd)
 {
     adj_index_t ai = ADJ_INDEX_INVALID;
     u32 sw_if_index = ~0;
     int summary = 0;
 
-    while (unformat_check_input (input) != UNFORMAT_END_OF_INPUT)
-    {
-	if (unformat (input, "%d", &ai))
-	    ;
-	else if (unformat (input, "sum"))
-	    summary = 1;
-	else if (unformat (input, "summary"))
-	    summary = 1;
-	else if (unformat (input, "%U",
-			   unformat_vnet_sw_interface, vnet_get_main(),
-			   &sw_if_index))
-	    ;
-	else
-	    break;
+    while (unformat_check_input (input) != UNFORMAT_END_OF_INPUT) {
+        if (unformat (input, "%d", &ai))
+            ;
+        else if (unformat (input, "sum"))
+            summary = 1;
+        else if (unformat (input, "summary"))
+            summary = 1;
+        else if (unformat (input, "%U",
+                           unformat_vnet_sw_interface, vnet_get_main(),
+                           &sw_if_index))
+            ;
+        else
+            break;
     }
 
-    if (summary)
-    {
+    if (summary) {
         vlib_cli_output (vm, "Number of adjacenies: %d", pool_elts(adj_pool));
         vlib_cli_output (vm, "Per-adjacency counters: %s",
                          (adj_are_counters_enabled() ?
                           "enabled":
                           "disabled"));
-    }
-    else
-    {
-        if (ADJ_INDEX_INVALID != ai)
-        {
-            if (pool_is_free_index(adj_pool, ai))
-            {
+    } else {
+        if (ADJ_INDEX_INVALID != ai) {
+            if (pool_is_free_index(adj_pool, ai)) {
                 vlib_cli_output (vm, "adjacency %d invalid", ai);
                 return 0;
             }
@@ -530,9 +509,7 @@ adj_show (vlib_main_t * vm,
                              ai,
                              format_ip_adjacency,  ai,
                              FORMAT_IP_ADJACENCY_DETAIL);
-        }
-        else
-        {
+        } else {
             /* *INDENT-OFF* */
             pool_foreach_index(ai, adj_pool,
             ({
@@ -583,23 +560,19 @@ adj_cli_counters_set (vlib_main_t * vm,
     clib_error_t *error = NULL;
     int enable = ~0;
 
-    while (unformat_check_input (input) != UNFORMAT_END_OF_INPUT)
-    {
-	if (unformat (input, "enable"))
-	    enable = 1;
-	else if (unformat (input, "disable"))
-	    enable = 0;
-	else
-	    break;
+    while (unformat_check_input (input) != UNFORMAT_END_OF_INPUT) {
+        if (unformat (input, "enable"))
+            enable = 1;
+        else if (unformat (input, "disable"))
+            enable = 0;
+        else
+            break;
     }
 
-    if (enable != ~0)
-    {
+    if (enable != ~0) {
         /* user requested something sensible */
         adj_per_adj_counters = enable;
-    }
-    else
-    {
+    } else {
         error = clib_error_return (0, "specify 'enable' or 'disable'");
     }
 

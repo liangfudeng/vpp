@@ -55,42 +55,41 @@ vxlan_gpe_main_t vxlan_gpe_main;
  */
 u8 * format_vxlan_gpe_tunnel (u8 * s, va_list * args)
 {
-  vxlan_gpe_tunnel_t * t = va_arg (*args, vxlan_gpe_tunnel_t *);
-  vxlan_gpe_main_t * ngm = &vxlan_gpe_main;
+    vxlan_gpe_tunnel_t * t = va_arg (*args, vxlan_gpe_tunnel_t *);
+    vxlan_gpe_main_t * ngm = &vxlan_gpe_main;
 
-  s = format (s, "[%d] local: %U remote: %U ",
-              t - ngm->tunnels,
-              format_ip46_address, &t->local, IP46_TYPE_ANY,
-              format_ip46_address, &t->remote, IP46_TYPE_ANY);
+    s = format (s, "[%d] local: %U remote: %U ",
+                t - ngm->tunnels,
+                format_ip46_address, &t->local, IP46_TYPE_ANY,
+                format_ip46_address, &t->remote, IP46_TYPE_ANY);
 
-  s = format (s, "  vxlan VNI %d ", t->vni);
+    s = format (s, "  vxlan VNI %d ", t->vni);
 
-  switch (t->protocol)
-    {
-    case VXLAN_GPE_PROTOCOL_IP4:
-      s = format (s, "next-protocol ip4");
-      break;
-    case VXLAN_GPE_PROTOCOL_IP6:
-      s = format (s, "next-protocol ip6");
-      break;
-    case VXLAN_GPE_PROTOCOL_ETHERNET:
-      s = format (s, "next-protocol ethernet");
-      break;
-    case VXLAN_GPE_PROTOCOL_NSH:
-      s = format (s, "next-protocol nsh");
-      break;
-    default:
-      s = format (s, "next-protocol unknown %d", t->protocol);
+    switch (t->protocol) {
+        case VXLAN_GPE_PROTOCOL_IP4:
+            s = format (s, "next-protocol ip4");
+            break;
+        case VXLAN_GPE_PROTOCOL_IP6:
+            s = format (s, "next-protocol ip6");
+            break;
+        case VXLAN_GPE_PROTOCOL_ETHERNET:
+            s = format (s, "next-protocol ethernet");
+            break;
+        case VXLAN_GPE_PROTOCOL_NSH:
+            s = format (s, "next-protocol nsh");
+            break;
+        default:
+            s = format (s, "next-protocol unknown %d", t->protocol);
     }
 
-  if (ip46_address_is_multicast (&t->remote))
-    s = format (s, "mcast_sw_if_index %d ", t->mcast_sw_if_index);
-    
-  s = format (s, " fibs: (encap %d, decap %d)",
-              t->encap_fib_index,
-              t->decap_fib_index);
+    if (ip46_address_is_multicast (&t->remote))
+        s = format (s, "mcast_sw_if_index %d ", t->mcast_sw_if_index);
 
-  return s;
+    s = format (s, " fibs: (encap %d, decap %d)",
+                t->encap_fib_index,
+                t->decap_fib_index);
+
+    return s;
 }
 
 /**
@@ -104,16 +103,16 @@ u8 * format_vxlan_gpe_tunnel (u8 * s, va_list * args)
  */
 static u8 * format_vxlan_gpe_name (u8 * s, va_list * args)
 {
-  u32 dev_instance = va_arg (*args, u32);
-  return format (s, "vxlan_gpe_tunnel%d", dev_instance);
+    u32 dev_instance = va_arg (*args, u32);
+    return format (s, "vxlan_gpe_tunnel%d", dev_instance);
 }
 
 static uword dummy_interface_tx (vlib_main_t * vm,
                                  vlib_node_runtime_t * node,
                                  vlib_frame_t * frame)
 {
-  clib_warning ("you shouldn't be here, leaking buffers...");
-  return frame->n_vectors;
+    clib_warning ("you shouldn't be here, leaking buffers...");
+    return frame->n_vectors;
 }
 
 /**
@@ -129,19 +128,19 @@ static uword dummy_interface_tx (vlib_main_t * vm,
 static clib_error_t *
 vxlan_gpe_interface_admin_up_down (vnet_main_t * vnm, u32 hw_if_index, u32 flags)
 {
-  u32 hw_flags = (flags & VNET_SW_INTERFACE_FLAG_ADMIN_UP) ?
-    VNET_HW_INTERFACE_FLAG_LINK_UP : 0;
-  vnet_hw_interface_set_flags (vnm, hw_if_index, hw_flags);
+    u32 hw_flags = (flags & VNET_SW_INTERFACE_FLAG_ADMIN_UP) ?
+                   VNET_HW_INTERFACE_FLAG_LINK_UP : 0;
+    vnet_hw_interface_set_flags (vnm, hw_if_index, hw_flags);
 
-  return 0;
+    return 0;
 }
 
 VNET_DEVICE_CLASS (vxlan_gpe_device_class,static) = {
-  .name = "VXLAN_GPE",
-  .format_device_name = format_vxlan_gpe_name,
-  .format_tx_trace = format_vxlan_gpe_encap_trace,
-  .tx_function = dummy_interface_tx,
-  .admin_up_down_function = vxlan_gpe_interface_admin_up_down,
+    .name = "VXLAN_GPE",
+    .format_device_name = format_vxlan_gpe_name,
+    .format_tx_trace = format_vxlan_gpe_encap_trace,
+    .tx_function = dummy_interface_tx,
+    .admin_up_down_function = vxlan_gpe_interface_admin_up_down,
 };
 
 
@@ -156,15 +155,15 @@ VNET_DEVICE_CLASS (vxlan_gpe_device_class,static) = {
  */
 static u8 * format_vxlan_gpe_header_with_length (u8 * s, va_list * args)
 {
-  u32 dev_instance = va_arg (*args, u32);
-  s = format (s, "unimplemented dev %u", dev_instance);
-  return s;
+    u32 dev_instance = va_arg (*args, u32);
+    s = format (s, "unimplemented dev %u", dev_instance);
+    return s;
 }
 
 VNET_HW_INTERFACE_CLASS (vxlan_gpe_hw_class) = {
-  .name = "VXLAN_GPE",
-  .format_header = format_vxlan_gpe_header_with_length,
-  .build_rewrite = default_build_rewrite,
+    .name = "VXLAN_GPE",
+    .format_header = format_vxlan_gpe_header_with_length,
+    .build_rewrite = default_build_rewrite,
 };
 
 static void
@@ -173,7 +172,7 @@ vxlan_gpe_tunnel_restack_dpo(vxlan_gpe_tunnel_t * t)
     dpo_id_t dpo = DPO_INVALID;
     u32 encap_index = vxlan_gpe_encap_node.index;
     fib_forward_chain_type_t forw_type = ip46_address_is_ip4(&t->remote) ?
-        FIB_FORW_CHAIN_TYPE_UNICAST_IP4 : FIB_FORW_CHAIN_TYPE_UNICAST_IP6;
+                                         FIB_FORW_CHAIN_TYPE_UNICAST_IP4 : FIB_FORW_CHAIN_TYPE_UNICAST_IP6;
 
     fib_entry_contribute_forwarding (t->fib_entry_index, forw_type, &dpo);
     dpo_stack_from_node (encap_index, &t->next_dpo, &dpo);
@@ -185,7 +184,7 @@ vxlan_gpe_tunnel_from_fib_node (fib_node_t *node)
 {
     ASSERT(FIB_NODE_TYPE_VXLAN_GPE_TUNNEL == node->fn_type);
     return ((vxlan_gpe_tunnel_t*) (((char*)node) -
-			       STRUCT_OFFSET_OF(vxlan_gpe_tunnel_t, node)));
+                                   STRUCT_OFFSET_OF(vxlan_gpe_tunnel_t, node)));
 }
 
 /**
@@ -194,7 +193,7 @@ vxlan_gpe_tunnel_from_fib_node (fib_node_t *node)
  */
 static fib_node_back_walk_rc_t
 vxlan_gpe_tunnel_back_walk (fib_node_t *node,
-			fib_node_back_walk_ctx_t *ctx)
+                            fib_node_back_walk_ctx_t *ctx)
 {
     vxlan_gpe_tunnel_restack_dpo(vxlan_gpe_tunnel_from_fib_node(node));
     return (FIB_NODE_BACK_WALK_CONTINUE);
@@ -268,50 +267,47 @@ _(decap_fib_index)
 int vxlan4_gpe_rewrite (vxlan_gpe_tunnel_t * t, u32 extension_size,
                         u8 protocol_override, uword encap_next_node)
 {
-  u8 *rw = 0;
-  ip4_header_t * ip0;
-  ip4_vxlan_gpe_header_t * h0;
-  int len;
+    u8 *rw = 0;
+    ip4_header_t * ip0;
+    ip4_vxlan_gpe_header_t * h0;
+    int len;
 
-  len = sizeof (*h0) + extension_size;
+    len = sizeof (*h0) + extension_size;
 
-  vec_free(t->rewrite);
-  vec_validate_aligned (rw, len-1, CLIB_CACHE_LINE_BYTES);
+    vec_free(t->rewrite);
+    vec_validate_aligned (rw, len-1, CLIB_CACHE_LINE_BYTES);
 
-  h0 = (ip4_vxlan_gpe_header_t *) rw;
+    h0 = (ip4_vxlan_gpe_header_t *) rw;
 
-  /* Fixed portion of the (outer) ip4 header */
-  ip0 = &h0->ip4;
-  ip0->ip_version_and_header_length = 0x45;
-  ip0->ttl = 254;
-  ip0->protocol = IP_PROTOCOL_UDP;
+    /* Fixed portion of the (outer) ip4 header */
+    ip0 = &h0->ip4;
+    ip0->ip_version_and_header_length = 0x45;
+    ip0->ttl = 254;
+    ip0->protocol = IP_PROTOCOL_UDP;
 
-  /* we fix up the ip4 header length and checksum after-the-fact */
-  ip0->src_address.as_u32 = t->local.ip4.as_u32;
-  ip0->dst_address.as_u32 = t->remote.ip4.as_u32;
-  ip0->checksum = ip4_header_checksum (ip0);
+    /* we fix up the ip4 header length and checksum after-the-fact */
+    ip0->src_address.as_u32 = t->local.ip4.as_u32;
+    ip0->dst_address.as_u32 = t->remote.ip4.as_u32;
+    ip0->checksum = ip4_header_checksum (ip0);
 
-  /* UDP header, randomize src port on something, maybe? */
-  h0->udp.src_port = clib_host_to_net_u16 (4790);
-  h0->udp.dst_port = clib_host_to_net_u16 (UDP_DST_PORT_VXLAN_GPE);
+    /* UDP header, randomize src port on something, maybe? */
+    h0->udp.src_port = clib_host_to_net_u16 (4790);
+    h0->udp.dst_port = clib_host_to_net_u16 (UDP_DST_PORT_VXLAN_GPE);
 
-  /* VXLAN header. Are we having fun yet? */
-  h0->vxlan.flags = VXLAN_GPE_FLAGS_I | VXLAN_GPE_FLAGS_P;
-  h0->vxlan.ver_res = VXLAN_GPE_VERSION;
-  if (protocol_override)
-  {
-      h0->vxlan.protocol = protocol_override;
-  }
-  else
-  {
-      h0->vxlan.protocol = t->protocol;
-  }
-  t->rewrite_size = sizeof(ip4_vxlan_gpe_header_t) +  extension_size;
-  h0->vxlan.vni_res = clib_host_to_net_u32 (t->vni<<8);
+    /* VXLAN header. Are we having fun yet? */
+    h0->vxlan.flags = VXLAN_GPE_FLAGS_I | VXLAN_GPE_FLAGS_P;
+    h0->vxlan.ver_res = VXLAN_GPE_VERSION;
+    if (protocol_override) {
+        h0->vxlan.protocol = protocol_override;
+    } else {
+        h0->vxlan.protocol = t->protocol;
+    }
+    t->rewrite_size = sizeof(ip4_vxlan_gpe_header_t) +  extension_size;
+    h0->vxlan.vni_res = clib_host_to_net_u32 (t->vni<<8);
 
-  t->rewrite = rw;
-  t->encap_next_node = encap_next_node;
-  return (0);
+    t->rewrite = rw;
+    t->encap_next_node = encap_next_node;
+    return (0);
 }
 
 /**
@@ -325,113 +321,114 @@ int vxlan4_gpe_rewrite (vxlan_gpe_tunnel_t * t, u32 extension_size,
 int vxlan6_gpe_rewrite (vxlan_gpe_tunnel_t * t, u32 extension_size,
                         u8 protocol_override, uword encap_next_node)
 {
-  u8 *rw = 0;
-  ip6_header_t * ip0;
-  ip6_vxlan_gpe_header_t * h0;
-  int len;
+    u8 *rw = 0;
+    ip6_header_t * ip0;
+    ip6_vxlan_gpe_header_t * h0;
+    int len;
 
-  len = sizeof (*h0) + extension_size;
+    len = sizeof (*h0) + extension_size;
 
-  vec_free(t->rewrite);
-  vec_validate_aligned (rw, len-1, CLIB_CACHE_LINE_BYTES);
+    vec_free(t->rewrite);
+    vec_validate_aligned (rw, len-1, CLIB_CACHE_LINE_BYTES);
 
-  h0 = (ip6_vxlan_gpe_header_t *) rw;
+    h0 = (ip6_vxlan_gpe_header_t *) rw;
 
-  /* Fixed portion of the (outer) ip4 header */
-  ip0 = &h0->ip6;
-  ip0->ip_version_traffic_class_and_flow_label = clib_host_to_net_u32(6 << 28);
-  ip0->hop_limit = 255;
-  ip0->protocol = IP_PROTOCOL_UDP;
+    /* Fixed portion of the (outer) ip4 header */
+    ip0 = &h0->ip6;
+    ip0->ip_version_traffic_class_and_flow_label = clib_host_to_net_u32(6 << 28);
+    ip0->hop_limit = 255;
+    ip0->protocol = IP_PROTOCOL_UDP;
 
-  ip0->src_address.as_u64[0] = t->local.ip6.as_u64[0];
-  ip0->src_address.as_u64[1] = t->local.ip6.as_u64[1];
-  ip0->dst_address.as_u64[0] = t->remote.ip6.as_u64[0];
-  ip0->dst_address.as_u64[1] = t->remote.ip6.as_u64[1];
+    ip0->src_address.as_u64[0] = t->local.ip6.as_u64[0];
+    ip0->src_address.as_u64[1] = t->local.ip6.as_u64[1];
+    ip0->dst_address.as_u64[0] = t->remote.ip6.as_u64[0];
+    ip0->dst_address.as_u64[1] = t->remote.ip6.as_u64[1];
 
-  /* UDP header, randomize src port on something, maybe? */
-  h0->udp.src_port = clib_host_to_net_u16 (4790);
-  h0->udp.dst_port = clib_host_to_net_u16 (UDP_DST_PORT_VXLAN_GPE);
+    /* UDP header, randomize src port on something, maybe? */
+    h0->udp.src_port = clib_host_to_net_u16 (4790);
+    h0->udp.dst_port = clib_host_to_net_u16 (UDP_DST_PORT_VXLAN_GPE);
 
-  /* VXLAN header. Are we having fun yet? */
-  h0->vxlan.flags = VXLAN_GPE_FLAGS_I | VXLAN_GPE_FLAGS_P;
-  h0->vxlan.ver_res = VXLAN_GPE_VERSION;
-  if (protocol_override)
-  {
-      h0->vxlan.protocol = t->protocol;
-  }
-  else
-  {
-      h0->vxlan.protocol = protocol_override;
-  }
-  t->rewrite_size = sizeof(ip4_vxlan_gpe_header_t) +  extension_size;
-  h0->vxlan.vni_res = clib_host_to_net_u32 (t->vni<<8);
+    /* VXLAN header. Are we having fun yet? */
+    h0->vxlan.flags = VXLAN_GPE_FLAGS_I | VXLAN_GPE_FLAGS_P;
+    h0->vxlan.ver_res = VXLAN_GPE_VERSION;
+    if (protocol_override) {
+        h0->vxlan.protocol = t->protocol;
+    } else {
+        h0->vxlan.protocol = protocol_override;
+    }
+    t->rewrite_size = sizeof(ip4_vxlan_gpe_header_t) +  extension_size;
+    h0->vxlan.vni_res = clib_host_to_net_u32 (t->vni<<8);
 
-  t->rewrite = rw;
-  t->encap_next_node = encap_next_node;
-  return (0);
+    t->rewrite = rw;
+    t->encap_next_node = encap_next_node;
+    return (0);
 }
 
 static void
-hash_set_key_copy (uword ** h, void * key, uword v) {
-	size_t ksz = hash_header(*h)->user;
-        void * copy = clib_mem_alloc (ksz);
-	clib_memcpy (copy, key, ksz);
-	hash_set_mem (*h, copy, v);
+hash_set_key_copy (uword ** h, void * key, uword v)
+{
+    size_t ksz = hash_header(*h)->user;
+    void * copy = clib_mem_alloc (ksz);
+    clib_memcpy (copy, key, ksz);
+    hash_set_mem (*h, copy, v);
 }
 
 static void
-hash_unset_key_free (uword ** h, void * key) {
-	hash_pair_t * hp = hash_get_pair_mem (*h, key);
-	ASSERT (hp);
-	key = uword_to_pointer (hp->key, void *);
-	hash_unset_mem (*h, key);
-	clib_mem_free (key);
+hash_unset_key_free (uword ** h, void * key)
+{
+    hash_pair_t * hp = hash_get_pair_mem (*h, key);
+    ASSERT (hp);
+    key = uword_to_pointer (hp->key, void *);
+    hash_unset_mem (*h, key);
+    clib_mem_free (key);
 }
 
 static uword
 vtep_addr_ref(ip46_address_t *ip)
 {
-	uword *vtep = ip46_address_is_ip4(ip) ?
-	                 hash_get (vxlan_gpe_main.vtep4, ip->ip4.as_u32) :
-	                 hash_get_mem (vxlan_gpe_main.vtep6, &ip->ip6);
-	if (vtep)
-		return ++(*vtep);
-	ip46_address_is_ip4(ip) ?
-	                 hash_set (vxlan_gpe_main.vtep4, ip->ip4.as_u32, 1) :
-	                 hash_set_key_copy (&vxlan_gpe_main.vtep6, &ip->ip6, 1);
-	return 1;
+    uword *vtep = ip46_address_is_ip4(ip) ?
+                  hash_get (vxlan_gpe_main.vtep4, ip->ip4.as_u32) :
+                  hash_get_mem (vxlan_gpe_main.vtep6, &ip->ip6);
+    if (vtep)
+        return ++(*vtep);
+    ip46_address_is_ip4(ip) ?
+    hash_set (vxlan_gpe_main.vtep4, ip->ip4.as_u32, 1) :
+    hash_set_key_copy (&vxlan_gpe_main.vtep6, &ip->ip6, 1);
+    return 1;
 }
 
 static uword
 vtep_addr_unref(ip46_address_t *ip)
 {
-	uword *vtep = ip46_address_is_ip4(ip) ?
-	                 hash_get (vxlan_gpe_main.vtep4, ip->ip4.as_u32) :
-	                 hash_get_mem (vxlan_gpe_main.vtep6, &ip->ip6);
-        ASSERT(vtep);
-	if (--(*vtep) != 0)
-		return *vtep;
-	ip46_address_is_ip4(ip) ?
-		hash_unset (vxlan_gpe_main.vtep4, ip->ip4.as_u32) :
-		hash_unset_key_free (&vxlan_gpe_main.vtep6, &ip->ip6);
-	return 0;
+    uword *vtep = ip46_address_is_ip4(ip) ?
+                  hash_get (vxlan_gpe_main.vtep4, ip->ip4.as_u32) :
+                  hash_get_mem (vxlan_gpe_main.vtep6, &ip->ip6);
+    ASSERT(vtep);
+    if (--(*vtep) != 0)
+        return *vtep;
+    ip46_address_is_ip4(ip) ?
+    hash_unset (vxlan_gpe_main.vtep4, ip->ip4.as_u32) :
+    hash_unset_key_free (&vxlan_gpe_main.vtep6, &ip->ip6);
+    return 0;
 }
 
 typedef CLIB_PACKED(union {
-  struct {
-    fib_node_index_t mfib_entry_index;
-    adj_index_t mcast_adj_index;
-  };
-  u64 as_u64;
+    struct {
+        fib_node_index_t mfib_entry_index;
+        adj_index_t mcast_adj_index;
+    };
+    u64 as_u64;
 }) mcast_shared_t;
 
 static inline mcast_shared_t
 mcast_shared_get(ip46_address_t * ip)
 {
-        ASSERT(ip46_address_is_multicast(ip));
-	uword * p = hash_get_mem (vxlan_gpe_main.mcast_shared, ip);
-        ASSERT(p);
-	return (mcast_shared_t) { .as_u64 = *p };
+    ASSERT(ip46_address_is_multicast(ip));
+    uword * p = hash_get_mem (vxlan_gpe_main.mcast_shared, ip);
+    ASSERT(p);
+    return (mcast_shared_t) {
+        .as_u64 = *p
+    };
 }
 
 static inline void
@@ -462,7 +459,7 @@ mcast_shared_remove(ip46_address_t *remote)
 static inline fib_protocol_t
 fib_ip_proto(bool is_ip6)
 {
-  return (is_ip6) ? FIB_PROTOCOL_IP6 : FIB_PROTOCOL_IP4;
+    return (is_ip6) ? FIB_PROTOCOL_IP6 : FIB_PROTOCOL_IP4;
 }
 
 /**
@@ -477,476 +474,428 @@ fib_ip_proto(bool is_ip6)
 int vnet_vxlan_gpe_add_del_tunnel
 (vnet_vxlan_gpe_add_del_tunnel_args_t *a, u32 * sw_if_indexp)
 {
-  vxlan_gpe_main_t * ngm = &vxlan_gpe_main;
-  vxlan_gpe_tunnel_t *t = 0;
-  vnet_main_t * vnm = ngm->vnet_main;
-  vnet_hw_interface_t * hi;
-  uword * p;
-  u32 hw_if_index = ~0;
-  u32 sw_if_index = ~0;
-  int rv;
-  vxlan4_gpe_tunnel_key_t key4, *key4_copy;
-  vxlan6_gpe_tunnel_key_t key6, *key6_copy;
-  u32 is_ip6 = a->is_ip6;
+    vxlan_gpe_main_t * ngm = &vxlan_gpe_main;
+    vxlan_gpe_tunnel_t *t = 0;
+    vnet_main_t * vnm = ngm->vnet_main;
+    vnet_hw_interface_t * hi;
+    uword * p;
+    u32 hw_if_index = ~0;
+    u32 sw_if_index = ~0;
+    int rv;
+    vxlan4_gpe_tunnel_key_t key4, *key4_copy;
+    vxlan6_gpe_tunnel_key_t key6, *key6_copy;
+    u32 is_ip6 = a->is_ip6;
 
-  if (!is_ip6)
-  {
-    key4.local = a->local.ip4.as_u32;
-    key4.remote = a->remote.ip4.as_u32;
-    key4.vni = clib_host_to_net_u32 (a->vni << 8);
-    key4.pad = 0;
+    if (!is_ip6) {
+        key4.local = a->local.ip4.as_u32;
+        key4.remote = a->remote.ip4.as_u32;
+        key4.vni = clib_host_to_net_u32 (a->vni << 8);
+        key4.pad = 0;
 
-    p = hash_get_mem(ngm->vxlan4_gpe_tunnel_by_key, &key4);
-  }
-  else
-  {
-    key6.local.as_u64[0] = a->local.ip6.as_u64[0];
-    key6.local.as_u64[1] = a->local.ip6.as_u64[1];
-    key6.remote.as_u64[0] = a->remote.ip6.as_u64[0];
-    key6.remote.as_u64[1] = a->remote.ip6.as_u64[1];
-    key6.vni = clib_host_to_net_u32 (a->vni << 8);
+        p = hash_get_mem(ngm->vxlan4_gpe_tunnel_by_key, &key4);
+    } else {
+        key6.local.as_u64[0] = a->local.ip6.as_u64[0];
+        key6.local.as_u64[1] = a->local.ip6.as_u64[1];
+        key6.remote.as_u64[0] = a->remote.ip6.as_u64[0];
+        key6.remote.as_u64[1] = a->remote.ip6.as_u64[1];
+        key6.vni = clib_host_to_net_u32 (a->vni << 8);
 
-    p = hash_get_mem(ngm->vxlan6_gpe_tunnel_by_key, &key6);
-  }
+        p = hash_get_mem(ngm->vxlan6_gpe_tunnel_by_key, &key6);
+    }
 
-  if (a->is_add)
-    {
-      l2input_main_t * l2im = &l2input_main;
+    if (a->is_add) {
+        l2input_main_t * l2im = &l2input_main;
 
-      /* adding a tunnel: tunnel must not already exist */
-      if (p)
-        return VNET_API_ERROR_TUNNEL_EXIST;
+        /* adding a tunnel: tunnel must not already exist */
+        if (p)
+            return VNET_API_ERROR_TUNNEL_EXIST;
 
-      pool_get_aligned (ngm->tunnels, t, CLIB_CACHE_LINE_BYTES);
-      memset (t, 0, sizeof (*t));
+        pool_get_aligned (ngm->tunnels, t, CLIB_CACHE_LINE_BYTES);
+        memset (t, 0, sizeof (*t));
 
-      /* copy from arg structure */
+        /* copy from arg structure */
 #define _(x) t->x = a->x;
-      foreach_gpe_copy_field;
-      if (!a->is_ip6) foreach_copy_ipv4
-      else            foreach_copy_ipv6
+        foreach_gpe_copy_field;
+        if (!a->is_ip6) foreach_copy_ipv4
+            else            foreach_copy_ipv6
 #undef _
 
-      if (!a->is_ip6) t->flags |= VXLAN_GPE_TUNNEL_IS_IPV4;
+                if (!a->is_ip6) t->flags |= VXLAN_GPE_TUNNEL_IS_IPV4;
 
-      if (!a->is_ip6) {
-        rv = vxlan4_gpe_rewrite (t, 0, 0, VXLAN_GPE_ENCAP_NEXT_IP4_LOOKUP);
-      } else {
-        rv = vxlan6_gpe_rewrite (t, 0, 0, VXLAN_GPE_ENCAP_NEXT_IP6_LOOKUP);
-      }
-
-      if (rv)
-      {
-          pool_put (ngm->tunnels, t);
-          return rv;
-      }
-
-      if (!is_ip6)
-      {
-        key4_copy = clib_mem_alloc (sizeof (*key4_copy));
-        clib_memcpy (key4_copy, &key4, sizeof (*key4_copy));
-        hash_set_mem (ngm->vxlan4_gpe_tunnel_by_key, key4_copy,
-                      t - ngm->tunnels);
-      }
-      else
-      {
-          key6_copy = clib_mem_alloc (sizeof (*key6_copy));
-          clib_memcpy (key6_copy, &key6, sizeof (*key6_copy));
-          hash_set_mem (ngm->vxlan6_gpe_tunnel_by_key, key6_copy,
-                        t - ngm->tunnels);
-      }
-
-      if (vec_len (ngm->free_vxlan_gpe_tunnel_hw_if_indices) > 0)
-        {
-	      vnet_interface_main_t * im = &vnm->interface_main;
-          hw_if_index = ngm->free_vxlan_gpe_tunnel_hw_if_indices
-            [vec_len (ngm->free_vxlan_gpe_tunnel_hw_if_indices)-1];
-          _vec_len (ngm->free_vxlan_gpe_tunnel_hw_if_indices) -= 1;
-
-          hi = vnet_get_hw_interface (vnm, hw_if_index);
-          hi->dev_instance = t - ngm->tunnels;
-          hi->hw_instance = hi->dev_instance;
-	  /* clear old stats of freed tunnel before reuse */
-	  sw_if_index = hi->sw_if_index;
-	  vnet_interface_counter_lock(im);
-	  vlib_zero_combined_counter
-	    (&im->combined_sw_if_counters[VNET_INTERFACE_COUNTER_TX], sw_if_index);
-	  vlib_zero_combined_counter
-	    (&im->combined_sw_if_counters[VNET_INTERFACE_COUNTER_RX], sw_if_index);
-	  vlib_zero_simple_counter
-	    (&im->sw_if_counters[VNET_INTERFACE_COUNTER_DROP], sw_if_index);
-	  vnet_interface_counter_unlock(im);
-        }
-      else
-        {
-          hw_if_index = vnet_register_interface
-            (vnm, vxlan_gpe_device_class.index, t - ngm->tunnels,
-             vxlan_gpe_hw_class.index, t - ngm->tunnels);
-          hi = vnet_get_hw_interface (vnm, hw_if_index);
-          hi->output_node_index = vxlan_gpe_encap_node.index;
+        if (!a->is_ip6) {
+            rv = vxlan4_gpe_rewrite (t, 0, 0, VXLAN_GPE_ENCAP_NEXT_IP4_LOOKUP);
+        } else {
+            rv = vxlan6_gpe_rewrite (t, 0, 0, VXLAN_GPE_ENCAP_NEXT_IP6_LOOKUP);
         }
 
-      t->hw_if_index = hw_if_index;
-      t->sw_if_index = sw_if_index = hi->sw_if_index;
-      vec_validate_init_empty (ngm->tunnel_index_by_sw_if_index, sw_if_index, ~0);
-      ngm->tunnel_index_by_sw_if_index[sw_if_index] = t - ngm->tunnels;
-
-      /* setup l2 input config with l2 feature and bd 0 to drop packet */
-      vec_validate (l2im->configs, sw_if_index);
-      l2im->configs[sw_if_index].feature_bitmap = L2INPUT_FEAT_DROP;
-      l2im->configs[sw_if_index].bd_index = 0;
-
-      vnet_sw_interface_t * si = vnet_get_sw_interface (vnm, sw_if_index);
-      si->flags &= ~VNET_SW_INTERFACE_FLAG_HIDDEN;
-      vnet_sw_interface_set_flags (vnm, hi->sw_if_index,
-                                   VNET_SW_INTERFACE_FLAG_ADMIN_UP);
-      fib_node_init(&t->node, FIB_NODE_TYPE_VXLAN_GPE_TUNNEL);
-      fib_prefix_t tun_remote_pfx;
-      u32 encap_index = vxlan_gpe_encap_node.index;
-      vnet_flood_class_t flood_class = VNET_FLOOD_CLASS_TUNNEL_NORMAL;
-
-      fib_prefix_from_ip46_addr(&t->remote, &tun_remote_pfx);
-      if (!ip46_address_is_multicast(&t->remote))
-        {
-          /* Unicast tunnel -
-           * source the FIB entry for the tunnel's destination
-           * and become a child thereof. The tunnel will then get poked
-           * when the forwarding for the entry updates, and the tunnel can
-           * re-stack accordingly
-           */
-          vtep_addr_ref(&t->local);
-          t->fib_entry_index = fib_table_entry_special_add
-            (t->encap_fib_index, &tun_remote_pfx, FIB_SOURCE_RR,
-	     FIB_ENTRY_FLAG_NONE);
-          t->sibling_index = fib_entry_child_add
-            (t->fib_entry_index, FIB_NODE_TYPE_VXLAN_GPE_TUNNEL, t - ngm->tunnels);
-          vxlan_gpe_tunnel_restack_dpo(t);
-	}
-      else
-        {
- 	  /* Multicast tunnel -
-	   * as the same mcast group can be used for mutiple mcast tunnels
-	   * with different VNIs, create the output fib adjecency only if
-	   * it does not already exist
-	   */
-          fib_protocol_t fp = fib_ip_proto(is_ip6);
-
-	  if (vtep_addr_ref(&t->remote) == 1)
-          {
-              fib_node_index_t mfei;
-              adj_index_t ai;
-              fib_route_path_t path = {
-                  .frp_proto = fib_proto_to_dpo(fp),
-                  .frp_addr = zero_addr,
-                  .frp_sw_if_index = 0xffffffff,
-                  .frp_fib_index = ~0,
-                  .frp_weight = 0,
-                  .frp_flags = FIB_ROUTE_PATH_LOCAL,
-              };
-              const mfib_prefix_t mpfx = {
-                  .fp_proto = fp,
-                  .fp_len = (is_ip6 ? 128 : 32),
-                  .fp_grp_addr = tun_remote_pfx.fp_addr,
-              };
-
-              /*
-               * Setup the (*,G) to receive traffic on the mcast group
-               *  - the forwarding interface is for-us
-               *  - the accepting interface is that from the API
-               */
-              mfib_table_entry_path_update(t->encap_fib_index,
-                                           &mpfx,
-                                           MFIB_SOURCE_VXLAN_GPE,
-                                           &path,
-                                           MFIB_ITF_FLAG_FORWARD);
-
-              path.frp_sw_if_index = a->mcast_sw_if_index;
-              path.frp_flags = FIB_ROUTE_PATH_FLAG_NONE;
-              mfei = mfib_table_entry_path_update(t->encap_fib_index,
-                                                  &mpfx,
-                                                  MFIB_SOURCE_VXLAN_GPE,
-                                                  &path,
-                                                  MFIB_ITF_FLAG_ACCEPT);
-
-              /*
-               * Create the mcast adjacency to send traffic to the group
-               */
-              ai = adj_mcast_add_or_lock(fp,
-                                         fib_proto_to_link(fp),
-                                         a->mcast_sw_if_index);
-
-              /*
-               * create a new end-point
-               */
-              mcast_shared_add(&t->remote, mfei, ai);
-          }
-
-          dpo_id_t dpo = DPO_INVALID;
-          mcast_shared_t ep = mcast_shared_get(&t->remote);
-
-          /* Stack shared mcast remote mac addr rewrite on encap */
-          dpo_set (&dpo, DPO_ADJACENCY_MCAST,
-                   fib_proto_to_dpo(fp),
-                   ep.mcast_adj_index);
-
-          dpo_stack_from_node (encap_index, &t->next_dpo, &dpo);
-          dpo_reset (&dpo);
-	  flood_class = VNET_FLOOD_CLASS_TUNNEL_MASTER;
-	}
-
-      /* Set vxlan tunnel output node */
-      hi->output_node_index = encap_index;
-
-      vnet_get_sw_interface (vnet_get_main(), sw_if_index)->flood_class = flood_class;
-    }
-  else
-    {
-      /* deleting a tunnel: tunnel must exist */
-      if (!p)
-        return VNET_API_ERROR_NO_SUCH_ENTRY;
-
-      t = pool_elt_at_index (ngm->tunnels, p[0]);
-
-      sw_if_index = t->sw_if_index;
-      vnet_sw_interface_set_flags (vnm, t->sw_if_index, 0 /* down */);
-      vnet_sw_interface_t * si = vnet_get_sw_interface (vnm, t->sw_if_index);
-      si->flags |= VNET_SW_INTERFACE_FLAG_HIDDEN;
-      set_int_l2_mode(ngm->vlib_main, vnm, MODE_L3, t->sw_if_index, 0, 0, 0, 0);
-      vec_add1 (ngm->free_vxlan_gpe_tunnel_hw_if_indices, t->hw_if_index);
-
-      ngm->tunnel_index_by_sw_if_index[t->sw_if_index] = ~0;
-
-      if (!is_ip6)
-        hash_unset (ngm->vxlan4_gpe_tunnel_by_key, key4.as_u64);
-      else
-	hash_unset_key_free (&ngm->vxlan6_gpe_tunnel_by_key, &key6);
-
-      if (!ip46_address_is_multicast(&t->remote))
-        {
-	  vtep_addr_unref(&t->local);
-	  fib_entry_child_remove(t->fib_entry_index, t->sibling_index);
-	  fib_table_entry_delete_index(t->fib_entry_index, FIB_SOURCE_RR);
-        }
-      else if (vtep_addr_unref(&t->remote) == 0)
-        {
-	  mcast_shared_remove(&t->remote);
+        if (rv) {
+            pool_put (ngm->tunnels, t);
+            return rv;
         }
 
-      fib_node_deinit(&t->node);
-      vec_free (t->rewrite);
-      pool_put (ngm->tunnels, t);
+        if (!is_ip6) {
+            key4_copy = clib_mem_alloc (sizeof (*key4_copy));
+            clib_memcpy (key4_copy, &key4, sizeof (*key4_copy));
+            hash_set_mem (ngm->vxlan4_gpe_tunnel_by_key, key4_copy,
+                          t - ngm->tunnels);
+        } else {
+            key6_copy = clib_mem_alloc (sizeof (*key6_copy));
+            clib_memcpy (key6_copy, &key6, sizeof (*key6_copy));
+            hash_set_mem (ngm->vxlan6_gpe_tunnel_by_key, key6_copy,
+                          t - ngm->tunnels);
+        }
+
+        if (vec_len (ngm->free_vxlan_gpe_tunnel_hw_if_indices) > 0) {
+            vnet_interface_main_t * im = &vnm->interface_main;
+            hw_if_index = ngm->free_vxlan_gpe_tunnel_hw_if_indices
+                          [vec_len (ngm->free_vxlan_gpe_tunnel_hw_if_indices)-1];
+            _vec_len (ngm->free_vxlan_gpe_tunnel_hw_if_indices) -= 1;
+
+            hi = vnet_get_hw_interface (vnm, hw_if_index);
+            hi->dev_instance = t - ngm->tunnels;
+            hi->hw_instance = hi->dev_instance;
+            /* clear old stats of freed tunnel before reuse */
+            sw_if_index = hi->sw_if_index;
+            vnet_interface_counter_lock(im);
+            vlib_zero_combined_counter
+            (&im->combined_sw_if_counters[VNET_INTERFACE_COUNTER_TX], sw_if_index);
+            vlib_zero_combined_counter
+            (&im->combined_sw_if_counters[VNET_INTERFACE_COUNTER_RX], sw_if_index);
+            vlib_zero_simple_counter
+            (&im->sw_if_counters[VNET_INTERFACE_COUNTER_DROP], sw_if_index);
+            vnet_interface_counter_unlock(im);
+        } else {
+            hw_if_index = vnet_register_interface
+                          (vnm, vxlan_gpe_device_class.index, t - ngm->tunnels,
+                           vxlan_gpe_hw_class.index, t - ngm->tunnels);
+            hi = vnet_get_hw_interface (vnm, hw_if_index);
+            hi->output_node_index = vxlan_gpe_encap_node.index;
+        }
+
+        t->hw_if_index = hw_if_index;
+        t->sw_if_index = sw_if_index = hi->sw_if_index;
+        vec_validate_init_empty (ngm->tunnel_index_by_sw_if_index, sw_if_index, ~0);
+        ngm->tunnel_index_by_sw_if_index[sw_if_index] = t - ngm->tunnels;
+
+        /* setup l2 input config with l2 feature and bd 0 to drop packet */
+        vec_validate (l2im->configs, sw_if_index);
+        l2im->configs[sw_if_index].feature_bitmap = L2INPUT_FEAT_DROP;
+        l2im->configs[sw_if_index].bd_index = 0;
+
+        vnet_sw_interface_t * si = vnet_get_sw_interface (vnm, sw_if_index);
+        si->flags &= ~VNET_SW_INTERFACE_FLAG_HIDDEN;
+        vnet_sw_interface_set_flags (vnm, hi->sw_if_index,
+                                     VNET_SW_INTERFACE_FLAG_ADMIN_UP);
+        fib_node_init(&t->node, FIB_NODE_TYPE_VXLAN_GPE_TUNNEL);
+        fib_prefix_t tun_remote_pfx;
+        u32 encap_index = vxlan_gpe_encap_node.index;
+        vnet_flood_class_t flood_class = VNET_FLOOD_CLASS_TUNNEL_NORMAL;
+
+        fib_prefix_from_ip46_addr(&t->remote, &tun_remote_pfx);
+        if (!ip46_address_is_multicast(&t->remote)) {
+            /* Unicast tunnel -
+             * source the FIB entry for the tunnel's destination
+             * and become a child thereof. The tunnel will then get poked
+             * when the forwarding for the entry updates, and the tunnel can
+             * re-stack accordingly
+             */
+            vtep_addr_ref(&t->local);
+            t->fib_entry_index = fib_table_entry_special_add
+                                 (t->encap_fib_index, &tun_remote_pfx, FIB_SOURCE_RR,
+                                  FIB_ENTRY_FLAG_NONE);
+            t->sibling_index = fib_entry_child_add
+                               (t->fib_entry_index, FIB_NODE_TYPE_VXLAN_GPE_TUNNEL, t - ngm->tunnels);
+            vxlan_gpe_tunnel_restack_dpo(t);
+        } else {
+            /* Multicast tunnel -
+             * as the same mcast group can be used for mutiple mcast tunnels
+             * with different VNIs, create the output fib adjecency only if
+             * it does not already exist
+             */
+            fib_protocol_t fp = fib_ip_proto(is_ip6);
+
+            if (vtep_addr_ref(&t->remote) == 1) {
+                fib_node_index_t mfei;
+                adj_index_t ai;
+                fib_route_path_t path = {
+                    .frp_proto = fib_proto_to_dpo(fp),
+                    .frp_addr = zero_addr,
+                    .frp_sw_if_index = 0xffffffff,
+                    .frp_fib_index = ~0,
+                    .frp_weight = 0,
+                    .frp_flags = FIB_ROUTE_PATH_LOCAL,
+                };
+                const mfib_prefix_t mpfx = {
+                    .fp_proto = fp,
+                    .fp_len = (is_ip6 ? 128 : 32),
+                    .fp_grp_addr = tun_remote_pfx.fp_addr,
+                };
+
+                /*
+                 * Setup the (*,G) to receive traffic on the mcast group
+                 *  - the forwarding interface is for-us
+                 *  - the accepting interface is that from the API
+                 */
+                mfib_table_entry_path_update(t->encap_fib_index,
+                                             &mpfx,
+                                             MFIB_SOURCE_VXLAN_GPE,
+                                             &path,
+                                             MFIB_ITF_FLAG_FORWARD);
+
+                path.frp_sw_if_index = a->mcast_sw_if_index;
+                path.frp_flags = FIB_ROUTE_PATH_FLAG_NONE;
+                mfei = mfib_table_entry_path_update(t->encap_fib_index,
+                                                    &mpfx,
+                                                    MFIB_SOURCE_VXLAN_GPE,
+                                                    &path,
+                                                    MFIB_ITF_FLAG_ACCEPT);
+
+                /*
+                 * Create the mcast adjacency to send traffic to the group
+                 */
+                ai = adj_mcast_add_or_lock(fp,
+                                           fib_proto_to_link(fp),
+                                           a->mcast_sw_if_index);
+
+                /*
+                 * create a new end-point
+                 */
+                mcast_shared_add(&t->remote, mfei, ai);
+            }
+
+            dpo_id_t dpo = DPO_INVALID;
+            mcast_shared_t ep = mcast_shared_get(&t->remote);
+
+            /* Stack shared mcast remote mac addr rewrite on encap */
+            dpo_set (&dpo, DPO_ADJACENCY_MCAST,
+                     fib_proto_to_dpo(fp),
+                     ep.mcast_adj_index);
+
+            dpo_stack_from_node (encap_index, &t->next_dpo, &dpo);
+            dpo_reset (&dpo);
+            flood_class = VNET_FLOOD_CLASS_TUNNEL_MASTER;
+        }
+
+        /* Set vxlan tunnel output node */
+        hi->output_node_index = encap_index;
+
+        vnet_get_sw_interface (vnet_get_main(), sw_if_index)->flood_class = flood_class;
+    } else {
+        /* deleting a tunnel: tunnel must exist */
+        if (!p)
+            return VNET_API_ERROR_NO_SUCH_ENTRY;
+
+        t = pool_elt_at_index (ngm->tunnels, p[0]);
+
+        sw_if_index = t->sw_if_index;
+        vnet_sw_interface_set_flags (vnm, t->sw_if_index, 0 /* down */);
+        vnet_sw_interface_t * si = vnet_get_sw_interface (vnm, t->sw_if_index);
+        si->flags |= VNET_SW_INTERFACE_FLAG_HIDDEN;
+        set_int_l2_mode(ngm->vlib_main, vnm, MODE_L3, t->sw_if_index, 0, 0, 0, 0);
+        vec_add1 (ngm->free_vxlan_gpe_tunnel_hw_if_indices, t->hw_if_index);
+
+        ngm->tunnel_index_by_sw_if_index[t->sw_if_index] = ~0;
+
+        if (!is_ip6)
+            hash_unset (ngm->vxlan4_gpe_tunnel_by_key, key4.as_u64);
+        else
+            hash_unset_key_free (&ngm->vxlan6_gpe_tunnel_by_key, &key6);
+
+        if (!ip46_address_is_multicast(&t->remote)) {
+            vtep_addr_unref(&t->local);
+            fib_entry_child_remove(t->fib_entry_index, t->sibling_index);
+            fib_table_entry_delete_index(t->fib_entry_index, FIB_SOURCE_RR);
+        } else if (vtep_addr_unref(&t->remote) == 0) {
+            mcast_shared_remove(&t->remote);
+        }
+
+        fib_node_deinit(&t->node);
+        vec_free (t->rewrite);
+        pool_put (ngm->tunnels, t);
     }
 
-  if (sw_if_indexp)
-      *sw_if_indexp = sw_if_index;
+    if (sw_if_indexp)
+        *sw_if_indexp = sw_if_index;
 
-  return 0;
+    return 0;
 }
 
 static clib_error_t *
 vxlan_gpe_add_del_tunnel_command_fn (vlib_main_t * vm,
-                                   unformat_input_t * input,
-                                   vlib_cli_command_t * cmd)
+                                     unformat_input_t * input,
+                                     vlib_cli_command_t * cmd)
 {
-  unformat_input_t _line_input, * line_input = &_line_input;
-  u8 is_add = 1;
-  ip46_address_t local, remote;
-  u8 local_set = 0;
-  u8 remote_set = 0;
-  u8 grp_set = 0;
-  u8 ipv4_set = 0;
-  u8 ipv6_set = 0;
-  u32 mcast_sw_if_index = ~0;
-  u32 encap_fib_index = 0;
-  u32 decap_fib_index = 0;
-  u8 protocol = VXLAN_GPE_PROTOCOL_IP4;
-  u32 vni;
-  u8 vni_set = 0;
-  int rv;
-  u32 tmp;
-  vnet_vxlan_gpe_add_del_tunnel_args_t _a, * a = &_a;
-  u32 sw_if_index;
-  clib_error_t *error = NULL;
+    unformat_input_t _line_input, * line_input = &_line_input;
+    u8 is_add = 1;
+    ip46_address_t local, remote;
+    u8 local_set = 0;
+    u8 remote_set = 0;
+    u8 grp_set = 0;
+    u8 ipv4_set = 0;
+    u8 ipv6_set = 0;
+    u32 mcast_sw_if_index = ~0;
+    u32 encap_fib_index = 0;
+    u32 decap_fib_index = 0;
+    u8 protocol = VXLAN_GPE_PROTOCOL_IP4;
+    u32 vni;
+    u8 vni_set = 0;
+    int rv;
+    u32 tmp;
+    vnet_vxlan_gpe_add_del_tunnel_args_t _a, * a = &_a;
+    u32 sw_if_index;
+    clib_error_t *error = NULL;
 
-  /* Get a line of input. */
-  if (! unformat_user (input, unformat_line_input, line_input))
-    return 0;
+    /* Get a line of input. */
+    if (! unformat_user (input, unformat_line_input, line_input))
+        return 0;
 
-  while (unformat_check_input (line_input) != UNFORMAT_END_OF_INPUT) {
-    if (unformat (line_input, "del"))
-      is_add = 0;
-    else if (unformat (line_input, "local %U",
-                       unformat_ip4_address, &local.ip4))
-    {
-      local_set = 1;
-      ipv4_set = 1;
-    }
-    else if (unformat (line_input, "remote %U",
-                       unformat_ip4_address, &remote.ip4))
-    {
-      remote_set = 1;
-      ipv4_set = 1;
-    }
-    else if (unformat (line_input, "local %U",
-                       unformat_ip6_address, &local.ip6))
-    {
-      local_set = 1;
-      ipv6_set = 1;
-    }
-    else if (unformat (line_input, "remote %U",
-                       unformat_ip6_address, &remote.ip6))
-    {
-      remote_set = 1;
-      ipv6_set = 1;
-    }
-    else if (unformat (line_input, "group %U %U",
-                       unformat_ip4_address, &remote.ip4,
-		       unformat_vnet_sw_interface,
-		       vnet_get_main(), &mcast_sw_if_index))
-      {
-        grp_set = remote_set = 1;
-        ipv4_set = 1;
-      }
-    else if (unformat (line_input, "group %U %U",
-                       unformat_ip6_address, &remote.ip6,
-		       unformat_vnet_sw_interface,
-		       vnet_get_main(), &mcast_sw_if_index))
-      {
-        grp_set = remote_set = 1;
-        ipv6_set = 1;
-      }
-    else if (unformat (line_input, "encap-vrf-id %d", &tmp))
-      {
-        if (ipv6_set)
-          encap_fib_index = fib_table_find (FIB_PROTOCOL_IP6, tmp);
-        else
-          encap_fib_index = fib_table_find (FIB_PROTOCOL_IP4, tmp);
+    while (unformat_check_input (line_input) != UNFORMAT_END_OF_INPUT) {
+        if (unformat (line_input, "del"))
+            is_add = 0;
+        else if (unformat (line_input, "local %U",
+                           unformat_ip4_address, &local.ip4)) {
+            local_set = 1;
+            ipv4_set = 1;
+        } else if (unformat (line_input, "remote %U",
+                             unformat_ip4_address, &remote.ip4)) {
+            remote_set = 1;
+            ipv4_set = 1;
+        } else if (unformat (line_input, "local %U",
+                             unformat_ip6_address, &local.ip6)) {
+            local_set = 1;
+            ipv6_set = 1;
+        } else if (unformat (line_input, "remote %U",
+                             unformat_ip6_address, &remote.ip6)) {
+            remote_set = 1;
+            ipv6_set = 1;
+        } else if (unformat (line_input, "group %U %U",
+                             unformat_ip4_address, &remote.ip4,
+                             unformat_vnet_sw_interface,
+                             vnet_get_main(), &mcast_sw_if_index)) {
+            grp_set = remote_set = 1;
+            ipv4_set = 1;
+        } else if (unformat (line_input, "group %U %U",
+                             unformat_ip6_address, &remote.ip6,
+                             unformat_vnet_sw_interface,
+                             vnet_get_main(), &mcast_sw_if_index)) {
+            grp_set = remote_set = 1;
+            ipv6_set = 1;
+        } else if (unformat (line_input, "encap-vrf-id %d", &tmp)) {
+            if (ipv6_set)
+                encap_fib_index = fib_table_find (FIB_PROTOCOL_IP6, tmp);
+            else
+                encap_fib_index = fib_table_find (FIB_PROTOCOL_IP4, tmp);
 
-        if (encap_fib_index == ~0)
-          {
-            error = clib_error_return (0, "nonexistent encap fib id %d", tmp);
+            if (encap_fib_index == ~0) {
+                error = clib_error_return (0, "nonexistent encap fib id %d", tmp);
+                goto done;
+            }
+        } else if (unformat (line_input, "decap-vrf-id %d", &tmp)) {
+            if (ipv6_set)
+                decap_fib_index = fib_table_find (FIB_PROTOCOL_IP6, tmp);
+            else
+                decap_fib_index = fib_table_find (FIB_PROTOCOL_IP4, tmp);
+
+            if (decap_fib_index == ~0) {
+                error = clib_error_return (0, "nonexistent decap fib id %d", tmp);
+                goto done;
+            }
+        } else if (unformat (line_input, "vni %d", &vni))
+            vni_set = 1;
+        else if (unformat(line_input, "next-ip4"))
+            protocol = VXLAN_GPE_PROTOCOL_IP4;
+        else if (unformat(line_input, "next-ip6"))
+            protocol = VXLAN_GPE_PROTOCOL_IP6;
+        else if (unformat(line_input, "next-ethernet"))
+            protocol = VXLAN_GPE_PROTOCOL_ETHERNET;
+        else if (unformat(line_input, "next-nsh"))
+            protocol = VXLAN_GPE_PROTOCOL_NSH;
+        else {
+            error = clib_error_return (0, "parse error: '%U'",
+                                       format_unformat_error, line_input);
             goto done;
-          }
-      }
-    else if (unformat (line_input, "decap-vrf-id %d", &tmp))
-      {
-        if (ipv6_set)
-          decap_fib_index = fib_table_find (FIB_PROTOCOL_IP6, tmp);
-        else
-          decap_fib_index = fib_table_find (FIB_PROTOCOL_IP4, tmp);
+        }
+    }
 
-        if (decap_fib_index == ~0)
-          {
-            error = clib_error_return (0, "nonexistent decap fib id %d", tmp);
-            goto done;
-          }
-      }
-    else if (unformat (line_input, "vni %d", &vni))
-      vni_set = 1;
-    else if (unformat(line_input, "next-ip4"))
-      protocol = VXLAN_GPE_PROTOCOL_IP4;
-    else if (unformat(line_input, "next-ip6"))
-      protocol = VXLAN_GPE_PROTOCOL_IP6;
-    else if (unformat(line_input, "next-ethernet"))
-      protocol = VXLAN_GPE_PROTOCOL_ETHERNET;
-    else if (unformat(line_input, "next-nsh"))
-      protocol = VXLAN_GPE_PROTOCOL_NSH;
-    else
-      {
-        error = clib_error_return (0, "parse error: '%U'",
-                                   format_unformat_error, line_input);
+    if (local_set == 0) {
+        error = clib_error_return (0, "tunnel local address not specified");
         goto done;
-      }
-  }
-
-  if (local_set == 0)
-    {
-      error = clib_error_return (0, "tunnel local address not specified");
-      goto done;
     }
 
-  if (remote_set == 0)
-    {
-      error = clib_error_return (0, "tunnel remote address not specified");
-      goto done;
+    if (remote_set == 0) {
+        error = clib_error_return (0, "tunnel remote address not specified");
+        goto done;
     }
 
-  if (grp_set && !ip46_address_is_multicast(&remote))
-    {
-      error = clib_error_return (0, "tunnel group address not multicast");
-      goto done;
+    if (grp_set && !ip46_address_is_multicast(&remote)) {
+        error = clib_error_return (0, "tunnel group address not multicast");
+        goto done;
     }
 
-  if (grp_set == 0 && ip46_address_is_multicast(&remote))
-    {
-      error = clib_error_return (0, "remote address must be unicast");
-      goto done;
+    if (grp_set == 0 && ip46_address_is_multicast(&remote)) {
+        error = clib_error_return (0, "remote address must be unicast");
+        goto done;
     }
 
-  if (grp_set && mcast_sw_if_index == ~0)
-    {
-      error = clib_error_return (0, "tunnel nonexistent multicast device");
-      goto done;
+    if (grp_set && mcast_sw_if_index == ~0) {
+        error = clib_error_return (0, "tunnel nonexistent multicast device");
+        goto done;
     }
-  if (ipv4_set && ipv6_set)
-    {
-      error = clib_error_return (0, "both IPv4 and IPv6 addresses specified");
-      goto done;
+    if (ipv4_set && ipv6_set) {
+        error = clib_error_return (0, "both IPv4 and IPv6 addresses specified");
+        goto done;
     }
 
-  if ((ipv4_set && memcmp(&local.ip4, &remote.ip4, sizeof(local.ip4)) == 0) ||
-      (ipv6_set && memcmp(&local.ip6, &remote.ip6, sizeof(local.ip6)) == 0))
-    {
-      error = clib_error_return (0, "src and remote addresses are identical");
-      goto done;
+    if ((ipv4_set && memcmp(&local.ip4, &remote.ip4, sizeof(local.ip4)) == 0) ||
+        (ipv6_set && memcmp(&local.ip6, &remote.ip6, sizeof(local.ip6)) == 0)) {
+        error = clib_error_return (0, "src and remote addresses are identical");
+        goto done;
     }
 
-  if (vni_set == 0)
-    {
-      error = clib_error_return (0, "vni not specified");
-      goto done;
+    if (vni_set == 0) {
+        error = clib_error_return (0, "vni not specified");
+        goto done;
     }
 
-  memset (a, 0, sizeof (*a));
+    memset (a, 0, sizeof (*a));
 
-  a->is_add = is_add;
-  a->is_ip6 = ipv6_set;
+    a->is_add = is_add;
+    a->is_ip6 = ipv6_set;
 
 #define _(x) a->x = x;
-  foreach_gpe_copy_field;
-  if (ipv4_set) foreach_copy_ipv4
-  else          foreach_copy_ipv6
+    foreach_gpe_copy_field;
+    if (ipv4_set) foreach_copy_ipv4
+        else          foreach_copy_ipv6
 #undef _
 
-  rv = vnet_vxlan_gpe_add_del_tunnel (a, &sw_if_index);
+            rv = vnet_vxlan_gpe_add_del_tunnel (a, &sw_if_index);
 
-  switch(rv)
-    {
-    case 0:
-      vlib_cli_output(vm, "%U\n", format_vnet_sw_if_index_name, vnet_get_main(), sw_if_index);
-      break;
-    case VNET_API_ERROR_INVALID_DECAP_NEXT:
-      error = clib_error_return (0, "invalid decap-next...");
-      goto done;
+    switch(rv) {
+        case 0:
+            vlib_cli_output(vm, "%U\n", format_vnet_sw_if_index_name, vnet_get_main(), sw_if_index);
+            break;
+        case VNET_API_ERROR_INVALID_DECAP_NEXT:
+            error = clib_error_return (0, "invalid decap-next...");
+            goto done;
 
-    case VNET_API_ERROR_TUNNEL_EXIST:
-      error = clib_error_return (0, "tunnel already exists...");
-      goto done;
+        case VNET_API_ERROR_TUNNEL_EXIST:
+            error = clib_error_return (0, "tunnel already exists...");
+            goto done;
 
-    case VNET_API_ERROR_NO_SUCH_ENTRY:
-      error = clib_error_return (0, "tunnel does not exist...");
-      goto done;
+        case VNET_API_ERROR_NO_SUCH_ENTRY:
+            error = clib_error_return (0, "tunnel does not exist...");
+            goto done;
 
-    default:
-      error = clib_error_return
-        (0, "vnet_vxlan_gpe_add_del_tunnel returned %d", rv);
-      goto done;
+        default:
+            error = clib_error_return
+                    (0, "vnet_vxlan_gpe_add_del_tunnel returned %d", rv);
+            goto done;
     }
 
 done:
-  unformat_free (line_input);
+    unformat_free (line_input);
 
-  return error;
+    return error;
 }
 
 /*?
@@ -992,21 +941,21 @@ VLIB_CLI_COMMAND (create_vxlan_gpe_tunnel_command, static) = {
  */
 static clib_error_t *
 show_vxlan_gpe_tunnel_command_fn (vlib_main_t * vm,
-                                unformat_input_t * input,
-                                vlib_cli_command_t * cmd)
+                                  unformat_input_t * input,
+                                  vlib_cli_command_t * cmd)
 {
-  vxlan_gpe_main_t * ngm = &vxlan_gpe_main;
-  vxlan_gpe_tunnel_t * t;
+    vxlan_gpe_main_t * ngm = &vxlan_gpe_main;
+    vxlan_gpe_tunnel_t * t;
 
-  if (pool_elts (ngm->tunnels) == 0)
-    vlib_cli_output (vm, "No vxlan-gpe tunnels configured.");
+    if (pool_elts (ngm->tunnels) == 0)
+        vlib_cli_output (vm, "No vxlan-gpe tunnels configured.");
 
-  pool_foreach (t, ngm->tunnels,
-  ({
-    vlib_cli_output (vm, "%U", format_vxlan_gpe_tunnel, t);
-  }));
+    pool_foreach (t, ngm->tunnels,
+    ({
+        vlib_cli_output (vm, "%U", format_vxlan_gpe_tunnel, t);
+    }));
 
-  return 0;
+    return 0;
 }
 
 /*?
@@ -1026,68 +975,65 @@ VLIB_CLI_COMMAND (show_vxlan_gpe_tunnel_command, static) = {
 /* *INDENT-ON* */
 
 void vnet_int_vxlan_gpe_bypass_mode (u32 sw_if_index,
-				 u8 is_ip6,
-				 u8 is_enable)
+                                     u8 is_ip6,
+                                     u8 is_enable)
 {
-  if (is_ip6)
-    vnet_feature_enable_disable ("ip6-unicast", "ip6-vxlan-gpe-bypass",
-				 sw_if_index, is_enable, 0, 0);
-  else
-    vnet_feature_enable_disable ("ip4-unicast", "ip4-vxlan-gpe-bypass",
-				 sw_if_index, is_enable, 0, 0);
+    if (is_ip6)
+        vnet_feature_enable_disable ("ip6-unicast", "ip6-vxlan-gpe-bypass",
+                                     sw_if_index, is_enable, 0, 0);
+    else
+        vnet_feature_enable_disable ("ip4-unicast", "ip4-vxlan-gpe-bypass",
+                                     sw_if_index, is_enable, 0, 0);
 }
 
 
 static clib_error_t *
 set_ip_vxlan_gpe_bypass (u32 is_ip6,
-		     unformat_input_t * input,
-		     vlib_cli_command_t * cmd)
+                         unformat_input_t * input,
+                         vlib_cli_command_t * cmd)
 {
-  unformat_input_t _line_input, * line_input = &_line_input;
-  vnet_main_t * vnm = vnet_get_main();
-  clib_error_t * error = 0;
-  u32 sw_if_index, is_enable;
+    unformat_input_t _line_input, * line_input = &_line_input;
+    vnet_main_t * vnm = vnet_get_main();
+    clib_error_t * error = 0;
+    u32 sw_if_index, is_enable;
 
-  sw_if_index = ~0;
-  is_enable = 1;
+    sw_if_index = ~0;
+    is_enable = 1;
 
-  if (! unformat_user (input, unformat_line_input, line_input))
-    return 0;
+    if (! unformat_user (input, unformat_line_input, line_input))
+        return 0;
 
-  while (unformat_check_input (line_input) != UNFORMAT_END_OF_INPUT)
-    {
-      if (unformat_user (line_input, unformat_vnet_sw_interface, vnm, &sw_if_index))
-	  ;
-      else if (unformat (line_input, "del"))
-        is_enable = 0;
-      else
-        {
-	  error = unformat_parse_error (line_input);
-	  goto done;
-	}
+    while (unformat_check_input (line_input) != UNFORMAT_END_OF_INPUT) {
+        if (unformat_user (line_input, unformat_vnet_sw_interface, vnm, &sw_if_index))
+            ;
+        else if (unformat (line_input, "del"))
+            is_enable = 0;
+        else {
+            error = unformat_parse_error (line_input);
+            goto done;
+        }
     }
 
-  if (~0 == sw_if_index)
-    {
-      error = clib_error_return (0, "unknown interface `%U'",
-				 format_unformat_error, line_input);
-      goto done;
+    if (~0 == sw_if_index) {
+        error = clib_error_return (0, "unknown interface `%U'",
+                                   format_unformat_error, line_input);
+        goto done;
     }
 
-  vnet_int_vxlan_gpe_bypass_mode (sw_if_index, is_ip6, is_enable);
+    vnet_int_vxlan_gpe_bypass_mode (sw_if_index, is_ip6, is_enable);
 
- done:
-  unformat_free (line_input);
+done:
+    unformat_free (line_input);
 
-  return error;
+    return error;
 }
 
 static clib_error_t *
 set_ip4_vxlan_gpe_bypass (vlib_main_t * vm,
-		      unformat_input_t * input,
-		      vlib_cli_command_t * cmd)
+                          unformat_input_t * input,
+                          vlib_cli_command_t * cmd)
 {
-  return set_ip_vxlan_gpe_bypass (0, input, cmd);
+    return set_ip_vxlan_gpe_bypass (0, input, cmd);
 }
 
 /*?
@@ -1142,10 +1088,10 @@ VLIB_CLI_COMMAND (set_interface_ip_vxlan_gpe_bypass_command, static) = {
 
 static clib_error_t *
 set_ip6_vxlan_gpe_bypass (vlib_main_t * vm,
-		      unformat_input_t * input,
-		      vlib_cli_command_t * cmd)
+                          unformat_input_t * input,
+                          vlib_cli_command_t * cmd)
 {
-  return set_ip_vxlan_gpe_bypass (1, input, cmd);
+    return set_ip_vxlan_gpe_bypass (1, input, cmd);
 }
 
 /*?
@@ -1224,38 +1170,38 @@ VNET_FEATURE_INIT (ip6_vxlan_gpe_bypass, static) =
  */
 clib_error_t *vxlan_gpe_init (vlib_main_t *vm)
 {
-  vxlan_gpe_main_t *ngm = &vxlan_gpe_main;
+    vxlan_gpe_main_t *ngm = &vxlan_gpe_main;
 
-  ngm->vnet_main = vnet_get_main();
-  ngm->vlib_main = vm;
+    ngm->vnet_main = vnet_get_main();
+    ngm->vlib_main = vm;
 
-  ngm->vxlan4_gpe_tunnel_by_key
-    = hash_create_mem (0, sizeof(vxlan4_gpe_tunnel_key_t), sizeof (uword));
+    ngm->vxlan4_gpe_tunnel_by_key
+        = hash_create_mem (0, sizeof(vxlan4_gpe_tunnel_key_t), sizeof (uword));
 
-  ngm->vxlan6_gpe_tunnel_by_key
-    = hash_create_mem (0, sizeof(vxlan6_gpe_tunnel_key_t), sizeof (uword));
+    ngm->vxlan6_gpe_tunnel_by_key
+        = hash_create_mem (0, sizeof(vxlan6_gpe_tunnel_key_t), sizeof (uword));
 
 
-  ngm->mcast_shared = hash_create_mem(0,
-        sizeof(ip46_address_t),
-	sizeof(mcast_shared_t));
+    ngm->mcast_shared = hash_create_mem(0,
+                                        sizeof(ip46_address_t),
+                                        sizeof(mcast_shared_t));
 
-  udp_register_dst_port (vm, UDP_DST_PORT_VXLAN_GPE,
-                         vxlan4_gpe_input_node.index, 1 /* is_ip4 */);
-  udp_register_dst_port (vm, UDP_DST_PORT_VXLAN6_GPE,
-                         vxlan6_gpe_input_node.index, 0 /* is_ip4 */);
+    udp_register_dst_port (vm, UDP_DST_PORT_VXLAN_GPE,
+                           vxlan4_gpe_input_node.index, 1 /* is_ip4 */);
+    udp_register_dst_port (vm, UDP_DST_PORT_VXLAN6_GPE,
+                           vxlan6_gpe_input_node.index, 0 /* is_ip4 */);
 
-  /* Register the list of standard decap protocols supported */
-  vxlan_gpe_register_decap_protocol (VXLAN_GPE_PROTOCOL_IP4,
-                                     VXLAN_GPE_INPUT_NEXT_IP4_INPUT);
-  vxlan_gpe_register_decap_protocol (VXLAN_GPE_PROTOCOL_IP6,
-                                     VXLAN_GPE_INPUT_NEXT_IP6_INPUT);
-  vxlan_gpe_register_decap_protocol (VXLAN_GPE_PROTOCOL_ETHERNET,
-                                     VXLAN_GPE_INPUT_NEXT_ETHERNET_INPUT);
+    /* Register the list of standard decap protocols supported */
+    vxlan_gpe_register_decap_protocol (VXLAN_GPE_PROTOCOL_IP4,
+                                       VXLAN_GPE_INPUT_NEXT_IP4_INPUT);
+    vxlan_gpe_register_decap_protocol (VXLAN_GPE_PROTOCOL_IP6,
+                                       VXLAN_GPE_INPUT_NEXT_IP6_INPUT);
+    vxlan_gpe_register_decap_protocol (VXLAN_GPE_PROTOCOL_ETHERNET,
+                                       VXLAN_GPE_INPUT_NEXT_ETHERNET_INPUT);
 
-  fib_node_register_type(FIB_NODE_TYPE_VXLAN_GPE_TUNNEL, &vxlan_gpe_vft);
+    fib_node_register_type(FIB_NODE_TYPE_VXLAN_GPE_TUNNEL, &vxlan_gpe_vft);
 
-  return 0;
+    return 0;
 }
 
 VLIB_INIT_FUNCTION(vxlan_gpe_init);

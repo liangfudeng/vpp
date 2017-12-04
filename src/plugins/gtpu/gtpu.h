@@ -35,31 +35,30 @@
 #include <vnet/fib/fib_table.h>
 
 /**
- *		Bits
- * Octets	8	7	6	5	4	3	2	1
- * 1		          Version	PT	(*)	E	S	PN
- * 2		Message Type
- * 3		Length (1st Octet)
- * 4		Length (2nd Octet)
- * 5		Tunnel Endpoint Identifier (1st Octet)
- * 6		Tunnel Endpoint Identifier (2nd Octet)
- * 7		Tunnel Endpoint Identifier (3rd Octet)
- * 8		Tunnel Endpoint Identifier (4th Octet)
- * 9		Sequence Number (1st Octet)1) 4)
- * 10		Sequence Number (2nd Octet)1) 4)
- * 11		N-PDU Number2) 4)
- * 12		Next Extension Header Type3) 4)
+ *      Bits
+ * Octets   8   7   6   5   4   3   2   1
+ * 1                  Version   PT  (*) E   S   PN
+ * 2        Message Type
+ * 3        Length (1st Octet)
+ * 4        Length (2nd Octet)
+ * 5        Tunnel Endpoint Identifier (1st Octet)
+ * 6        Tunnel Endpoint Identifier (2nd Octet)
+ * 7        Tunnel Endpoint Identifier (3rd Octet)
+ * 8        Tunnel Endpoint Identifier (4th Octet)
+ * 9        Sequence Number (1st Octet)1) 4)
+ * 10       Sequence Number (2nd Octet)1) 4)
+ * 11       N-PDU Number2) 4)
+ * 12       Next Extension Header Type3) 4)
 **/
 
-typedef struct
-{
-  u8 ver_flags;
-  u8 type;
-  u16 length;			/* length in octets of the payload */
-  u32 teid;
-  u16 sequence;
-  u8 pdu_number;
-  u8 next_ext_type;
+typedef struct {
+    u8 ver_flags;
+    u8 type;
+    u16 length;           /* length in octets of the payload */
+    u32 teid;
+    u16 sequence;
+    u8 pdu_number;
+    u8 next_ext_type;
 } gtpu_header_t;
 
 #define GTPU_VER_MASK (7<<5)
@@ -121,53 +120,52 @@ typedef CLIB_PACKED
 }) gtpu6_tunnel_key_t;
 /* *INDENT-ON* */
 
-typedef struct
-{
-  /* Rewrite string */
-  u8 *rewrite;
+typedef struct {
+    /* Rewrite string */
+    u8 *rewrite;
 
-  /* FIB DPO for IP forwarding of gtpu encap packet */
-  dpo_id_t next_dpo;
+    /* FIB DPO for IP forwarding of gtpu encap packet */
+    dpo_id_t next_dpo;
 
-  /* gtpu teid in HOST byte order */
-  u32 teid;
+    /* gtpu teid in HOST byte order */
+    u32 teid;
 
-  /* tunnel src and dst addresses */
-  ip46_address_t src;
-  ip46_address_t dst;
+    /* tunnel src and dst addresses */
+    ip46_address_t src;
+    ip46_address_t dst;
 
-  /* mcast packet output intf index (used only if dst is mcast) */
-  u32 mcast_sw_if_index;
+    /* mcast packet output intf index (used only if dst is mcast) */
+    u32 mcast_sw_if_index;
 
-  /* decap next index */
-  u32 decap_next_index;
+    /* decap next index */
+    u32 decap_next_index;
 
-  /* The FIB index for src/dst addresses */
-  u32 encap_fib_index;
+    /* The FIB index for src/dst addresses */
+    u32 encap_fib_index;
 
-  /* vnet intfc index */
-  u32 sw_if_index;
-  u32 hw_if_index;
+    /* vnet intfc index */
+    u32 sw_if_index;
+    u32 hw_if_index;
 
-  /**
-   * Linkage into the FIB object graph
-   */
-  fib_node_t node;
+    /**
+     * Linkage into the FIB object graph
+     */
+    fib_node_t node;
 
-  /*
-   * The FIB entry for (depending on gtpu tunnel is unicast or mcast)
-   * sending unicast gtpu encap packets or receiving mcast gtpu packets
-   */
-  fib_node_index_t fib_entry_index;
-  adj_index_t mcast_adj_index;
+    /*
+     * The FIB entry for (depending on gtpu tunnel is unicast or mcast)
+     * sending unicast gtpu encap packets or receiving mcast gtpu packets
+     */
+    fib_node_index_t fib_entry_index;
+    adj_index_t mcast_adj_index;
 
-  /**
-   * The tunnel is a child of the FIB entry for its destination. This is
-   * so it receives updates when the forwarding information for that entry
-   * changes.
-   * The tunnels sibling index on the FIB entry's dependency list.
-   */
-  u32 sibling_index;
+    /**
+     * The tunnel is a child of the FIB entry for its destination. This is
+     * so it receives updates when the forwarding information for that entry
+     * changes.
+     * The tunnels sibling index on the FIB entry's dependency list.
+     */
+    u32 sibling_index;
 } gtpu_tunnel_t;
 
 #define foreach_gtpu_input_next        \
@@ -176,56 +174,53 @@ _(L2_INPUT, "l2-input")                \
 _(IP4_INPUT,  "ip4-input")             \
 _(IP6_INPUT, "ip6-input" )
 
-typedef enum
-{
+typedef enum {
 #define _(s,n) GTPU_INPUT_NEXT_##s,
-  foreach_gtpu_input_next
+    foreach_gtpu_input_next
 #undef _
     GTPU_INPUT_N_NEXT,
 } gtpu_input_next_t;
 
-typedef enum
-{
+typedef enum {
 #define gtpu_error(n,s) GTPU_ERROR_##n,
 #include <gtpu/gtpu_error.def>
 #undef gtpu_error
-  GTPU_N_ERROR,
+    GTPU_N_ERROR,
 } gtpu_input_error_t;
 
-typedef struct
-{
-  /* vector of encap tunnel instances */
-  gtpu_tunnel_t *tunnels;
+typedef struct {
+    /* vector of encap tunnel instances */
+    gtpu_tunnel_t *tunnels;
 
-  /* lookup tunnel by key */
-  uword *gtpu4_tunnel_by_key;	/* keyed on ipv4.dst + teid */
-  uword *gtpu6_tunnel_by_key;	/* keyed on ipv6.dst + teid */
+    /* lookup tunnel by key */
+    uword *gtpu4_tunnel_by_key;   /* keyed on ipv4.dst + teid */
+    uword *gtpu6_tunnel_by_key;   /* keyed on ipv6.dst + teid */
 
-  /* local VTEP IPs ref count used by gtpu-bypass node to check if
-     received gtpu packet DIP matches any local VTEP address */
-  uword *vtep4;			/* local ip4 VTEPs keyed on their ip4 addr */
-  uword *vtep6;			/* local ip6 VTEPs keyed on their ip6 addr */
+    /* local VTEP IPs ref count used by gtpu-bypass node to check if
+       received gtpu packet DIP matches any local VTEP address */
+    uword *vtep4;         /* local ip4 VTEPs keyed on their ip4 addr */
+    uword *vtep6;         /* local ip6 VTEPs keyed on their ip6 addr */
 
-  /* mcast shared info */
-  uword *mcast_shared;		/* keyed on mcast ip46 addr */
+    /* mcast shared info */
+    uword *mcast_shared;      /* keyed on mcast ip46 addr */
 
-  /* Free vlib hw_if_indices */
-  u32 *free_gtpu_tunnel_hw_if_indices;
+    /* Free vlib hw_if_indices */
+    u32 *free_gtpu_tunnel_hw_if_indices;
 
-  /* Mapping from sw_if_index to tunnel index */
-  u32 *tunnel_index_by_sw_if_index;
+    /* Mapping from sw_if_index to tunnel index */
+    u32 *tunnel_index_by_sw_if_index;
 
-  /**
-   * Node type for registering to fib changes.
-   */
-  fib_node_type_t fib_node_type;
+    /**
+     * Node type for registering to fib changes.
+     */
+    fib_node_type_t fib_node_type;
 
-  /* API message ID base */
-  u16 msg_id_base;
+    /* API message ID base */
+    u16 msg_id_base;
 
-  /* convenience */
-  vlib_main_t *vlib_main;
-  vnet_main_t *vnet_main;
+    /* convenience */
+    vlib_main_t *vlib_main;
+    vnet_main_t *vnet_main;
 } gtpu_main_t;
 
 extern gtpu_main_t gtpu_main;
@@ -237,19 +232,18 @@ extern vlib_node_registration_t gtpu6_encap_node;
 
 u8 *format_gtpu_encap_trace (u8 * s, va_list * args);
 
-typedef struct
-{
-  u8 is_add;
-  u8 is_ip6;
-  ip46_address_t src, dst;
-  u32 mcast_sw_if_index;
-  u32 encap_fib_index;
-  u32 decap_next_index;
-  u32 teid;
+typedef struct {
+    u8 is_add;
+    u8 is_ip6;
+    ip46_address_t src, dst;
+    u32 mcast_sw_if_index;
+    u32 encap_fib_index;
+    u32 decap_next_index;
+    u32 teid;
 } vnet_gtpu_add_del_tunnel_args_t;
 
 int vnet_gtpu_add_del_tunnel
-  (vnet_gtpu_add_del_tunnel_args_t * a, u32 * sw_if_indexp);
+(vnet_gtpu_add_del_tunnel_args_t * a, u32 * sw_if_indexp);
 
 void vnet_int_gtpu_bypass_mode (u32 sw_if_index, u8 is_ip6, u8 is_enable);
 #endif /* included_vnet_gtpu_h */

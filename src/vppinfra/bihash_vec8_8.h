@@ -30,10 +30,9 @@
 #include <vppinfra/crc32.h>
 
 /** 8 octet key, 8 octet key value pair */
-typedef struct
-{
-  u64 key;			/**< the key */
-  u64 value;			/**< the value */
+typedef struct {
+    u64 key;          /**< the key */
+    u64 value;            /**< the value */
 } clib_bihash_kv_vec8_8_t;
 
 /** Decide if a clib_bihash_kv_vec8_8_t instance is free
@@ -42,9 +41,9 @@ typedef struct
 static inline int
 clib_bihash_is_free_vec8_8 (clib_bihash_kv_vec8_8_t * v)
 {
-  if (v->key == ~0ULL && v->value == ~0ULL)
-    return 1;
-  return 0;
+    if (v->key == ~0ULL && v->value == ~0ULL)
+        return 1;
+    return 0;
 }
 
 /** Hash a clib_bihash_kv_vec8_8_t instance
@@ -53,25 +52,24 @@ clib_bihash_is_free_vec8_8 (clib_bihash_kv_vec8_8_t * v)
 static inline u64
 clib_bihash_hash_vec8_8 (clib_bihash_kv_vec8_8_t * v)
 {
-  u8 *keyp = (u8 *) (v->key);
-  /* Note: to torture-test linear scan, make this fn return a constant */
+    u8 *keyp = (u8 *) (v->key);
+    /* Note: to torture-test linear scan, make this fn return a constant */
 #ifdef clib_crc32c_uses_intrinsics
-  return clib_crc32c (keyp, vec_len (keyp));
+    return clib_crc32c (keyp, vec_len (keyp));
 #else
-  {
-    int i, j;
-    u64 sum = 0;
+    {
+        int i, j;
+        u64 sum = 0;
 
-    for (i = 0, j = 0; i < vec_len (keyp); i++)
-      {
-	sum ^= keyp[i] << (j * 8);
-	j++;
-	if (j == 4)
-	  j = 0;
-      }
+        for (i = 0, j = 0; i < vec_len (keyp); i++) {
+            sum ^= keyp[i] << (j * 8);
+            j++;
+            if (j == 4)
+                j = 0;
+        }
 
-    return clib_xxhash (sum);
-  }
+        return clib_xxhash (sum);
+    }
 #endif
 }
 
@@ -83,11 +81,11 @@ clib_bihash_hash_vec8_8 (clib_bihash_kv_vec8_8_t * v)
 static inline u8 *
 format_bihash_kvp_vec8_8 (u8 * s, va_list * args)
 {
-  clib_bihash_kv_vec8_8_t *v = va_arg (*args, clib_bihash_kv_vec8_8_t *);
+    clib_bihash_kv_vec8_8_t *v = va_arg (*args, clib_bihash_kv_vec8_8_t *);
 
-  s = format (s, "key %U value %llu",
-	      format_hex_bytes, v->key, vec_len ((u8 *) (v->key)), v->value);
-  return s;
+    s = format (s, "key %U value %llu",
+                format_hex_bytes, v->key, vec_len ((u8 *) (v->key)), v->value);
+    return s;
 }
 
 /** Compare two clib_bihash_kv_vec8_8_t instances
@@ -97,16 +95,16 @@ format_bihash_kvp_vec8_8 (u8 * s, va_list * args)
 static inline int
 clib_bihash_key_compare_vec8_8 (u64 a_arg, u64 b_arg)
 {
-  u8 *a = (u8 *) a_arg;
-  u8 *b = (u8 *) b_arg;
+    u8 *a = (u8 *) a_arg;
+    u8 *b = (u8 *) b_arg;
 
-  if (a_arg == ~0ULL || b_arg == ~0ULL)
-    return 0;
+    if (a_arg == ~0ULL || b_arg == ~0ULL)
+        return 0;
 
-  if (vec_len (a) != vec_len (b))
-    return 0;
+    if (vec_len (a) != vec_len (b))
+        return 0;
 
-  return memcmp (a, b, vec_len (a)) == 0;
+    return memcmp (a, b, vec_len (a)) == 0;
 }
 
 #undef __included_bihash_template_h__

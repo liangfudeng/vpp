@@ -98,14 +98,14 @@
 #define i16x_sub_saturate i16x4_sub_saturate
 #endif
 
-#define _vector_interleave(a,b,t)		\
-do {						\
-  t _tmp_lo = t##_interleave_lo (a, b);		\
-  t _tmp_hi = t##_interleave_hi (a, b);		\
-  if (CLIB_ARCH_IS_LITTLE_ENDIAN)		\
-    (a) = _tmp_lo, (b) = _tmp_hi;		\
-  else						\
-    (a) = _tmp_hi, (b) = _tmp_lo;		\
+#define _vector_interleave(a,b,t)       \
+do {                        \
+  t _tmp_lo = t##_interleave_lo (a, b);     \
+  t _tmp_hi = t##_interleave_hi (a, b);     \
+  if (CLIB_ARCH_IS_LITTLE_ENDIAN)       \
+    (a) = _tmp_lo, (b) = _tmp_hi;       \
+  else                      \
+    (a) = _tmp_hi, (b) = _tmp_lo;       \
 } while (0)
 
 /* 128 bit interleaves. */
@@ -138,7 +138,7 @@ do {						\
 #define u8x_interleave u8x8_interleave
 #define u16x_interleave u16x4_interleave
 #define u32x_interleave u32x2_interleave
-#define u64x_interleave(a,b)	/* do nothing */
+#define u64x_interleave(a,b)    /* do nothing */
 #endif
 
 /* Vector word sized shifts. */
@@ -280,45 +280,45 @@ do {						\
 #define i32x_splat i32x2_splat
 #endif
 
-#define u32x4_transpose_step(x,y)		\
-do {						\
-  u32x4 _x = (x);				\
-  u32x4 _y = (y);				\
-  (x) = u32x4_interleave_lo (_x, _y);		\
-  (y) = u32x4_interleave_hi (_x, _y);		\
+#define u32x4_transpose_step(x,y)       \
+do {                        \
+  u32x4 _x = (x);               \
+  u32x4 _y = (y);               \
+  (x) = u32x4_interleave_lo (_x, _y);       \
+  (y) = u32x4_interleave_hi (_x, _y);       \
 } while (0)
 
 /* 4x4 transpose: x_ij -> x_ji */
-#define u32x4_transpose(x0,x1,x2,x3)		\
-do {						\
-  u32x4 _x0 = (u32x4) (x0);			\
-  u32x4 _x1 = (u32x4) (x1);			\
-  u32x4 _x2 = (u32x4) (x2);			\
-  u32x4 _x3 = (u32x4) (x3);			\
-  u32x4_transpose_step (_x0, _x2);		\
-  u32x4_transpose_step (_x1, _x3);		\
-  u32x4_transpose_step (_x0, _x1);		\
-  u32x4_transpose_step (_x2, _x3);		\
-  (x0) = (u32x4) _x0;				\
-  (x1) = (u32x4) _x1;				\
-  (x2) = (u32x4) _x2;				\
-  (x3) = (u32x4) _x3;				\
+#define u32x4_transpose(x0,x1,x2,x3)        \
+do {                        \
+  u32x4 _x0 = (u32x4) (x0);         \
+  u32x4 _x1 = (u32x4) (x1);         \
+  u32x4 _x2 = (u32x4) (x2);         \
+  u32x4 _x3 = (u32x4) (x3);         \
+  u32x4_transpose_step (_x0, _x2);      \
+  u32x4_transpose_step (_x1, _x3);      \
+  u32x4_transpose_step (_x0, _x1);      \
+  u32x4_transpose_step (_x2, _x3);      \
+  (x0) = (u32x4) _x0;               \
+  (x1) = (u32x4) _x1;               \
+  (x2) = (u32x4) _x2;               \
+  (x3) = (u32x4) _x3;               \
 } while (0)
 
-#define i32x4_transpose(x0,x1,x2,x3)		\
-do {						\
-  u32x4 _x0 = (u32x4) (x0);			\
-  u32x4 _x1 = (u32x4) (x1);			\
-  u32x4 _x2 = (u32x4) (x2);			\
-  u32x4 _x3 = (u32x4) (x3);			\
-  u32x4_transpose_step (_x0, _x2);		\
-  u32x4_transpose_step (_x1, _x3);		\
-  u32x4_transpose_step (_x0, _x1);		\
-  u32x4_transpose_step (_x2, _x3);		\
-  (x0) = (i32x4) _x0;				\
-  (x1) = (i32x4) _x1;				\
-  (x2) = (i32x4) _x2;				\
-  (x3) = (i32x4) _x3;				\
+#define i32x4_transpose(x0,x1,x2,x3)        \
+do {                        \
+  u32x4 _x0 = (u32x4) (x0);         \
+  u32x4 _x1 = (u32x4) (x1);         \
+  u32x4 _x2 = (u32x4) (x2);         \
+  u32x4 _x3 = (u32x4) (x3);         \
+  u32x4_transpose_step (_x0, _x2);      \
+  u32x4_transpose_step (_x1, _x3);      \
+  u32x4_transpose_step (_x0, _x1);      \
+  u32x4_transpose_step (_x2, _x3);      \
+  (x0) = (i32x4) _x0;               \
+  (x1) = (i32x4) _x1;               \
+  (x2) = (i32x4) _x2;               \
+  (x3) = (i32x4) _x3;               \
 } while (0)
 
 #undef _

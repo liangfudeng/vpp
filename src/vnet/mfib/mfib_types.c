@@ -1,17 +1,17 @@
- /*
- * Copyright (c) 2016 Cisco and/or its affiliates.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at:
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+/*
+* Copyright (c) 2016 Cisco and/or its affiliates.
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at:
+*
+*     http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 
 #include <vnet/mfib/mfib_types.h>
 
@@ -34,48 +34,39 @@ format_mfib_prefix (u8 * s, va_list * args)
     /*
      * protocol specific so it prints ::/0 correctly.
      */
-    switch (fp->fp_proto)
-    {
-    case FIB_PROTOCOL_IP6:
-    {
-        ip6_address_t p6 = fp->fp_grp_addr.ip6;
-        u32 len = (fp->fp_len > 128 ? 128 : fp->fp_len);
+    switch (fp->fp_proto) {
+        case FIB_PROTOCOL_IP6: {
+            ip6_address_t p6 = fp->fp_grp_addr.ip6;
+            u32 len = (fp->fp_len > 128 ? 128 : fp->fp_len);
 
-        ip6_address_mask(&p6, &(ip6_main.fib_masks[len]));
+            ip6_address_mask(&p6, &(ip6_main.fib_masks[len]));
 
-        if (ip6_address_is_zero(&fp->fp_src_addr.ip6))
-        {
-            s = format(s, "(*, ");
+            if (ip6_address_is_zero(&fp->fp_src_addr.ip6)) {
+                s = format(s, "(*, ");
+            } else {
+                s = format (s, "(%U, ", format_ip6_address, &fp->fp_src_addr.ip6);
+            }
+            s = format (s, "%U", format_ip6_address, &p6);
+            s = format (s, "/%d)", len);
+            break;
         }
-        else
-        {
-            s = format (s, "(%U, ", format_ip6_address, &fp->fp_src_addr.ip6);
-        }
-        s = format (s, "%U", format_ip6_address, &p6);
-        s = format (s, "/%d)", len);
-        break;
-    }
-    case FIB_PROTOCOL_IP4:
-    {
-        ip4_address_t p4 = fp->fp_grp_addr.ip4;
-        u32 len = (fp->fp_len > 32 ? 32 : fp->fp_len);
+        case FIB_PROTOCOL_IP4: {
+            ip4_address_t p4 = fp->fp_grp_addr.ip4;
+            u32 len = (fp->fp_len > 32 ? 32 : fp->fp_len);
 
-        p4.as_u32 &= ip4_main.fib_masks[len];
+            p4.as_u32 &= ip4_main.fib_masks[len];
 
-        if (0 == fp->fp_src_addr.ip4.as_u32)
-        {
-            s = format(s, "(*, ");
+            if (0 == fp->fp_src_addr.ip4.as_u32) {
+                s = format(s, "(*, ");
+            } else {
+                s = format (s, "(%U, ", format_ip4_address, &fp->fp_src_addr.ip4);
+            }
+            s = format (s, "%U", format_ip4_address, &p4);
+            s = format (s, "/%d)", len);
+            break;
         }
-        else
-        {
-            s = format (s, "(%U, ", format_ip4_address, &fp->fp_src_addr.ip4);
-        }
-        s = format (s, "%U", format_ip4_address, &p4);
-        s = format (s, "/%d)", len);
-        break;
-    }
-    case FIB_PROTOCOL_MPLS:
-        break;
+        case FIB_PROTOCOL_MPLS:
+            break;
     }
 
     return (s);

@@ -18,79 +18,80 @@
 
 #include "vom/interface.hpp"
 
-namespace VOM {
-/**
- * A Sub-interface. e.g. a VLAN sub-interface on an Ethernet interface
- */
-class sub_interface : public interface
+namespace VOM
 {
-  /*
-   * Typedef for VLAN ID
-   */
-  typedef uint16_t vlan_id_t;
+    /**
+     * A Sub-interface. e.g. a VLAN sub-interface on an Ethernet interface
+     */
+    class sub_interface : public interface
+        {
+            /*
+             * Typedef for VLAN ID
+             */
+            typedef uint16_t vlan_id_t;
 
-public:
-  /**
-   * Construct a new object matching the desried state
-   */
-  sub_interface(const interface& parent, admin_state_t state, vlan_id_t vlan);
-  /**
-   * Destructor
-   */
-  ~sub_interface();
-  /**
-   * Copy Constructor
-   */
-  sub_interface(const sub_interface& o);
+        public:
+            /**
+             * Construct a new object matching the desried state
+             */
+            sub_interface(const interface& parent, admin_state_t state, vlan_id_t vlan);
+            /**
+             * Destructor
+             */
+            ~sub_interface();
+            /**
+             * Copy Constructor
+             */
+            sub_interface(const sub_interface& o);
 
-  /**
-   * comparison operator - for UT
-   */
-  bool operator==(const sub_interface& s) const;
+            /**
+             * comparison operator - for UT
+             */
+            bool operator==(const sub_interface& s) const;
 
-  /**
-   * Return the matching 'singular instance' of the sub-interface
-   */
-  std::shared_ptr<sub_interface> singular() const;
+            /**
+             * Return the matching 'singular instance' of the sub-interface
+             */
+            std::shared_ptr<sub_interface> singular() const;
 
-  /**
-   * Find a subinterface from its key
-   */
-  static std::shared_ptr<sub_interface> find(const key_t& k);
+            /**
+             * Find a subinterface from its key
+             */
+            static std::shared_ptr<sub_interface> find(const key_t& k);
 
-private:
-  /**
-   * Return the matching 'instance' of the sub-interface
-   *  over-ride from the base class
-   */
-  std::shared_ptr<interface> singular_i() const;
+        private:
+            /**
+             * Return the matching 'instance' of the sub-interface
+             *  over-ride from the base class
+             */
+            std::shared_ptr<interface> singular_i() const;
 
-  /**
-   * Virtual functions to construct an interface create commands.
-   */
-  virtual std::queue<cmd*>& mk_create_cmd(std::queue<cmd*>& cmds);
+            /**
+             * Virtual functions to construct an interface create commands.
+             */
+            virtual std::queue<cmd*>& mk_create_cmd(std::queue<cmd*>& cmds);
 
-  /**
-   * Virtual functions to construct an interface delete commands.
-   */
-  virtual std::queue<cmd*>& mk_delete_cmd(std::queue<cmd*>& cmds);
+            /**
+             * Virtual functions to construct an interface delete commands.
+             */
+            virtual std::queue<cmd*>& mk_delete_cmd(std::queue<cmd*>& cmds);
 
-  /**
-   * From the name of the parent and the vlan,
-   * construct the sub-interface's name
-   */
-  static std::string mk_name(const interface& parent, vlan_id_t vlan);
+            /**
+             * From the name of the parent and the vlan,
+             * construct the sub-interface's name
+             */
+            static std::string mk_name(const interface& parent, vlan_id_t vlan);
 
-  /**
-   * Refernece conter lock on the parent
-   */
-  const std::shared_ptr<interface> m_parent;
+            /**
+             * Refernece conter lock on the parent
+             */
+            const std::shared_ptr<interface> m_parent;
 
-  /**
-   * VLAN ID
-   */
-  vlan_id_t m_vlan;
-};
+            /**
+             * VLAN ID
+             */
+            vlan_id_t m_vlan;
+        };
 };
 
 /*

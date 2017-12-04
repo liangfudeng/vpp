@@ -53,8 +53,7 @@ mfib_forward_lookup_trace (vlib_main_t * vm,
     n_left = frame->n_vectors;
     from = vlib_frame_vector_args (frame);
 
-    while (n_left >= 4)
-    {
+    while (n_left >= 4) {
         mfib_forward_lookup_trace_t * t0, * t1;
         vlib_buffer_t * b0, * b1;
         u32 bi0, bi1;
@@ -69,15 +68,13 @@ mfib_forward_lookup_trace (vlib_main_t * vm,
         b0 = vlib_get_buffer (vm, bi0);
         b1 = vlib_get_buffer (vm, bi1);
 
-        if (b0->flags & VLIB_BUFFER_IS_TRACED)
-        {
+        if (b0->flags & VLIB_BUFFER_IS_TRACED) {
             t0 = vlib_add_trace (vm, node, b0, sizeof (t0[0]));
             t0->entry_index = vnet_buffer (b0)->ip.adj_index[VLIB_TX];
             t0->fib_index = vec_elt (im->mfib_index_by_sw_if_index,
                                      vnet_buffer(b1)->sw_if_index[VLIB_RX]);
         }
-        if (b1->flags & VLIB_BUFFER_IS_TRACED)
-        {
+        if (b1->flags & VLIB_BUFFER_IS_TRACED) {
             t1 = vlib_add_trace (vm, node, b1, sizeof (t1[0]));
             t1->entry_index = vnet_buffer (b1)->ip.adj_index[VLIB_TX];
             t1->fib_index = vec_elt (im->mfib_index_by_sw_if_index,
@@ -87,8 +84,7 @@ mfib_forward_lookup_trace (vlib_main_t * vm,
         n_left -= 2;
     }
 
-    while (n_left >= 1)
-    {
+    while (n_left >= 1) {
         mfib_forward_lookup_trace_t * t0;
         vlib_buffer_t * b0;
         u32 bi0;
@@ -97,8 +93,7 @@ mfib_forward_lookup_trace (vlib_main_t * vm,
 
         b0 = vlib_get_buffer (vm, bi0);
 
-        if (b0->flags & VLIB_BUFFER_IS_TRACED)
-        {
+        if (b0->flags & VLIB_BUFFER_IS_TRACED) {
             t0 = vlib_add_trace (vm, node, b0, sizeof (t0[0]));
             t0->entry_index = vnet_buffer (b0)->ip.adj_index[VLIB_TX];
             t0->fib_index = vec_elt (im->mfib_index_by_sw_if_index,
@@ -125,13 +120,11 @@ mfib_forward_lookup (vlib_main_t * vm,
     from = vlib_frame_vector_args (frame);
     n_left_from = frame->n_vectors;
 
-    while (n_left_from > 0)
-    {
+    while (n_left_from > 0) {
         vlib_get_next_frame (vm, node, MFIB_FORWARD_LOOKUP_NEXT_RPF,
                              to_next, n_left_to_next);
 
-        while (n_left_from > 0 && n_left_to_next > 0)
-        {
+        while (n_left_from > 0 && n_left_to_next > 0) {
             fib_node_index_t mfei0;
             vlib_buffer_t * p0;
             u32 fib_index0;
@@ -146,8 +139,7 @@ mfib_forward_lookup (vlib_main_t * vm,
 
             p0 = vlib_get_buffer (vm, pi0);
 
-            if (is_v4)
-            {
+            if (is_v4) {
                 ip4_header_t * ip0;
 
                 fib_index0 = vec_elt (ip4_main.mfib_index_by_sw_if_index,
@@ -157,9 +149,7 @@ mfib_forward_lookup (vlib_main_t * vm,
                                               &ip0->src_address,
                                               &ip0->dst_address,
                                               64);
-            }
-            else
-            {
+            } else {
                 ip6_header_t * ip0;
 
                 fib_index0 = vec_elt (ip6_main.mfib_index_by_sw_if_index,
@@ -269,8 +259,7 @@ mfib_forward_connected_check (vlib_buffer_t * b0,
      */
     index_t lbi0;
 
-    if (is_v4)
-    {
+    if (is_v4) {
         load_balance_t *lb0;
         ip4_header_t *ip0;
 
@@ -284,9 +273,7 @@ mfib_forward_connected_check (vlib_buffer_t * b0,
 
         return (FIB_ENTRY_FLAG_ATTACHED &
                 lb0->lb_fib_entry_flags);
-    }
-    else
-    {
+    } else {
         ASSERT(0);
     }
     return (0);
@@ -303,13 +290,11 @@ mfib_forward_itf_signal (vlib_main_t *vm,
     old_flags = __sync_fetch_and_or(&mfi->mfi_flags,
                                     MFIB_ITF_FLAG_SIGNAL_PRESENT);
 
-    if (!(old_flags & MFIB_ITF_FLAG_SIGNAL_PRESENT))
-    {
+    if (!(old_flags & MFIB_ITF_FLAG_SIGNAL_PRESENT)) {
         /*
          * we were the lucky ones to set the signal present flag
          */
-        if (!(old_flags & MFIB_ITF_FLAG_DONT_PRESERVE))
-        {
+        if (!(old_flags & MFIB_ITF_FLAG_DONT_PRESERVE)) {
             /*
              * preserve a copy of the packet for the control
              * plane to examine.
@@ -318,9 +303,7 @@ mfib_forward_itf_signal (vlib_main_t *vm,
              * preserved packet.
              */
             mfib_signal_push(mfe, mfi, b0);
-        }
-        else
-        {
+        } else {
             /*
              *  The control plane just wants the signal, not the packet as well
              */
@@ -347,13 +330,11 @@ mfib_forward_rpf (vlib_main_t * vm,
     n_left_from = frame->n_vectors;
     next = MFIB_FORWARD_RPF_NEXT_DROP;
 
-    while (n_left_from > 0)
-    {
+    while (n_left_from > 0) {
         vlib_get_next_frame (vm, node, next,
                              to_next, n_left_to_next);
 
-        while (n_left_from > 0 && n_left_to_next > 0)
-        {
+        while (n_left_from > 0 && n_left_to_next > 0) {
             fib_node_index_t mfei0;
             const mfib_entry_t *mfe0;
             mfib_itf_t *mfi0;
@@ -385,27 +366,20 @@ mfib_forward_rpf (vlib_main_t * vm,
              * If the mfib entry has a configured RPF-ID check that
              * in preference to an interface based RPF
              */
-            if (MFIB_RPF_ID_NONE != mfe0->mfe_rpf_id)
-            {
+            if (MFIB_RPF_ID_NONE != mfe0->mfe_rpf_id) {
                 iflags0 = (mfe0->mfe_rpf_id == vnet_buffer(b0)->ip.rpf_id ?
                            MFIB_ITF_FLAG_ACCEPT :
                            MFIB_ITF_FLAG_NONE);
-            }
-            else
-            {
-                if (PREDICT_TRUE(NULL != mfi0))
-                {
+            } else {
+                if (PREDICT_TRUE(NULL != mfi0)) {
                     iflags0 = mfi0->mfi_flags;
-                }
-                else
-                {
+                } else {
                     iflags0 = MFIB_ITF_FLAG_NONE;
                 }
             }
             eflags0 = mfe0->mfe_flags;
 
-            if (PREDICT_FALSE(eflags0 & MFIB_ENTRY_FLAG_CONNECTED))
-            {
+            if (PREDICT_FALSE(eflags0 & MFIB_ENTRY_FLAG_CONNECTED)) {
                 /*
                  * lookup the source in the unicast FIB - check it
                  * matches a connected.
@@ -413,26 +387,22 @@ mfib_forward_rpf (vlib_main_t * vm,
                 if (mfib_forward_connected_check(
                         b0,
                         vnet_buffer(b0)->sw_if_index[VLIB_RX],
-                        is_v4))
-                {
+                        is_v4)) {
                     mfib_forward_itf_signal(vm, mfe0, mfi0, b0);
                 }
             }
             if (PREDICT_FALSE((eflags0 & MFIB_ENTRY_FLAG_SIGNAL) ^
-                              (iflags0 & MFIB_ITF_FLAG_NEGATE_SIGNAL)))
-            {
+                              (iflags0 & MFIB_ITF_FLAG_NEGATE_SIGNAL))) {
                 /*
                  * Entry signal XOR interface negate-signal
                  */
-                if (NULL != mfi0)
-                {
+                if (NULL != mfi0) {
                     mfib_forward_itf_signal(vm, mfe0, mfi0, b0);
                 }
             }
 
             if (PREDICT_TRUE((iflags0 & MFIB_ITF_FLAG_ACCEPT) ||
-                             (eflags0 & MFIB_ENTRY_FLAG_ACCEPT_ALL_ITF)))
-            {
+                             (eflags0 & MFIB_ENTRY_FLAG_ACCEPT_ALL_ITF))) {
                 /*
                  * This interface is accepting packets for the matching entry
                  */
@@ -440,25 +410,19 @@ mfib_forward_rpf (vlib_main_t * vm,
 
                 vnet_buffer(b0)->ip.adj_index[VLIB_TX] =
                     mfe0->mfe_rep.dpoi_index;
-            }
-            else
-            {
+            } else {
                 next0 = MFIB_FORWARD_RPF_NEXT_DROP;
             }
 
-            if (b0->flags & VLIB_BUFFER_IS_TRACED)
-            {
+            if (b0->flags & VLIB_BUFFER_IS_TRACED) {
                 mfib_forward_rpf_trace_t *t0;
 
                 t0 = vlib_add_trace (vm, node, b0, sizeof (*t0));
                 t0->entry_index = mfei0;
                 t0->itf_flags = iflags0;
-                if (NULL == mfi0)
-                {
+                if (NULL == mfi0) {
                     t0->sw_if_index = ~0;
-                }
-                else
-                {
+                } else {
                     t0->sw_if_index = mfi0->mfi_sw_if_index;
                 }
             }

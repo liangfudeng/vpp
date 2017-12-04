@@ -22,11 +22,10 @@
  * Refernece counting lock types on the tenant.
  * When all of these counters drop to zero, we no longer need the tenant.
  */
-typedef enum lisp_gpe_tenant_lock_t_
-{
-  LISP_GPE_TENANT_LOCK_L2_IFACE,
-  LISP_GPE_TENANT_LOCK_L3_IFACE,
-  LISP_GPE_TENANT_LOCK_NUM,
+typedef enum lisp_gpe_tenant_lock_t_ {
+    LISP_GPE_TENANT_LOCK_L2_IFACE,
+    LISP_GPE_TENANT_LOCK_L3_IFACE,
+    LISP_GPE_TENANT_LOCK_NUM,
 } lisp_gpe_tenant_lock_t;
 
 /**
@@ -35,40 +34,39 @@ typedef enum lisp_gpe_tenant_lock_t_
  * This object exists to manage the shared resources of the L2 and L3 interface
  * of a given tenant.
  */
-typedef struct lisp_gpe_tenant_t_
-{
-  /**
-   * The VNI is the identifier of the tenant
-   */
-  u32 lt_vni;
+typedef struct lisp_gpe_tenant_t_ {
+    /**
+     * The VNI is the identifier of the tenant
+     */
+    u32 lt_vni;
 
-  /**
-   * The tenant can have both L2 and L3 services enabled.
-   */
-  u32 lt_table_id;
-  u32 lt_bd_id;
+    /**
+     * The tenant can have both L2 and L3 services enabled.
+     */
+    u32 lt_table_id;
+    u32 lt_bd_id;
 
-  /**
-   * The number of locks on the tenant's L3 interface.
-   */
-  u32 lt_locks[LISP_GPE_TENANT_LOCK_NUM];
+    /**
+     * The number of locks on the tenant's L3 interface.
+     */
+    u32 lt_locks[LISP_GPE_TENANT_LOCK_NUM];
 
-  /**
-   * The L3 SW interface index
-   */
-  u32 lt_l3_sw_if_index;
+    /**
+     * The L3 SW interface index
+     */
+    u32 lt_l3_sw_if_index;
 
-  /**
-   * The L2 SW interface index
-   */
-  u32 lt_l2_sw_if_index;
+    /**
+     * The L2 SW interface index
+     */
+    u32 lt_l2_sw_if_index;
 
 } lisp_gpe_tenant_t;
 
 extern u32 lisp_gpe_tenant_find_or_create (u32 vni);
 
 extern u32 lisp_gpe_tenant_l3_iface_add_or_lock (u32 vni, u32 vrf,
-						 u8 with_default_route);
+        u8 with_default_route);
 extern void lisp_gpe_tenant_l3_iface_unlock (u32 vni);
 
 extern u32 lisp_gpe_tenant_l2_iface_add_or_lock (u32 vni, u32 vrf);

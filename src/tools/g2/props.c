@@ -1,4 +1,4 @@
-/* 
+/*
  *------------------------------------------------------------------
  * Copyright (c) 1997-2016 Cisco and/or its affiliates.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,7 +35,7 @@ static prop_t *buckets [NBUCKETS];
 static int hash_shifts[4] = {24, 16, 8, 0};
 
 /*
- * getprop 
+ * getprop
  */
 
 char *getprop (char *name)
@@ -106,7 +106,7 @@ void addprop (char *name, char *value)
 }
 
 /*
- * sxerox 
+ * sxerox
  */
 
 static char *sxerox (char *s)
@@ -117,7 +117,7 @@ static char *sxerox (char *s)
 }
 
 /*
- * readprops 
+ * readprops
  */
 
 #define START 0
@@ -148,131 +148,131 @@ int readprops (char *filename)
 
     again:
         switch (state) {
-        case START:
-            if (feof (ifp)) {
-                fclose (ifp);
-                return (0);
-            }
-
-            if (c == ' ' || c == '\t')
-                goto readchar;
-
-            if (c == '\n') {
-                linenum++;
-                goto readchar;
-            }
-            if (isalpha (c) || (c == '_')) {
-                state = READNAME;
-                goto again;
-            }
-            if (c == '/') {
-                c = getc (ifp);
-                if (c == '/') {
-                    state = CPP_COMMENT;
-                    goto readchar;
-                } else if (c == '*') {
-                    state = C_COMMENT;
-                    goto readchar;
-                } else {
-                    fprintf (stderr, "unknown token '/' line %d\n",
-                             linenum);
-                    exit (1);
-                }
-            }
-            fprintf (stderr, "unknown token '%c' line %d\n",
-                     c, linenum);
-            exit (1);
-            break;
-            
-        case CPP_COMMENT:
-            while (1) {
-                c = getc (ifp);
-                if (feof (ifp))
+            case START:
+                if (feof (ifp)) {
+                    fclose (ifp);
                     return (0);
+                }
+
+                if (c == ' ' || c == '\t')
+                    goto readchar;
+
                 if (c == '\n') {
                     linenum++;
-                    state = START;
                     goto readchar;
                 }
-            }
-            break;
-
-        case C_COMMENT:
-            while (1) {
-                c = getc (ifp);
-                if (feof (ifp)) {
-                    fprintf (stderr, "unterminated comment, line %d\n",
-                             linenum);
-                    exit (1);
-                }
-                if (c == '*') {
-                staragain:
-                    c = getc (ifp);
-                    if (c == '/') {
-                        state = START;
-                        goto readchar;
-                    }
-                    if (c == '*')
-                        goto staragain;
-                }
-            }
-            break;
-                    
-        case READNAME:
-            i = 0;
-            namebuf[i++] = c;
-            while (1) {
-                c = getc (ifp);
-                if (feof (ifp)) {
-                    fprintf (stderr, "EOF while reading a name, line %d\n",
-                             linenum);
-                    exit (1);
-                }
-                if ((!isalnum (c)) && (c != '_')) {
-                    namebuf [i] = 0;
-                    state = READVALUE;
+                if (isalpha (c) || (c == '_')) {
+                    state = READNAME;
                     goto again;
                 }
-                namebuf [i++] = c;
-            }
-            break;
-
-        case READVALUE:
-            i = 0;
-            while ((c == ' ') || (c == '\t') || (c == '=')) {
-                c = getc (ifp);
-                if (feof (ifp)) {
-                    fprintf (stderr, "EOF while reading a value, line %d\n",
-                             linenum);
-                    exit (1);
-                }
-            }
-            goto firsttime;
-            while (1) {
-                c = getc (ifp);
-
-            firsttime:
-                if (c == '\\') {
+                if (c == '/') {
                     c = getc (ifp);
-                    if (feof (ifp)) {
-                        fprintf (stderr, "EOF after '\\', line %d\n",
+                    if (c == '/') {
+                        state = CPP_COMMENT;
+                        goto readchar;
+                    } else if (c == '*') {
+                        state = C_COMMENT;
+                        goto readchar;
+                    } else {
+                        fprintf (stderr, "unknown token '/' line %d\n",
                                  linenum);
                         exit (1);
                     }
+                }
+                fprintf (stderr, "unknown token '%c' line %d\n",
+                         c, linenum);
+                exit (1);
+                break;
+
+            case CPP_COMMENT:
+                while (1) {
+                    c = getc (ifp);
+                    if (feof (ifp))
+                        return (0);
+                    if (c == '\n') {
+                        linenum++;
+                        state = START;
+                        goto readchar;
+                    }
+                }
+                break;
+
+            case C_COMMENT:
+                while (1) {
+                    c = getc (ifp);
+                    if (feof (ifp)) {
+                        fprintf (stderr, "unterminated comment, line %d\n",
+                                 linenum);
+                        exit (1);
+                    }
+                    if (c == '*') {
+                    staragain:
+                        c = getc (ifp);
+                        if (c == '/') {
+                            state = START;
+                            goto readchar;
+                        }
+                        if (c == '*')
+                            goto staragain;
+                    }
+                }
+                break;
+
+            case READNAME:
+                i = 0;
+                namebuf[i++] = c;
+                while (1) {
+                    c = getc (ifp);
+                    if (feof (ifp)) {
+                        fprintf (stderr, "EOF while reading a name, line %d\n",
+                                 linenum);
+                        exit (1);
+                    }
+                    if ((!isalnum (c)) && (c != '_')) {
+                        namebuf [i] = 0;
+                        state = READVALUE;
+                        goto again;
+                    }
+                    namebuf [i++] = c;
+                }
+                break;
+
+            case READVALUE:
+                i = 0;
+                while ((c == ' ') || (c == '\t') || (c == '=')) {
+                    c = getc (ifp);
+                    if (feof (ifp)) {
+                        fprintf (stderr, "EOF while reading a value, line %d\n",
+                                 linenum);
+                        exit (1);
+                    }
+                }
+                goto firsttime;
+                while (1) {
+                    c = getc (ifp);
+
+                firsttime:
+                    if (c == '\\') {
+                        c = getc (ifp);
+                        if (feof (ifp)) {
+                            fprintf (stderr, "EOF after '\\', line %d\n",
+                                     linenum);
+                            exit (1);
+                        }
+                        valbuf[i++] = c;
+                        continue;
+                    }
+                    if (c == '\n') {
+                        linenum++;
+                        while (valbuf [i-1] == ' ' || valbuf[i-1] == '\t')
+                            i--;
+                        valbuf[i] = 0;
+                        addprop (namebuf, valbuf);
+                        state = START;
+                        goto readchar;
+                    }
                     valbuf[i++] = c;
-                    continue;
                 }
-                if (c == '\n') {
-                    linenum++;
-                    while (valbuf [i-1] == ' ' || valbuf[i-1] == '\t')
-                        i--;
-                    valbuf[i] = 0;
-                    addprop (namebuf, valbuf);
-                    state = START;
-                    goto readchar;
-                }
-                valbuf[i++] = c;
-            }
 
         }
     }

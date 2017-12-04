@@ -15,105 +15,107 @@
 
 #include "vom/bridge_domain_arp_entry_cmds.hpp"
 
-namespace VOM {
-namespace bridge_domain_arp_entry_cmds {
-
-create_cmd::create_cmd(HW::item<bool>& item,
-                       uint32_t bd,
-                       const mac_address_t& mac,
-                       const boost::asio::ip::address& ip_addr)
-  : rpc_cmd(item)
-  , m_bd(bd)
-  , m_mac(mac)
-  , m_ip_addr(ip_addr)
+namespace VOM
 {
-}
+    namespace bridge_domain_arp_entry_cmds
+    {
 
-bool
-create_cmd::operator==(const create_cmd& other) const
-{
-  return ((m_mac == other.m_mac) && (m_ip_addr == other.m_ip_addr) &&
-          (m_bd == other.m_bd));
-}
+        create_cmd::create_cmd(HW::item<bool>& item,
+                               uint32_t bd,
+                               const mac_address_t& mac,
+                               const boost::asio::ip::address& ip_addr)
+            : rpc_cmd(item)
+            , m_bd(bd)
+            , m_mac(mac)
+            , m_ip_addr(ip_addr)
+        {
+        }
 
-rc_t
-create_cmd::issue(connection& con)
-{
-  msg_t req(con.ctx(), std::ref(*this));
+        bool
+        create_cmd::operator==(const create_cmd& other) const
+        {
+            return ((m_mac == other.m_mac) && (m_ip_addr == other.m_ip_addr) &&
+                    (m_bd == other.m_bd));
+        }
 
-  auto& payload = req.get_request().get_payload();
-  payload.bd_id = m_bd;
-  payload.is_add = 1;
-  m_mac.to_bytes(payload.mac_address, 6);
-  to_bytes(m_ip_addr, &payload.is_ipv6, payload.ip_address);
+        rc_t
+        create_cmd::issue(connection& con)
+        {
+            msg_t req(con.ctx(), std::ref(*this));
 
-  VAPI_CALL(req.execute());
+            auto& payload = req.get_request().get_payload();
+            payload.bd_id = m_bd;
+            payload.is_add = 1;
+            m_mac.to_bytes(payload.mac_address, 6);
+            to_bytes(m_ip_addr, &payload.is_ipv6, payload.ip_address);
 
-  m_hw_item.set(wait());
+            VAPI_CALL(req.execute());
 
-  return rc_t::OK;
-}
+            m_hw_item.set(wait());
 
-std::string
-create_cmd::to_string() const
-{
-  std::ostringstream s;
-  s << "bridge-domain-arp-entry-create: " << m_hw_item.to_string()
-    << " bd:" << m_bd << " mac:" << m_mac.to_string()
-    << " ip:" << m_ip_addr.to_string();
+            return rc_t::OK;
+        }
 
-  return (s.str());
-}
+        std::string
+        create_cmd::to_string() const
+        {
+            std::ostringstream s;
+            s << "bridge-domain-arp-entry-create: " << m_hw_item.to_string()
+              << " bd:" << m_bd << " mac:" << m_mac.to_string()
+              << " ip:" << m_ip_addr.to_string();
 
-delete_cmd::delete_cmd(HW::item<bool>& item,
-                       uint32_t bd,
-                       const mac_address_t& mac,
-                       const boost::asio::ip::address& ip_addr)
-  : rpc_cmd(item)
-  , m_bd(bd)
-  , m_mac(mac)
-  , m_ip_addr(ip_addr)
-{
-}
+            return (s.str());
+        }
 
-bool
-delete_cmd::operator==(const delete_cmd& other) const
-{
-  return ((m_mac == other.m_mac) && (m_ip_addr == other.m_ip_addr) &&
-          (m_bd == other.m_bd));
-}
+        delete_cmd::delete_cmd(HW::item<bool>& item,
+                               uint32_t bd,
+                               const mac_address_t& mac,
+                               const boost::asio::ip::address& ip_addr)
+            : rpc_cmd(item)
+            , m_bd(bd)
+            , m_mac(mac)
+            , m_ip_addr(ip_addr)
+        {
+        }
 
-rc_t
-delete_cmd::issue(connection& con)
-{
-  msg_t req(con.ctx(), std::ref(*this));
+        bool
+        delete_cmd::operator==(const delete_cmd& other) const
+        {
+            return ((m_mac == other.m_mac) && (m_ip_addr == other.m_ip_addr) &&
+                    (m_bd == other.m_bd));
+        }
 
-  auto& payload = req.get_request().get_payload();
-  payload.bd_id = m_bd;
-  payload.is_add = 0;
-  m_mac.to_bytes(payload.mac_address, 6);
-  to_bytes(m_ip_addr, &payload.is_ipv6, payload.ip_address);
+        rc_t
+        delete_cmd::issue(connection& con)
+        {
+            msg_t req(con.ctx(), std::ref(*this));
 
-  VAPI_CALL(req.execute());
+            auto& payload = req.get_request().get_payload();
+            payload.bd_id = m_bd;
+            payload.is_add = 0;
+            m_mac.to_bytes(payload.mac_address, 6);
+            to_bytes(m_ip_addr, &payload.is_ipv6, payload.ip_address);
 
-  wait();
-  m_hw_item.set(rc_t::NOOP);
+            VAPI_CALL(req.execute());
 
-  return rc_t::OK;
-}
+            wait();
+            m_hw_item.set(rc_t::NOOP);
 
-std::string
-delete_cmd::to_string() const
-{
-  std::ostringstream s;
-  s << "bridge-domain-arp-entry-delete: " << m_hw_item.to_string()
-    << " bd:" << m_bd << " mac:" << m_mac.to_string()
-    << " ip:" << m_ip_addr.to_string();
+            return rc_t::OK;
+        }
 
-  return (s.str());
-}
+        std::string
+        delete_cmd::to_string() const
+        {
+            std::ostringstream s;
+            s << "bridge-domain-arp-entry-delete: " << m_hw_item.to_string()
+              << " bd:" << m_bd << " mac:" << m_mac.to_string()
+              << " ip:" << m_ip_addr.to_string();
 
-}; // namespace bridge_domain_arp_entry
+            return (s.str());
+        }
+
+    }; // namespace bridge_domain_arp_entry
 }; // namespace VOM
 
 /*

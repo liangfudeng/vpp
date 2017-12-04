@@ -43,17 +43,15 @@
 
 #define LLDP_TLV_NAME(t) LLDP_TLV_##t
 
-typedef enum
-{
+typedef enum {
 #define F(n, t, s) LLDP_TLV_NAME (t) = n,
-  foreach_lldp_tlv_type (F)
+    foreach_lldp_tlv_type (F)
 #undef F
 } lldp_tlv_code_t;
 
-struct lldp_tlv_head
-{
-  u8 byte1;			/* contains TLV code in the upper 7 bits + MSB of length */
-  u8 byte2;			/* contains the lower bits of length */
+struct lldp_tlv_head {
+    u8 byte1;         /* contains TLV code in the upper 7 bits + MSB of length */
+    u8 byte2;         /* contains the lower bits of length */
 };
 
 /* *INDENT-OFF* */
@@ -82,10 +80,9 @@ void lldp_tlv_set_length (lldp_tlv_t * tlv, u16 length);
 #define LLDP_MIN_CHASS_ID_LEN (1)
 #define LLDP_MAX_CHASS_ID_LEN (255)
 
-typedef enum
-{
+typedef enum {
 #define F(n, t, s) LLDP_CHASS_ID_SUBTYPE_NAME (t) = n,
-  foreach_chassis_id_subtype (F)
+    foreach_chassis_id_subtype (F)
 #undef F
 } lldp_chassis_id_subtype_t;
 
@@ -111,10 +108,9 @@ typedef CLIB_PACKED (struct {
 #define LLDP_MIN_PORT_ID_LEN (1)
 #define LLDP_MAX_PORT_ID_LEN (255)
 
-typedef enum
-{
+typedef enum {
 #define F(n, t, s) LLDP_PORT_ID_SUBTYPE_NAME (t) = n,
-  foreach_port_id_subtype (F)
+    foreach_port_id_subtype (F)
 #undef F
 } lldp_port_id_subtype_t;
 

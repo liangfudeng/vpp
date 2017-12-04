@@ -51,8 +51,8 @@ typedef struct load_balance_map_t_ {
 } load_balance_map_t;
 
 extern index_t load_balance_map_add_or_lock(u32 n_buckets,
-                                            u32 sum_of_weights,
-                                            const load_balance_path_t *norm_paths);
+        u32 sum_of_weights,
+        const load_balance_path_t *norm_paths);
 
 extern void load_balance_map_lock(index_t lmbi);
 extern void load_balance_map_unlock(index_t lbmi);
@@ -90,18 +90,14 @@ load_balance_get_fwd_bucket (const load_balance_t *lb,
 {
     ASSERT(bucket < lb->lb_n_buckets);
 
-    if (INDEX_INVALID != lb->lb_map)
-    {
+    if (INDEX_INVALID != lb->lb_map) {
         bucket = load_balance_map_translate(lb->lb_map, bucket);
     }
 
-    if (PREDICT_TRUE(LB_HAS_INLINE_BUCKETS(lb)))
-    {
-	return (&lb->lb_buckets_inline[bucket]);
-    }
-    else
-    {
-	return (&lb->lb_buckets[bucket]);
+    if (PREDICT_TRUE(LB_HAS_INLINE_BUCKETS(lb))) {
+        return (&lb->lb_buckets_inline[bucket]);
+    } else {
+        return (&lb->lb_buckets[bucket]);
     }
 }
 

@@ -44,8 +44,8 @@
  *  The interface on which to mcast
  */
 extern adj_index_t adj_mcast_add_or_lock(fib_protocol_t proto,
-                                         vnet_link_t link_type,
-					 u32 sw_if_index);
+        vnet_link_t link_type,
+        u32 sw_if_index);
 
 /**
  * @brief
@@ -81,11 +81,11 @@ extern void adj_mcast_update_rewrite(adj_index_t adj_index,
  *  The new rewrite
  */
 extern void adj_mcast_midchain_update_rewrite(adj_index_t adj_index,
-                                              adj_midchain_fixup_t fixup,
-                                              adj_flags_t flags,
-                                              u8 *rewrite,
-                                              u8 offset,
-                                              u32 mask);
+        adj_midchain_fixup_t fixup,
+        adj_flags_t flags,
+        u8 *rewrite,
+        u8 offset,
+        u32 mask);
 /**
  * @brief Walk the multicast Adjacencies on a given interface
  */

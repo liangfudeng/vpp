@@ -45,83 +45,77 @@ static int verbose;
 int
 test_socket_main (unformat_input_t * input)
 {
-  clib_socket_t _s = { 0 }, *s = &_s;
-  char *config;
-  clib_error_t *error;
+    clib_socket_t _s = { 0 }, *s = &_s;
+    char *config;
+    clib_error_t *error;
 
-  s->config = "localhost:22";
-  s->flags = CLIB_SOCKET_F_IS_CLIENT;
+    s->config = "localhost:22";
+    s->flags = CLIB_SOCKET_F_IS_CLIENT;
 
-  while (unformat_check_input (input) != UNFORMAT_END_OF_INPUT)
-    {
-      if (unformat (input, "server %s %=", &config,
-		    &s->flags, CLIB_SOCKET_F_IS_SERVER))
-	;
-      else if (unformat (input, "client %s %=", &config,
-			 &s->flags, CLIB_SOCKET_F_IS_CLIENT))
-	;
-      else
-	{
-	  error = clib_error_create ("unknown input `%U'\n",
-				     format_unformat_error, input);
-	  goto done;
-	}
+    while (unformat_check_input (input) != UNFORMAT_END_OF_INPUT) {
+        if (unformat (input, "server %s %=", &config,
+                      &s->flags, CLIB_SOCKET_F_IS_SERVER))
+            ;
+        else if (unformat (input, "client %s %=", &config,
+                           &s->flags, CLIB_SOCKET_F_IS_CLIENT))
+            ;
+        else {
+            error = clib_error_create ("unknown input `%U'\n",
+                                       format_unformat_error, input);
+            goto done;
+        }
     }
 
-  error = clib_socket_init (s);
-  if (error)
-    goto done;
+    error = clib_socket_init (s);
+    if (error)
+        goto done;
 
-  if (0)
-    {
-      struct
-      {
-	int a, b;
-      } *msg;
-      msg = clib_socket_tx_add (s, sizeof (msg[0]));
-      msg->a = 99;
-      msg->b = 100;
-    }
-  else
-    clib_socket_tx_add_formatted (s, "hello there mr server %d\n", 99);
+    if (0) {
+        struct {
+            int a, b;
+        } *msg;
+        msg = clib_socket_tx_add (s, sizeof (msg[0]));
+        msg->a = 99;
+        msg->b = 100;
+    } else
+        clib_socket_tx_add_formatted (s, "hello there mr server %d\n", 99);
 
-  error = clib_socket_tx (s);
-  if (error)
-    goto done;
+    error = clib_socket_tx (s);
+    if (error)
+        goto done;
 
-  while (1)
-    {
-      error = clib_socket_rx (s, 100);
-      if (error)
-	break;
+    while (1) {
+        error = clib_socket_rx (s, 100);
+        if (error)
+            break;
 
-      if (clib_socket_rx_end_of_file (s))
-	break;
+        if (clib_socket_rx_end_of_file (s))
+            break;
 
-      if_verbose ("%v", s->rx_buffer);
-      _vec_len (s->rx_buffer) = 0;
+        if_verbose ("%v", s->rx_buffer);
+        _vec_len (s->rx_buffer) = 0;
     }
 
-  error = clib_socket_close (s);
+    error = clib_socket_close (s);
 
 done:
-  if (error)
-    clib_error_report (error);
-  return 0;
+    if (error)
+        clib_error_report (error);
+    return 0;
 }
 
 #ifdef CLIB_UNIX
 int
 main (int argc, char *argv[])
 {
-  unformat_input_t i;
-  int r;
+    unformat_input_t i;
+    int r;
 
-  verbose = (argc > 1);
-  unformat_init_command_line (&i, argv);
-  r = test_socket_main (&i);
-  unformat_free (&i);
-  return r;
+    verbose = (argc > 1);
+    unformat_init_command_line (&i, argv);
+    r = test_socket_main (&i);
+    unformat_free (&i);
+    return r;
 }
 #endif
 

@@ -56,11 +56,11 @@
 #define f64_endian(a)
 #define f64_print(a,b)
 
-#define vl_typedefs		/* define message structures */
+#define vl_typedefs     /* define message structures */
 #include <vpp/api/vpe_all_api_h.h>
 #undef vl_typedefs
 
-#define vl_endianfun		/* define message structures */
+#define vl_endianfun        /* define message structures */
 #include <vpp/api/vpe_all_api_h.h>
 #undef vl_endianfun
 
@@ -72,27 +72,26 @@
 
 vl_shmem_hdr_t *shmem_hdr;
 
-typedef struct
-{
-  u32 pings_sent;
-  u32 pings_replied;
-  volatile u32 signal_received;
+typedef struct {
+    u32 pings_sent;
+    u32 pings_replied;
+    volatile u32 signal_received;
 
-  /* convenience */
-  unix_shared_memory_queue_t *vl_input_queue;
-  u32 my_client_index;
-  svmdb_client_t *svmdb_client;
+    /* convenience */
+    unix_shared_memory_queue_t *vl_input_queue;
+    u32 my_client_index;
+    svmdb_client_t *svmdb_client;
 } test_main_t;
 
 test_main_t test_main;
 
 static void vl_api_control_ping_reply_t_handler
-  (vl_api_control_ping_reply_t * mp)
+(vl_api_control_ping_reply_t * mp)
 {
-  test_main_t *tm = &test_main;
+    test_main_t *tm = &test_main;
 
-  fformat (stdout, "control ping reply from pid %d\n", ntohl (mp->vpe_pid));
-  tm->pings_replied++;
+    fformat (stdout, "control ping reply from pid %d\n", ntohl (mp->vpe_pid));
+    tm->pings_replied++;
 }
 
 vlib_main_t vlib_global_main;
@@ -101,7 +100,7 @@ vlib_main_t **vlib_mains;
 void
 vlib_cli_output (struct vlib_main_t *vm, char *fmt, ...)
 {
-  clib_warning ("BUG: vlib_cli_output callled...");
+    clib_warning ("BUG: vlib_cli_output callled...");
 }
 
 #define foreach_api_msg                         \
@@ -110,15 +109,15 @@ _(CONTROL_PING_REPLY,control_ping_reply)
 void
 ping (test_main_t * tm)
 {
-  vl_api_control_ping_t *mp;
+    vl_api_control_ping_t *mp;
 
-  mp = vl_msg_api_alloc (sizeof (*mp));
-  memset (mp, 0, sizeof (*mp));
-  mp->_vl_msg_id = ntohs (VL_API_CONTROL_PING);
-  mp->client_index = tm->my_client_index;
-  mp->context = 0xdeadbeef;
+    mp = vl_msg_api_alloc (sizeof (*mp));
+    memset (mp, 0, sizeof (*mp));
+    mp->_vl_msg_id = ntohs (VL_API_CONTROL_PING);
+    mp->client_index = tm->my_client_index;
+    mp->context = 0xdeadbeef;
 
-  vl_msg_api_send_shmem (tm->vl_input_queue, (u8 *) & mp);
+    vl_msg_api_send_shmem (tm->vl_input_queue, (u8 *) & mp);
 }
 
 static void
@@ -129,13 +128,13 @@ noop_handler (void *notused)
 int
 connect_to_vpe (char *name)
 {
-  int rv = 0;
-  test_main_t *tm = &test_main;
-  api_main_t *am = &api_main;
+    int rv = 0;
+    test_main_t *tm = &test_main;
+    api_main_t *am = &api_main;
 
-  rv = vl_client_connect_to_vlib ("/vpe-api", name, 32);
-  if (rv < 0)
-    return rv;
+    rv = vl_client_connect_to_vlib ("/vpe-api", name, 32);
+    if (rv < 0)
+        return rv;
 
 #define _(N,n)                                                  \
     vl_msg_api_set_handlers(VL_API_##N, #n,                     \
@@ -144,100 +143,90 @@ connect_to_vpe (char *name)
                            vl_api_##n##_t_endian,               \
                            vl_api_##n##_t_print,                \
                            sizeof(vl_api_##n##_t), 1);
-  foreach_api_msg;
+    foreach_api_msg;
 #undef _
 
-  shmem_hdr = api_main.shmem_hdr;
-  tm->vl_input_queue = shmem_hdr->vl_input_queue;
-  tm->my_client_index = am->my_client_index;
-  return 0;
+    shmem_hdr = api_main.shmem_hdr;
+    tm->vl_input_queue = shmem_hdr->vl_input_queue;
+    tm->my_client_index = am->my_client_index;
+    return 0;
 }
 
 int
 disconnect_from_vpe (void)
 {
-  vl_client_disconnect_from_vlib ();
+    vl_client_disconnect_from_vlib ();
 
-  return 0;
+    return 0;
 }
 
 void
 signal_handler (int signo)
 {
-  test_main_t *tm = &test_main;
+    test_main_t *tm = &test_main;
 
-  tm->signal_received = 1;
+    tm->signal_received = 1;
 }
 
 
 int
 main (int argc, char **argv)
 {
-  test_main_t *tm = &test_main;
-  api_main_t *am = &api_main;
-  u32 swt_pid = 0;
-  int connected = 0;
+    test_main_t *tm = &test_main;
+    api_main_t *am = &api_main;
+    u32 swt_pid = 0;
+    int connected = 0;
 
-  signal (SIGINT, signal_handler);
+    signal (SIGINT, signal_handler);
 
-  while (1)
-    {
-      if (tm->signal_received)
-	break;
+    while (1) {
+        if (tm->signal_received)
+            break;
 
-      if (am->shmem_hdr)
-	swt_pid = am->shmem_hdr->vl_pid;
+        if (am->shmem_hdr)
+            swt_pid = am->shmem_hdr->vl_pid;
 
-      /* If kill returns 0, the vpe-f process is alive */
-      if (kill (swt_pid, 0) == 0)
-	{
-	  /* Try to connect */
-	  if (connected == 0)
-	    {
-	      fformat (stdout, "Connect to VPE-f\n");
-	      if (connect_to_vpe ("test_ha_client") >= 0)
-		{
-		  tm->pings_sent = 0;
-		  tm->pings_replied = 0;
-		  connected = 1;
-		}
-	      else
-		{
-		  fformat (stdout, "Connect failed, sleep and retry...\n");
-		  sleep (1);
-		  continue;
-		}
-	    }
-	  tm->pings_sent++;
-	  ping (tm);
+        /* If kill returns 0, the vpe-f process is alive */
+        if (kill (swt_pid, 0) == 0) {
+            /* Try to connect */
+            if (connected == 0) {
+                fformat (stdout, "Connect to VPE-f\n");
+                if (connect_to_vpe ("test_ha_client") >= 0) {
+                    tm->pings_sent = 0;
+                    tm->pings_replied = 0;
+                    connected = 1;
+                } else {
+                    fformat (stdout, "Connect failed, sleep and retry...\n");
+                    sleep (1);
+                    continue;
+                }
+            }
+            tm->pings_sent++;
+            ping (tm);
 
-	  sleep (1);
+            sleep (1);
 
-	  /* havent heard back in 3 seconds, disco / reco */
-	  if ((tm->pings_replied + 3) <= tm->pings_sent)
-	    {
-	      fformat (stdout, "VPE-f pid %d not responding\n", swt_pid);
-	      swt_pid = 0;
-	      disconnect_from_vpe ();
-	      connected = 0;
-	    }
-	}
-      else
-	{
-	  if (connected)
-	    {
-	      fformat (stdout, "VPE-f pid %d died\n", swt_pid);
-	      swt_pid = 0;
-	      disconnect_from_vpe ();
-	      connected = 0;
-	    }
-	  sleep (1);
-	}
+            /* havent heard back in 3 seconds, disco / reco */
+            if ((tm->pings_replied + 3) <= tm->pings_sent) {
+                fformat (stdout, "VPE-f pid %d not responding\n", swt_pid);
+                swt_pid = 0;
+                disconnect_from_vpe ();
+                connected = 0;
+            }
+        } else {
+            if (connected) {
+                fformat (stdout, "VPE-f pid %d died\n", swt_pid);
+                swt_pid = 0;
+                disconnect_from_vpe ();
+                connected = 0;
+            }
+            sleep (1);
+        }
     }
 
-  fformat (stdout, "Signal received, graceful exit\n");
-  disconnect_from_vpe ();
-  exit (0);
+    fformat (stdout, "Signal received, graceful exit\n");
+    disconnect_from_vpe ();
+    exit (0);
 }
 
 /*

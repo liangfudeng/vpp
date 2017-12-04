@@ -23,14 +23,13 @@
 static fib_bfd_state_t
 fib_bfd_bfd_state_to_fib (bfd_state_e bstate)
 {
-    switch (bstate)
-    {
-    case BFD_STATE_up:
-        return (FIB_BFD_STATE_UP);
-    case BFD_STATE_down:
-    case BFD_STATE_admin_down:
-    case BFD_STATE_init:
-        return (FIB_BFD_STATE_DOWN);
+    switch (bstate) {
+        case BFD_STATE_up:
+            return (FIB_BFD_STATE_UP);
+        case BFD_STATE_down:
+        case BFD_STATE_admin_down:
+        case BFD_STATE_init:
+            return (FIB_BFD_STATE_DOWN);
     }
     return (FIB_BFD_STATE_DOWN);
 }
@@ -61,8 +60,7 @@ fib_bfd_notify (bfd_listen_event_e event,
     const bfd_udp_key_t *key;
     fib_node_index_t fei;
 
-    if (BFD_HOP_TYPE_MULTI != session->hop_type)
-    {
+    if (BFD_HOP_TYPE_MULTI != session->hop_type) {
         /*
          * multi-hop BFD sessions attach directly to the FIB entry
          * single-hop adj to the associate adjacency.
@@ -87,96 +85,88 @@ fib_bfd_notify (bfd_listen_event_e event,
      */
     fei = fib_table_lookup_exact_match(key->fib_index, &pfx);
 
-    switch (event)
-    {
-    case BFD_LISTEN_EVENT_CREATE:
-        /*
-         * The creation of a new session
-         */
-        if ((FIB_NODE_INDEX_INVALID != fei) &&
-            (fed = fib_entry_delegate_get(fib_entry_get(fei),
-                                          FIB_ENTRY_DELEGATE_BFD)))
-        {
+    switch (event) {
+        case BFD_LISTEN_EVENT_CREATE:
             /*
-             * already got state for this entry
+             * The creation of a new session
              */
-        }
-        else
-        {
+            if ((FIB_NODE_INDEX_INVALID != fei) &&
+                (fed = fib_entry_delegate_get(fib_entry_get(fei),
+                                              FIB_ENTRY_DELEGATE_BFD))) {
+                /*
+                 * already got state for this entry
+                 */
+            } else {
+                /*
+                 * source and lock the entry. add the delegate
+                 */
+                fei = fib_table_entry_special_add(key->fib_index,
+                                                  &pfx,
+                                                  FIB_SOURCE_RR,
+                                                  FIB_ENTRY_FLAG_NONE);
+                fib_entry_lock(fei);
+
+                fed = fib_entry_delegate_find_or_add(fib_entry_get(fei),
+                                                     FIB_ENTRY_DELEGATE_BFD);
+
+                /*
+                 * pretend the session is up and skip the walk.
+                 * If we set it down then we get traffic loss on new children.
+                 * if we walk then we lose traffic for existing children. Wait
+                 * for the first BFD UP/DOWN before we let the session's state
+                 * influence forwarding.
+                 */
+                fed->fd_bfd_state = FIB_BFD_STATE_UP;
+            }
+            break;
+
+        case BFD_LISTEN_EVENT_UPDATE:
             /*
-             * source and lock the entry. add the delegate
+             * state change up/dowm and
              */
-            fei = fib_table_entry_special_add(key->fib_index,
-                                              &pfx,
-                                              FIB_SOURCE_RR,
-                                              FIB_ENTRY_FLAG_NONE);
-            fib_entry_lock(fei);
+            ASSERT(FIB_NODE_INDEX_INVALID != fei);
 
-            fed = fib_entry_delegate_find_or_add(fib_entry_get(fei),
-                                                 FIB_ENTRY_DELEGATE_BFD);
+            fed = fib_entry_delegate_get(fib_entry_get(fei),
+                                         FIB_ENTRY_DELEGATE_BFD);
 
+            if (NULL != fed) {
+                fed->fd_bfd_state = fib_bfd_bfd_state_to_fib(session->local_state);
+                fib_bfd_update_walk(fei);
+            }
             /*
-             * pretend the session is up and skip the walk.
-             * If we set it down then we get traffic loss on new children.
-             * if we walk then we lose traffic for existing children. Wait
-             * for the first BFD UP/DOWN before we let the session's state
-             * influence forwarding.
+             * else
+             *   no BFD state
              */
-            fed->fd_bfd_state = FIB_BFD_STATE_UP;
-        }
-        break;
+            break;
 
-    case BFD_LISTEN_EVENT_UPDATE:
-        /*
-         * state change up/dowm and
-         */
-        ASSERT(FIB_NODE_INDEX_INVALID != fei);
-
-        fed = fib_entry_delegate_get(fib_entry_get(fei),
-                                     FIB_ENTRY_DELEGATE_BFD);
-
-        if (NULL != fed)
-        {
-            fed->fd_bfd_state = fib_bfd_bfd_state_to_fib(session->local_state);
-            fib_bfd_update_walk(fei);
-        }
-        /*
-         * else
-         *   no BFD state
-         */
-        break;
-
-    case BFD_LISTEN_EVENT_DELETE:
-        /*
-         * session has been removed.
-         */
-        if (FIB_NODE_INDEX_INVALID == fei)
-        {
+        case BFD_LISTEN_EVENT_DELETE:
             /*
-             * no FIB entry
+             * session has been removed.
              */
-        }
-        else if (fib_entry_delegate_get(fib_entry_get(fei),
-                                        FIB_ENTRY_DELEGATE_BFD))
-        {
-            /*
-             * has an associated BFD tracking delegate
-             * usource the entry and remove the BFD tracking deletgate
-             */
-            fib_entry_delegate_remove(fib_entry_get(fei),
-                                      FIB_ENTRY_DELEGATE_BFD);
-            fib_bfd_update_walk(fei);
+            if (FIB_NODE_INDEX_INVALID == fei) {
+                /*
+                 * no FIB entry
+                 */
+            } else if (fib_entry_delegate_get(fib_entry_get(fei),
+                                              FIB_ENTRY_DELEGATE_BFD)) {
+                /*
+                 * has an associated BFD tracking delegate
+                 * usource the entry and remove the BFD tracking deletgate
+                 */
+                fib_entry_delegate_remove(fib_entry_get(fei),
+                                          FIB_ENTRY_DELEGATE_BFD);
+                fib_bfd_update_walk(fei);
 
-            fib_table_entry_special_remove(key->fib_index,
-                                           &pfx,
-                                           FIB_SOURCE_RR);
-            fib_entry_unlock(fei);
-        }
-        /*
-         * else
-         * no BFD associated state
-         */
-        break;
+                fib_table_entry_special_remove(key->fib_index,
+                                               &pfx,
+                                               FIB_SOURCE_RR);
+                fib_entry_unlock(fei);
+            }
+            /*
+             * else
+             * no BFD associated state
+             */
+            break;
     }
 }
 

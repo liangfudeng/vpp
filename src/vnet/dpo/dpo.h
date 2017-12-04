@@ -16,7 +16,7 @@
  * @brief
  * A Data-Path Object is an object that represents actions that are
  * applied to packets are they are switched through VPP's data-path.
- * 
+ *
  * The DPO can be considered to be like is a base class that is specialised
  * by other objects to provide concreate actions
  *
@@ -57,8 +57,7 @@ typedef u32 index_t;
  * When programming a DPO's next node arc from child to parent it is thus required
  * to know the parent's data-path protocol so the correct arc index can be used.
  */
-typedef enum dpo_proto_t_
-{
+typedef enum dpo_proto_t_ {
     DPO_PROTO_IP4 = 0,
     DPO_PROTO_IP6,
     DPO_PROTO_MPLS,
@@ -70,19 +69,19 @@ typedef enum dpo_proto_t_
 #define DPO_PROTO_NUM ((dpo_proto_t)(DPO_PROTO_NSH+1))
 #define DPO_PROTO_NONE ((dpo_proto_t)(DPO_PROTO_NUM+1))
 
-#define DPO_PROTOS {		\
-    [DPO_PROTO_IP4]  = "ip4",	\
-    [DPO_PROTO_IP6]  = "ip6",	\
+#define DPO_PROTOS {        \
+    [DPO_PROTO_IP4]  = "ip4",   \
+    [DPO_PROTO_IP6]  = "ip6",   \
     [DPO_PROTO_ETHERNET]  = "ethernet", \
-    [DPO_PROTO_MPLS] = "mpls",	\
+    [DPO_PROTO_MPLS] = "mpls",  \
     [DPO_PROTO_NSH] = "nsh",    \
-    [DPO_PROTO_BIER] = "bier",	\
+    [DPO_PROTO_BIER] = "bier",  \
 }
 
 #define FOR_EACH_DPO_PROTO(_proto)    \
     for (_proto = DPO_PROTO_IP4;      \
-	 _proto <= DPO_PROTO_NSH;    \
-	 _proto++)
+     _proto <= DPO_PROTO_NSH;    \
+     _proto++)
 
 /**
  * @brief Common types of data-path objects
@@ -128,35 +127,35 @@ typedef enum dpo_type_t_ {
 
 #define DPO_TYPE_NUM DPO_LAST
 
-#define DPO_TYPES {			\
-    [DPO_FIRST] = "dpo-invalid",	\
-    [DPO_DROP] = "dpo-drop",	\
-    [DPO_IP_NULL] = "dpo-ip-null",		\
-    [DPO_PUNT] = "dpo-punt",	\
-    [DPO_ADJACENCY] = "dpo-adjacency",	\
-    [DPO_ADJACENCY_INCOMPLETE] = "dpo-adjacency-incomplete",	\
-    [DPO_ADJACENCY_MIDCHAIN] = "dpo-adjacency-midcahin",	\
-    [DPO_ADJACENCY_GLEAN] = "dpo-glean",	\
-    [DPO_ADJACENCY_MCAST] = "dpo-adj-mcast",	\
-    [DPO_ADJACENCY_MCAST_MIDCHAIN] = "dpo-adj-mcast-midchain",	\
-    [DPO_RECEIVE] = "dpo-receive",	\
-    [DPO_LOOKUP] = "dpo-lookup",	\
-    [DPO_LOAD_BALANCE] = "dpo-load-balance",	\
-    [DPO_REPLICATE] = "dpo-replicate",	\
-    [DPO_LISP_CP] = "dpo-lisp-cp",	\
-    [DPO_CLASSIFY] = "dpo-classify",	\
+#define DPO_TYPES {         \
+    [DPO_FIRST] = "dpo-invalid",    \
+    [DPO_DROP] = "dpo-drop",    \
+    [DPO_IP_NULL] = "dpo-ip-null",      \
+    [DPO_PUNT] = "dpo-punt",    \
+    [DPO_ADJACENCY] = "dpo-adjacency",  \
+    [DPO_ADJACENCY_INCOMPLETE] = "dpo-adjacency-incomplete",    \
+    [DPO_ADJACENCY_MIDCHAIN] = "dpo-adjacency-midcahin",    \
+    [DPO_ADJACENCY_GLEAN] = "dpo-glean",    \
+    [DPO_ADJACENCY_MCAST] = "dpo-adj-mcast",    \
+    [DPO_ADJACENCY_MCAST_MIDCHAIN] = "dpo-adj-mcast-midchain",  \
+    [DPO_RECEIVE] = "dpo-receive",  \
+    [DPO_LOOKUP] = "dpo-lookup",    \
+    [DPO_LOAD_BALANCE] = "dpo-load-balance",    \
+    [DPO_REPLICATE] = "dpo-replicate",  \
+    [DPO_LISP_CP] = "dpo-lisp-cp",  \
+    [DPO_CLASSIFY] = "dpo-classify",    \
     [DPO_MPLS_LABEL] = "dpo-mpls-label", \
     [DPO_MPLS_DISPOSITION] = "dpo-mpls-diposition", \
     [DPO_MFIB_ENTRY] = "dpo-mfib_entry", \
-    [DPO_INTERFACE_RX] = "dpo-interface-rx",	\
-    [DPO_INTERFACE_TX] = "dpo-interface-tx",	\
-    [DPO_L2_BRIDGE] = "dpo-l2-bridge",	\
-    [DPO_L3_PROXY] = "dpo-l3-proxy",	\
-    [DPO_BIER_TABLE] = "bier-table",	\
-    [DPO_BIER_FMASK] = "bier-fmask",	\
-    [DPO_BIER_IMP] = "bier-imposition",	\
-    [DPO_BIER_DISP_ENTRY] = "bier-disp-entry",	\
-    [DPO_BIER_DISP_TABLE] = "bier-disp-table",	\
+    [DPO_INTERFACE_RX] = "dpo-interface-rx",    \
+    [DPO_INTERFACE_TX] = "dpo-interface-tx",    \
+    [DPO_L2_BRIDGE] = "dpo-l2-bridge",  \
+    [DPO_L3_PROXY] = "dpo-l3-proxy",    \
+    [DPO_BIER_TABLE] = "bier-table",    \
+    [DPO_BIER_FMASK] = "bier-fmask",    \
+    [DPO_BIER_IMP] = "bier-imposition", \
+    [DPO_BIER_DISP_ENTRY] = "bier-disp-entry",  \
+    [DPO_BIER_DISP_TABLE] = "bier-disp-table",  \
 }
 
 /**
@@ -183,8 +182,8 @@ typedef struct dpo_id_t_ {
 } __attribute__ ((aligned(sizeof(u64)))) dpo_id_t;
 
 STATIC_ASSERT(sizeof(dpo_id_t) <= sizeof(u64),
-	      "DPO ID is greater than sizeof u64 "
-	      "atomic updates need to be revisited");
+              "DPO ID is greater than sizeof u64 "
+              "atomic updates need to be revisited");
 
 /**
  * @brief An initialiser for DPOs declared on the stack.
@@ -205,7 +204,7 @@ static inline int
 dpo_id_is_valid (const dpo_id_t *dpoi)
 {
     return (dpoi->dpoi_type != DPO_FIRST &&
-	    dpoi->dpoi_index != INDEX_INVALID);
+            dpoi->dpoi_index != INDEX_INVALID);
 }
 
 extern dpo_proto_t vnet_link_to_dpo_proto(vnet_link_t linkt);
@@ -239,9 +238,9 @@ extern void dpo_unlock(dpo_id_t *dpo);
  *  The type specific index of the DPO
  */
 extern void dpo_set(dpo_id_t *dpo,
-		    dpo_type_t type,
-		    dpo_proto_t proto,
-		    index_t index);
+                    dpo_type_t type,
+                    dpo_proto_t proto,
+                    index_t index);
 
 /**
  * @brief reset a DPO ID
@@ -256,7 +255,7 @@ extern void dpo_reset(dpo_id_t *dpo);
  * @brief compare two DPOs for equality
  */
 extern int dpo_cmp(const dpo_id_t *dpo1,
-		   const dpo_id_t *dpo2);
+                   const dpo_id_t *dpo2);
 
 /**
  * @brief
@@ -264,7 +263,7 @@ extern int dpo_cmp(const dpo_id_t *dpo1,
  * This is safe to use when the dst DPO is currently switching packets
  */
 extern void dpo_copy(dpo_id_t *dst,
-		     const dpo_id_t *src);
+                     const dpo_id_t *src);
 
 /**
  * @brief Return TRUE is the DPO is any type of adjacency
@@ -316,7 +315,7 @@ extern void dpo_stack(dpo_type_t child_type,
                       const dpo_id_t *parent_dpo);
 
 /**
- * @brief 
+ * @brief
  *  Set and stack a DPO.
  *  The DPO passed is set to the parent DPO and the necessary
  *  VLIB graph arcs are created, from the child_node passed.
@@ -329,7 +328,7 @@ extern void dpo_stack(dpo_type_t child_type,
  *
  * @param parent_dpo
  *  The parent DPO to stack onto.
- */ 
+ */
 extern void dpo_stack_from_node(u32 child_node,
                                 dpo_id_t *dpo,
                                 const dpo_id_t *parent);
@@ -374,8 +373,7 @@ typedef u32 (*dpo_get_urpf_t)(const dpo_id_t *dpo);
 /**
  * @brief A virtual function table regisitered for a DPO type
  */
-typedef struct dpo_vft_t_
-{
+typedef struct dpo_vft_t_ {
     /**
      * A reference counting lock function
      */
@@ -415,7 +413,7 @@ typedef struct dpo_vft_t_
  *     (see above).
  *
  * @param type
- *  The type being registered. 
+ *  The type being registered.
  *
  * @param vft
  *  The virtual function table to register for the type.
@@ -424,8 +422,8 @@ typedef struct dpo_vft_t_
  *  The string description of the per-protocol VLIB graph nodes.
  */
 extern void dpo_register(dpo_type_t type,
-			 const dpo_vft_t *vft,
-			 const char * const * const * nodes);
+                         const dpo_vft_t *vft,
+                         const char * const * const * nodes);
 
 /**
  * @brief Create and register a new DPO type.
@@ -442,6 +440,6 @@ extern void dpo_register(dpo_type_t type,
  * @return The new dpo_type_t
  */
 extern dpo_type_t dpo_register_new_type(const dpo_vft_t *vft,
-					const char * const * const * nodes);
+                                        const char * const * const * nodes);
 
 #endif

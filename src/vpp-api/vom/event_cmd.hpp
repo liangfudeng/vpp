@@ -22,88 +22,104 @@
 
 #include <vapi/vapi.hpp>
 
-namespace VOM {
-/**
- * An Event command base class.
- * Events are one of the sub-set of command type to VPP.
- * A client performs a one time 'registration/subsription' to VPP for the
- * event in question and then is notified asynchronously when those events
- * occur.
- * The model here then is that the lifetime of the event command represensts
- * the during of the clients subscription. When the command is 'issued' the
- * subscription begins, when it is 'retired' the subscription ends. For the
- * subscription duration the client will be notified as events are recieved.
- * The client can then 'pop' these events from this command object.
- */
-template <typename WANT, typename EVENT>
-class event_cmd : public rpc_cmd<HW::item<bool>, rc_t, WANT>
+namespace VOM
 {
-public:
-  /**
-   * Default constructor
-   */
-  event_cmd(HW::item<bool>& b)
-    : rpc_cmd<HW::item<bool>, rc_t, WANT>(b)
-  {
-  }
+    /**
+     * An Event command base class.
+     * Events are one of the sub-set of command type to VPP.
+     * A client performs a one time 'registration/subsription' to VPP for the
+     * event in question and then is notified asynchronously when those events
+     * occur.
+     * The model here then is that the lifetime of the event command represensts
+     * the during of the clients subscription. When the command is 'issued' the
+     * subscription begins, when it is 'retired' the subscription ends. For the
+     * subscription duration the client will be notified as events are recieved.
+     * The client can then 'pop' these events from this command object.
+     */
+    template <typename WANT, typename EVENT>
+    class event_cmd : public rpc_cmd<HW::item<bool>, rc_t, WANT>
+    {
+    public:
+        /**
+         * Default constructor
+         */
+        event_cmd(HW::item<bool>& b)
+            : rpc_cmd<HW::item<bool>, rc_t, WANT>(b)
+        {
+        }
 
-  /**
-   * Default destructor
-   */
-  virtual ~event_cmd() {}
+        /**
+         * Default destructor
+         */
+        virtual ~event_cmd() {}
 
-  /**
-   * Typedef for the event type
-   */
-  typedef typename vapi::Event_registration<EVENT>::resp_type event_t;
-  typedef typename vapi::Event_registration<EVENT> reg_t;
+        /**
+         * Typedef for the event type
+         */
+        typedef typename vapi::Event_registration<EVENT>::resp_type event_t;
+        typedef typename vapi::Event_registration<EVENT> reg_t;
 
-  typedef typename vapi::Result_set<typename reg_t::resp_type>::const_iterator
-    const_iterator;
+        typedef typename vapi::Result_set<typename reg_t::resp_type>::const_iterator
+        const_iterator;
 
-  const_iterator begin() { return (m_reg->get_result_set().begin()); }
+        const_iterator begin()
+        {
+            return (m_reg->get_result_set().begin());
+        }
 
-  const_iterator end() { return (m_reg->get_result_set().end()); }
+        const_iterator end()
+        {
+            return (m_reg->get_result_set().end());
+        }
 
-  void lock() { m_mutex.lock(); }
-  void unlock() { m_mutex.unlock(); }
+        void lock()
+        {
+            m_mutex.lock();
+        }
+        void unlock()
+        {
+            m_mutex.unlock();
+        }
 
-  /**
-   * flush/free all the events thus far reeived.
-   * Call with the lock held!
-   */
-  void flush() { m_reg->get_result_set().free_all_responses(); }
+        /**
+         * flush/free all the events thus far reeived.
+         * Call with the lock held!
+         */
+        void flush()
+        {
+            m_reg->get_result_set().free_all_responses();
+        }
 
-  /**
-   * Retire the command. This is only appropriate for Event Commands
-   * As they persist until retired.
-   */
-  virtual void retire(connection& con) = 0;
+        /**
+         * Retire the command. This is only appropriate for Event Commands
+         * As they persist until retired.
+         */
+        virtual void retire(connection& con) = 0;
 
-  vapi_error_e operator()(reg_t& dl)
-  {
-    notify();
+        vapi_error_e operator()(reg_t& dl)
+        {
+            notify();
 
-    return (VAPI_OK);
-  }
+            return (VAPI_OK);
+        }
 
-protected:
-  /**
-   * Notify the command that data from VPP has arrived and been stored.
-   * The command should now inform its clients/listeners.
-   */
-  virtual void notify() = 0;
+    protected:
+        /**
+         * Notify the command that data from VPP has arrived and been stored.
+         * The command should now inform its clients/listeners.
+         */
+        virtual void notify() = 0;
 
-  /**
-   * The VAPI event registration
-   */
-  std::unique_ptr<vapi::Event_registration<EVENT>> m_reg;
+        /**
+         * The VAPI event registration
+         */
+        std::unique_ptr<vapi::Event_registration<EVENT>> m_reg;
 
-  /**
-   * Mutex protection for the events
-   */
-  std::mutex m_mutex;
-};
+        /**
+         * Mutex protection for the events
+         */
+        std::mutex m_mutex;
+    };
 };
 
 /*

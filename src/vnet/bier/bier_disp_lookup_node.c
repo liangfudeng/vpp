@@ -20,8 +20,7 @@
  * @brief A struct to hold tracing information for the MPLS label imposition
  * node.
  */
-typedef struct bier_disp_lookup_trace_t_
-{
+typedef struct bier_disp_lookup_trace_t_ {
     /**
      * BIER source BP used in the lookup - host order
      */
@@ -35,8 +34,7 @@ typedef struct bier_disp_lookup_trace_t_
 /**
  * Next nodes from BIER disposition lookup
  */
-typedef enum bier_disp_lookup_next_t_
-{
+typedef enum bier_disp_lookup_next_t_ {
     BIER_DISP_LOOKUP_NEXT_DROP,
     BIER_DISP_LOOKUP_NEXT_DISPATCH,
 } bier_disp_lookup_next_t;
@@ -54,14 +52,12 @@ bier_disp_lookup_inline (vlib_main_t * vm,
 
     next_index = node->cached_next_index;
 
-    while (n_left_from > 0)
-    {
+    while (n_left_from > 0) {
         u32 n_left_to_next;
 
         vlib_get_next_frame(vm, node, next_index, to_next, n_left_to_next);
 
-        while (n_left_from > 0 && n_left_to_next > 0)
-        {
+        while (n_left_from > 0 && n_left_to_next > 0) {
             const bier_hdr_t *hdr0;
             vlib_buffer_t * b0;
             u32 bdei0, bdti0;
@@ -84,19 +80,15 @@ bier_disp_lookup_inline (vlib_main_t * vm,
              */
             bdei0 = bier_disp_table_lookup(bdti0, bier_hdr_get_src_id(hdr0));
 
-            if (PREDICT_FALSE(INDEX_INVALID == bdei0))
-            {
+            if (PREDICT_FALSE(INDEX_INVALID == bdei0)) {
                 next0 = BIER_DISP_LOOKUP_NEXT_DROP;
-            }
-            else
-            {
+            } else {
                 next0 = BIER_DISP_LOOKUP_NEXT_DISPATCH;
             }
 
             vnet_buffer(b0)->ip.adj_index[VLIB_TX] = bdei0;
 
-            if (PREDICT_FALSE(b0->flags & VLIB_BUFFER_IS_TRACED))
-            {
+            if (PREDICT_FALSE(b0->flags & VLIB_BUFFER_IS_TRACED)) {
                 bier_disp_lookup_trace_t *tr =
                     vlib_add_trace (vm, node, b0, sizeof (*tr));
                 tr->bp = clib_net_to_host_u16(bier_hdr_get_src_id(hdr0));

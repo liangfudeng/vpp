@@ -25,7 +25,7 @@
 u32 mpls_lookup_to_replicate_edge;
 
 /*
- * Compute flow hash. 
+ * Compute flow hash.
  * We'll use it to select which adjacency to use for this flow.  And other things.
  */
 always_inline u32
@@ -44,29 +44,24 @@ mpls_compute_flow_hash (const mpls_unicast_header_t * hdr,
     hash = vnet_mpls_uc_get_label(ho_label);
     next_label_is_entropy = 0;
 
-    while (MPLS_EOS != vnet_mpls_uc_get_s(ho_label))
-    {
+    while (MPLS_EOS != vnet_mpls_uc_get_s(ho_label)) {
         hdr++;
         ho_label = clib_net_to_host_u32(hdr->label_exp_s_ttl);
         value = vnet_mpls_uc_get_label(ho_label);
 
-        if (1 == next_label_is_entropy)
-        {
+        if (1 == next_label_is_entropy) {
             /*
              * The label is an entropy value, use it alone as the hash
              */
             return (ho_label);
         }
-        if (MPLS_IETF_ENTROPY_LABEL == value)
-        {
+        if (MPLS_IETF_ENTROPY_LABEL == value) {
             /*
              * we've met a label in the stack indicating that tha next
              * label is an entropy value
              */
             next_label_is_entropy = 1;
-        }
-        else
-        {
+        } else {
             /*
              * XOR the label values in the stack together to
              * build up the hash value
@@ -80,20 +75,19 @@ mpls_compute_flow_hash (const mpls_unicast_header_t * hdr,
      */
     hdr++;
 
-    switch (((u8*)hdr)[0] >> 4)
-    {
-    case 4:
-        /* incorporate the v4 flow-hash */
-        hash ^= ip4_compute_flow_hash ((const ip4_header_t *)hdr,
-                                       IP_FLOW_HASH_DEFAULT);
-        break;
-    case 6:
-        /* incorporate the v6 flow-hash */
-        hash ^= ip6_compute_flow_hash ((const ip6_header_t *)hdr,
-                                       IP_FLOW_HASH_DEFAULT);
-        break;
-    default:
-        break;
+    switch (((u8*)hdr)[0] >> 4) {
+        case 4:
+            /* incorporate the v4 flow-hash */
+            hash ^= ip4_compute_flow_hash ((const ip4_header_t *)hdr,
+                                           IP_FLOW_HASH_DEFAULT);
+            break;
+        case 6:
+            /* incorporate the v6 flow-hash */
+            hash ^= ip6_compute_flow_hash ((const ip6_header_t *)hdr,
+                                           IP_FLOW_HASH_DEFAULT);
+            break;
+        default:
+            break;
     }
 
     return (hash);

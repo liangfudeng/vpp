@@ -36,243 +36,208 @@
 
 static clib_error_t *
 get_hqos (u32 hw_if_index, u32 subport_id, dpdk_device_t ** xd,
-	  dpdk_device_config_t ** devconf)
+          dpdk_device_config_t ** devconf)
 {
-  dpdk_main_t *dm = &dpdk_main;
-  vnet_hw_interface_t *hw;
-  struct rte_eth_dev_info dev_info;
-  uword *p = 0;
-  clib_error_t *error = NULL;
+    dpdk_main_t *dm = &dpdk_main;
+    vnet_hw_interface_t *hw;
+    struct rte_eth_dev_info dev_info;
+    uword *p = 0;
+    clib_error_t *error = NULL;
 
 
-  if (hw_if_index == (u32) ~ 0)
-    {
-      error = clib_error_return (0, "please specify valid interface name");
-      goto done;
+    if (hw_if_index == (u32) ~ 0) {
+        error = clib_error_return (0, "please specify valid interface name");
+        goto done;
     }
 
-  if (subport_id != 0)
-    {
-      error = clib_error_return (0, "Invalid subport");
-      goto done;
+    if (subport_id != 0) {
+        error = clib_error_return (0, "Invalid subport");
+        goto done;
     }
 
-  hw = vnet_get_hw_interface (dm->vnet_main, hw_if_index);
-  *xd = vec_elt_at_index (dm->devices, hw->dev_instance);
+    hw = vnet_get_hw_interface (dm->vnet_main, hw_if_index);
+    *xd = vec_elt_at_index (dm->devices, hw->dev_instance);
 
-  rte_eth_dev_info_get ((*xd)->device_index, &dev_info);
-  if (dev_info.pci_dev)
-    {				/* bonded interface has no pci info */
-      vlib_pci_addr_t pci_addr;
+    rte_eth_dev_info_get ((*xd)->device_index, &dev_info);
+    if (dev_info.pci_dev) {
+        /* bonded interface has no pci info */
+        vlib_pci_addr_t pci_addr;
 
-      pci_addr.domain = dev_info.pci_dev->addr.domain;
-      pci_addr.bus = dev_info.pci_dev->addr.bus;
-      pci_addr.slot = dev_info.pci_dev->addr.devid;
-      pci_addr.function = dev_info.pci_dev->addr.function;
+        pci_addr.domain = dev_info.pci_dev->addr.domain;
+        pci_addr.bus = dev_info.pci_dev->addr.bus;
+        pci_addr.slot = dev_info.pci_dev->addr.devid;
+        pci_addr.function = dev_info.pci_dev->addr.function;
 
-      p =
-	hash_get (dm->conf->device_config_index_by_pci_addr, pci_addr.as_u32);
+        p =
+            hash_get (dm->conf->device_config_index_by_pci_addr, pci_addr.as_u32);
     }
 
-  if (p)
-    (*devconf) = pool_elt_at_index (dm->conf->dev_confs, p[0]);
-  else
-    (*devconf) = &dm->conf->default_devconf;
+    if (p)
+        (*devconf) = pool_elt_at_index (dm->conf->dev_confs, p[0]);
+    else
+        (*devconf) = &dm->conf->default_devconf;
 
 done:
-  return error;
+    return error;
 }
 
 static clib_error_t *
 pcap_trace_command_fn (vlib_main_t * vm,
-		       unformat_input_t * input, vlib_cli_command_t * cmd)
+                       unformat_input_t * input, vlib_cli_command_t * cmd)
 {
 #define PCAP_DEF_PKT_TO_CAPTURE (100)
 
-  unformat_input_t _line_input, *line_input = &_line_input;
-  dpdk_main_t *dm = &dpdk_main;
-  u8 *filename;
-  u8 *chroot_filename = 0;
-  u32 max = 0;
-  int enabled = 0;
-  int errorFlag = 0;
-  clib_error_t *error = 0;
+    unformat_input_t _line_input, *line_input = &_line_input;
+    dpdk_main_t *dm = &dpdk_main;
+    u8 *filename;
+    u8 *chroot_filename = 0;
+    u32 max = 0;
+    int enabled = 0;
+    int errorFlag = 0;
+    clib_error_t *error = 0;
 
-  /* Get a line of input. */
-  if (!unformat_user (input, unformat_line_input, line_input))
-    return 0;
+    /* Get a line of input. */
+    if (!unformat_user (input, unformat_line_input, line_input))
+        return 0;
 
-  while (unformat_check_input (line_input) != UNFORMAT_END_OF_INPUT)
-    {
-      if (unformat (line_input, "on"))
-	{
-	  if (dm->tx_pcap_enable == 0)
-	    {
-	      enabled = 1;
-	    }
-	  else
-	    {
-	      vlib_cli_output (vm, "pcap tx capture already on...");
-	      errorFlag = 1;
-	      break;
-	    }
-	}
-      else if (unformat (line_input, "off"))
-	{
-	  if (dm->tx_pcap_enable)
-	    {
-	      vlib_cli_output (vm, "captured %d pkts...",
-			       dm->pcap_main.n_packets_captured + 1);
-	      if (dm->pcap_main.n_packets_captured)
-		{
-		  dm->pcap_main.n_packets_to_capture =
-		    dm->pcap_main.n_packets_captured;
-		  error = pcap_write (&dm->pcap_main);
-		  if (error)
-		    clib_error_report (error);
-		  else
-		    vlib_cli_output (vm, "saved to %s...", dm->pcap_filename);
-		}
+    while (unformat_check_input (line_input) != UNFORMAT_END_OF_INPUT) {
+        if (unformat (line_input, "on")) {
+            if (dm->tx_pcap_enable == 0) {
+                enabled = 1;
+            } else {
+                vlib_cli_output (vm, "pcap tx capture already on...");
+                errorFlag = 1;
+                break;
+            }
+        } else if (unformat (line_input, "off")) {
+            if (dm->tx_pcap_enable) {
+                vlib_cli_output (vm, "captured %d pkts...",
+                                 dm->pcap_main.n_packets_captured + 1);
+                if (dm->pcap_main.n_packets_captured) {
+                    dm->pcap_main.n_packets_to_capture =
+                        dm->pcap_main.n_packets_captured;
+                    error = pcap_write (&dm->pcap_main);
+                    if (error)
+                        clib_error_report (error);
+                    else
+                        vlib_cli_output (vm, "saved to %s...", dm->pcap_filename);
+                }
 
-	      dm->tx_pcap_enable = 0;
-	    }
-	  else
-	    {
-	      vlib_cli_output (vm, "pcap tx capture already off...");
-	      errorFlag = 1;
-	      break;
-	    }
-	}
-      else if (unformat (line_input, "max %d", &max))
-	{
-	  if (dm->tx_pcap_enable)
-	    {
-	      vlib_cli_output (vm,
-			       "can't change max value while pcap tx capture active...");
-	      errorFlag = 1;
-	      break;
-	    }
-	}
-      else if (unformat (line_input, "intfc %U",
-			 unformat_vnet_sw_interface, dm->vnet_main,
-			 &dm->pcap_sw_if_index))
-	;
+                dm->tx_pcap_enable = 0;
+            } else {
+                vlib_cli_output (vm, "pcap tx capture already off...");
+                errorFlag = 1;
+                break;
+            }
+        } else if (unformat (line_input, "max %d", &max)) {
+            if (dm->tx_pcap_enable) {
+                vlib_cli_output (vm,
+                                 "can't change max value while pcap tx capture active...");
+                errorFlag = 1;
+                break;
+            }
+        } else if (unformat (line_input, "intfc %U",
+                             unformat_vnet_sw_interface, dm->vnet_main,
+                             &dm->pcap_sw_if_index))
+            ;
 
-      else if (unformat (line_input, "intfc any"))
-	{
-	  dm->pcap_sw_if_index = 0;
-	}
-      else if (unformat (line_input, "file %s", &filename))
-	{
-	  if (dm->tx_pcap_enable)
-	    {
-	      vlib_cli_output (vm,
-			       "can't change file while pcap tx capture active...");
-	      errorFlag = 1;
-	      break;
-	    }
+        else if (unformat (line_input, "intfc any")) {
+            dm->pcap_sw_if_index = 0;
+        } else if (unformat (line_input, "file %s", &filename)) {
+            if (dm->tx_pcap_enable) {
+                vlib_cli_output (vm,
+                                 "can't change file while pcap tx capture active...");
+                errorFlag = 1;
+                break;
+            }
 
-	  /* Brain-police user path input */
-	  if (strstr ((char *) filename, "..")
-	      || index ((char *) filename, '/'))
-	    {
-	      vlib_cli_output (vm, "illegal characters in filename '%s'",
-			       filename);
-	      vlib_cli_output (vm,
-			       "Hint: Only filename, do not enter directory structure.");
-	      vec_free (filename);
-	      errorFlag = 1;
-	      break;
-	    }
+            /* Brain-police user path input */
+            if (strstr ((char *) filename, "..")
+                || index ((char *) filename, '/')) {
+                vlib_cli_output (vm, "illegal characters in filename '%s'",
+                                 filename);
+                vlib_cli_output (vm,
+                                 "Hint: Only filename, do not enter directory structure.");
+                vec_free (filename);
+                errorFlag = 1;
+                break;
+            }
 
-	  chroot_filename = format (0, "/tmp/%s%c", filename, 0);
-	  vec_free (filename);
-	}
-      else if (unformat (line_input, "status"))
-	{
-	  if (dm->pcap_sw_if_index == 0)
-	    {
-	      vlib_cli_output (vm, "max is %d for any interface to file %s",
-			       dm->
-			       pcap_pkts_to_capture ? dm->pcap_pkts_to_capture
-			       : PCAP_DEF_PKT_TO_CAPTURE,
-			       dm->
-			       pcap_filename ? dm->pcap_filename : (u8 *)
-			       "/tmp/vpe.pcap");
-	    }
-	  else
-	    {
-	      vlib_cli_output (vm, "max is %d for interface %U to file %s",
-			       dm->
-			       pcap_pkts_to_capture ? dm->pcap_pkts_to_capture
-			       : PCAP_DEF_PKT_TO_CAPTURE,
-			       format_vnet_sw_if_index_name, dm->vnet_main,
-			       dm->pcap_sw_if_index,
-			       dm->
-			       pcap_filename ? dm->pcap_filename : (u8 *)
-			       "/tmp/vpe.pcap");
-	    }
+            chroot_filename = format (0, "/tmp/%s%c", filename, 0);
+            vec_free (filename);
+        } else if (unformat (line_input, "status")) {
+            if (dm->pcap_sw_if_index == 0) {
+                vlib_cli_output (vm, "max is %d for any interface to file %s",
+                                 dm->
+                                 pcap_pkts_to_capture ? dm->pcap_pkts_to_capture
+                                 : PCAP_DEF_PKT_TO_CAPTURE,
+                                 dm->
+                                 pcap_filename ? dm->pcap_filename : (u8 *)
+                                 "/tmp/vpe.pcap");
+            } else {
+                vlib_cli_output (vm, "max is %d for interface %U to file %s",
+                                 dm->
+                                 pcap_pkts_to_capture ? dm->pcap_pkts_to_capture
+                                 : PCAP_DEF_PKT_TO_CAPTURE,
+                                 format_vnet_sw_if_index_name, dm->vnet_main,
+                                 dm->pcap_sw_if_index,
+                                 dm->
+                                 pcap_filename ? dm->pcap_filename : (u8 *)
+                                 "/tmp/vpe.pcap");
+            }
 
-	  if (dm->tx_pcap_enable == 0)
-	    {
-	      vlib_cli_output (vm, "pcap tx capture is off...");
-	    }
-	  else
-	    {
-	      vlib_cli_output (vm, "pcap tx capture is on: %d of %d pkts...",
-			       dm->pcap_main.n_packets_captured,
-			       dm->pcap_main.n_packets_to_capture);
-	    }
-	  break;
-	}
+            if (dm->tx_pcap_enable == 0) {
+                vlib_cli_output (vm, "pcap tx capture is off...");
+            } else {
+                vlib_cli_output (vm, "pcap tx capture is on: %d of %d pkts...",
+                                 dm->pcap_main.n_packets_captured,
+                                 dm->pcap_main.n_packets_to_capture);
+            }
+            break;
+        }
 
-      else
-	{
-	  error = clib_error_return (0, "unknown input `%U'",
-				     format_unformat_error, line_input);
-	  errorFlag = 1;
-	  break;
-	}
+        else {
+            error = clib_error_return (0, "unknown input `%U'",
+                                       format_unformat_error, line_input);
+            errorFlag = 1;
+            break;
+        }
     }
-  unformat_free (line_input);
+    unformat_free (line_input);
 
 
-  if (errorFlag == 0)
-    {
-      /* Since no error, save configured values. */
-      if (chroot_filename)
-	{
-	  if (dm->pcap_filename)
-	    vec_free (dm->pcap_filename);
-	  vec_add1 (chroot_filename, 0);
-	  dm->pcap_filename = chroot_filename;
-	}
+    if (errorFlag == 0) {
+        /* Since no error, save configured values. */
+        if (chroot_filename) {
+            if (dm->pcap_filename)
+                vec_free (dm->pcap_filename);
+            vec_add1 (chroot_filename, 0);
+            dm->pcap_filename = chroot_filename;
+        }
 
-      if (max)
-	dm->pcap_pkts_to_capture = max;
+        if (max)
+            dm->pcap_pkts_to_capture = max;
 
 
-      if (enabled)
-	{
-	  if (dm->pcap_filename == 0)
-	    dm->pcap_filename = format (0, "/tmp/vpe.pcap%c", 0);
+        if (enabled) {
+            if (dm->pcap_filename == 0)
+                dm->pcap_filename = format (0, "/tmp/vpe.pcap%c", 0);
 
-	  memset (&dm->pcap_main, 0, sizeof (dm->pcap_main));
-	  dm->pcap_main.file_name = (char *) dm->pcap_filename;
-	  dm->pcap_main.n_packets_to_capture = PCAP_DEF_PKT_TO_CAPTURE;
-	  if (dm->pcap_pkts_to_capture)
-	    dm->pcap_main.n_packets_to_capture = dm->pcap_pkts_to_capture;
+            memset (&dm->pcap_main, 0, sizeof (dm->pcap_main));
+            dm->pcap_main.file_name = (char *) dm->pcap_filename;
+            dm->pcap_main.n_packets_to_capture = PCAP_DEF_PKT_TO_CAPTURE;
+            if (dm->pcap_pkts_to_capture)
+                dm->pcap_main.n_packets_to_capture = dm->pcap_pkts_to_capture;
 
-	  dm->pcap_main.packet_type = PCAP_PACKET_TYPE_ethernet;
-	  dm->tx_pcap_enable = 1;
-	  vlib_cli_output (vm, "pcap tx capture on...");
-	}
-    }
-  else if (chroot_filename)
-    vec_free (chroot_filename);
+            dm->pcap_main.packet_type = PCAP_PACKET_TYPE_ethernet;
+            dm->tx_pcap_enable = 1;
+            vlib_cli_output (vm, "pcap tx capture on...");
+        }
+    } else if (chroot_filename)
+        vec_free (chroot_filename);
 
 
-  return error;
+    return error;
 }
 
 /*?
@@ -340,30 +305,26 @@ VLIB_CLI_COMMAND (pcap_trace_command, static) = {
 
 static clib_error_t *
 show_dpdk_buffer (vlib_main_t * vm, unformat_input_t * input,
-		  vlib_cli_command_t * cmd)
+                  vlib_cli_command_t * cmd)
 {
-  struct rte_mempool *rmp;
-  int i;
+    struct rte_mempool *rmp;
+    int i;
 
-  for (i = 0; i < vec_len (dpdk_main.pktmbuf_pools); i++)
-    {
-      rmp = dpdk_main.pktmbuf_pools[i];
-      if (rmp)
-	{
-	  unsigned count = rte_mempool_avail_count (rmp);
-	  unsigned free_count = rte_mempool_in_use_count (rmp);
+    for (i = 0; i < vec_len (dpdk_main.pktmbuf_pools); i++) {
+        rmp = dpdk_main.pktmbuf_pools[i];
+        if (rmp) {
+            unsigned count = rte_mempool_avail_count (rmp);
+            unsigned free_count = rte_mempool_in_use_count (rmp);
 
-	  vlib_cli_output (vm,
-			   "name=\"%s\"  available = %7d allocated = %7d total = %7d\n",
-			   rmp->name, (u32) count, (u32) free_count,
-			   (u32) (count + free_count));
-	}
-      else
-	{
-	  vlib_cli_output (vm, "rte_mempool is NULL (!)\n");
-	}
+            vlib_cli_output (vm,
+                             "name=\"%s\"  available = %7d allocated = %7d total = %7d\n",
+                             rmp->name, (u32) count, (u32) free_count,
+                             (u32) (count + free_count));
+        } else {
+            vlib_cli_output (vm, "rte_mempool is NULL (!)\n");
+        }
     }
-  return 0;
+    return 0;
 }
 
 /*?
@@ -386,55 +347,52 @@ VLIB_CLI_COMMAND (cmd_show_dpdk_bufferr,static) = {
 
 static clib_error_t *
 test_dpdk_buffer (vlib_main_t * vm, unformat_input_t * input,
-		  vlib_cli_command_t * cmd)
+                  vlib_cli_command_t * cmd)
 {
-  static u32 *allocated_buffers;
-  u32 n_alloc = 0;
-  u32 n_free = 0;
-  u32 first, actual_alloc;
+    static u32 *allocated_buffers;
+    u32 n_alloc = 0;
+    u32 n_free = 0;
+    u32 first, actual_alloc;
 
-  while (unformat_check_input (input) != UNFORMAT_END_OF_INPUT)
-    {
-      if (unformat (input, "allocate %d", &n_alloc))
-	;
-      else if (unformat (input, "free %d", &n_free))
-	;
-      else
-	break;
+    while (unformat_check_input (input) != UNFORMAT_END_OF_INPUT) {
+        if (unformat (input, "allocate %d", &n_alloc))
+            ;
+        else if (unformat (input, "free %d", &n_free))
+            ;
+        else
+            break;
     }
 
-  if (n_free)
-    {
-      if (vec_len (allocated_buffers) < n_free)
-	return clib_error_return (0, "Can't free %d, only %d allocated",
-				  n_free, vec_len (allocated_buffers));
+    if (n_free) {
+        if (vec_len (allocated_buffers) < n_free)
+            return clib_error_return (0, "Can't free %d, only %d allocated",
+                                      n_free, vec_len (allocated_buffers));
 
-      first = vec_len (allocated_buffers) - n_free;
-      vlib_buffer_free (vm, allocated_buffers + first, n_free);
-      _vec_len (allocated_buffers) = first;
+        first = vec_len (allocated_buffers) - n_free;
+        vlib_buffer_free (vm, allocated_buffers + first, n_free);
+        _vec_len (allocated_buffers) = first;
     }
-  if (n_alloc)
-    {
-      first = vec_len (allocated_buffers);
-      vec_validate (allocated_buffers,
-		    vec_len (allocated_buffers) + n_alloc - 1);
+    if (n_alloc) {
+        first = vec_len (allocated_buffers);
+        vec_validate (allocated_buffers,
+                      vec_len (allocated_buffers) + n_alloc - 1);
 
-      actual_alloc = vlib_buffer_alloc (vm, allocated_buffers + first,
-					n_alloc);
-      _vec_len (allocated_buffers) = first + actual_alloc;
+        actual_alloc = vlib_buffer_alloc (vm, allocated_buffers + first,
+                                          n_alloc);
+        _vec_len (allocated_buffers) = first + actual_alloc;
 
-      if (actual_alloc < n_alloc)
-	vlib_cli_output (vm, "WARNING: only allocated %d buffers",
-			 actual_alloc);
+        if (actual_alloc < n_alloc)
+            vlib_cli_output (vm, "WARNING: only allocated %d buffers",
+                             actual_alloc);
     }
 
-  vlib_cli_output (vm, "Currently %d buffers allocated",
-		   vec_len (allocated_buffers));
+    vlib_cli_output (vm, "Currently %d buffers allocated",
+                     vec_len (allocated_buffers));
 
-  if (allocated_buffers && vec_len (allocated_buffers) == 0)
-    vec_free (allocated_buffers);
+    if (allocated_buffers && vec_len (allocated_buffers) == 0)
+        vec_free (allocated_buffers);
 
-  return 0;
+    return 0;
 }
 
 /*?
@@ -474,78 +432,73 @@ VLIB_CLI_COMMAND (cmd_test_dpdk_buffer,static) = {
 
 static clib_error_t *
 set_dpdk_if_desc (vlib_main_t * vm, unformat_input_t * input,
-		  vlib_cli_command_t * cmd)
+                  vlib_cli_command_t * cmd)
 {
-  unformat_input_t _line_input, *line_input = &_line_input;
-  dpdk_main_t *dm = &dpdk_main;
-  vnet_hw_interface_t *hw;
-  dpdk_device_t *xd;
-  u32 hw_if_index = (u32) ~ 0;
-  u32 nb_rx_desc = (u32) ~ 0;
-  u32 nb_tx_desc = (u32) ~ 0;
-  clib_error_t *error = NULL;
+    unformat_input_t _line_input, *line_input = &_line_input;
+    dpdk_main_t *dm = &dpdk_main;
+    vnet_hw_interface_t *hw;
+    dpdk_device_t *xd;
+    u32 hw_if_index = (u32) ~ 0;
+    u32 nb_rx_desc = (u32) ~ 0;
+    u32 nb_tx_desc = (u32) ~ 0;
+    clib_error_t *error = NULL;
 
-  if (!unformat_user (input, unformat_line_input, line_input))
-    return 0;
+    if (!unformat_user (input, unformat_line_input, line_input))
+        return 0;
 
-  while (unformat_check_input (line_input) != UNFORMAT_END_OF_INPUT)
-    {
-      if (unformat
-	  (line_input, "%U", unformat_vnet_hw_interface, dm->vnet_main,
-	   &hw_if_index))
-	;
-      else if (unformat (line_input, "tx %d", &nb_tx_desc))
-	;
-      else if (unformat (line_input, "rx %d", &nb_rx_desc))
-	;
-      else
-	{
-	  error = clib_error_return (0, "parse error: '%U'",
-				     format_unformat_error, line_input);
-	  goto done;
-	}
+    while (unformat_check_input (line_input) != UNFORMAT_END_OF_INPUT) {
+        if (unformat
+            (line_input, "%U", unformat_vnet_hw_interface, dm->vnet_main,
+             &hw_if_index))
+            ;
+        else if (unformat (line_input, "tx %d", &nb_tx_desc))
+            ;
+        else if (unformat (line_input, "rx %d", &nb_rx_desc))
+            ;
+        else {
+            error = clib_error_return (0, "parse error: '%U'",
+                                       format_unformat_error, line_input);
+            goto done;
+        }
     }
 
-  if (hw_if_index == (u32) ~ 0)
-    {
-      error = clib_error_return (0, "please specify valid interface name");
-      goto done;
+    if (hw_if_index == (u32) ~ 0) {
+        error = clib_error_return (0, "please specify valid interface name");
+        goto done;
     }
 
-  hw = vnet_get_hw_interface (dm->vnet_main, hw_if_index);
-  xd = vec_elt_at_index (dm->devices, hw->dev_instance);
+    hw = vnet_get_hw_interface (dm->vnet_main, hw_if_index);
+    xd = vec_elt_at_index (dm->devices, hw->dev_instance);
 
-  if ((xd->flags & DPDK_DEVICE_FLAG_PMD) == 0)
-    {
-      error =
-	clib_error_return (0,
-			   "number of descriptors can be set only for "
-			   "physical devices");
-      goto done;
+    if ((xd->flags & DPDK_DEVICE_FLAG_PMD) == 0) {
+        error =
+            clib_error_return (0,
+                               "number of descriptors can be set only for "
+                               "physical devices");
+        goto done;
     }
 
-  if ((nb_rx_desc == (u32) ~ 0 || nb_rx_desc == xd->nb_rx_desc) &&
-      (nb_tx_desc == (u32) ~ 0 || nb_tx_desc == xd->nb_tx_desc))
-    {
-      error = clib_error_return (0, "nothing changed");
-      goto done;
+    if ((nb_rx_desc == (u32) ~ 0 || nb_rx_desc == xd->nb_rx_desc) &&
+        (nb_tx_desc == (u32) ~ 0 || nb_tx_desc == xd->nb_tx_desc)) {
+        error = clib_error_return (0, "nothing changed");
+        goto done;
     }
 
-  if (nb_rx_desc != (u32) ~ 0)
-    xd->nb_rx_desc = nb_rx_desc;
+    if (nb_rx_desc != (u32) ~ 0)
+        xd->nb_rx_desc = nb_rx_desc;
 
-  if (nb_tx_desc != (u32) ~ 0)
-    xd->nb_tx_desc = nb_tx_desc;
+    if (nb_tx_desc != (u32) ~ 0)
+        xd->nb_tx_desc = nb_tx_desc;
 
-  dpdk_device_setup (xd);
+    dpdk_device_setup (xd);
 
-  if (vec_len (xd->errors))
-    return clib_error_return (0, "%U", format_dpdk_device_errors, xd);
+    if (vec_len (xd->errors))
+        return clib_error_return (0, "%U", format_dpdk_device_errors, xd);
 
 done:
-  unformat_free (line_input);
+    unformat_free (line_input);
 
-  return error;
+    return error;
 }
 
 /*?
@@ -569,51 +522,49 @@ VLIB_CLI_COMMAND (cmd_set_dpdk_if_desc,static) = {
 static int
 dpdk_device_queue_sort (void *a1, void *a2)
 {
-  dpdk_device_and_queue_t *dq1 = a1;
-  dpdk_device_and_queue_t *dq2 = a2;
+    dpdk_device_and_queue_t *dq1 = a1;
+    dpdk_device_and_queue_t *dq2 = a2;
 
-  if (dq1->device > dq2->device)
-    return 1;
-  else if (dq1->device < dq2->device)
-    return -1;
-  else if (dq1->queue_id > dq2->queue_id)
-    return 1;
-  else if (dq1->queue_id < dq2->queue_id)
-    return -1;
-  else
-    return 0;
+    if (dq1->device > dq2->device)
+        return 1;
+    else if (dq1->device < dq2->device)
+        return -1;
+    else if (dq1->queue_id > dq2->queue_id)
+        return 1;
+    else if (dq1->queue_id < dq2->queue_id)
+        return -1;
+    else
+        return 0;
 }
 
 
 static clib_error_t *
 show_dpdk_if_hqos_placement (vlib_main_t * vm, unformat_input_t * input,
-			     vlib_cli_command_t * cmd)
+                             vlib_cli_command_t * cmd)
 {
-  vlib_thread_main_t *tm = vlib_get_thread_main ();
-  dpdk_main_t *dm = &dpdk_main;
-  dpdk_device_and_queue_t *dq;
-  int cpu;
+    vlib_thread_main_t *tm = vlib_get_thread_main ();
+    dpdk_main_t *dm = &dpdk_main;
+    dpdk_device_and_queue_t *dq;
+    int cpu;
 
-  if (tm->n_vlib_mains == 1)
-    vlib_cli_output (vm, "All interfaces are handled by main thread");
+    if (tm->n_vlib_mains == 1)
+        vlib_cli_output (vm, "All interfaces are handled by main thread");
 
-  for (cpu = 0; cpu < vec_len (dm->devices_by_hqos_cpu); cpu++)
-    {
-      if (cpu >= dm->hqos_cpu_first_index &&
-	  cpu < (dm->hqos_cpu_first_index + dm->hqos_cpu_count))
-	vlib_cli_output (vm, "Thread %u (%s at lcore %u):", cpu,
-			 vlib_worker_threads[cpu].name,
-			 vlib_worker_threads[cpu].lcore_id);
+    for (cpu = 0; cpu < vec_len (dm->devices_by_hqos_cpu); cpu++) {
+        if (cpu >= dm->hqos_cpu_first_index &&
+            cpu < (dm->hqos_cpu_first_index + dm->hqos_cpu_count))
+            vlib_cli_output (vm, "Thread %u (%s at lcore %u):", cpu,
+                             vlib_worker_threads[cpu].name,
+                             vlib_worker_threads[cpu].lcore_id);
 
-      vec_foreach (dq, dm->devices_by_hqos_cpu[cpu])
-      {
-	u32 hw_if_index = dm->devices[dq->device].hw_if_index;
-	vnet_hw_interface_t *hi =
-	  vnet_get_hw_interface (dm->vnet_main, hw_if_index);
-	vlib_cli_output (vm, "  %v queue %u", hi->name, dq->queue_id);
-      }
+        vec_foreach (dq, dm->devices_by_hqos_cpu[cpu]) {
+            u32 hw_if_index = dm->devices[dq->device].hw_if_index;
+            vnet_hw_interface_t *hi =
+                vnet_get_hw_interface (dm->vnet_main, hw_if_index);
+            vlib_cli_output (vm, "  %v queue %u", hi->name, dq->queue_id);
+        }
     }
-  return 0;
+    return 0;
 }
 
 /*?
@@ -639,82 +590,76 @@ VLIB_CLI_COMMAND (cmd_show_dpdk_if_hqos_placement, static) = {
 
 static clib_error_t *
 set_dpdk_if_hqos_placement (vlib_main_t * vm, unformat_input_t * input,
-			    vlib_cli_command_t * cmd)
+                            vlib_cli_command_t * cmd)
 {
-  unformat_input_t _line_input, *line_input = &_line_input;
-  dpdk_main_t *dm = &dpdk_main;
-  dpdk_device_and_queue_t *dq;
-  vnet_hw_interface_t *hw;
-  dpdk_device_t *xd;
-  u32 hw_if_index = (u32) ~ 0;
-  u32 cpu = (u32) ~ 0;
-  int i;
-  clib_error_t *error = NULL;
+    unformat_input_t _line_input, *line_input = &_line_input;
+    dpdk_main_t *dm = &dpdk_main;
+    dpdk_device_and_queue_t *dq;
+    vnet_hw_interface_t *hw;
+    dpdk_device_t *xd;
+    u32 hw_if_index = (u32) ~ 0;
+    u32 cpu = (u32) ~ 0;
+    int i;
+    clib_error_t *error = NULL;
 
-  if (!unformat_user (input, unformat_line_input, line_input))
-    return 0;
+    if (!unformat_user (input, unformat_line_input, line_input))
+        return 0;
 
-  while (unformat_check_input (line_input) != UNFORMAT_END_OF_INPUT)
-    {
-      if (unformat
-	  (line_input, "%U", unformat_vnet_hw_interface, dm->vnet_main,
-	   &hw_if_index))
-	;
-      else if (unformat (line_input, "thread %d", &cpu))
-	;
-      else
-	{
-	  error = clib_error_return (0, "parse error: '%U'",
-				     format_unformat_error, line_input);
-	  goto done;
-	}
+    while (unformat_check_input (line_input) != UNFORMAT_END_OF_INPUT) {
+        if (unformat
+            (line_input, "%U", unformat_vnet_hw_interface, dm->vnet_main,
+             &hw_if_index))
+            ;
+        else if (unformat (line_input, "thread %d", &cpu))
+            ;
+        else {
+            error = clib_error_return (0, "parse error: '%U'",
+                                       format_unformat_error, line_input);
+            goto done;
+        }
     }
 
-  if (hw_if_index == (u32) ~ 0)
-    return clib_error_return (0, "please specify valid interface name");
+    if (hw_if_index == (u32) ~ 0)
+        return clib_error_return (0, "please specify valid interface name");
 
-  if (cpu < dm->hqos_cpu_first_index ||
-      cpu >= (dm->hqos_cpu_first_index + dm->hqos_cpu_count))
-    {
-      error = clib_error_return (0, "please specify valid thread id");
-      goto done;
+    if (cpu < dm->hqos_cpu_first_index ||
+        cpu >= (dm->hqos_cpu_first_index + dm->hqos_cpu_count)) {
+        error = clib_error_return (0, "please specify valid thread id");
+        goto done;
     }
 
-  hw = vnet_get_hw_interface (dm->vnet_main, hw_if_index);
-  xd = vec_elt_at_index (dm->devices, hw->dev_instance);
+    hw = vnet_get_hw_interface (dm->vnet_main, hw_if_index);
+    xd = vec_elt_at_index (dm->devices, hw->dev_instance);
 
-  for (i = 0; i < vec_len (dm->devices_by_hqos_cpu); i++)
-    {
-      vec_foreach (dq, dm->devices_by_hqos_cpu[i])
-      {
-	if (hw_if_index == dm->devices[dq->device].hw_if_index)
-	  {
-	    if (cpu == i)	/* nothing to do */
-	      goto done;
+    for (i = 0; i < vec_len (dm->devices_by_hqos_cpu); i++) {
+        vec_foreach (dq, dm->devices_by_hqos_cpu[i]) {
+            if (hw_if_index == dm->devices[dq->device].hw_if_index) {
+                if (cpu == i)   /* nothing to do */
+                    goto done;
 
-	    vec_del1 (dm->devices_by_hqos_cpu[i],
-		      dq - dm->devices_by_hqos_cpu[i]);
-	    vec_add2 (dm->devices_by_hqos_cpu[cpu], dq, 1);
-	    dq->queue_id = 0;
-	    dq->device = xd->device_index;
+                vec_del1 (dm->devices_by_hqos_cpu[i],
+                          dq - dm->devices_by_hqos_cpu[i]);
+                vec_add2 (dm->devices_by_hqos_cpu[cpu], dq, 1);
+                dq->queue_id = 0;
+                dq->device = xd->device_index;
 
-	    vec_sort_with_function (dm->devices_by_hqos_cpu[i],
-				    dpdk_device_queue_sort);
+                vec_sort_with_function (dm->devices_by_hqos_cpu[i],
+                                        dpdk_device_queue_sort);
 
-	    vec_sort_with_function (dm->devices_by_hqos_cpu[cpu],
-				    dpdk_device_queue_sort);
+                vec_sort_with_function (dm->devices_by_hqos_cpu[cpu],
+                                        dpdk_device_queue_sort);
 
-	    goto done;
-	  }
-      }
+                goto done;
+            }
+        }
     }
 
-  error = clib_error_return (0, "not found");
+    error = clib_error_return (0, "not found");
 
 done:
-  unformat_free (line_input);
+    unformat_free (line_input);
 
-  return error;
+    return error;
 }
 
 /*?
@@ -744,64 +689,60 @@ VLIB_CLI_COMMAND (cmd_set_dpdk_if_hqos_placement, static) = {
 
 static clib_error_t *
 set_dpdk_if_hqos_pipe (vlib_main_t * vm, unformat_input_t * input,
-		       vlib_cli_command_t * cmd)
+                       vlib_cli_command_t * cmd)
 {
-  unformat_input_t _line_input, *line_input = &_line_input;
-  dpdk_main_t *dm = &dpdk_main;
-  vnet_hw_interface_t *hw;
-  dpdk_device_t *xd;
-  u32 hw_if_index = (u32) ~ 0;
-  u32 subport_id = (u32) ~ 0;
-  u32 pipe_id = (u32) ~ 0;
-  u32 profile_id = (u32) ~ 0;
-  int rv;
-  clib_error_t *error = NULL;
+    unformat_input_t _line_input, *line_input = &_line_input;
+    dpdk_main_t *dm = &dpdk_main;
+    vnet_hw_interface_t *hw;
+    dpdk_device_t *xd;
+    u32 hw_if_index = (u32) ~ 0;
+    u32 subport_id = (u32) ~ 0;
+    u32 pipe_id = (u32) ~ 0;
+    u32 profile_id = (u32) ~ 0;
+    int rv;
+    clib_error_t *error = NULL;
 
-  if (!unformat_user (input, unformat_line_input, line_input))
-    return 0;
+    if (!unformat_user (input, unformat_line_input, line_input))
+        return 0;
 
-  while (unformat_check_input (line_input) != UNFORMAT_END_OF_INPUT)
-    {
-      if (unformat
-	  (line_input, "%U", unformat_vnet_hw_interface, dm->vnet_main,
-	   &hw_if_index))
-	;
-      else if (unformat (line_input, "subport %d", &subport_id))
-	;
-      else if (unformat (line_input, "pipe %d", &pipe_id))
-	;
-      else if (unformat (line_input, "profile %d", &profile_id))
-	;
-      else
-	{
-	  error = clib_error_return (0, "parse error: '%U'",
-				     format_unformat_error, line_input);
-	  goto done;
-	}
+    while (unformat_check_input (line_input) != UNFORMAT_END_OF_INPUT) {
+        if (unformat
+            (line_input, "%U", unformat_vnet_hw_interface, dm->vnet_main,
+             &hw_if_index))
+            ;
+        else if (unformat (line_input, "subport %d", &subport_id))
+            ;
+        else if (unformat (line_input, "pipe %d", &pipe_id))
+            ;
+        else if (unformat (line_input, "profile %d", &profile_id))
+            ;
+        else {
+            error = clib_error_return (0, "parse error: '%U'",
+                                       format_unformat_error, line_input);
+            goto done;
+        }
     }
 
-  if (hw_if_index == (u32) ~ 0)
-    {
-      error = clib_error_return (0, "please specify valid interface name");
-      goto done;
+    if (hw_if_index == (u32) ~ 0) {
+        error = clib_error_return (0, "please specify valid interface name");
+        goto done;
     }
 
-  hw = vnet_get_hw_interface (dm->vnet_main, hw_if_index);
-  xd = vec_elt_at_index (dm->devices, hw->dev_instance);
+    hw = vnet_get_hw_interface (dm->vnet_main, hw_if_index);
+    xd = vec_elt_at_index (dm->devices, hw->dev_instance);
 
-  rv =
-    rte_sched_pipe_config (xd->hqos_ht->hqos, subport_id, pipe_id,
-			   profile_id);
-  if (rv)
-    {
-      error = clib_error_return (0, "pipe configuration failed");
-      goto done;
+    rv =
+        rte_sched_pipe_config (xd->hqos_ht->hqos, subport_id, pipe_id,
+                               profile_id);
+    if (rv) {
+        error = clib_error_return (0, "pipe configuration failed");
+        goto done;
     }
 
 done:
-  unformat_free (line_input);
+    unformat_free (line_input);
 
-  return error;
+    return error;
 }
 
 /*?
@@ -832,115 +773,102 @@ VLIB_CLI_COMMAND (cmd_set_dpdk_if_hqos_pipe, static) =
 
 static clib_error_t *
 set_dpdk_if_hqos_subport (vlib_main_t * vm, unformat_input_t * input,
-			  vlib_cli_command_t * cmd)
+                          vlib_cli_command_t * cmd)
 {
-  unformat_input_t _line_input, *line_input = &_line_input;
-  dpdk_main_t *dm = &dpdk_main;
-  dpdk_device_t *xd = NULL;
-  u32 hw_if_index = (u32) ~ 0;
-  u32 subport_id = (u32) ~ 0;
-  struct rte_sched_subport_params p;
-  int rv;
-  clib_error_t *error = NULL;
-  u32 tb_rate = (u32) ~ 0;
-  u32 tb_size = (u32) ~ 0;
-  u32 tc_rate[RTE_SCHED_TRAFFIC_CLASSES_PER_PIPE] =
+    unformat_input_t _line_input, *line_input = &_line_input;
+    dpdk_main_t *dm = &dpdk_main;
+    dpdk_device_t *xd = NULL;
+    u32 hw_if_index = (u32) ~ 0;
+    u32 subport_id = (u32) ~ 0;
+    struct rte_sched_subport_params p;
+    int rv;
+    clib_error_t *error = NULL;
+    u32 tb_rate = (u32) ~ 0;
+    u32 tb_size = (u32) ~ 0;
+    u32 tc_rate[RTE_SCHED_TRAFFIC_CLASSES_PER_PIPE] =
     { (u32) ~ 0, (u32) ~ 0, (u32) ~ 0, (u32) ~ 0 };
-  u32 tc_period = (u32) ~ 0;
-  dpdk_device_config_t *devconf = NULL;
+    u32 tc_period = (u32) ~ 0;
+    dpdk_device_config_t *devconf = NULL;
 
-  if (!unformat_user (input, unformat_line_input, line_input))
-    return 0;
+    if (!unformat_user (input, unformat_line_input, line_input))
+        return 0;
 
-  while (unformat_check_input (line_input) != UNFORMAT_END_OF_INPUT)
-    {
-      if (unformat
-	  (line_input, "%U", unformat_vnet_hw_interface, dm->vnet_main,
-	   &hw_if_index))
-	;
-      else if (unformat (line_input, "subport %d", &subport_id))
-	;
-      else if (unformat (line_input, "rate %d", &tb_rate))
-	;
-      else if (unformat (line_input, "bktsize %d", &tb_size))
-	;
-      else if (unformat (line_input, "tc0 %d", &tc_rate[0]))
-	;
-      else if (unformat (line_input, "tc1 %d", &tc_rate[1]))
-	;
-      else if (unformat (line_input, "tc2 %d", &tc_rate[2]))
-	;
-      else if (unformat (line_input, "tc3 %d", &tc_rate[3]))
-	;
-      else if (unformat (line_input, "period %d", &tc_period))
-	;
-      else
-	{
-	  error = clib_error_return (0, "parse error: '%U'",
-				     format_unformat_error, line_input);
-	  goto done;
-	}
+    while (unformat_check_input (line_input) != UNFORMAT_END_OF_INPUT) {
+        if (unformat
+            (line_input, "%U", unformat_vnet_hw_interface, dm->vnet_main,
+             &hw_if_index))
+            ;
+        else if (unformat (line_input, "subport %d", &subport_id))
+            ;
+        else if (unformat (line_input, "rate %d", &tb_rate))
+            ;
+        else if (unformat (line_input, "bktsize %d", &tb_size))
+            ;
+        else if (unformat (line_input, "tc0 %d", &tc_rate[0]))
+            ;
+        else if (unformat (line_input, "tc1 %d", &tc_rate[1]))
+            ;
+        else if (unformat (line_input, "tc2 %d", &tc_rate[2]))
+            ;
+        else if (unformat (line_input, "tc3 %d", &tc_rate[3]))
+            ;
+        else if (unformat (line_input, "period %d", &tc_period))
+            ;
+        else {
+            error = clib_error_return (0, "parse error: '%U'",
+                                       format_unformat_error, line_input);
+            goto done;
+        }
     }
 
-  error = get_hqos (hw_if_index, subport_id, &xd, &devconf);
+    error = get_hqos (hw_if_index, subport_id, &xd, &devconf);
 
-  if (error == NULL)
-    {
-      /* Copy the current values over to local structure. */
-      memcpy (&p, &devconf->hqos.subport[subport_id], sizeof (p));
+    if (error == NULL) {
+        /* Copy the current values over to local structure. */
+        memcpy (&p, &devconf->hqos.subport[subport_id], sizeof (p));
 
-      /* Update local structure with input values. */
-      if (tb_rate != (u32) ~ 0)
-	{
-	  p.tb_rate = tb_rate;
-	  p.tc_rate[0] = tb_rate;
-	  p.tc_rate[1] = tb_rate;
-	  p.tc_rate[2] = tb_rate;
-	  p.tc_rate[3] = tb_rate;
-	}
-      if (tb_size != (u32) ~ 0)
-	{
-	  p.tb_size = tb_size;
-	}
-      if (tc_rate[0] != (u32) ~ 0)
-	{
-	  p.tc_rate[0] = tc_rate[0];
-	}
-      if (tc_rate[1] != (u32) ~ 0)
-	{
-	  p.tc_rate[1] = tc_rate[1];
-	}
-      if (tc_rate[2] != (u32) ~ 0)
-	{
-	  p.tc_rate[2] = tc_rate[2];
-	}
-      if (tc_rate[3] != (u32) ~ 0)
-	{
-	  p.tc_rate[3] = tc_rate[3];
-	}
-      if (tc_period != (u32) ~ 0)
-	{
-	  p.tc_period = tc_period;
-	}
+        /* Update local structure with input values. */
+        if (tb_rate != (u32) ~ 0) {
+            p.tb_rate = tb_rate;
+            p.tc_rate[0] = tb_rate;
+            p.tc_rate[1] = tb_rate;
+            p.tc_rate[2] = tb_rate;
+            p.tc_rate[3] = tb_rate;
+        }
+        if (tb_size != (u32) ~ 0) {
+            p.tb_size = tb_size;
+        }
+        if (tc_rate[0] != (u32) ~ 0) {
+            p.tc_rate[0] = tc_rate[0];
+        }
+        if (tc_rate[1] != (u32) ~ 0) {
+            p.tc_rate[1] = tc_rate[1];
+        }
+        if (tc_rate[2] != (u32) ~ 0) {
+            p.tc_rate[2] = tc_rate[2];
+        }
+        if (tc_rate[3] != (u32) ~ 0) {
+            p.tc_rate[3] = tc_rate[3];
+        }
+        if (tc_period != (u32) ~ 0) {
+            p.tc_period = tc_period;
+        }
 
-      /* Apply changes. */
-      rv = rte_sched_subport_config (xd->hqos_ht->hqos, subport_id, &p);
-      if (rv)
-	{
-	  error = clib_error_return (0, "subport configuration failed");
-	  goto done;
-	}
-      else
-	{
-	  /* Successfully applied, so save of the input values. */
-	  memcpy (&devconf->hqos.subport[subport_id], &p, sizeof (p));
-	}
+        /* Apply changes. */
+        rv = rte_sched_subport_config (xd->hqos_ht->hqos, subport_id, &p);
+        if (rv) {
+            error = clib_error_return (0, "subport configuration failed");
+            goto done;
+        } else {
+            /* Successfully applied, so save of the input values. */
+            memcpy (&devconf->hqos.subport[subport_id], &p, sizeof (p));
+        }
     }
 
 done:
-  unformat_free (line_input);
+    unformat_free (line_input);
 
-  return error;
+    return error;
 }
 
 /*?
@@ -970,88 +898,81 @@ VLIB_CLI_COMMAND (cmd_set_dpdk_if_hqos_subport, static) = {
 
 static clib_error_t *
 set_dpdk_if_hqos_tctbl (vlib_main_t * vm, unformat_input_t * input,
-			vlib_cli_command_t * cmd)
+                        vlib_cli_command_t * cmd)
 {
-  unformat_input_t _line_input, *line_input = &_line_input;
-  vlib_thread_main_t *tm = vlib_get_thread_main ();
-  dpdk_main_t *dm = &dpdk_main;
-  vnet_hw_interface_t *hw;
-  dpdk_device_t *xd;
-  u32 hw_if_index = (u32) ~ 0;
-  u32 tc = (u32) ~ 0;
-  u32 queue = (u32) ~ 0;
-  u32 entry = (u32) ~ 0;
-  u32 val, i;
-  clib_error_t *error = NULL;
+    unformat_input_t _line_input, *line_input = &_line_input;
+    vlib_thread_main_t *tm = vlib_get_thread_main ();
+    dpdk_main_t *dm = &dpdk_main;
+    vnet_hw_interface_t *hw;
+    dpdk_device_t *xd;
+    u32 hw_if_index = (u32) ~ 0;
+    u32 tc = (u32) ~ 0;
+    u32 queue = (u32) ~ 0;
+    u32 entry = (u32) ~ 0;
+    u32 val, i;
+    clib_error_t *error = NULL;
 
-  if (!unformat_user (input, unformat_line_input, line_input))
-    return 0;
+    if (!unformat_user (input, unformat_line_input, line_input))
+        return 0;
 
-  while (unformat_check_input (line_input) != UNFORMAT_END_OF_INPUT)
-    {
-      if (unformat
-	  (line_input, "%U", unformat_vnet_hw_interface, dm->vnet_main,
-	   &hw_if_index))
-	;
-      else if (unformat (line_input, "entry %d", &entry))
-	;
-      else if (unformat (line_input, "tc %d", &tc))
-	;
-      else if (unformat (line_input, "queue %d", &queue))
-	;
-      else
-	{
-	  error = clib_error_return (0, "parse error: '%U'",
-				     format_unformat_error, line_input);
-	  goto done;
-	}
+    while (unformat_check_input (line_input) != UNFORMAT_END_OF_INPUT) {
+        if (unformat
+            (line_input, "%U", unformat_vnet_hw_interface, dm->vnet_main,
+             &hw_if_index))
+            ;
+        else if (unformat (line_input, "entry %d", &entry))
+            ;
+        else if (unformat (line_input, "tc %d", &tc))
+            ;
+        else if (unformat (line_input, "queue %d", &queue))
+            ;
+        else {
+            error = clib_error_return (0, "parse error: '%U'",
+                                       format_unformat_error, line_input);
+            goto done;
+        }
     }
 
-  if (hw_if_index == (u32) ~ 0)
-    {
-      error = clib_error_return (0, "please specify valid interface name");
-      goto done;
+    if (hw_if_index == (u32) ~ 0) {
+        error = clib_error_return (0, "please specify valid interface name");
+        goto done;
     }
-  if (entry >= 64)
-    {
-      error = clib_error_return (0, "invalid entry");
-      goto done;
+    if (entry >= 64) {
+        error = clib_error_return (0, "invalid entry");
+        goto done;
     }
-  if (tc >= RTE_SCHED_TRAFFIC_CLASSES_PER_PIPE)
-    {
-      error = clib_error_return (0, "invalid traffic class");
-      goto done;
+    if (tc >= RTE_SCHED_TRAFFIC_CLASSES_PER_PIPE) {
+        error = clib_error_return (0, "invalid traffic class");
+        goto done;
     }
-  if (queue >= RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS)
-    {
-      error = clib_error_return (0, "invalid traffic class queue");
-      goto done;
+    if (queue >= RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS) {
+        error = clib_error_return (0, "invalid traffic class queue");
+        goto done;
     }
 
-  hw = vnet_get_hw_interface (dm->vnet_main, hw_if_index);
-  xd = vec_elt_at_index (dm->devices, hw->dev_instance);
+    hw = vnet_get_hw_interface (dm->vnet_main, hw_if_index);
+    xd = vec_elt_at_index (dm->devices, hw->dev_instance);
 
-  /* Detect the set of worker threads */
-  uword *p = hash_get_mem (tm->thread_registrations_by_name, "workers");
-  /* Should never happen, shut up Coverity warning */
-  if (p == 0)
-    {
-      error = clib_error_return (0, "no worker registrations?");
-      goto done;
+    /* Detect the set of worker threads */
+    uword *p = hash_get_mem (tm->thread_registrations_by_name, "workers");
+    /* Should never happen, shut up Coverity warning */
+    if (p == 0) {
+        error = clib_error_return (0, "no worker registrations?");
+        goto done;
     }
 
-  vlib_thread_registration_t *tr = (vlib_thread_registration_t *) p[0];
-  int worker_thread_first = tr->first_index;
-  int worker_thread_count = tr->count;
+    vlib_thread_registration_t *tr = (vlib_thread_registration_t *) p[0];
+    int worker_thread_first = tr->first_index;
+    int worker_thread_count = tr->count;
 
-  val = tc * RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS + queue;
-  for (i = 0; i < worker_thread_count; i++)
-    xd->hqos_wt[worker_thread_first + i].hqos_tc_table[entry] = val;
+    val = tc * RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS + queue;
+    for (i = 0; i < worker_thread_count; i++)
+        xd->hqos_wt[worker_thread_first + i].hqos_tc_table[entry] = val;
 
 done:
-  unformat_free (line_input);
+    unformat_free (line_input);
 
-  return error;
+    return error;
 }
 
 /*?
@@ -1085,174 +1006,164 @@ VLIB_CLI_COMMAND (cmd_set_dpdk_if_hqos_tctbl, static) = {
 
 static clib_error_t *
 set_dpdk_if_hqos_pktfield (vlib_main_t * vm, unformat_input_t * input,
-			   vlib_cli_command_t * cmd)
+                           vlib_cli_command_t * cmd)
 {
-  unformat_input_t _line_input, *line_input = &_line_input;
-  vlib_thread_main_t *tm = vlib_get_thread_main ();
-  dpdk_main_t *dm = &dpdk_main;
-  clib_error_t *error = NULL;
+    unformat_input_t _line_input, *line_input = &_line_input;
+    vlib_thread_main_t *tm = vlib_get_thread_main ();
+    dpdk_main_t *dm = &dpdk_main;
+    clib_error_t *error = NULL;
 
-  /* Device specific data */
-  struct rte_eth_dev_info dev_info;
-  dpdk_device_config_t *devconf = 0;
-  vnet_hw_interface_t *hw;
-  dpdk_device_t *xd;
-  u32 hw_if_index = (u32) ~ 0;
+    /* Device specific data */
+    struct rte_eth_dev_info dev_info;
+    dpdk_device_config_t *devconf = 0;
+    vnet_hw_interface_t *hw;
+    dpdk_device_t *xd;
+    u32 hw_if_index = (u32) ~ 0;
 
-  /* Detect the set of worker threads */
-  uword *p = hash_get_mem (tm->thread_registrations_by_name, "workers");
-  /* Should never happen, shut up Coverity warning */
-  if (p == 0)
-    return clib_error_return (0, "no worker registrations?");
+    /* Detect the set of worker threads */
+    uword *p = hash_get_mem (tm->thread_registrations_by_name, "workers");
+    /* Should never happen, shut up Coverity warning */
+    if (p == 0)
+        return clib_error_return (0, "no worker registrations?");
 
-  vlib_thread_registration_t *tr = (vlib_thread_registration_t *) p[0];
-  int worker_thread_first = tr->first_index;
-  int worker_thread_count = tr->count;
+    vlib_thread_registration_t *tr = (vlib_thread_registration_t *) p[0];
+    int worker_thread_first = tr->first_index;
+    int worker_thread_count = tr->count;
 
-  /* Packet field configuration */
-  u64 mask = (u64) ~ 0;
-  u32 id = (u32) ~ 0;
-  u32 offset = (u32) ~ 0;
+    /* Packet field configuration */
+    u64 mask = (u64) ~ 0;
+    u32 id = (u32) ~ 0;
+    u32 offset = (u32) ~ 0;
 
-  /* HQoS params */
-  u32 n_subports_per_port, n_pipes_per_subport, tctbl_size;
+    /* HQoS params */
+    u32 n_subports_per_port, n_pipes_per_subport, tctbl_size;
 
-  u32 i;
+    u32 i;
 
-  /* Parse input arguments */
-  if (!unformat_user (input, unformat_line_input, line_input))
-    return 0;
+    /* Parse input arguments */
+    if (!unformat_user (input, unformat_line_input, line_input))
+        return 0;
 
-  while (unformat_check_input (line_input) != UNFORMAT_END_OF_INPUT)
-    {
-      if (unformat
-	  (line_input, "%U", unformat_vnet_hw_interface, dm->vnet_main,
-	   &hw_if_index))
-	;
-      else if (unformat (line_input, "id subport"))
-	id = 0;
-      else if (unformat (line_input, "id pipe"))
-	id = 1;
-      else if (unformat (line_input, "id tc"))
-	id = 2;
-      else if (unformat (line_input, "id %d", &id))
-	;
-      else if (unformat (line_input, "offset %d", &offset))
-	;
-      else if (unformat (line_input, "mask %llx", &mask))
-	;
-      else
-	{
-	  error = clib_error_return (0, "parse error: '%U'",
-				     format_unformat_error, line_input);
-	  goto done;
-	}
+    while (unformat_check_input (line_input) != UNFORMAT_END_OF_INPUT) {
+        if (unformat
+            (line_input, "%U", unformat_vnet_hw_interface, dm->vnet_main,
+             &hw_if_index))
+            ;
+        else if (unformat (line_input, "id subport"))
+            id = 0;
+        else if (unformat (line_input, "id pipe"))
+            id = 1;
+        else if (unformat (line_input, "id tc"))
+            id = 2;
+        else if (unformat (line_input, "id %d", &id))
+            ;
+        else if (unformat (line_input, "offset %d", &offset))
+            ;
+        else if (unformat (line_input, "mask %llx", &mask))
+            ;
+        else {
+            error = clib_error_return (0, "parse error: '%U'",
+                                       format_unformat_error, line_input);
+            goto done;
+        }
     }
 
-  /* Get interface */
-  if (hw_if_index == (u32) ~ 0)
-    {
-      error = clib_error_return (0, "please specify valid interface name");
-      goto done;
+    /* Get interface */
+    if (hw_if_index == (u32) ~ 0) {
+        error = clib_error_return (0, "please specify valid interface name");
+        goto done;
     }
 
-  hw = vnet_get_hw_interface (dm->vnet_main, hw_if_index);
-  xd = vec_elt_at_index (dm->devices, hw->dev_instance);
+    hw = vnet_get_hw_interface (dm->vnet_main, hw_if_index);
+    xd = vec_elt_at_index (dm->devices, hw->dev_instance);
 
-  rte_eth_dev_info_get (xd->device_index, &dev_info);
-  if (dev_info.pci_dev)
-    {				/* bonded interface has no pci info */
-      vlib_pci_addr_t pci_addr;
+    rte_eth_dev_info_get (xd->device_index, &dev_info);
+    if (dev_info.pci_dev) {
+        /* bonded interface has no pci info */
+        vlib_pci_addr_t pci_addr;
 
-      pci_addr.domain = dev_info.pci_dev->addr.domain;
-      pci_addr.bus = dev_info.pci_dev->addr.bus;
-      pci_addr.slot = dev_info.pci_dev->addr.devid;
-      pci_addr.function = dev_info.pci_dev->addr.function;
+        pci_addr.domain = dev_info.pci_dev->addr.domain;
+        pci_addr.bus = dev_info.pci_dev->addr.bus;
+        pci_addr.slot = dev_info.pci_dev->addr.devid;
+        pci_addr.function = dev_info.pci_dev->addr.function;
 
-      p =
-	hash_get (dm->conf->device_config_index_by_pci_addr, pci_addr.as_u32);
+        p =
+            hash_get (dm->conf->device_config_index_by_pci_addr, pci_addr.as_u32);
     }
 
-  if (p)
-    devconf = pool_elt_at_index (dm->conf->dev_confs, p[0]);
-  else
-    devconf = &dm->conf->default_devconf;
+    if (p)
+        devconf = pool_elt_at_index (dm->conf->dev_confs, p[0]);
+    else
+        devconf = &dm->conf->default_devconf;
 
-  if (devconf->hqos_enabled == 0)
-    {
-      vlib_cli_output (vm, "HQoS disabled for this interface");
-      goto done;
+    if (devconf->hqos_enabled == 0) {
+        vlib_cli_output (vm, "HQoS disabled for this interface");
+        goto done;
     }
 
-  n_subports_per_port = devconf->hqos.port.n_subports_per_port;
-  n_pipes_per_subport = devconf->hqos.port.n_pipes_per_subport;
-  tctbl_size = RTE_DIM (devconf->hqos.tc_table);
+    n_subports_per_port = devconf->hqos.port.n_subports_per_port;
+    n_pipes_per_subport = devconf->hqos.port.n_pipes_per_subport;
+    tctbl_size = RTE_DIM (devconf->hqos.tc_table);
 
-  /* Validate packet field configuration: id, offset and mask */
-  if (id >= 3)
-    {
-      error = clib_error_return (0, "invalid packet field id");
-      goto done;
+    /* Validate packet field configuration: id, offset and mask */
+    if (id >= 3) {
+        error = clib_error_return (0, "invalid packet field id");
+        goto done;
     }
 
-  switch (id)
-    {
-    case 0:
-      if (dpdk_hqos_validate_mask (mask, n_subports_per_port) != 0)
-	{
-	  error = clib_error_return (0, "invalid subport ID mask "
-				     "(n_subports_per_port = %u)",
-				     n_subports_per_port);
-	  goto done;
-	}
-      break;
-    case 1:
-      if (dpdk_hqos_validate_mask (mask, n_pipes_per_subport) != 0)
-	{
-	  error = clib_error_return (0, "invalid pipe ID mask "
-				     "(n_pipes_per_subport = %u)",
-				     n_pipes_per_subport);
-	  goto done;
-	}
-      break;
-    case 2:
-    default:
-      if (dpdk_hqos_validate_mask (mask, tctbl_size) != 0)
-	{
-	  error = clib_error_return (0, "invalid TC table index mask "
-				     "(TC table size = %u)", tctbl_size);
-	  goto done;
-	}
+    switch (id) {
+        case 0:
+            if (dpdk_hqos_validate_mask (mask, n_subports_per_port) != 0) {
+                error = clib_error_return (0, "invalid subport ID mask "
+                                           "(n_subports_per_port = %u)",
+                                           n_subports_per_port);
+                goto done;
+            }
+            break;
+        case 1:
+            if (dpdk_hqos_validate_mask (mask, n_pipes_per_subport) != 0) {
+                error = clib_error_return (0, "invalid pipe ID mask "
+                                           "(n_pipes_per_subport = %u)",
+                                           n_pipes_per_subport);
+                goto done;
+            }
+            break;
+        case 2:
+        default:
+            if (dpdk_hqos_validate_mask (mask, tctbl_size) != 0) {
+                error = clib_error_return (0, "invalid TC table index mask "
+                                           "(TC table size = %u)", tctbl_size);
+                goto done;
+            }
     }
 
-  /* Propagate packet field configuration to all workers */
-  for (i = 0; i < worker_thread_count; i++)
-    switch (id)
-      {
-      case 0:
-	xd->hqos_wt[worker_thread_first + i].hqos_field0_slabpos = offset;
-	xd->hqos_wt[worker_thread_first + i].hqos_field0_slabmask = mask;
-	xd->hqos_wt[worker_thread_first + i].hqos_field0_slabshr =
-	  __builtin_ctzll (mask);
-	break;
-      case 1:
-	xd->hqos_wt[worker_thread_first + i].hqos_field1_slabpos = offset;
-	xd->hqos_wt[worker_thread_first + i].hqos_field1_slabmask = mask;
-	xd->hqos_wt[worker_thread_first + i].hqos_field1_slabshr =
-	  __builtin_ctzll (mask);
-	break;
-      case 2:
-      default:
-	xd->hqos_wt[worker_thread_first + i].hqos_field2_slabpos = offset;
-	xd->hqos_wt[worker_thread_first + i].hqos_field2_slabmask = mask;
-	xd->hqos_wt[worker_thread_first + i].hqos_field2_slabshr =
-	  __builtin_ctzll (mask);
-      }
+    /* Propagate packet field configuration to all workers */
+    for (i = 0; i < worker_thread_count; i++)
+        switch (id) {
+            case 0:
+                xd->hqos_wt[worker_thread_first + i].hqos_field0_slabpos = offset;
+                xd->hqos_wt[worker_thread_first + i].hqos_field0_slabmask = mask;
+                xd->hqos_wt[worker_thread_first + i].hqos_field0_slabshr =
+                    __builtin_ctzll (mask);
+                break;
+            case 1:
+                xd->hqos_wt[worker_thread_first + i].hqos_field1_slabpos = offset;
+                xd->hqos_wt[worker_thread_first + i].hqos_field1_slabmask = mask;
+                xd->hqos_wt[worker_thread_first + i].hqos_field1_slabshr =
+                    __builtin_ctzll (mask);
+                break;
+            case 2:
+            default:
+                xd->hqos_wt[worker_thread_first + i].hqos_field2_slabpos = offset;
+                xd->hqos_wt[worker_thread_first + i].hqos_field2_slabmask = mask;
+                xd->hqos_wt[worker_thread_first + i].hqos_field2_slabshr =
+                    __builtin_ctzll (mask);
+        }
 
 done:
-  unformat_free (line_input);
+    unformat_free (line_input);
 
-  return error;
+    return error;
 }
 
 /*?
@@ -1305,346 +1216,337 @@ VLIB_CLI_COMMAND (cmd_set_dpdk_if_hqos_pktfield, static) = {
 
 static clib_error_t *
 show_dpdk_if_hqos (vlib_main_t * vm, unformat_input_t * input,
-		   vlib_cli_command_t * cmd)
+                   vlib_cli_command_t * cmd)
 {
-  unformat_input_t _line_input, *line_input = &_line_input;
-  vlib_thread_main_t *tm = vlib_get_thread_main ();
-  dpdk_main_t *dm = &dpdk_main;
-  vnet_hw_interface_t *hw;
-  dpdk_device_t *xd;
-  dpdk_device_config_hqos_t *cfg;
-  dpdk_device_hqos_per_hqos_thread_t *ht;
-  dpdk_device_hqos_per_worker_thread_t *wk;
-  u32 *tctbl;
-  u32 hw_if_index = (u32) ~ 0;
-  u32 profile_id, subport_id, i;
-  struct rte_eth_dev_info dev_info;
-  dpdk_device_config_t *devconf = 0;
-  vlib_thread_registration_t *tr;
-  uword *p = 0;
-  clib_error_t *error = NULL;
+    unformat_input_t _line_input, *line_input = &_line_input;
+    vlib_thread_main_t *tm = vlib_get_thread_main ();
+    dpdk_main_t *dm = &dpdk_main;
+    vnet_hw_interface_t *hw;
+    dpdk_device_t *xd;
+    dpdk_device_config_hqos_t *cfg;
+    dpdk_device_hqos_per_hqos_thread_t *ht;
+    dpdk_device_hqos_per_worker_thread_t *wk;
+    u32 *tctbl;
+    u32 hw_if_index = (u32) ~ 0;
+    u32 profile_id, subport_id, i;
+    struct rte_eth_dev_info dev_info;
+    dpdk_device_config_t *devconf = 0;
+    vlib_thread_registration_t *tr;
+    uword *p = 0;
+    clib_error_t *error = NULL;
 
-  if (!unformat_user (input, unformat_line_input, line_input))
-    return 0;
+    if (!unformat_user (input, unformat_line_input, line_input))
+        return 0;
 
-  while (unformat_check_input (line_input) != UNFORMAT_END_OF_INPUT)
-    {
-      if (unformat
-	  (line_input, "%U", unformat_vnet_hw_interface, dm->vnet_main,
-	   &hw_if_index))
-	;
-      else
-	{
-	  error = clib_error_return (0, "parse error: '%U'",
-				     format_unformat_error, line_input);
-	  goto done;
-	}
+    while (unformat_check_input (line_input) != UNFORMAT_END_OF_INPUT) {
+        if (unformat
+            (line_input, "%U", unformat_vnet_hw_interface, dm->vnet_main,
+             &hw_if_index))
+            ;
+        else {
+            error = clib_error_return (0, "parse error: '%U'",
+                                       format_unformat_error, line_input);
+            goto done;
+        }
     }
 
-  if (hw_if_index == (u32) ~ 0)
-    {
-      error = clib_error_return (0, "please specify interface name!!");
-      goto done;
+    if (hw_if_index == (u32) ~ 0) {
+        error = clib_error_return (0, "please specify interface name!!");
+        goto done;
     }
 
-  hw = vnet_get_hw_interface (dm->vnet_main, hw_if_index);
-  xd = vec_elt_at_index (dm->devices, hw->dev_instance);
+    hw = vnet_get_hw_interface (dm->vnet_main, hw_if_index);
+    xd = vec_elt_at_index (dm->devices, hw->dev_instance);
 
-  rte_eth_dev_info_get (xd->device_index, &dev_info);
-  if (dev_info.pci_dev)
-    {				/* bonded interface has no pci info */
-      vlib_pci_addr_t pci_addr;
+    rte_eth_dev_info_get (xd->device_index, &dev_info);
+    if (dev_info.pci_dev) {
+        /* bonded interface has no pci info */
+        vlib_pci_addr_t pci_addr;
 
-      pci_addr.domain = dev_info.pci_dev->addr.domain;
-      pci_addr.bus = dev_info.pci_dev->addr.bus;
-      pci_addr.slot = dev_info.pci_dev->addr.devid;
-      pci_addr.function = dev_info.pci_dev->addr.function;
+        pci_addr.domain = dev_info.pci_dev->addr.domain;
+        pci_addr.bus = dev_info.pci_dev->addr.bus;
+        pci_addr.slot = dev_info.pci_dev->addr.devid;
+        pci_addr.function = dev_info.pci_dev->addr.function;
 
-      p =
-	hash_get (dm->conf->device_config_index_by_pci_addr, pci_addr.as_u32);
+        p =
+            hash_get (dm->conf->device_config_index_by_pci_addr, pci_addr.as_u32);
     }
 
-  if (p)
-    devconf = pool_elt_at_index (dm->conf->dev_confs, p[0]);
-  else
-    devconf = &dm->conf->default_devconf;
+    if (p)
+        devconf = pool_elt_at_index (dm->conf->dev_confs, p[0]);
+    else
+        devconf = &dm->conf->default_devconf;
 
-  if (devconf->hqos_enabled == 0)
-    {
-      vlib_cli_output (vm, "HQoS disabled for this interface");
-      goto done;
+    if (devconf->hqos_enabled == 0) {
+        vlib_cli_output (vm, "HQoS disabled for this interface");
+        goto done;
     }
 
-  /* Detect the set of worker threads */
-  p = hash_get_mem (tm->thread_registrations_by_name, "workers");
+    /* Detect the set of worker threads */
+    p = hash_get_mem (tm->thread_registrations_by_name, "workers");
 
-  /* Should never happen, shut up Coverity warning */
-  if (p == 0)
-    {
-      error = clib_error_return (0, "no worker registrations?");
-      goto done;
+    /* Should never happen, shut up Coverity warning */
+    if (p == 0) {
+        error = clib_error_return (0, "no worker registrations?");
+        goto done;
     }
 
-  tr = (vlib_thread_registration_t *) p[0];
+    tr = (vlib_thread_registration_t *) p[0];
 
-  cfg = &devconf->hqos;
-  ht = xd->hqos_ht;
-  wk = &xd->hqos_wt[tr->first_index];
-  tctbl = wk->hqos_tc_table;
+    cfg = &devconf->hqos;
+    ht = xd->hqos_ht;
+    wk = &xd->hqos_wt[tr->first_index];
+    tctbl = wk->hqos_tc_table;
 
-  vlib_cli_output (vm, " Thread:");
-  vlib_cli_output (vm, "   Input SWQ size = %u packets", cfg->swq_size);
-  vlib_cli_output (vm, "   Enqueue burst size = %u packets",
-		   ht->hqos_burst_enq);
-  vlib_cli_output (vm, "   Dequeue burst size = %u packets",
-		   ht->hqos_burst_deq);
+    vlib_cli_output (vm, " Thread:");
+    vlib_cli_output (vm, "   Input SWQ size = %u packets", cfg->swq_size);
+    vlib_cli_output (vm, "   Enqueue burst size = %u packets",
+                     ht->hqos_burst_enq);
+    vlib_cli_output (vm, "   Dequeue burst size = %u packets",
+                     ht->hqos_burst_deq);
 
-  vlib_cli_output (vm,
-		   "   Packet field 0: slab position = %4u, slab bitmask = 0x%016llx   (subport)",
-		   wk->hqos_field0_slabpos, wk->hqos_field0_slabmask);
-  vlib_cli_output (vm,
-		   "   Packet field 1: slab position = %4u, slab bitmask = 0x%016llx   (pipe)",
-		   wk->hqos_field1_slabpos, wk->hqos_field1_slabmask);
-  vlib_cli_output (vm,
-		   "   Packet field 2: slab position = %4u, slab bitmask = 0x%016llx   (tc)",
-		   wk->hqos_field2_slabpos, wk->hqos_field2_slabmask);
-  vlib_cli_output (vm,
-		   "   Packet field 2  tc translation table: ([Mapped Value Range]: tc/queue tc/queue ...)");
-  vlib_cli_output (vm,
-		   "     [ 0 .. 15]: "
-		   "%u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u",
-		   tctbl[0] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[0] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[1] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[1] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[2] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[2] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[3] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[3] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[4] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[4] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[5] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[5] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[6] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[6] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[7] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[7] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[8] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[8] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[9] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[9] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[10] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[10] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[11] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[11] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[12] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[12] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[13] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[13] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[14] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[14] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[15] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[15] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS);
-  vlib_cli_output (vm,
-		   "     [16 .. 31]: "
-		   "%u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u",
-		   tctbl[16] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[16] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[17] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[17] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[18] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[18] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[19] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[19] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[20] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[20] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[21] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[21] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[22] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[22] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[23] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[23] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[24] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[24] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[25] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[25] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[26] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[26] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[27] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[27] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[28] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[28] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[29] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[29] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[30] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[30] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[31] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[31] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS);
-  vlib_cli_output (vm,
-		   "     [32 .. 47]: "
-		   "%u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u",
-		   tctbl[32] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[32] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[33] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[33] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[34] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[34] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[35] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[35] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[36] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[36] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[37] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[37] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[38] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[38] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[39] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[39] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[40] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[40] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[41] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[41] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[42] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[42] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[43] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[43] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[44] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[44] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[45] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[45] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[46] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[46] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[47] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[47] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS);
-  vlib_cli_output (vm,
-		   "     [48 .. 63]: "
-		   "%u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u",
-		   tctbl[48] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[48] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[49] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[49] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[50] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[50] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[51] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[51] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[52] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[52] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[53] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[53] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[54] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[54] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[55] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[55] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[56] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[56] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[57] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[57] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[58] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[58] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[59] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[59] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[60] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[60] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[61] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[61] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[62] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[62] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[63] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
-		   tctbl[63] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS);
-  vlib_cli_output (vm, " Port:");
-  vlib_cli_output (vm, "   Rate = %u bytes/second", cfg->port.rate);
-  vlib_cli_output (vm, "   MTU = %u bytes", cfg->port.mtu);
-  vlib_cli_output (vm, "   Frame overhead = %u bytes",
-		   cfg->port.frame_overhead);
-  vlib_cli_output (vm, "   Number of subports = %u",
-		   cfg->port.n_subports_per_port);
-  vlib_cli_output (vm, "   Number of pipes per subport = %u",
-		   cfg->port.n_pipes_per_subport);
-  vlib_cli_output (vm,
-		   "   Packet queue size: TC0 = %u, TC1 = %u, TC2 = %u, TC3 = %u packets",
-		   cfg->port.qsize[0], cfg->port.qsize[1], cfg->port.qsize[2],
-		   cfg->port.qsize[3]);
-  vlib_cli_output (vm, "   Number of pipe profiles = %u",
-		   cfg->port.n_pipe_profiles);
+    vlib_cli_output (vm,
+                     "   Packet field 0: slab position = %4u, slab bitmask = 0x%016llx   (subport)",
+                     wk->hqos_field0_slabpos, wk->hqos_field0_slabmask);
+    vlib_cli_output (vm,
+                     "   Packet field 1: slab position = %4u, slab bitmask = 0x%016llx   (pipe)",
+                     wk->hqos_field1_slabpos, wk->hqos_field1_slabmask);
+    vlib_cli_output (vm,
+                     "   Packet field 2: slab position = %4u, slab bitmask = 0x%016llx   (tc)",
+                     wk->hqos_field2_slabpos, wk->hqos_field2_slabmask);
+    vlib_cli_output (vm,
+                     "   Packet field 2  tc translation table: ([Mapped Value Range]: tc/queue tc/queue ...)");
+    vlib_cli_output (vm,
+                     "     [ 0 .. 15]: "
+                     "%u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u",
+                     tctbl[0] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[0] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[1] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[1] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[2] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[2] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[3] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[3] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[4] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[4] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[5] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[5] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[6] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[6] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[7] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[7] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[8] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[8] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[9] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[9] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[10] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[10] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[11] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[11] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[12] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[12] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[13] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[13] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[14] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[14] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[15] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[15] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS);
+    vlib_cli_output (vm,
+                     "     [16 .. 31]: "
+                     "%u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u",
+                     tctbl[16] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[16] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[17] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[17] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[18] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[18] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[19] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[19] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[20] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[20] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[21] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[21] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[22] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[22] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[23] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[23] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[24] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[24] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[25] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[25] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[26] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[26] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[27] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[27] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[28] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[28] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[29] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[29] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[30] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[30] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[31] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[31] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS);
+    vlib_cli_output (vm,
+                     "     [32 .. 47]: "
+                     "%u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u",
+                     tctbl[32] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[32] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[33] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[33] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[34] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[34] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[35] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[35] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[36] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[36] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[37] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[37] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[38] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[38] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[39] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[39] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[40] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[40] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[41] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[41] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[42] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[42] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[43] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[43] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[44] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[44] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[45] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[45] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[46] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[46] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[47] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[47] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS);
+    vlib_cli_output (vm,
+                     "     [48 .. 63]: "
+                     "%u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u %u/%u",
+                     tctbl[48] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[48] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[49] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[49] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[50] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[50] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[51] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[51] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[52] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[52] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[53] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[53] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[54] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[54] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[55] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[55] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[56] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[56] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[57] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[57] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[58] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[58] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[59] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[59] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[60] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[60] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[61] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[61] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[62] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[62] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[63] / RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS,
+                     tctbl[63] % RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS);
+    vlib_cli_output (vm, " Port:");
+    vlib_cli_output (vm, "   Rate = %u bytes/second", cfg->port.rate);
+    vlib_cli_output (vm, "   MTU = %u bytes", cfg->port.mtu);
+    vlib_cli_output (vm, "   Frame overhead = %u bytes",
+                     cfg->port.frame_overhead);
+    vlib_cli_output (vm, "   Number of subports = %u",
+                     cfg->port.n_subports_per_port);
+    vlib_cli_output (vm, "   Number of pipes per subport = %u",
+                     cfg->port.n_pipes_per_subport);
+    vlib_cli_output (vm,
+                     "   Packet queue size: TC0 = %u, TC1 = %u, TC2 = %u, TC3 = %u packets",
+                     cfg->port.qsize[0], cfg->port.qsize[1], cfg->port.qsize[2],
+                     cfg->port.qsize[3]);
+    vlib_cli_output (vm, "   Number of pipe profiles = %u",
+                     cfg->port.n_pipe_profiles);
 
-  for (subport_id = 0; subport_id < vec_len (cfg->subport); subport_id++)
-    {
-      vlib_cli_output (vm, " Subport %u:", subport_id);
-      vlib_cli_output (vm, "   Rate = %u bytes/second",
-		       cfg->subport[subport_id].tb_rate);
-      vlib_cli_output (vm, "   Token bucket size = %u bytes",
-		       cfg->subport[subport_id].tb_size);
-      vlib_cli_output (vm,
-		       "   Traffic class rate: TC0 = %u, TC1 = %u, TC2 = %u, TC3 = %u bytes/second",
-		       cfg->subport[subport_id].tc_rate[0],
-		       cfg->subport[subport_id].tc_rate[1],
-		       cfg->subport[subport_id].tc_rate[2],
-		       cfg->subport[subport_id].tc_rate[3]);
-      vlib_cli_output (vm, "   TC period = %u milliseconds",
-		       cfg->subport[subport_id].tc_period);
+    for (subport_id = 0; subport_id < vec_len (cfg->subport); subport_id++) {
+        vlib_cli_output (vm, " Subport %u:", subport_id);
+        vlib_cli_output (vm, "   Rate = %u bytes/second",
+                         cfg->subport[subport_id].tb_rate);
+        vlib_cli_output (vm, "   Token bucket size = %u bytes",
+                         cfg->subport[subport_id].tb_size);
+        vlib_cli_output (vm,
+                         "   Traffic class rate: TC0 = %u, TC1 = %u, TC2 = %u, TC3 = %u bytes/second",
+                         cfg->subport[subport_id].tc_rate[0],
+                         cfg->subport[subport_id].tc_rate[1],
+                         cfg->subport[subport_id].tc_rate[2],
+                         cfg->subport[subport_id].tc_rate[3]);
+        vlib_cli_output (vm, "   TC period = %u milliseconds",
+                         cfg->subport[subport_id].tc_period);
     }
 
-  for (profile_id = 0; profile_id < vec_len (cfg->pipe); profile_id++)
-    {
-      vlib_cli_output (vm, " Pipe profile %u:", profile_id);
-      vlib_cli_output (vm, "   Rate = %u bytes/second",
-		       cfg->pipe[profile_id].tb_rate);
-      vlib_cli_output (vm, "   Token bucket size = %u bytes",
-		       cfg->pipe[profile_id].tb_size);
-      vlib_cli_output (vm,
-		       "   Traffic class rate: TC0 = %u, TC1 = %u, TC2 = %u, TC3 = %u bytes/second",
-		       cfg->pipe[profile_id].tc_rate[0],
-		       cfg->pipe[profile_id].tc_rate[1],
-		       cfg->pipe[profile_id].tc_rate[2],
-		       cfg->pipe[profile_id].tc_rate[3]);
-      vlib_cli_output (vm, "   TC period = %u milliseconds",
-		       cfg->pipe[profile_id].tc_period);
+    for (profile_id = 0; profile_id < vec_len (cfg->pipe); profile_id++) {
+        vlib_cli_output (vm, " Pipe profile %u:", profile_id);
+        vlib_cli_output (vm, "   Rate = %u bytes/second",
+                         cfg->pipe[profile_id].tb_rate);
+        vlib_cli_output (vm, "   Token bucket size = %u bytes",
+                         cfg->pipe[profile_id].tb_size);
+        vlib_cli_output (vm,
+                         "   Traffic class rate: TC0 = %u, TC1 = %u, TC2 = %u, TC3 = %u bytes/second",
+                         cfg->pipe[profile_id].tc_rate[0],
+                         cfg->pipe[profile_id].tc_rate[1],
+                         cfg->pipe[profile_id].tc_rate[2],
+                         cfg->pipe[profile_id].tc_rate[3]);
+        vlib_cli_output (vm, "   TC period = %u milliseconds",
+                         cfg->pipe[profile_id].tc_period);
 #ifdef RTE_SCHED_SUBPORT_TC_OV
-      vlib_cli_output (vm, "   TC3 oversubscription_weight = %u",
-		       cfg->pipe[profile_id].tc_ov_weight);
+        vlib_cli_output (vm, "   TC3 oversubscription_weight = %u",
+                         cfg->pipe[profile_id].tc_ov_weight);
 #endif
 
-      for (i = 0; i < RTE_SCHED_TRAFFIC_CLASSES_PER_PIPE; i++)
-	{
-	  vlib_cli_output (vm,
-			   "   TC%u WRR weights: Q0 = %u, Q1 = %u, Q2 = %u, Q3 = %u",
-			   i, cfg->pipe[profile_id].wrr_weights[i * 4],
-			   cfg->pipe[profile_id].wrr_weights[i * 4 + 1],
-			   cfg->pipe[profile_id].wrr_weights[i * 4 + 2],
-			   cfg->pipe[profile_id].wrr_weights[i * 4 + 3]);
-	}
+        for (i = 0; i < RTE_SCHED_TRAFFIC_CLASSES_PER_PIPE; i++) {
+            vlib_cli_output (vm,
+                             "   TC%u WRR weights: Q0 = %u, Q1 = %u, Q2 = %u, Q3 = %u",
+                             i, cfg->pipe[profile_id].wrr_weights[i * 4],
+                             cfg->pipe[profile_id].wrr_weights[i * 4 + 1],
+                             cfg->pipe[profile_id].wrr_weights[i * 4 + 2],
+                             cfg->pipe[profile_id].wrr_weights[i * 4 + 3]);
+        }
     }
 
 #ifdef RTE_SCHED_RED
-  vlib_cli_output (vm, " Weighted Random Early Detection (WRED):");
-  for (i = 0; i < RTE_SCHED_TRAFFIC_CLASSES_PER_PIPE; i++)
-    {
-      vlib_cli_output (vm, "   TC%u min: G = %u, Y = %u, R = %u", i,
-		       cfg->port.red_params[i][e_RTE_METER_GREEN].min_th,
-		       cfg->port.red_params[i][e_RTE_METER_YELLOW].min_th,
-		       cfg->port.red_params[i][e_RTE_METER_RED].min_th);
+    vlib_cli_output (vm, " Weighted Random Early Detection (WRED):");
+    for (i = 0; i < RTE_SCHED_TRAFFIC_CLASSES_PER_PIPE; i++) {
+        vlib_cli_output (vm, "   TC%u min: G = %u, Y = %u, R = %u", i,
+                         cfg->port.red_params[i][e_RTE_METER_GREEN].min_th,
+                         cfg->port.red_params[i][e_RTE_METER_YELLOW].min_th,
+                         cfg->port.red_params[i][e_RTE_METER_RED].min_th);
 
-      vlib_cli_output (vm, "   TC%u max: G = %u, Y = %u, R = %u", i,
-		       cfg->port.red_params[i][e_RTE_METER_GREEN].max_th,
-		       cfg->port.red_params[i][e_RTE_METER_YELLOW].max_th,
-		       cfg->port.red_params[i][e_RTE_METER_RED].max_th);
+        vlib_cli_output (vm, "   TC%u max: G = %u, Y = %u, R = %u", i,
+                         cfg->port.red_params[i][e_RTE_METER_GREEN].max_th,
+                         cfg->port.red_params[i][e_RTE_METER_YELLOW].max_th,
+                         cfg->port.red_params[i][e_RTE_METER_RED].max_th);
 
-      vlib_cli_output (vm,
-		       "   TC%u inverted probability: G = %u, Y = %u, R = %u",
-		       i, cfg->port.red_params[i][e_RTE_METER_GREEN].maxp_inv,
-		       cfg->port.red_params[i][e_RTE_METER_YELLOW].maxp_inv,
-		       cfg->port.red_params[i][e_RTE_METER_RED].maxp_inv);
+        vlib_cli_output (vm,
+                         "   TC%u inverted probability: G = %u, Y = %u, R = %u",
+                         i, cfg->port.red_params[i][e_RTE_METER_GREEN].maxp_inv,
+                         cfg->port.red_params[i][e_RTE_METER_YELLOW].maxp_inv,
+                         cfg->port.red_params[i][e_RTE_METER_RED].maxp_inv);
 
-      vlib_cli_output (vm, "   TC%u weight: R = %u, Y = %u, R = %u", i,
-		       cfg->port.red_params[i][e_RTE_METER_GREEN].wq_log2,
-		       cfg->port.red_params[i][e_RTE_METER_YELLOW].wq_log2,
-		       cfg->port.red_params[i][e_RTE_METER_RED].wq_log2);
+        vlib_cli_output (vm, "   TC%u weight: R = %u, Y = %u, R = %u", i,
+                         cfg->port.red_params[i][e_RTE_METER_GREEN].wq_log2,
+                         cfg->port.red_params[i][e_RTE_METER_YELLOW].wq_log2,
+                         cfg->port.red_params[i][e_RTE_METER_RED].wq_log2);
     }
 #endif
 
 done:
-  unformat_free (line_input);
+    unformat_free (line_input);
 
-  return error;
+    return error;
 }
 
 /*?
@@ -1701,130 +1603,125 @@ VLIB_CLI_COMMAND (cmd_show_dpdk_if_hqos, static) = {
 
 static clib_error_t *
 show_dpdk_hqos_queue_stats (vlib_main_t * vm, unformat_input_t * input,
-			    vlib_cli_command_t * cmd)
+                            vlib_cli_command_t * cmd)
 {
-  unformat_input_t _line_input, *line_input = &_line_input;
-  clib_error_t *error = NULL;
+    unformat_input_t _line_input, *line_input = &_line_input;
+    clib_error_t *error = NULL;
 #ifdef RTE_SCHED_COLLECT_STATS
-  dpdk_main_t *dm = &dpdk_main;
-  u32 hw_if_index = (u32) ~ 0;
-  u32 subport = (u32) ~ 0;
-  u32 pipe = (u32) ~ 0;
-  u32 tc = (u32) ~ 0;
-  u32 tc_q = (u32) ~ 0;
-  vnet_hw_interface_t *hw;
-  dpdk_device_t *xd;
-  uword *p = 0;
-  struct rte_eth_dev_info dev_info;
-  dpdk_device_config_t *devconf = 0;
-  u32 qindex;
-  struct rte_sched_queue_stats stats;
-  u16 qlen;
+    dpdk_main_t *dm = &dpdk_main;
+    u32 hw_if_index = (u32) ~ 0;
+    u32 subport = (u32) ~ 0;
+    u32 pipe = (u32) ~ 0;
+    u32 tc = (u32) ~ 0;
+    u32 tc_q = (u32) ~ 0;
+    vnet_hw_interface_t *hw;
+    dpdk_device_t *xd;
+    uword *p = 0;
+    struct rte_eth_dev_info dev_info;
+    dpdk_device_config_t *devconf = 0;
+    u32 qindex;
+    struct rte_sched_queue_stats stats;
+    u16 qlen;
 
-  if (!unformat_user (input, unformat_line_input, line_input))
-    return 0;
+    if (!unformat_user (input, unformat_line_input, line_input))
+        return 0;
 
-  while (unformat_check_input (line_input) != UNFORMAT_END_OF_INPUT)
-    {
-      if (unformat
-	  (line_input, "%U", unformat_vnet_hw_interface, dm->vnet_main,
-	   &hw_if_index))
-	;
+    while (unformat_check_input (line_input) != UNFORMAT_END_OF_INPUT) {
+        if (unformat
+            (line_input, "%U", unformat_vnet_hw_interface, dm->vnet_main,
+             &hw_if_index))
+            ;
 
-      else if (unformat (line_input, "subport %d", &subport))
-	;
+        else if (unformat (line_input, "subport %d", &subport))
+            ;
 
-      else if (unformat (line_input, "pipe %d", &pipe))
-	;
+        else if (unformat (line_input, "pipe %d", &pipe))
+            ;
 
-      else if (unformat (line_input, "tc %d", &tc))
-	;
+        else if (unformat (line_input, "tc %d", &tc))
+            ;
 
-      else if (unformat (line_input, "tc_q %d", &tc_q))
-	;
+        else if (unformat (line_input, "tc_q %d", &tc_q))
+            ;
 
-      else
-	{
-	  error = clib_error_return (0, "parse error: '%U'",
-				     format_unformat_error, line_input);
-	  goto done;
-	}
+        else {
+            error = clib_error_return (0, "parse error: '%U'",
+                                       format_unformat_error, line_input);
+            goto done;
+        }
     }
 
-  if (hw_if_index == (u32) ~ 0)
-    {
-      error = clib_error_return (0, "please specify interface name!!");
-      goto done;
+    if (hw_if_index == (u32) ~ 0) {
+        error = clib_error_return (0, "please specify interface name!!");
+        goto done;
     }
 
-  hw = vnet_get_hw_interface (dm->vnet_main, hw_if_index);
-  xd = vec_elt_at_index (dm->devices, hw->dev_instance);
+    hw = vnet_get_hw_interface (dm->vnet_main, hw_if_index);
+    xd = vec_elt_at_index (dm->devices, hw->dev_instance);
 
-  rte_eth_dev_info_get (xd->device_index, &dev_info);
-  if (dev_info.pci_dev)
-    {				/* bonded interface has no pci info */
-      vlib_pci_addr_t pci_addr;
+    rte_eth_dev_info_get (xd->device_index, &dev_info);
+    if (dev_info.pci_dev) {
+        /* bonded interface has no pci info */
+        vlib_pci_addr_t pci_addr;
 
-      pci_addr.domain = dev_info.pci_dev->addr.domain;
-      pci_addr.bus = dev_info.pci_dev->addr.bus;
-      pci_addr.slot = dev_info.pci_dev->addr.devid;
-      pci_addr.function = dev_info.pci_dev->addr.function;
+        pci_addr.domain = dev_info.pci_dev->addr.domain;
+        pci_addr.bus = dev_info.pci_dev->addr.bus;
+        pci_addr.slot = dev_info.pci_dev->addr.devid;
+        pci_addr.function = dev_info.pci_dev->addr.function;
 
-      p =
-	hash_get (dm->conf->device_config_index_by_pci_addr, pci_addr.as_u32);
+        p =
+            hash_get (dm->conf->device_config_index_by_pci_addr, pci_addr.as_u32);
     }
 
-  if (p)
-    devconf = pool_elt_at_index (dm->conf->dev_confs, p[0]);
-  else
-    devconf = &dm->conf->default_devconf;
+    if (p)
+        devconf = pool_elt_at_index (dm->conf->dev_confs, p[0]);
+    else
+        devconf = &dm->conf->default_devconf;
 
-  if (devconf->hqos_enabled == 0)
-    {
-      vlib_cli_output (vm, "HQoS disabled for this interface");
-      goto done;
+    if (devconf->hqos_enabled == 0) {
+        vlib_cli_output (vm, "HQoS disabled for this interface");
+        goto done;
     }
 
-  /*
-   * Figure out which queue to query.  cf rte_sched_port_qindex.  (Not sure why
-   * that method isn't made public by DPDK - how _should_ we get the queue ID?)
-   */
-  qindex = subport * devconf->hqos.port.n_pipes_per_subport + pipe;
-  qindex = qindex * RTE_SCHED_TRAFFIC_CLASSES_PER_PIPE + tc;
-  qindex = qindex * RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS + tc_q;
+    /*
+     * Figure out which queue to query.  cf rte_sched_port_qindex.  (Not sure why
+     * that method isn't made public by DPDK - how _should_ we get the queue ID?)
+     */
+    qindex = subport * devconf->hqos.port.n_pipes_per_subport + pipe;
+    qindex = qindex * RTE_SCHED_TRAFFIC_CLASSES_PER_PIPE + tc;
+    qindex = qindex * RTE_SCHED_QUEUES_PER_TRAFFIC_CLASS + tc_q;
 
-  if (rte_sched_queue_read_stats (xd->hqos_ht->hqos, qindex, &stats, &qlen) !=
-      0)
-    {
-      error = clib_error_return (0, "failed to read stats");
-      goto done;
+    if (rte_sched_queue_read_stats (xd->hqos_ht->hqos, qindex, &stats, &qlen) !=
+        0) {
+        error = clib_error_return (0, "failed to read stats");
+        goto done;
     }
 
-  vlib_cli_output (vm, "%=24s%=16s", "Stats Parameter", "Value");
-  vlib_cli_output (vm, "%=24s%=16d", "Packets", stats.n_pkts);
-  vlib_cli_output (vm, "%=24s%=16d", "Packets dropped", stats.n_pkts_dropped);
+    vlib_cli_output (vm, "%=24s%=16s", "Stats Parameter", "Value");
+    vlib_cli_output (vm, "%=24s%=16d", "Packets", stats.n_pkts);
+    vlib_cli_output (vm, "%=24s%=16d", "Packets dropped", stats.n_pkts_dropped);
 #ifdef RTE_SCHED_RED
-  vlib_cli_output (vm, "%=24s%=16d", "Packets dropped (RED)",
-		   stats.n_pkts_red_dropped);
+    vlib_cli_output (vm, "%=24s%=16d", "Packets dropped (RED)",
+                     stats.n_pkts_red_dropped);
 #endif
-  vlib_cli_output (vm, "%=24s%=16d", "Bytes", stats.n_bytes);
-  vlib_cli_output (vm, "%=24s%=16d", "Bytes dropped", stats.n_bytes_dropped);
+    vlib_cli_output (vm, "%=24s%=16d", "Bytes", stats.n_bytes);
+    vlib_cli_output (vm, "%=24s%=16d", "Bytes dropped", stats.n_bytes_dropped);
 
 #else
 
-  /* Get a line of input */
-  if (!unformat_user (input, unformat_line_input, line_input))
-    return 0;
+    /* Get a line of input */
+    if (!unformat_user (input, unformat_line_input, line_input))
+        return 0;
 
-  vlib_cli_output (vm, "RTE_SCHED_COLLECT_STATS disabled in DPDK");
-  goto done;
+    vlib_cli_output (vm, "RTE_SCHED_COLLECT_STATS disabled in DPDK");
+    goto done;
 
 #endif
 
 done:
-  unformat_free (line_input);
+    unformat_free (line_input);
 
-  return error;
+    return error;
 }
 
 /*?
@@ -1856,14 +1753,14 @@ VLIB_CLI_COMMAND (cmd_show_dpdk_hqos_queue_stats, static) = {
 
 static clib_error_t *
 show_dpdk_version_command_fn (vlib_main_t * vm,
-			      unformat_input_t * input,
-			      vlib_cli_command_t * cmd)
+                              unformat_input_t * input,
+                              vlib_cli_command_t * cmd)
 {
 #define _(a,b,c) vlib_cli_output (vm, "%-25s " b, a ":", c);
-  _("DPDK Version", "%s", rte_version ());
-  _("DPDK EAL init args", "%s", dpdk_config_main.eal_init_args_str);
+    _("DPDK Version", "%s", rte_version ());
+    _("DPDK EAL init args", "%s", dpdk_config_main.eal_init_args_str);
 #undef _
-  return 0;
+    return 0;
 }
 
 /*?
@@ -1889,42 +1786,38 @@ VLIB_CLI_COMMAND (show_vpe_version_command, static) = {
 
 static clib_error_t *
 dpdk_validate_buffers_fn (vlib_main_t * vm, unformat_input_t * input,
-			  vlib_cli_command_t * cmd_arg)
+                          vlib_cli_command_t * cmd_arg)
 {
-  u32 n_invalid_bufs = 0, uninitialized = 0;
-  u32 is_poison = 0, is_test = 0;
-  while (unformat_check_input (input) != UNFORMAT_END_OF_INPUT)
-    {
-      if (unformat (input, "poison"))
-	is_poison = 1;
-      else if (unformat (input, "trajectory"))
-	is_test = 1;
-      else
-	return clib_error_return (0, "unknown input `%U'",
-				  format_unformat_error, input);
+    u32 n_invalid_bufs = 0, uninitialized = 0;
+    u32 is_poison = 0, is_test = 0;
+    while (unformat_check_input (input) != UNFORMAT_END_OF_INPUT) {
+        if (unformat (input, "poison"))
+            is_poison = 1;
+        else if (unformat (input, "trajectory"))
+            is_test = 1;
+        else
+            return clib_error_return (0, "unknown input `%U'",
+                                      format_unformat_error, input);
     }
 
-  if (VLIB_BUFFER_TRACE_TRAJECTORY == 0)
-    {
-      vlib_cli_output (vm, "Trajectory not enabled. Recompile with "
-		       "VLIB_BUFFER_TRACE_TRAJECTORY 1");
-      return 0;
+    if (VLIB_BUFFER_TRACE_TRAJECTORY == 0) {
+        vlib_cli_output (vm, "Trajectory not enabled. Recompile with "
+                         "VLIB_BUFFER_TRACE_TRAJECTORY 1");
+        return 0;
     }
-  if (is_poison)
-    {
-      dpdk_buffer_poison_trajectory_all ();
+    if (is_poison) {
+        dpdk_buffer_poison_trajectory_all ();
     }
-  if (is_test)
-    {
-      n_invalid_bufs = dpdk_buffer_validate_trajectory_all (&uninitialized);
-      if (!n_invalid_bufs)
-	vlib_cli_output (vm, "All buffers are valid %d uninitialized",
-			 uninitialized);
-      else
-	vlib_cli_output (vm, "Found %d invalid buffers and %d uninitialized",
-			 n_invalid_bufs, uninitialized);
+    if (is_test) {
+        n_invalid_bufs = dpdk_buffer_validate_trajectory_all (&uninitialized);
+        if (!n_invalid_bufs)
+            vlib_cli_output (vm, "All buffers are valid %d uninitialized",
+                             uninitialized);
+        else
+            vlib_cli_output (vm, "Found %d invalid buffers and %d uninitialized",
+                             n_invalid_bufs, uninitialized);
     }
-  return 0;
+    return 0;
 }
 
 /* *INDENT-OFF* */
@@ -1941,7 +1834,7 @@ VLIB_CLI_COMMAND (test_dpdk_buffers_command, static) =
 clib_error_t *
 dpdk_cli_init (vlib_main_t * vm)
 {
-  return 0;
+    return 0;
 }
 
 VLIB_INIT_FUNCTION (dpdk_cli_init);

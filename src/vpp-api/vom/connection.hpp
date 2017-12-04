@@ -22,53 +22,55 @@
 /**
  * Forward declarations
  */
-namespace vapi {
-class Connection;
-};
-
-namespace VOM {
-/**
- * A representation of the connection to VPP
- */
-class connection
+namespace vapi
 {
-public:
-  /**
-   * Constructor
-   */
-  connection();
-  /**
-   * Destructor
-   */
-  ~connection();
-
-  /**
-   * Blocking [re]connect call - always eventually succeeds, or the
-   * universe expires. Not much this system can do without one.
-   */
-  void connect();
-
-  /**
-   * Blocking disconnect
-   */
-  void disconnect();
-
-  /**
-   * Retrun the VAPI context the commands will use
-   */
-  vapi::Connection& ctx();
-
-private:
-  /**
-   * The VAPI connection context
-   */
-  std::unique_ptr<vapi::Connection> m_vapi_conn;
-
-  /**
-   * The name of this application
-   */
-  const std::string m_app_name;
+    class Connection;
 };
+
+namespace VOM
+{
+    /**
+     * A representation of the connection to VPP
+     */
+    class connection
+    {
+    public:
+        /**
+         * Constructor
+         */
+        connection();
+        /**
+         * Destructor
+         */
+        ~connection();
+
+        /**
+         * Blocking [re]connect call - always eventually succeeds, or the
+         * universe expires. Not much this system can do without one.
+         */
+        void connect();
+
+        /**
+         * Blocking disconnect
+         */
+        void disconnect();
+
+        /**
+         * Retrun the VAPI context the commands will use
+         */
+        vapi::Connection& ctx();
+
+    private:
+        /**
+         * The VAPI connection context
+         */
+        std::unique_ptr<vapi::Connection> m_vapi_conn;
+
+        /**
+         * The name of this application
+         */
+        const std::string m_app_name;
+    };
 };
 
 /*

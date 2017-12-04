@@ -20,74 +20,76 @@
 
 #include <vapi/vpe.api.vapi.hpp>
 
-namespace VOM {
-namespace arp_proxy_binding_cmds {
-/**
- * A command class that binds the LLDP config to the interface
- */
-class bind_cmd
-  : public rpc_cmd<HW::item<bool>, rc_t, vapi::Proxy_arp_intfc_enable_disable>
+namespace VOM
 {
-public:
-  /**
-   * Constructor
-   */
-  bind_cmd(HW::item<bool>& item, const handle_t& itf);
+    namespace arp_proxy_binding_cmds
+    {
+        /**
+         * A command class that binds the LLDP config to the interface
+         */
+        class bind_cmd
+            : public rpc_cmd<HW::item<bool>, rc_t, vapi::Proxy_arp_intfc_enable_disable>
+        {
+        public:
+            /**
+             * Constructor
+             */
+            bind_cmd(HW::item<bool>& item, const handle_t& itf);
 
-  /**
-   * Issue the command to VPP/HW
-   */
-  rc_t issue(connection& con);
-  /**
-   * convert to string format for debug purposes
-   */
-  std::string to_string() const;
+            /**
+             * Issue the command to VPP/HW
+             */
+            rc_t issue(connection& con);
+            /**
+             * convert to string format for debug purposes
+             */
+            std::string to_string() const;
 
-  /**
-   * Comparison operator - only used for UT
-   */
-  bool operator==(const bind_cmd& i) const;
+            /**
+             * Comparison operator - only used for UT
+             */
+            bool operator==(const bind_cmd& i) const;
 
-private:
-  /**
-   * Reference to the HW::item of the interface to bind
-   */
-  const handle_t& m_itf;
-};
+        private:
+            /**
+             * Reference to the HW::item of the interface to bind
+             */
+            const handle_t& m_itf;
+        };
 
-/**
- * A cmd class that Unbinds ArpProxy Config from an interface
- */
-class unbind_cmd
-  : public rpc_cmd<HW::item<bool>, rc_t, vapi::Proxy_arp_intfc_enable_disable>
-{
-public:
-  /**
-   * Constructor
-   */
-  unbind_cmd(HW::item<bool>& item, const handle_t& itf);
+        /**
+         * A cmd class that Unbinds ArpProxy Config from an interface
+         */
+        class unbind_cmd
+            : public rpc_cmd<HW::item<bool>, rc_t, vapi::Proxy_arp_intfc_enable_disable>
+        {
+        public:
+            /**
+             * Constructor
+             */
+            unbind_cmd(HW::item<bool>& item, const handle_t& itf);
 
-  /**
-   * Issue the command to VPP/HW
-   */
-  rc_t issue(connection& con);
-  /**
-   * convert to string format for debug purposes
-   */
-  std::string to_string() const;
+            /**
+             * Issue the command to VPP/HW
+             */
+            rc_t issue(connection& con);
+            /**
+             * convert to string format for debug purposes
+             */
+            std::string to_string() const;
 
-  /**
-   * Comparison operator - only used for UT
-   */
-  bool operator==(const unbind_cmd& i) const;
+            /**
+             * Comparison operator - only used for UT
+             */
+            bool operator==(const unbind_cmd& i) const;
 
-private:
-  /**
-   * Reference to the HW::item of the interface to unbind
-   */
-  const handle_t& m_itf;
-};
-};
+        private:
+            /**
+             * Reference to the HW::item of the interface to unbind
+             */
+            const handle_t& m_itf;
+        };
+    };
 };
 
 /*

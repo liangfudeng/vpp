@@ -116,20 +116,16 @@ bier_table_id_cmp (const bier_table_id_t *btid1,
 
     res = (btid1->bti_set - btid2->bti_set);
 
-    if (0 == res)
-    {
+    if (0 == res) {
         res  = (btid1->bti_sub_domain - btid2->bti_sub_domain);
     }
-    if (0 == res)
-    {
+    if (0 == res) {
         res = (btid1->bti_ecmp - btid2->bti_ecmp);
     }
-    if (0 == res)
-    {
+    if (0 == res) {
         res = (btid1->bti_hdr_len - btid2->bti_hdr_len);
     }
-    if (0 == res)
-    {
+    if (0 == res) {
         res = (btid1->bti_type - btid2->bti_type);
     }
     return (res);
@@ -138,23 +134,22 @@ bier_table_id_cmp (const bier_table_id_t *btid1,
 dpo_proto_t
 bier_hdr_proto_to_dpo (bier_hdr_proto_id_t bproto)
 {
-    switch (bproto)
-    {
-    case BIER_HDR_PROTO_INVALID:
-    case BIER_HDR_PROTO_CTRL:
-    case BIER_HDR_PROTO_OAM:
-        ASSERT(0);
-        break;
-    case BIER_HDR_PROTO_MPLS_DOWN_STREAM:
-    case BIER_HDR_PROTO_MPLS_UP_STREAM:
-        return (DPO_PROTO_MPLS);
-    case BIER_HDR_PROTO_ETHERNET:
-    case BIER_HDR_PROTO_VXLAN:
-        return (DPO_PROTO_ETHERNET);
-    case BIER_HDR_PROTO_IPV4:
-        return (DPO_PROTO_IP4);
-    case BIER_HDR_PROTO_IPV6:
-        return (DPO_PROTO_IP4);
+    switch (bproto) {
+        case BIER_HDR_PROTO_INVALID:
+        case BIER_HDR_PROTO_CTRL:
+        case BIER_HDR_PROTO_OAM:
+            ASSERT(0);
+            break;
+        case BIER_HDR_PROTO_MPLS_DOWN_STREAM:
+        case BIER_HDR_PROTO_MPLS_UP_STREAM:
+            return (DPO_PROTO_MPLS);
+        case BIER_HDR_PROTO_ETHERNET:
+        case BIER_HDR_PROTO_VXLAN:
+            return (DPO_PROTO_ETHERNET);
+        case BIER_HDR_PROTO_IPV4:
+            return (DPO_PROTO_IP4);
+        case BIER_HDR_PROTO_IPV6:
+            return (DPO_PROTO_IP4);
     }
 
     return (DPO_PROTO_NUM);

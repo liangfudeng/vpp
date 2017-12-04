@@ -130,7 +130,7 @@ typedef u32 clib_address_t;
 static inline __attribute__ ((always_inline)) uword
 pointer_to_uword (const void *p)
 {
-  return (uword) (clib_address_t) p;
+    return (uword) (clib_address_t) p;
 }
 
 #define uword_to_pointer(u,type) ((type) (clib_address_t) (u))
@@ -157,10 +157,10 @@ typedef f64 fword;
 
 /* Access memory with specified alignment depending on align argument.
    As with clib_mem_unaligned, may be used as {r,l}value. */
-#define clib_mem_aligned(addr,type,align)		\
-  (((struct {						\
-       type _data					\
-       __attribute__ ((aligned (align), packed));	\
+#define clib_mem_aligned(addr,type,align)       \
+  (((struct {                       \
+       type _data                   \
+       __attribute__ ((aligned (align), packed));   \
     } *) (addr))->_data)
 
 #endif /* included_clib_types_h */

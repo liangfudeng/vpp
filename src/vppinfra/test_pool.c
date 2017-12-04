@@ -47,34 +47,30 @@
 int
 main (int argc, char *argv[])
 {
-  int i, n, seed;
+    int i, n, seed;
 
-  int *p = 0, *e, j, *o = 0;
+    int *p = 0, *e, j, *o = 0;
 
-  n = atoi (argv[1]);
-  seed = getpid ();
-  srandom (1);
+    n = atoi (argv[1]);
+    seed = getpid ();
+    srandom (1);
 
-  for (i = 0; i < n; i++)
-    {
-      if (vec_len (o) < 10 || (random () & 1))
-	{
-	  pool_get (p, e);
-	  j = e - p;
-	  *e = j;
-	  vec_add1 (o, j);
-	}
-      else
-	{
-	  j = random () % vec_len (o);
-	  e = p + j;
-	  pool_put (p, e);
-	  vec_delete (o, 1, j);
-	}
+    for (i = 0; i < n; i++) {
+        if (vec_len (o) < 10 || (random () & 1)) {
+            pool_get (p, e);
+            j = e - p;
+            *e = j;
+            vec_add1 (o, j);
+        } else {
+            j = random () % vec_len (o);
+            e = p + j;
+            pool_put (p, e);
+            vec_delete (o, 1, j);
+        }
     }
-  p = pool_free (p);
-  vec_free (o);
-  return 0;
+    p = pool_free (p);
+    vec_free (o);
+    return 0;
 }
 
 /*

@@ -55,8 +55,8 @@
 #define NULL ((void *) 0)
 #endif
 
-#define BITS(x)		(8*sizeof(x))
-#define ARRAY_LEN(x)	(sizeof (x)/sizeof (x[0]))
+#define BITS(x)     (8*sizeof(x))
+#define ARRAY_LEN(x)    (sizeof (x)/sizeof (x[0]))
 
 #define _STRUCT_FIELD(t,f) (((t *) 0)->f)
 #define STRUCT_OFFSET_OF(t,f) ((uword) & _STRUCT_FIELD (t, f))
@@ -68,15 +68,15 @@
 #define STRUCT_MARK_PTR(v, f) &(v)->f
 
 /* Stride in bytes between struct array elements. */
-#define STRUCT_STRIDE_OF(t,f)			\
-  (  ((uword) & (((t *) 0)[1].f))		\
+#define STRUCT_STRIDE_OF(t,f)           \
+  (  ((uword) & (((t *) 0)[1].f))       \
    - ((uword) & (((t *) 0)[0].f)))
 
 #define STRUCT_OFFSET_OF_VAR(v,f) ((uword) (&(v)->f) - (uword) (v))
 
 /* Used to pack structure elements. */
-#define CLIB_PACKED(x)	x __attribute__ ((packed))
-#define CLIB_UNUSED(x)	x __attribute__ ((unused))
+#define CLIB_PACKED(x)  x __attribute__ ((packed))
+#define CLIB_UNUSED(x)  x __attribute__ ((unused))
 
 /* Make a string from the macro's argument */
 #define CLIB_STRING_MACRO(x) #x
@@ -115,13 +115,13 @@
 #endif
 
 /* Arranges for function to be called before main. */
-#define INIT_FUNCTION(decl)			\
-  decl __attribute ((constructor));		\
+#define INIT_FUNCTION(decl)         \
+  decl __attribute ((constructor));     \
   decl
 
 /* Arranges for function to be called before exit. */
-#define EXIT_FUNCTION(decl)			\
-  decl __attribute ((destructor));		\
+#define EXIT_FUNCTION(decl)         \
+  decl __attribute ((destructor));      \
   decl
 
 /* Use __builtin_clz if available. */
@@ -142,42 +142,42 @@
 
 /* Misc. integer arithmetic functions. */
 #if defined (i386)
-#define count_leading_zeros(count, x)		\
-  do {						\
-    word _clz;					\
-    __asm__ ("bsrl %1,%0"			\
-	     : "=r" (_clz) : "rm" ((word) (x)));\
-    (count) = _clz ^ 31;			\
+#define count_leading_zeros(count, x)       \
+  do {                      \
+    word _clz;                  \
+    __asm__ ("bsrl %1,%0"           \
+         : "=r" (_clz) : "rm" ((word) (x)));\
+    (count) = _clz ^ 31;            \
   } while (0)
 
-#define count_trailing_zeros(count, x)			\
+#define count_trailing_zeros(count, x)          \
   __asm__ ("bsfl %1,%0" : "=r" (count) : "rm" ((word)(x)))
 #endif /* i386 */
 
 #if defined (__alpha__) && defined (HAVE_CIX)
-#define count_leading_zeros(count, x)		\
-  __asm__ ("ctlz %1,%0"				\
-	   : "=r" ((word) (count))		\
-	   : "r" ((word) (x)))
-#define count_trailing_zeros(count, x)		\
-  __asm__ ("cttz %1,%0"				\
-	   : "=r" ((word) (count))		\
-	   : "r" ((word) (x)))
+#define count_leading_zeros(count, x)       \
+  __asm__ ("ctlz %1,%0"             \
+       : "=r" ((word) (count))      \
+       : "r" ((word) (x)))
+#define count_trailing_zeros(count, x)      \
+  __asm__ ("cttz %1,%0"             \
+       : "=r" ((word) (count))      \
+       : "r" ((word) (x)))
 #endif /* alpha && HAVE_CIX */
 
 #if __mips >= 4
 
 /* Select between 32/64 opcodes. */
 #if uword_bits == 32
-#define count_leading_zeros(_count, _x)		\
-  __asm__ ("clz %[count],%[x]"			\
-	   : [count] "=r" ((word) (_count))	\
-	   : [x] "r" ((word) (_x)))
+#define count_leading_zeros(_count, _x)     \
+  __asm__ ("clz %[count],%[x]"          \
+       : [count] "=r" ((word) (_count)) \
+       : [x] "r" ((word) (_x)))
 #else
-#define count_leading_zeros(_count, _x)		\
-  __asm__ ("dclz %[count],%[x]"			\
-	   : [count] "=r" ((word) (_count))	\
-	   : [x] "r" ((word) (_x)))
+#define count_leading_zeros(_count, _x)     \
+  __asm__ ("dclz %[count],%[x]"         \
+       : [count] "=r" ((word) (_count)) \
+       : [x] "r" ((word) (_x)))
 #endif
 
 #endif /* __mips >= 4 */
@@ -188,166 +188,161 @@
 always_inline uword
 min_log2 (uword x)
 {
-  uword n;
-  count_leading_zeros (n, x);
-  return BITS (uword) - n - 1;
+    uword n;
+    count_leading_zeros (n, x);
+    return BITS (uword) - n - 1;
 }
 #else
 always_inline uword
 min_log2 (uword x)
 {
-  uword a = x, b = BITS (uword) / 2, c = 0, r = 0;
+    uword a = x, b = BITS (uword) / 2, c = 0, r = 0;
 
-  /* Reduce x to 4 bit result. */
-#define _					\
-{						\
-  c = a >> b;					\
-  if (c) a = c;					\
-  if (c) r += b;				\
-  b /= 2;					\
+    /* Reduce x to 4 bit result. */
+#define _                   \
+{                       \
+  c = a >> b;                   \
+  if (c) a = c;                 \
+  if (c) r += b;                \
+  b /= 2;                   \
 }
 
-  if (BITS (uword) > 32)
+    if (BITS (uword) > 32)
+        _;
     _;
-  _;
-  _;
-  _;
+    _;
+    _;
 #undef _
 
-  /* Do table lookup on 4 bit partial. */
-  if (BITS (uword) > 32)
-    {
-      const u64 table = 0x3333333322221104LL;
-      uword t = (table >> (4 * a)) & 0xf;
-      r = t < 4 ? r + t : ~0;
-    }
-  else
-    {
-      const u32 table = 0x22221104;
-      uword t = (a & 8) ? 3 : ((table >> (4 * a)) & 0xf);
-      r = t < 4 ? r + t : ~0;
+    /* Do table lookup on 4 bit partial. */
+    if (BITS (uword) > 32) {
+        const u64 table = 0x3333333322221104LL;
+        uword t = (table >> (4 * a)) & 0xf;
+        r = t < 4 ? r + t : ~0;
+    } else {
+        const u32 table = 0x22221104;
+        uword t = (a & 8) ? 3 : ((table >> (4 * a)) & 0xf);
+        r = t < 4 ? r + t : ~0;
     }
 
-  return r;
+    return r;
 }
 #endif
 
 always_inline uword
 max_log2 (uword x)
 {
-  uword l = min_log2 (x);
-  if (x > ((uword) 1 << l))
-    l++;
-  return l;
+    uword l = min_log2 (x);
+    if (x > ((uword) 1 << l))
+        l++;
+    return l;
 }
 
 always_inline u64
 min_log2_u64 (u64 x)
 {
-  if (BITS (uword) == 64)
-    return min_log2 (x);
-  else
-    {
-      uword l, y;
-      y = x;
-      l = 0;
-      if (y == 0)
-	{
-	  l += 32;
-	  x >>= 32;
-	}
-      l += min_log2 (x);
-      return l;
+    if (BITS (uword) == 64)
+        return min_log2 (x);
+    else {
+        uword l, y;
+        y = x;
+        l = 0;
+        if (y == 0) {
+            l += 32;
+            x >>= 32;
+        }
+        l += min_log2 (x);
+        return l;
     }
 }
 
 always_inline uword
 pow2_mask (uword x)
 {
-  return ((uword) 1 << x) - (uword) 1;
+    return ((uword) 1 << x) - (uword) 1;
 }
 
 always_inline uword
 max_pow2 (uword x)
 {
-  word y = (word) 1 << min_log2 (x);
-  if (x > y)
-    y *= 2;
-  return y;
+    word y = (word) 1 << min_log2 (x);
+    if (x > y)
+        y *= 2;
+    return y;
 }
 
 always_inline uword
 is_pow2 (uword x)
 {
-  return 0 == (x & (x - 1));
+    return 0 == (x & (x - 1));
 }
 
 always_inline uword
 round_pow2 (uword x, uword pow2)
 {
-  return (x + pow2 - 1) & ~(pow2 - 1);
+    return (x + pow2 - 1) & ~(pow2 - 1);
 }
 
 always_inline u64
 round_pow2_u64 (u64 x, u64 pow2)
 {
-  return (x + pow2 - 1) & ~(pow2 - 1);
+    return (x + pow2 - 1) & ~(pow2 - 1);
 }
 
 always_inline uword
 first_set (uword x)
 {
-  return x & -x;
+    return x & -x;
 }
 
 always_inline uword
 log2_first_set (uword x)
 {
-  uword result;
+    uword result;
 #ifdef count_trailing_zeros
-  count_trailing_zeros (result, x);
+    count_trailing_zeros (result, x);
 #else
-  result = min_log2 (first_set (x));
+    result = min_log2 (first_set (x));
 #endif
-  return result;
+    return result;
 }
 
 always_inline f64
 flt_round_down (f64 x)
 {
-  return (int) x;
+    return (int) x;
 }
 
 always_inline word
 flt_round_nearest (f64 x)
 {
-  return (word) (x + .5);
+    return (word) (x + .5);
 }
 
 always_inline f64
 flt_round_to_multiple (f64 x, f64 f)
 {
-  return f * flt_round_nearest (x / f);
+    return f * flt_round_nearest (x / f);
 }
 
-#define clib_max(x,y)				\
-({						\
-  __typeof__ (x) _x = (x);			\
-  __typeof__ (y) _y = (y);			\
-  _x > _y ? _x : _y;				\
+#define clib_max(x,y)               \
+({                      \
+  __typeof__ (x) _x = (x);          \
+  __typeof__ (y) _y = (y);          \
+  _x > _y ? _x : _y;                \
 })
 
-#define clib_min(x,y)				\
-({						\
-  __typeof__ (x) _x = (x);			\
-  __typeof__ (y) _y = (y);			\
-  _x < _y ? _x : _y;				\
+#define clib_min(x,y)               \
+({                      \
+  __typeof__ (x) _x = (x);          \
+  __typeof__ (y) _y = (y);          \
+  _x < _y ? _x : _y;                \
 })
 
-#define clib_abs(x)				\
-({						\
-  __typeof__ (x) _x = (x);			\
-  _x < 0 ? -_x : _x;				\
+#define clib_abs(x)             \
+({                      \
+  __typeof__ (x) _x = (x);          \
+  _x < 0 ? -_x : _x;                \
 })
 
 /* Standard standalone-only function declarations. */
@@ -355,7 +350,7 @@ flt_round_to_multiple (f64 x, f64 f)
 void clib_standalone_init (void *memory, uword memory_bytes);
 
 void qsort (void *base, uword n, uword size,
-	    int (*)(const void *, const void *));
+            int (*)(const void *, const void *));
 #endif
 
 /* Stack backtrace. */

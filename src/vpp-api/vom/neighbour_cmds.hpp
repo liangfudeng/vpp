@@ -21,125 +21,127 @@
 
 #include <vapi/ip.api.vapi.hpp>
 
-namespace VOM {
-namespace neighbour_cmds {
-
-/**
- * A command class that creates or updates the bridge domain ARP Entry
- */
-class create_cmd
-  : public rpc_cmd<HW::item<bool>, rc_t, vapi::Ip_neighbor_add_del>
+namespace VOM
 {
-public:
-  /**
-   * Constructor
-   */
-  create_cmd(HW::item<bool>& item,
-             handle_t itf,
-             const mac_address_t& mac,
-             const boost::asio::ip::address& ip_addr);
+    namespace neighbour_cmds
+    {
 
-  /**
-   * Issue the command to VPP/HW
-   */
-  rc_t issue(connection& con);
+        /**
+         * A command class that creates or updates the bridge domain ARP Entry
+         */
+        class create_cmd
+            : public rpc_cmd<HW::item<bool>, rc_t, vapi::Ip_neighbor_add_del>
+        {
+        public:
+            /**
+             * Constructor
+             */
+            create_cmd(HW::item<bool>& item,
+                       handle_t itf,
+                       const mac_address_t& mac,
+                       const boost::asio::ip::address& ip_addr);
 
-  /**
-   * convert to string format for debug purposes
-   */
-  std::string to_string() const;
+            /**
+             * Issue the command to VPP/HW
+             */
+            rc_t issue(connection& con);
 
-  /**
-   * Comparison operator - only used for UT
-   */
-  bool operator==(const create_cmd& i) const;
+            /**
+             * convert to string format for debug purposes
+             */
+            std::string to_string() const;
 
-private:
-  handle_t m_itf;
-  mac_address_t m_mac;
-  boost::asio::ip::address m_ip_addr;
-};
+            /**
+             * Comparison operator - only used for UT
+             */
+            bool operator==(const create_cmd& i) const;
 
-/**
- * A cmd class that deletes a bridge domain ARP entry
- */
-class delete_cmd
-  : public rpc_cmd<HW::item<bool>, rc_t, vapi::Ip_neighbor_add_del>
-{
-public:
-  /**
-   * Constructor
-   */
-  delete_cmd(HW::item<bool>& item,
-             handle_t itf,
-             const mac_address_t& mac,
-             const boost::asio::ip::address& ip_addr);
+        private:
+            handle_t m_itf;
+            mac_address_t m_mac;
+            boost::asio::ip::address m_ip_addr;
+        };
 
-  /**
-   * Issue the command to VPP/HW
-   */
-  rc_t issue(connection& con);
+        /**
+         * A cmd class that deletes a bridge domain ARP entry
+         */
+        class delete_cmd
+            : public rpc_cmd<HW::item<bool>, rc_t, vapi::Ip_neighbor_add_del>
+        {
+        public:
+            /**
+             * Constructor
+             */
+            delete_cmd(HW::item<bool>& item,
+                       handle_t itf,
+                       const mac_address_t& mac,
+                       const boost::asio::ip::address& ip_addr);
 
-  /**
-   * convert to string format for debug purposes
-   */
-  std::string to_string() const;
+            /**
+             * Issue the command to VPP/HW
+             */
+            rc_t issue(connection& con);
 
-  /**
-   * Comparison operator - only used for UT
-   */
-  bool operator==(const delete_cmd& i) const;
+            /**
+             * convert to string format for debug purposes
+             */
+            std::string to_string() const;
 
-private:
-  handle_t m_itf;
-  mac_address_t m_mac;
-  boost::asio::ip::address m_ip_addr;
-};
+            /**
+             * Comparison operator - only used for UT
+             */
+            bool operator==(const delete_cmd& i) const;
 
-/**
- * A cmd class that Dumps all the neighbours
- */
-class dump_cmd : public VOM::dump_cmd<vapi::Ip_neighbor_dump>
-{
-public:
-  /**
-   * Constructor
-   */
-  dump_cmd(const handle_t& itf, const l3_proto_t& proto);
-  dump_cmd(const dump_cmd& d);
+        private:
+            handle_t m_itf;
+            mac_address_t m_mac;
+            boost::asio::ip::address m_ip_addr;
+        };
 
-  /**
-   * Issue the command to VPP/HW
-   */
-  rc_t issue(connection& con);
-  /**
-   * convert to string format for debug purposes
-   */
-  std::string to_string() const;
+        /**
+         * A cmd class that Dumps all the neighbours
+         */
+        class dump_cmd : public VOM::dump_cmd<vapi::Ip_neighbor_dump>
+        {
+        public:
+            /**
+             * Constructor
+             */
+            dump_cmd(const handle_t& itf, const l3_proto_t& proto);
+            dump_cmd(const dump_cmd& d);
 
-  /**
-   * Comparison operator - only used for UT
-   */
-  bool operator==(const dump_cmd& i) const;
+            /**
+             * Issue the command to VPP/HW
+             */
+            rc_t issue(connection& con);
+            /**
+             * convert to string format for debug purposes
+             */
+            std::string to_string() const;
 
-private:
-  /**
-   * HW reutrn code
-   */
-  HW::item<bool> item;
+            /**
+             * Comparison operator - only used for UT
+             */
+            bool operator==(const dump_cmd& i) const;
 
-  /**
-   * The interface to dump
-   */
-  handle_t m_itf;
+        private:
+            /**
+             * HW reutrn code
+             */
+            HW::item<bool> item;
 
-  /**
-   * V4 or V6
-   */
-  l3_proto_t m_proto;
-};
+            /**
+             * The interface to dump
+             */
+            handle_t m_itf;
 
-}; // namespace neighbour_cmds
+            /**
+             * V4 or V6
+             */
+            l3_proto_t m_proto;
+        };
+
+    }; // namespace neighbour_cmds
 }; // namespace vom
 #endif
 

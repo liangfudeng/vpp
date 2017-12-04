@@ -180,10 +180,10 @@ typedef u64 u64x _vector_size (8);
 /* Union types. */
 #if (defined(CLIB_HAVE_VEC128) || defined(CLIB_HAVE_VEC64))
 
-#define _(t)					\
-  typedef union {				\
-    t##x as_##t##x;				\
-    t as_##t[VECTOR_WORD_TYPE_LEN (t)];	\
+#define _(t)                    \
+  typedef union {               \
+    t##x as_##t##x;             \
+    t as_##t[VECTOR_WORD_TYPE_LEN (t)]; \
   } t##x##_union_t;
 
 _(u8);
@@ -201,11 +201,11 @@ _(i64);
 
 #ifdef CLIB_HAVE_VEC64
 
-#define _(t,n)					\
-  typedef union {				\
-    t##x##n as_##t##x##n;			\
-    t as_##t[n];				\
-  } t##x##n##_union_t;				\
+#define _(t,n)                  \
+  typedef union {               \
+    t##x##n as_##t##x##n;           \
+    t as_##t[n];                \
+  } t##x##n##_union_t;              \
 
 _(u8, 8);
 _(u16, 4);
@@ -220,11 +220,11 @@ _(i32, 2);
 
 #ifdef CLIB_HAVE_VEC128
 
-#define _(t,n)					\
-  typedef union {				\
-    t##x##n as_##t##x##n;			\
-    t as_##t[n];				\
-  } t##x##n##_union_t;				\
+#define _(t,n)                  \
+  typedef union {               \
+    t##x##n as_##t##x##n;           \
+    t as_##t[n];                \
+  } t##x##n##_union_t;              \
 
 _(u8, 16);
 _(u16, 8);
@@ -244,10 +244,10 @@ _(f64, 2);
 /* When we don't have vector types, still define e.g. u32x4_union_t but as an array. */
 #if !defined(CLIB_HAVE_VEC128) && !defined(CLIB_HAVE_VEC64)
 
-#define _(t,n)					\
-  typedef union {				\
-    t as_##t[n];				\
-  } t##x##n##_union_t;				\
+#define _(t,n)                  \
+  typedef union {               \
+    t as_##t[n];                \
+  } t##x##n##_union_t;              \
 
 _(u8, 16);
 _(u16, 8);

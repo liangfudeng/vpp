@@ -31,8 +31,7 @@ static dlist_elt_t *mfib_signal_dlist_pool;
 /**
  * the list/set of interfaces with signals pending
  */
-typedef struct mfib_signal_q_t_
-{
+typedef struct mfib_signal_q_t_ {
     /**
      * the dlist indext that is the head of the list
      */
@@ -105,8 +104,7 @@ mfib_signal_send_one (struct _unix_shared_memory_queue *q,
                                     mfib_signal_pending.mip_head);
     }));
 
-    if (~0 != li)
-    {
+    if (~0 != li) {
         mfib_signal_t *mfs;
         mfib_itf_t *mfi;
         dlist_elt_t *elt;
@@ -165,17 +163,14 @@ mfib_signal_push (const mfib_entry_t *mfe,
     mfs->mfs_entry = mfib_entry_get_index(mfe);
     mfs->mfs_itf = mfib_itf_get_index(mfi);
 
-    if (NULL != b0)
-    {
+    if (NULL != b0) {
         mfs->mfs_buffer_len = b0->current_length;
         memcpy(mfs->mfs_buffer,
                vlib_buffer_get_current(b0),
                (mfs->mfs_buffer_len > MFIB_SIGNAL_BUFFER_SIZE ?
                 MFIB_SIGNAL_BUFFER_SIZE :
                 mfs->mfs_buffer_len));
-    }
-    else
-    {
+    } else {
         mfs->mfs_buffer_len = 0;
     }
 }
@@ -190,8 +185,7 @@ mfib_signal_remove_itf (const mfib_itf_t *mfi)
      */
     li = mfi->mfi_si;
 
-    if (INDEX_INVALID != li)
-    {
+    if (INDEX_INVALID != li) {
         /*
          * it's in the pending q
          */

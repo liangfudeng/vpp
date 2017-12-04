@@ -33,10 +33,9 @@
 
 #define BFD_AUTH_TYPE_NAME(t) BFD_AUTH_TYPE_##t
 
-typedef enum
-{
+typedef enum {
 #define F(n, l, t, s) BFD_AUTH_TYPE_NAME (t) = n,
-  foreach_bfd_auth_type (F)
+    foreach_bfd_auth_type (F)
 #undef F
 } bfd_auth_type_e;
 
@@ -174,10 +173,9 @@ void bfd_pkt_set_multipoint (bfd_pkt_t * pkt);
 
 #define BFD_DIAG_CODE_NAME(t) BFD_DIAG_CODE_##t
 
-typedef enum
-{
+typedef enum {
 #define F(n, t, s) BFD_DIAG_CODE_NAME (t) = n,
-  foreach_bfd_diag_code (F)
+    foreach_bfd_diag_code (F)
 #undef F
 } bfd_diag_code_e;
 
@@ -192,10 +190,9 @@ const char *bfd_diag_code_string (bfd_diag_code_e diag);
 
 #define BFD_STATE_NAME(t) BFD_STATE_##t
 
-typedef enum
-{
+typedef enum {
 #define F(n, t, s) BFD_STATE_NAME (t) = n,
-  foreach_bfd_state (F)
+    foreach_bfd_state (F)
 #undef F
 } bfd_state_e;
 

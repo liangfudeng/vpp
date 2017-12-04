@@ -39,15 +39,15 @@ typedef CLIB_PACKED (struct {
 #define DNS_RCODE_NOT_IMPLEMENTED 4
 #define DNS_RCODE_REFUSED 5
 
-#define DNS_RA (1<<7)		/**< recursion available */
-#define DNS_RD (1<<8)		/**< recursion desired */
-#define DNS_TC (1<<9)	       /**< truncation  */
-#define DNS_AA (1<<10)		/**< authoritative answer  */
+#define DNS_RA (1<<7)       /**< recursion available */
+#define DNS_RD (1<<8)       /**< recursion desired */
+#define DNS_TC (1<<9)          /**< truncation  */
+#define DNS_AA (1<<10)      /**< authoritative answer  */
 #define DNS_OPCODE_MASK (0xf<<11) /**< opcode mask */
 #define DNS_OPCODE_QUERY (0<<11)  /**< standard query */
 #define DNS_OPCODE_IQUERY (1<<11) /**< inverse query (deprecated) */
 #define DNS_OPCODE_STATUS (2<<11) /**< server status  */
-#define DNS_QR (1<<15)		/**< query=0, response=1  */
+#define DNS_QR (1<<15)      /**< query=0, response=1  */
 
 
 /*
@@ -125,24 +125,23 @@ typedef CLIB_PACKED (struct {
  * Feel free to add as needed
  */
 #define foreach_dns_type                        \
-_(A, 1) 	/**< ip4 host address */        \
+_(A, 1)     /**< ip4 host address */        \
 _(AAAA, 28)     /**< ip6 host address */        \
 _(ALL, 255)     /**< all available data */      \
 _(TEXT, 16)     /**< a text string */           \
 _(NAMESERVER, 2) /**< a nameserver */           \
-_(CNAME, 5)      /**< a CNAME (alias) */	\
-_(MAIL_EXCHANGE, 15) /**< a mail exchange  */	\
-_(PTR, 12)      /**< a PTR (pointer) record */	\
-_(HINFO, 13)	/**< Host info */
+_(CNAME, 5)      /**< a CNAME (alias) */    \
+_(MAIL_EXCHANGE, 15) /**< a mail exchange  */   \
+_(PTR, 12)      /**< a PTR (pointer) record */  \
+_(HINFO, 13)    /**< Host info */
 
-typedef enum
-{
+typedef enum {
 #define _(name,value) DNS_TYPE_##name = value,
-  foreach_dns_type
+    foreach_dns_type
 #undef _
 } dns_type_t;
 
-#define DNS_CLASS_IN	1	/**< The Internet */
+#define DNS_CLASS_IN    1   /**< The Internet */
 
 
 #endif /* included_dns_packet_h */

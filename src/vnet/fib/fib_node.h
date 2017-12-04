@@ -72,8 +72,8 @@ typedef enum fib_node_type_t_ {
     [FIB_NODE_TYPE_MAP_E] = "map-e", \
     [FIB_NODE_TYPE_VXLAN_GPE_TUNNEL] = "vxlan-gpe-tunnel", \
     [FIB_NODE_TYPE_UDP_ENCAP] = "udp-encap", \
-    [FIB_NODE_TYPE_BIER_FMASK] = "bier-fmask",	\
-    [FIB_NODE_TYPE_BIER_ENTRY] = "bier-entry",	\
+    [FIB_NODE_TYPE_BIER_FMASK] = "bier-fmask",  \
+    [FIB_NODE_TYPE_BIER_ENTRY] = "bier-entry",  \
 }
 
 /**
@@ -122,8 +122,8 @@ typedef enum fib_node_back_walk_reason_t_ {
     FIB_NODE_BW_REASON_LAST = FIB_NODE_BW_REASON_ADJ_DOWN,
 } fib_node_back_walk_reason_t;
 
-#define FIB_NODE_BW_REASONS {			            \
-    [FIB_NODE_BW_REASON_RESOLVE] = "resolve",	            \
+#define FIB_NODE_BW_REASONS {                       \
+    [FIB_NODE_BW_REASON_RESOLVE] = "resolve",               \
     [FIB_NODE_BW_REASON_EVALUATE] = "evaluate",             \
     [FIB_NODE_BW_REASON_INTERFACE_UP] = "if-up",            \
     [FIB_NODE_BW_REASON_INTERFACE_DOWN] = "if-down",        \
@@ -134,8 +134,8 @@ typedef enum fib_node_back_walk_reason_t_ {
 
 #define FOR_EACH_FIB_NODE_BW_REASON(_item) \
     for (_item = FIB_NODE_BW_REASON_FIRST; \
-	 _item <= FIB_NODE_BW_REASON_LAST; \
-	 _item++)
+     _item <= FIB_NODE_BW_REASON_LAST; \
+     _item++)
 
 /**
  * Flags enum constructed from the reaons
@@ -152,13 +152,12 @@ typedef enum fib_node_bw_reason_flag_t_ {
 } __attribute__ ((packed)) fib_node_bw_reason_flag_t;
 
 STATIC_ASSERT(sizeof(fib_node_bw_reason_flag_t) < 2,
-	      "BW Reason enum < 2 byte. Consequences for cover_upd_res_t");
+              "BW Reason enum < 2 byte. Consequences for cover_upd_res_t");
 
 /**
  * Flags on the walk
  */
-typedef enum fib_node_bw_flags_t_
-{
+typedef enum fib_node_bw_flags_t_ {
     /**
      * Force the walk to be synchronous
      */
@@ -228,7 +227,7 @@ typedef struct fib_node_back_walk_ctx_t_ {
  * A callback function for walking a node dependency list
  */
 typedef int (*fib_node_ptr_walk_t)(fib_node_ptr_t *depend,
-				   void *ctx);
+                                   void *ctx);
 
 /**
  * A list of dependent nodes.
@@ -325,7 +324,7 @@ STATIC_ASSERT(sizeof(fib_node_t) == 12, "FIB node type is growing");
  * virtual function table
  */
 extern void fib_node_register_type (fib_node_type_t ft,
-				    const fib_node_vft_t *vft);
+                                    const fib_node_vft_t *vft);
 
 /**
  * @brief
@@ -350,12 +349,12 @@ extern fib_node_type_t fib_node_register_new_type (const fib_node_vft_t *vft);
  * @param size_elt The size of one element
  */
 extern void fib_show_memory_usage(const char *name,
-				  u32 in_use_elts,
-				  u32 allocd_elts,
-				  size_t size_elt);
+                                  u32 in_use_elts,
+                                  u32 allocd_elts,
+                                  size_t size_elt);
 
 extern void fib_node_init(fib_node_t *node,
-			  fib_node_type_t ft);
+                          fib_node_type_t ft);
 extern void fib_node_deinit(fib_node_t *node);
 
 extern void fib_node_lock(fib_node_t *node);
@@ -364,18 +363,18 @@ extern void fib_node_unlock(fib_node_t *node);
 extern u32 fib_node_get_n_children(fib_node_type_t parent_type,
                                    fib_node_index_t parent_index);
 extern u32 fib_node_child_add(fib_node_type_t parent_type,
-			      fib_node_index_t parent_index,
-			      fib_node_type_t child_type,
-			      fib_node_index_t child_index);
+                              fib_node_index_t parent_index,
+                              fib_node_type_t child_type,
+                              fib_node_index_t child_index);
 extern void fib_node_child_remove(fib_node_type_t parent_type,
                                   fib_node_index_t parent_index,
                                   fib_node_index_t sibling_index);
 
 extern fib_node_back_walk_rc_t fib_node_back_walk_one(fib_node_ptr_t *ptr,
-                                                      fib_node_back_walk_ctx_t *ctx);
+        fib_node_back_walk_ctx_t *ctx);
 
 extern u8* fib_node_children_format(fib_node_list_t list,
-				    u8 *s);
+                                    u8 *s);
 
 extern const char* fib_node_type_get_name(fib_node_type_t type);
 

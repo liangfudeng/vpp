@@ -20,8 +20,7 @@
  * @brief A struct to hold tracing information for the MPLS label imposition
  * node.
  */
-typedef struct bier_disp_dispatch_trace_t_
-{
+typedef struct bier_disp_dispatch_trace_t_ {
     /**
      * BIER payload protocol used to dispatch
      */
@@ -35,8 +34,8 @@ typedef struct bier_disp_dispatch_trace_t_
 
 always_inline uword
 bier_disp_dispatch_inline (vlib_main_t * vm,
-                         vlib_node_runtime_t * node,
-                         vlib_frame_t * from_frame)
+                           vlib_node_runtime_t * node,
+                           vlib_frame_t * from_frame)
 {
     u32 n_left_from, next_index, * from, * to_next;
 
@@ -45,14 +44,12 @@ bier_disp_dispatch_inline (vlib_main_t * vm,
 
     next_index = node->cached_next_index;
 
-    while (n_left_from > 0)
-    {
+    while (n_left_from > 0) {
         u32 n_left_to_next;
 
         vlib_get_next_frame(vm, node, next_index, to_next, n_left_to_next);
 
-        while (n_left_from > 0 && n_left_to_next > 0)
-        {
+        while (n_left_from > 0 && n_left_to_next > 0) {
             bier_hdr_proto_id_t pproto0;
             bier_disp_entry_t *bde0;
             u32 next0, bi0, bdei0;
@@ -99,8 +96,7 @@ bier_disp_dispatch_inline (vlib_main_t * vm,
             vnet_buffer(b0)->ip.adj_index[VLIB_TX] = dpo0->dpoi_index;
             vnet_buffer(b0)->ip.rpf_id = bde0->bde_fwd[pproto0].bde_rpf_id;
 
-            if (PREDICT_FALSE(b0->flags & VLIB_BUFFER_IS_TRACED))
-            {
+            if (PREDICT_FALSE(b0->flags & VLIB_BUFFER_IS_TRACED)) {
                 bier_disp_dispatch_trace_t *tr =
                     vlib_add_trace (vm, node, b0, sizeof (*tr));
                 tr->pproto = pproto0;
@@ -130,8 +126,8 @@ format_bier_disp_dispatch_trace (u8 * s, va_list * args)
 
 static uword
 bier_disp_dispatch (vlib_main_t * vm,
-                  vlib_node_runtime_t * node,
-                  vlib_frame_t * frame)
+                    vlib_node_runtime_t * node,
+                    vlib_frame_t * frame)
 {
     return (bier_disp_dispatch_inline(vm, node, frame));
 }

@@ -97,6 +97,6 @@ typedef struct node_vft_ {
     void (*print)(struct node_ *);
     void (*generate)(struct node_ *, enum passid id, FILE *ofp);
     char *endian_converter;
-} node_vft_t;    
+} node_vft_t;
 
 #endif /* _node_h */

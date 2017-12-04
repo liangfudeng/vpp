@@ -23,8 +23,7 @@
 /**
  * @brief An element in the list
  */
-typedef struct fib_node_list_elt_t_
-{
+typedef struct fib_node_list_elt_t_ {
     /**
      * The index of the list this element is in
      */
@@ -49,8 +48,7 @@ typedef struct fib_node_list_elt_t_
 /**
  * @brief A list of FIB nodes
  */
-typedef struct fib_node_list_head_t_
-{
+typedef struct fib_node_list_head_t_ {
     /**
      * The head element
      */
@@ -167,8 +165,7 @@ fib_node_list_push_front (fib_node_list_t list,
     elt->fnle_prev = FIB_NODE_INDEX_INVALID;
     elt->fnle_next = head->fnlh_head;
 
-    if (FIB_NODE_INDEX_INVALID != head->fnlh_head)
-    {
+    if (FIB_NODE_INDEX_INVALID != head->fnlh_head) {
         next = fib_node_list_elt_get(head->fnlh_head);
         next->fnle_prev = fib_node_list_elt_get_index(elt);
     }
@@ -181,9 +178,9 @@ fib_node_list_push_front (fib_node_list_t list,
 
 u32
 fib_node_list_push_back (fib_node_list_t list,
-                        int owner_id,
-                        fib_node_type_t type,
-                        fib_node_index_t index)
+                         int owner_id,
+                         fib_node_type_t type,
+                         fib_node_index_t index)
 {
     ASSERT(0);
     return (FIB_NODE_INDEX_INVALID);
@@ -195,19 +192,15 @@ fib_node_list_extract (fib_node_list_head_t *head,
 {
     fib_node_list_elt_t *next, *prev;
 
-    if (FIB_NODE_INDEX_INVALID != elt->fnle_next)
-    {
+    if (FIB_NODE_INDEX_INVALID != elt->fnle_next) {
         next = fib_node_list_elt_get(elt->fnle_next);
         next->fnle_prev = elt->fnle_prev;
     }
 
-    if (FIB_NODE_INDEX_INVALID != elt->fnle_prev)
-    {
+    if (FIB_NODE_INDEX_INVALID != elt->fnle_prev) {
         prev = fib_node_list_elt_get(elt->fnle_prev);
         prev->fnle_next = elt->fnle_next;
-    }
-    else
-    {
+    } else {
         ASSERT (fib_node_list_elt_get_index(elt) == head->fnlh_head);
         head->fnlh_head = elt->fnle_next;
     }
@@ -221,8 +214,7 @@ fib_node_list_insert_after (fib_node_list_head_t *head,
     fib_node_list_elt_t *next;
 
     elt->fnle_next = prev->fnle_next;
-    if (FIB_NODE_INDEX_INVALID != prev->fnle_next)
-    {
+    if (FIB_NODE_INDEX_INVALID != prev->fnle_next) {
         next = fib_node_list_elt_get(prev->fnle_next);
         next->fnle_prev = fib_node_list_elt_get_index(elt);
     }
@@ -269,8 +261,7 @@ fib_node_list_advance (u32 sibling)
     elt = fib_node_list_elt_get(sibling);
     head = fib_node_list_head_get(elt->fnle_list);
 
-    if (FIB_NODE_INDEX_INVALID != elt->fnle_next)
-    {
+    if (FIB_NODE_INDEX_INVALID != elt->fnle_next) {
         /*
          * not at the end of the list
          */
@@ -280,9 +271,7 @@ fib_node_list_advance (u32 sibling)
         fib_node_list_insert_after(head, next, elt);
 
         return (1);
-    }
-    else
-    {
+    } else {
         return (0);
     }
 }
@@ -295,15 +284,12 @@ fib_node_list_elt_get_next (u32 sibling,
 
     elt = fib_node_list_elt_get(sibling);
 
-    if (FIB_NODE_INDEX_INVALID != elt->fnle_next)
-    {
+    if (FIB_NODE_INDEX_INVALID != elt->fnle_next) {
         next = fib_node_list_elt_get(elt->fnle_next);
 
         *ptr = next->fnle_owner;
         return (1);
-    }
-    else
-    {
+    } else {
         ptr->fnp_index = FIB_NODE_INDEX_INVALID;
         return (0);
     }
@@ -314,8 +300,7 @@ fib_node_list_get_size (fib_node_list_t list)
 {
     fib_node_list_head_t *head;
 
-    if (FIB_NODE_INDEX_INVALID == list)
-    {
+    if (FIB_NODE_INDEX_INVALID == list) {
         return (0);
     }
 
@@ -332,15 +317,14 @@ fib_node_list_get_front (fib_node_list_t list,
     fib_node_list_elt_t *elt;
 
 
-    if (0 == fib_node_list_get_size(list))
-    {
+    if (0 == fib_node_list_get_size(list)) {
         ptr->fnp_index = FIB_NODE_INDEX_INVALID;
         return (0);
     }
 
     head = fib_node_list_head_get(list);
     elt = fib_node_list_elt_get(head->fnlh_head);
-    
+
     *ptr = elt->fnle_owner;
 
     return (1);
@@ -359,16 +343,14 @@ fib_node_list_walk (fib_node_list_t list,
     fib_node_list_head_t *head;
     u32 sibling;
 
-    if (FIB_NODE_INDEX_INVALID == list)
-    {
+    if (FIB_NODE_INDEX_INVALID == list) {
         return;
     }
 
     head = fib_node_list_head_get(list);
     sibling = head->fnlh_head;
 
-    while (FIB_NODE_INDEX_INVALID != sibling)
-    {
+    while (FIB_NODE_INDEX_INVALID != sibling) {
         elt = fib_node_list_elt_get(sibling);
         sibling = elt->fnle_next;
 
@@ -380,11 +362,11 @@ void
 fib_node_list_memory_show (void)
 {
     fib_show_memory_usage("Node-list elements",
-			  pool_elts(fib_node_list_elt_pool),
-			  pool_len(fib_node_list_elt_pool),
-			  sizeof(fib_node_list_elt_t));
+                          pool_elts(fib_node_list_elt_pool),
+                          pool_len(fib_node_list_elt_pool),
+                          sizeof(fib_node_list_elt_t));
     fib_show_memory_usage("Node-list heads",
-			  pool_elts(fib_node_list_head_pool),
-			  pool_len(fib_node_list_head_pool),
-			  sizeof(fib_node_list_head_t));
+                          pool_elts(fib_node_list_head_pool),
+                          pool_len(fib_node_list_head_pool),
+                          sizeof(fib_node_list_head_t));
 }

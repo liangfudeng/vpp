@@ -20,22 +20,20 @@
 #ifndef __included_cj_h__
 #define __included_cj_h__
 
-typedef struct
-{
-  f64 time;
-  u32 thread_index;
-  u32 type;
-  u64 data[2];
+typedef struct {
+    f64 time;
+    u32 thread_index;
+    u32 type;
+    u64 data[2];
 } cj_record_t;
 
-typedef struct
-{
-  volatile u64 tail;
-  cj_record_t *records;
-  u32 num_records;
-  volatile u32 enable;
+typedef struct {
+    volatile u64 tail;
+    cj_record_t *records;
+    u32 num_records;
+    volatile u32 enable;
 
-  vlib_main_t *vlib_main;
+    vlib_main_t *vlib_main;
 } cj_main_t;
 
 void cj_log (u32 type, void *data0, void *data1);

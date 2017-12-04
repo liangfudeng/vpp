@@ -32,49 +32,46 @@
   _(6, V6_FIN_V4_FIN_RCV, "v6-fin-v4-fin-rcv") \
   _(7, TRANS, "trans")
 
-typedef enum
-{
+typedef enum {
 #define _(v, N, s) NAT64_TCP_STATE_##N = v,
-  foreach_nat64_tcp_ses_state
+    foreach_nat64_tcp_ses_state
 #undef _
 } nat64_tcp_ses_state_t;
 
-typedef struct
-{
-  ip6_address_t prefix;
-  u8 plen;
-  u32 vrf_id;
-  u32 fib_index;
+typedef struct {
+    ip6_address_t prefix;
+    u8 plen;
+    u32 vrf_id;
+    u32 fib_index;
 } nat64_prefix_t;
 
-typedef struct
-{
-  /** Interface pool */
-  snat_interface_t *interfaces;
+typedef struct {
+    /** Interface pool */
+    snat_interface_t *interfaces;
 
-  /** Address pool vector */
-  snat_address_t *addr_pool;
+    /** Address pool vector */
+    snat_address_t *addr_pool;
 
-  /** sw_if_indices whose interface addresses should be auto-added */
-  u32 *auto_add_sw_if_indices;
+    /** sw_if_indices whose interface addresses should be auto-added */
+    u32 *auto_add_sw_if_indices;
 
-  /** Pref64 vector */
-  nat64_prefix_t *pref64;
+    /** Pref64 vector */
+    nat64_prefix_t *pref64;
 
-  /** BIB and session DB */
-  nat64_db_t db;
+    /** BIB and session DB */
+    nat64_db_t db;
 
-  /* values of various timeouts */
-  u32 udp_timeout;
-  u32 icmp_timeout;
-  u32 tcp_trans_timeout;
-  u32 tcp_est_timeout;
-  u32 tcp_incoming_syn_timeout;
+    /* values of various timeouts */
+    u32 udp_timeout;
+    u32 icmp_timeout;
+    u32 tcp_trans_timeout;
+    u32 tcp_est_timeout;
+    u32 tcp_incoming_syn_timeout;
 
-  u8 is_disabled;
+    u8 is_disabled;
 
-  ip4_main_t *ip4_main;
-  snat_main_t *sm;
+    ip4_main_t *ip4_main;
+    snat_main_t *sm;
 } nat64_main_t;
 
 extern nat64_main_t nat64_main;
@@ -164,9 +161,9 @@ clib_error_t *nat64_init (vlib_main_t * vm);
  * @returns 0 on success, non-zero value otherwise.
  */
 int nat64_add_del_static_bib_entry (ip6_address_t * in_addr,
-				    ip4_address_t * out_addr, u16 in_port,
-				    u16 out_port, u8 proto, u32 vrf_id,
-				    u8 is_add);
+                                    ip4_address_t * out_addr, u16 in_port,
+                                    u16 out_port, u8 proto, u32 vrf_id,
+                                    u8 is_add);
 
 /**
  * @brief Alloce IPv4 address and port pair from NAT64 pool.
@@ -179,7 +176,7 @@ int nat64_add_del_static_bib_entry (ip6_address_t * in_addr,
  * @returns 0 on success, non-zero value otherwise.
  */
 int nat64_alloc_out_addr_and_port (u32 fib_index, snat_protocol_t proto,
-				   ip4_address_t * addr, u16 * port);
+                                   ip4_address_t * addr, u16 * port);
 
 /**
  * @brief Free IPv4 address and port pair from NAT64 pool.
@@ -191,7 +188,7 @@ int nat64_alloc_out_addr_and_port (u32 fib_index, snat_protocol_t proto,
  * @returns 0 on success, non-zero value otherwise.
  */
 void nat64_free_out_addr_and_port (ip4_address_t * addr, u16 port,
-				   snat_protocol_t proto);
+                                   snat_protocol_t proto);
 
 /**
  * @brief Set UDP session timeout.
@@ -264,7 +261,7 @@ u32 nat64_get_tcp_incoming_syn_timeout (void);
  * @param vm VLIB main.
  **/
 void nat64_session_reset_timeout (nat64_db_st_entry_t * ste,
-				  vlib_main_t * vm);
+                                  vlib_main_t * vm);
 
 /**
  * @brief Set NAT64 TCP session state.
@@ -274,7 +271,7 @@ void nat64_session_reset_timeout (nat64_db_st_entry_t * ste,
  * @param is_ip6 1 if IPv6 packet, 0 if IPv4.
  */
 void nat64_tcp_session_set_state (nat64_db_st_entry_t * ste,
-				  tcp_header_t * tcp, u8 is_ip6);
+                                  tcp_header_t * tcp, u8 is_ip6);
 
 /**
  * @brief Add/delete NAT64 prefix.
@@ -287,7 +284,7 @@ void nat64_tcp_session_set_state (nat64_db_st_entry_t * ste,
  * @returns 0 on success, non-zero value otherwise.
  */
 int nat64_add_del_prefix (ip6_address_t * prefix, u8 plen, u32 vrf_id,
-			  u8 is_add);
+                          u8 is_add);
 
 /**
  * @brief Call back function when walking addresses in NAT64 prefixes, non-zero
@@ -310,7 +307,7 @@ void nat64_prefix_walk (nat64_prefix_walk_fn_t fn, void *ctx);
  * @param fib_index Tenant FIB index.
  */
 void nat64_compose_ip6 (ip6_address_t * ip6, ip4_address_t * ip4,
-			u32 fib_index);
+                        u32 fib_index);
 
 /**
  * Extract IPv4 address from the IPv4-embedded IPv6 addresses.
@@ -320,7 +317,7 @@ void nat64_compose_ip6 (ip6_address_t * ip6, ip4_address_t * ip4,
  * @param fib_index Tenant FIB index.
  */
 void nat64_extract_ip4 (ip6_address_t * ip6, ip4_address_t * ip4,
-			u32 fib_index);
+                        u32 fib_index);
 
 #define u8_ptr_add(ptr, index) (((u8 *)ptr) + index)
 #define u16_net_add(u, val) clib_host_to_net_u16(clib_net_to_host_u16(u) + (val))

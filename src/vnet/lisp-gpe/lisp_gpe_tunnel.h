@@ -32,11 +32,10 @@ struct lisp_gpe_adjacency_t_;
 /**
  * A Key for a tunnel
  */
-typedef struct lisp_gpe_tunnel_key_t_
-{
-  ip_address_t rmt;
-  ip_address_t lcl;
-  u32 fib_index;
+typedef struct lisp_gpe_tunnel_key_t_ {
+    ip_address_t rmt;
+    ip_address_t lcl;
+    u32 fib_index;
 } lisp_gpe_tunnel_key_t;
 
 /**
@@ -45,37 +44,36 @@ typedef struct lisp_gpe_tunnel_key_t_
  * A tunnel represents an associatation between a local and remote RLOC.
  * As such it represents a unique LISP rewrite.
  */
-typedef struct lisp_gpe_tunnel_t_
-{
-  /**
-   * RLOC pair and rloc fib_index. This is the tunnel's key.
-   */
-  lisp_gpe_tunnel_key_t *key;
+typedef struct lisp_gpe_tunnel_t_ {
+    /**
+     * RLOC pair and rloc fib_index. This is the tunnel's key.
+     */
+    lisp_gpe_tunnel_key_t *key;
 
-  /**
-   * number of reference counting locks
-   */
-  u32 locks;
+    /**
+     * number of reference counting locks
+     */
+    u32 locks;
 
-  /**
-   * the FIB entry through which the remote rloc is reachable
-   s */
-  fib_node_index_t fib_entry_index;
+    /**
+     * the FIB entry through which the remote rloc is reachable
+     s */
+    fib_node_index_t fib_entry_index;
 } lisp_gpe_tunnel_t;
 
 extern index_t lisp_gpe_tunnel_find_or_create_and_lock (const locator_pair_t *
-							pair,
-							u32 rloc_fib_index);
+        pair,
+        u32 rloc_fib_index);
 
 extern void lisp_gpe_tunnel_unlock (index_t lgti);
 
 extern const lisp_gpe_tunnel_t *lisp_gpe_tunnel_get (index_t lgti);
 
 extern u8 *lisp_gpe_tunnel_build_rewrite (const lisp_gpe_tunnel_t * lgt,
-					  const struct lisp_gpe_adjacency_t_
-					  *ladj,
-					  lisp_gpe_next_protocol_e
-					  payload_proto);
+        const struct lisp_gpe_adjacency_t_
+        *ladj,
+        lisp_gpe_next_protocol_e
+        payload_proto);
 extern u8 *format_lisp_gpe_tunnel (u8 * s, va_list * args);
 
 #endif

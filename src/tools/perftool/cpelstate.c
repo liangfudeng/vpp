@@ -1,4 +1,4 @@
-/* 
+/*
  *------------------------------------------------------------------
  * Copyright (c) 2006-2016 Cisco and/or its affiliates.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -115,7 +115,7 @@ int strtab_pass1(cpel_section_header_t *sh, int verbose, FILE *ofp)
 {
     uword *p;
     u8 *strtab_data_area = (u8 *)(sh+1);
-    
+
     /* Multiple string tables with the same name are Bad... */
     p = hash_get_mem(the_strtab_hash, strtab_data_area);
     if (p) {
@@ -123,7 +123,7 @@ int strtab_pass1(cpel_section_header_t *sh, int verbose, FILE *ofp)
     }
     /*
      * Looks funny, but we really do want key = first string in the
-     * table, value = address(first string in the table) 
+     * table, value = address(first string in the table)
      */
     hash_set_mem(the_strtab_hash, strtab_data_area, strtab_data_area);
     if (verbose) {
@@ -145,7 +145,7 @@ int evtdef_pass1(cpel_section_header_t *sh, int verbose, FILE *ofp)
 
     edh = (event_definition_section_header_t *)(sh+1);
     nevents = ntohl(edh->number_of_event_definitions);
-    
+
     if (verbose) {
         fprintf(ofp, "Event Definition Section: %d definitions\n",
                 nevents);
@@ -159,7 +159,7 @@ int evtdef_pass1(cpel_section_header_t *sh, int verbose, FILE *ofp)
     this_strtab = (u8 *)p[0];
 
     ep = (event_definition_t *)(edh+1);
-    
+
     for (i = 0; i < nevents; i++) {
         event_code = ntohl(ep->event);
         p = hash_get(the_evtdef_hash, event_code);
@@ -179,7 +179,7 @@ int evtdef_pass1(cpel_section_header_t *sh, int verbose, FILE *ofp)
             int seen_percent=0;
 
             for (j = 0; j < strlen((char *)(bp->datum_str)); j++) {
-                if (bp->datum_str[j] == '%'){
+                if (bp->datum_str[j] == '%') {
                     seen_percent=1;
                     continue;
                 }
@@ -188,7 +188,7 @@ int evtdef_pass1(cpel_section_header_t *sh, int verbose, FILE *ofp)
                 }
             }
         }
-        
+
         hash_set(the_evtdef_hash, event_code, bp - bound_events);
 
         thislen = strlen((char *)bp->event_str);
@@ -213,7 +213,7 @@ int trackdef_pass1(cpel_section_header_t *sh, int verbose, FILE *ofp)
 
     tdh = (track_definition_section_header_t *)(sh+1);
     nevents = ntohl(tdh->number_of_track_definitions);
-    
+
     if (verbose) {
         fprintf(ofp, "Track Definition Section: %d definitions\n",
                 nevents);
@@ -227,7 +227,7 @@ int trackdef_pass1(cpel_section_header_t *sh, int verbose, FILE *ofp)
     this_strtab = (u8 *)p[0];
 
     tp = (track_definition_t *)(tdh+1);
-    
+
     for (i = 0; i < nevents; i++) {
         track_code = ntohl(tp->track);
         p = hash_get(the_trackdef_hash, track_code);
@@ -303,7 +303,7 @@ int event_pass2(cpel_section_header_t *sh, int verbose, FILE *ofp)
         if (ntohl(ep->event_code) == state_event_code) {
             /*
              * Add a ticks-in-state record, unless
-             * this is the "prime mover" event instance 
+             * this is the "prime mover" event instance
              */
             if (in_state) {
                 ticks_in_state = now - state_start_ticks;
@@ -328,18 +328,17 @@ int event_pass2(cpel_section_header_t *sh, int verbose, FILE *ofp)
     return(0);
 }
 
-/* 
- * Note: If necessary, add passes / columns to this table to 
+/*
+ * Note: If necessary, add passes / columns to this table to
  * handle section order dependencies.
  */
 
-section_processor_t processors[CPEL_NUM_SECTION_TYPES+1] =
-{
-    {bad_section,	noop_pass}, 		/* type 0 -- f**ked */
-    {strtab_pass1, 	noop_pass}, 		/* type 1 -- STRTAB */
-    {unsupported_pass,  noop_pass}, 		/* type 2 -- SYMTAB */
+section_processor_t processors[CPEL_NUM_SECTION_TYPES+1] = {
+    {bad_section,   noop_pass},         /* type 0 -- f**ked */
+    {strtab_pass1,  noop_pass},         /* type 1 -- STRTAB */
+    {unsupported_pass,  noop_pass},         /* type 2 -- SYMTAB */
     {evtdef_pass1,      noop_pass},             /* type 3 -- EVTDEF */
-    {trackdef_pass1,    noop_pass},		/* type 4 -- TRACKDEF */
+    {trackdef_pass1,    noop_pass},     /* type 4 -- TRACKDEF */
     {noop_pass,         event_pass2},           /* type 5 -- EVENTS */
 };
 
@@ -357,17 +356,17 @@ int process_section(cpel_section_header_t *sh, int verbose, FILE *ofp,
         return(1);
     }
     switch(pass) {
-    case PASS1:
-        fp = processors[type].pass1;
-        break;
+        case PASS1:
+            fp = processors[type].pass1;
+            break;
 
-    case PASS2:
-        fp = processors[type].pass2;
-        break;
-        
-    default:
-        fprintf(stderr, "Unknown pass %d\n", pass);
-        return(1);
+        case PASS2:
+            fp = processors[type].pass2;
+            break;
+
+        default:
+            fprintf(stderr, "Unknown pass %d\n", pass);
+            return(1);
     }
 
     rv = (*fp)(sh, verbose, ofp);
@@ -381,14 +380,14 @@ int cpel_dump_file_header(cpel_file_header_t *fh, int verbose, FILE *ofp)
 
     if (verbose) {
         fprintf(ofp, "CPEL file: %s-endian, version %d\n",
-                ((fh->endian_version & CPEL_FILE_LITTLE_ENDIAN) ? 
-                 "little" : "big"), 
+                ((fh->endian_version & CPEL_FILE_LITTLE_ENDIAN) ?
+                 "little" : "big"),
                 fh->endian_version & CPEL_FILE_VERSION_MASK);
 
         file_time = ntohl(fh->file_date);
-        
+
         fprintf(ofp, "File created %s", ctime(&file_time));
-        fprintf(ofp, "File has %d sections\n", 
+        fprintf(ofp, "File has %d sections\n",
                 ntohs(fh->nsections));
     }
 
@@ -411,7 +410,7 @@ int cpel_dump(u8 *cpel, int verbose, FILE *ofp)
             fprintf(stderr, "Little endian data format not supported\n");
             return(1);
         }
-        fprintf(stderr, "Unsupported file version 0x%x\n", 
+        fprintf(stderr, "Unsupported file version 0x%x\n",
                 fh->endian_version);
         return(1);
     }
@@ -467,20 +466,20 @@ void compute_state_statistics(int verbose, FILE *ofp)
         }
         /* Compute mean */
         if (vec_len(bp->ticks_in_state)) {
-            bp->mean_ticks_in_state = bp->total_ticks_in_state / 
-                ((f64) vec_len(bp->ticks_in_state));
+            bp->mean_ticks_in_state = bp->total_ticks_in_state /
+                                      ((f64) vec_len(bp->ticks_in_state));
         }
         /* Accumulate sum: (Xi-Xbar)**2 */
         for (j = 0; j < vec_len(bp->ticks_in_state); j++) {
             fticks = bp->ticks_in_state[j];
-            bp->variance_ticks_in_state += 
+            bp->variance_ticks_in_state +=
                 (fticks - bp->mean_ticks_in_state)*
                 (fticks - bp->mean_ticks_in_state);
         }
         /* Compute s**2, the unbiased estimator of sigma**2 */
         if (vec_len(bp->ticks_in_state) > 1) {
-            bp->variance_ticks_in_state /= (f64) 
-                (vec_len(bp->ticks_in_state)-1);
+            bp->variance_ticks_in_state /= (f64)
+                                           (vec_len(bp->ticks_in_state)-1);
         }
     }
 }
@@ -493,7 +492,7 @@ int track_compare_max (const void *arg1, const void *arg2)
 
     v1 = a1->total_ticks_in_state;
     v2 = a2->total_ticks_in_state;
-    
+
     if (v1 < v2)
         return (1);
     else if (v1 == v2)
@@ -509,7 +508,7 @@ int track_compare_occurrences (const void *arg1, const void *arg2)
 
     v1 = (f64) vec_len(a1->ticks_in_state);
     v2 = (f64) vec_len(a2->ticks_in_state);
-    
+
     if (v1 < v2)
         return (1);
     else if (v1 == v2)
@@ -533,27 +532,27 @@ void sort_state_statistics(sort_t type, FILE *ofp)
         return;
 
     switch(type) {
-    case SORT_MAX_TIME:
-        fprintf(ofp, "Results sorted by max time in state.\n");
-        compare = track_compare_max;
-        break;
+        case SORT_MAX_TIME:
+            fprintf(ofp, "Results sorted by max time in state.\n");
+            compare = track_compare_max;
+            break;
 
-    case SORT_MAX_OCCURRENCES:
-        fprintf(ofp, "Results sorted by max occurrences of state.\n");
-        compare = track_compare_occurrences;
-        break;
+        case SORT_MAX_OCCURRENCES:
+            fprintf(ofp, "Results sorted by max occurrences of state.\n");
+            compare = track_compare_occurrences;
+            break;
 
-    case SORT_NAME:
-        compare = track_compare_name;
-        fprintf(ofp, "Results sorted by process-id/name/thread ID\n");
-        break;
+        case SORT_NAME:
+            compare = track_compare_name;
+            fprintf(ofp, "Results sorted by process-id/name/thread ID\n");
+            break;
 
-    default:
-        fatal("sort type not set?");
+        default:
+            fatal("sort type not set?");
     }
-    
-    qsort (bound_tracks, vec_len(bound_tracks), 
-           sizeof (bound_track_t), compare);    
+
+    qsort (bound_tracks, vec_len(bound_tracks),
+           sizeof (bound_track_t), compare);
 }
 
 void print_state_statistics(int verbose, FILE *ofp)
@@ -571,59 +570,59 @@ void print_state_statistics(int verbose, FILE *ofp)
         fprintf(ofp, (char *)trackpad, "ProcThread");
         fprintf(ofp, "  Mean(us)     Stdev(us)   Total(us)      N\n");
     }
-        
+
     for (i = 0; i < vec_len(bound_tracks); i++) {
         bp = &bound_tracks[i];
         if (bp->mean_ticks_in_state == 0.0)
             continue;
 
         if (name_filter &&
-            strncmp((char *)(bp->track_str), (char *)name_filter, 
+            strncmp((char *)(bp->track_str), (char *)name_filter,
                     strlen((char *)name_filter)))
             continue;
 
         /*
          * Exclude kernel threads (e.g. idle thread) from
-         * state statistics 
+         * state statistics
          */
-        if (exclude_kernel_from_summary_stats && 
+        if (exclude_kernel_from_summary_stats &&
             !strncmp((char *)(bp->track_str), "kernel ", 7))
             continue;
 
         total_switches += (f64) vec_len(bp->ticks_in_state);
-        
+
         if (!summary_stats_only) {
             fprintf(ofp, (char *) trackpad, bp->track_str);
-            fprintf(ofp, "%10.3f +- %10.3f", 
+            fprintf(ofp, "%10.3f +- %10.3f",
                     bp->mean_ticks_in_state / ticks_per_us,
-                    sqrt(bp->variance_ticks_in_state) 
+                    sqrt(bp->variance_ticks_in_state)
                     / (f64) ticks_per_us);
-            fprintf(ofp, "%12.3f", 
+            fprintf(ofp, "%12.3f",
                     bp->total_ticks_in_state / ticks_per_us);
             fprintf(ofp, "%8d\n", (int)vec_len(bp->ticks_in_state));
         }
 
         if (scatterplot) {
             for (j = 0; j < vec_len(bp->ticks_in_state); j++) {
-                fprintf(ofp, "%.3f\n", 
+                fprintf(ofp, "%.3f\n",
                         (f64)bp->ticks_in_state[j] / ticks_per_us);
             }
         }
 
         total_time += bp->total_ticks_in_state;
     }
-    
+
     if (!summary_stats_only)
         fprintf(ofp, "\n");
     fprintf(ofp, "Note: the following statistics %s kernel-thread activity.\n",
             exclude_kernel_from_summary_stats ? "exclude" : "include");
     if (name_filter)
-        fprintf(ofp, 
+        fprintf(ofp,
                 "Note: only pid/proc/threads matching '%s' are included.\n",
                 name_filter);
 
-    fprintf(ofp, 
-      "Total runtime: %10.3f (us), Total state switches: %.0f\n", 
+    fprintf(ofp,
+            "Total runtime: %10.3f (us), Total state switches: %.0f\n",
             total_time / ticks_per_us, total_switches);
     fprintf(ofp, "Average time in state: %10.3f (us)\n",
             (total_time / total_switches) / ticks_per_us);
@@ -635,17 +634,15 @@ char *mapfile (char *file)
     char *rv;
     int maphfile;
     size_t mapfsize;
-    
+
     maphfile = open (file, O_RDONLY);
 
-    if (maphfile < 0)
-    {
+    if (maphfile < 0) {
         fprintf (stderr, "Couldn't read %s, skipping it...\n", file);
         return (NULL);
     }
 
-    if (fstat (maphfile, &statb) < 0)
-    {
+    if (fstat (maphfile, &statb) < 0) {
         fprintf (stderr, "Couldn't get size of %s, skipping it...\n", file);
         return (NULL);
     }
@@ -658,8 +655,7 @@ char *mapfile (char *file)
 
     mapfsize = statb.st_size;
 
-    if (mapfsize < 3)
-    {
+    if (mapfsize < 3) {
         fprintf (stderr, "%s zero-length, skipping it...\n", file);
         close (maphfile);
         return (NULL);
@@ -667,8 +663,7 @@ char *mapfile (char *file)
 
     rv = mmap (0, mapfsize, PROT_READ, MAP_SHARED, maphfile, 0);
 
-    if (rv == 0)
-    {
+    if (rv == 0) {
         fprintf (stderr, "%s problem mapping, I quit...\n", file);
         exit (-1);
     }
@@ -677,7 +672,7 @@ char *mapfile (char *file)
 }
 
 /*
- * main 
+ * main
  */
 int main (int argc, char **argv)
 {
@@ -761,21 +756,21 @@ int main (int argc, char **argv)
             }
             fatal("Missing filter string after --filter\n");
         }
-        
+
 
     usage:
-        fprintf(stderr, 
-          "cpelstate --input-file <filename> [--output-file <filename>]\n");
-        fprintf(stderr, 
-          "          [--state-event <decimal>] [--verbose]\n");
-        fprintf(stderr, 
-          "          [--max-time-sort(default) | --max-occurrence-sort |\n");
+        fprintf(stderr,
+                "cpelstate --input-file <filename> [--output-file <filename>]\n");
+        fprintf(stderr,
+                "          [--state-event <decimal>] [--verbose]\n");
+        fprintf(stderr,
+                "          [--max-time-sort(default) | --max-occurrence-sort |\n");
 
-        fprintf(stderr, 
-          "           --name-sort-sort] [--kernel-included]\n");
+        fprintf(stderr,
+                "           --name-sort-sort] [--kernel-included]\n");
 
-        fprintf(stderr, 
-          "          [--summary-stats-only] [--scatterplot]\n");
+        fprintf(stderr,
+                "          [--summary-stats-only] [--scatterplot]\n");
 
         fprintf(stderr, "%s\n", version);
         exit(1);

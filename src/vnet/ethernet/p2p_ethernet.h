@@ -20,28 +20,27 @@
 
 
 typedef struct {
-  /**
-   * Hash mapping parent sw_if_index and client mac address to p2p_ethernet sub-interface
-   */
-  uword * p2p_ethernet_by_key;
+    /**
+     * Hash mapping parent sw_if_index and client mac address to p2p_ethernet sub-interface
+     */
+    uword * p2p_ethernet_by_key;
 
-  u32 *p2p_ethernet_by_sw_if_index;
+    u32 *p2p_ethernet_by_sw_if_index;
 
-  // Pool of p2p subifs;
-  subint_config_t *p2p_subif_pool;
+    // Pool of p2p subifs;
+    subint_config_t *p2p_subif_pool;
 
-  /* convenience */
-  vlib_main_t * vlib_main;
-  vnet_main_t * vnet_main;
+    /* convenience */
+    vlib_main_t * vlib_main;
+    vnet_main_t * vnet_main;
 } p2p_ethernet_main_t;
 
 extern p2p_ethernet_main_t p2p_main;
 
-typedef struct
-{
-  u32 sw_if_index;
-  u32 p2pe_sw_if_index;
-  u8  client_mac[6];
+typedef struct {
+    u32 sw_if_index;
+    u32 p2pe_sw_if_index;
+    u8  client_mac[6];
 } p2p_ethernet_trace_t;
 
 /**
@@ -51,10 +50,10 @@ typedef struct
  */
 
 typedef struct {
-  u8 mac[6];
-  u16 pad1;         // padding for u64 mac address
-  u32 hw_if_index;
-  u32 pad2;         // padding for u64
+    u8 mac[6];
+    u16 pad1;         // padding for u64 mac address
+    u32 hw_if_index;
+    u32 pad2;         // padding for u64
 } p2p_key_t;
 
 u32 p2p_ethernet_lookup (u32 parent_sw_if_index, u8* client_mac);

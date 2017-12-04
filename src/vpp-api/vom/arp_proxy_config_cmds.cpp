@@ -15,100 +15,102 @@
 
 #include "vom/arp_proxy_config_cmds.hpp"
 
-namespace VOM {
-namespace arp_proxy_config_cmds {
-
-config_cmd::config_cmd(HW::item<bool>& item,
-                       const boost::asio::ip::address_v4& low,
-                       const boost::asio::ip::address_v4& high)
-  : rpc_cmd(item)
-  , m_low(low)
-  , m_high(high)
+namespace VOM
 {
-}
+    namespace arp_proxy_config_cmds
+    {
 
-bool
-config_cmd::operator==(const config_cmd& o) const
-{
-  return ((m_low == o.m_low) && (m_high == o.m_high));
-}
+        config_cmd::config_cmd(HW::item<bool>& item,
+                               const boost::asio::ip::address_v4& low,
+                               const boost::asio::ip::address_v4& high)
+            : rpc_cmd(item)
+            , m_low(low)
+            , m_high(high)
+        {
+        }
 
-rc_t
-config_cmd::issue(connection& con)
-{
-  msg_t req(con.ctx(), std::ref(*this));
+        bool
+        config_cmd::operator==(const config_cmd& o) const
+        {
+            return ((m_low == o.m_low) && (m_high == o.m_high));
+        }
 
-  auto& payload = req.get_request().get_payload();
-  payload.is_add = 1;
+        rc_t
+        config_cmd::issue(connection& con)
+        {
+            msg_t req(con.ctx(), std::ref(*this));
 
-  std::copy_n(std::begin(m_low.to_bytes()), m_low.to_bytes().size(),
-              payload.low_address);
-  std::copy_n(std::begin(m_high.to_bytes()), m_high.to_bytes().size(),
-              payload.hi_address);
+            auto& payload = req.get_request().get_payload();
+            payload.is_add = 1;
 
-  VAPI_CALL(req.execute());
+            std::copy_n(std::begin(m_low.to_bytes()), m_low.to_bytes().size(),
+                        payload.low_address);
+            std::copy_n(std::begin(m_high.to_bytes()), m_high.to_bytes().size(),
+                        payload.hi_address);
 
-  m_hw_item.set(wait());
+            VAPI_CALL(req.execute());
 
-  return (rc_t::OK);
-}
+            m_hw_item.set(wait());
 
-std::string
-config_cmd::to_string() const
-{
-  std::ostringstream s;
-  s << "ARP-proxy-config: " << m_hw_item.to_string()
-    << " low:" << m_low.to_string() << " high:" << m_high.to_string();
+            return (rc_t::OK);
+        }
 
-  return (s.str());
-}
+        std::string
+        config_cmd::to_string() const
+        {
+            std::ostringstream s;
+            s << "ARP-proxy-config: " << m_hw_item.to_string()
+              << " low:" << m_low.to_string() << " high:" << m_high.to_string();
 
-unconfig_cmd::unconfig_cmd(HW::item<bool>& item,
-                           const boost::asio::ip::address_v4& low,
-                           const boost::asio::ip::address_v4& high)
-  : rpc_cmd(item)
-  , m_low(low)
-  , m_high(high)
-{
-}
+            return (s.str());
+        }
 
-bool
-unconfig_cmd::operator==(const unconfig_cmd& o) const
-{
-  return ((m_low == o.m_low) && (m_high == o.m_high));
-}
+        unconfig_cmd::unconfig_cmd(HW::item<bool>& item,
+                                   const boost::asio::ip::address_v4& low,
+                                   const boost::asio::ip::address_v4& high)
+            : rpc_cmd(item)
+            , m_low(low)
+            , m_high(high)
+        {
+        }
 
-rc_t
-unconfig_cmd::issue(connection& con)
-{
-  msg_t req(con.ctx(), std::ref(*this));
+        bool
+        unconfig_cmd::operator==(const unconfig_cmd& o) const
+        {
+            return ((m_low == o.m_low) && (m_high == o.m_high));
+        }
 
-  auto& payload = req.get_request().get_payload();
-  payload.is_add = 0;
+        rc_t
+        unconfig_cmd::issue(connection& con)
+        {
+            msg_t req(con.ctx(), std::ref(*this));
 
-  std::copy_n(std::begin(m_low.to_bytes()), m_low.to_bytes().size(),
-              payload.low_address);
-  std::copy_n(std::begin(m_high.to_bytes()), m_high.to_bytes().size(),
-              payload.hi_address);
+            auto& payload = req.get_request().get_payload();
+            payload.is_add = 0;
 
-  VAPI_CALL(req.execute());
+            std::copy_n(std::begin(m_low.to_bytes()), m_low.to_bytes().size(),
+                        payload.low_address);
+            std::copy_n(std::begin(m_high.to_bytes()), m_high.to_bytes().size(),
+                        payload.hi_address);
 
-  wait();
-  m_hw_item.set(rc_t::NOOP);
+            VAPI_CALL(req.execute());
 
-  return (rc_t::OK);
-}
+            wait();
+            m_hw_item.set(rc_t::NOOP);
 
-std::string
-unconfig_cmd::to_string() const
-{
-  std::ostringstream s;
-  s << "ARP-proxy-unconfig: " << m_hw_item.to_string()
-    << " low:" << m_low.to_string() << " high:" << m_high.to_string();
+            return (rc_t::OK);
+        }
 
-  return (s.str());
-}
-}
+        std::string
+        unconfig_cmd::to_string() const
+        {
+            std::ostringstream s;
+            s << "ARP-proxy-unconfig: " << m_hw_item.to_string()
+              << " low:" << m_low.to_string() << " high:" << m_high.to_string();
+
+            return (s.str());
+        }
+    }
 }
 
 /*

@@ -81,17 +81,14 @@ bier_fmask_db_find_or_create_and_lock (index_t bti,
     index = INDEX_INVALID;
     p = mhash_get (&bier_fmask_db.bfdb_hash, &key);
 
-    if (NULL == p)
-    {
+    if (NULL == p) {
         /*
          * adding a new fmask object
          */
         index = bier_fmask_create_and_lock(fmid, bti, rpath);
 
         mhash_set (&bier_fmask_db.bfdb_hash, &key, index, 0 /*old_value*/);
-    }
-    else
-    {
+    } else {
         index = p[0];
         bier_fmask_lock(index);
     }
@@ -118,8 +115,7 @@ bier_fmask_db_find (index_t bti,
     index = INDEX_INVALID;
     p = mhash_get(&bier_fmask_db.bfdb_hash, &key);
 
-    if (NULL != p)
-    {
+    if (NULL != p) {
         index = p[0];
     }
 

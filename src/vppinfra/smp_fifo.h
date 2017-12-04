@@ -40,25 +40,23 @@
 
 #include <vppinfra/smp.h>
 
-#define foreach_clib_smp_fifo_data_state	\
-  _ (free)					\
-  _ (write_alloc)				\
-  _ (write_done)				\
+#define foreach_clib_smp_fifo_data_state    \
+  _ (free)                  \
+  _ (write_alloc)               \
+  _ (write_done)                \
   _ (read_fetch)
 
-typedef enum
-{
+typedef enum {
 #define _(f) CLIB_SMP_FIFO_DATA_STATE_##f,
-  foreach_clib_smp_fifo_data_state
+    foreach_clib_smp_fifo_data_state
 #undef _
     CLIB_SMP_FIFO_N_DATA_STATE,
 } clib_smp_fifo_data_state_t;
 
 /* Footer at end of each data element. */
-typedef struct
-{
-  /* Magic number marking valid footer plus state encoded in low bits. */
-  u32 magic_state;
+typedef struct {
+    /* Magic number marking valid footer plus state encoded in low bits. */
+    u32 magic_state;
 } clib_smp_fifo_data_footer_t;
 
 #define CLIB_SMP_DATA_FOOTER_MAGIC 0xfafbfcf0
@@ -66,36 +64,35 @@ typedef struct
 always_inline clib_smp_fifo_data_state_t
 clib_smp_fifo_data_footer_get_state (clib_smp_fifo_data_footer_t * f)
 {
-  u32 s = f->magic_state - CLIB_SMP_DATA_FOOTER_MAGIC;
+    u32 s = f->magic_state - CLIB_SMP_DATA_FOOTER_MAGIC;
 
-  /* Check that magic number plus state is still valid. */
-  if (s >= CLIB_SMP_FIFO_N_DATA_STATE)
-    os_panic ();
+    /* Check that magic number plus state is still valid. */
+    if (s >= CLIB_SMP_FIFO_N_DATA_STATE)
+        os_panic ();
 
-  return s;
+    return s;
 }
 
 always_inline void
 clib_smp_fifo_data_footer_set_state (clib_smp_fifo_data_footer_t * f,
-				     clib_smp_fifo_data_state_t s)
+                                     clib_smp_fifo_data_state_t s)
 {
-  f->magic_state = CLIB_SMP_DATA_FOOTER_MAGIC + s;
+    f->magic_state = CLIB_SMP_DATA_FOOTER_MAGIC + s;
 }
 
-typedef struct
-{
-  /* Read/write indices each on their own cache line.
-     Atomic incremented for each read/write. */
-  u32 read_index, write_index;
+typedef struct {
+    /* Read/write indices each on their own cache line.
+       Atomic incremented for each read/write. */
+    u32 read_index, write_index;
 
-  /* Power of 2 number of elements in fifo less one. */
-  u32 max_n_elts_less_one;
+    /* Power of 2 number of elements in fifo less one. */
+    u32 max_n_elts_less_one;
 
-  /* Log2 of above. */
-  u32 log2_max_n_elts;
+    /* Log2 of above. */
+    u32 log2_max_n_elts;
 
-  /* Cache aligned data. */
-  void *data;
+    /* Cache aligned data. */
+    void *data;
 } clib_smp_fifo_t;
 
 /* External functions. */
@@ -105,201 +102,193 @@ clib_smp_fifo_t *clib_smp_fifo_init (uword max_n_elts, uword n_bytes_per_elt);
 always_inline uword
 clib_smp_fifo_round_elt_bytes (uword n_bytes_per_elt)
 {
-  return round_pow2 (n_bytes_per_elt, CLIB_CACHE_LINE_BYTES);
+    return round_pow2 (n_bytes_per_elt, CLIB_CACHE_LINE_BYTES);
 }
 
 always_inline uword
 clib_smp_fifo_n_elts (clib_smp_fifo_t * f)
 {
-  uword n = f->write_index - f->read_index;
-  ASSERT (n <= f->max_n_elts_less_one + 1);
-  return n;
+    uword n = f->write_index - f->read_index;
+    ASSERT (n <= f->max_n_elts_less_one + 1);
+    return n;
 }
 
 always_inline clib_smp_fifo_data_footer_t *
 clib_smp_fifo_get_data_footer (void *d, uword n_bytes_per_elt)
 {
-  clib_smp_fifo_data_footer_t *f;
-  f = d + clib_smp_fifo_round_elt_bytes (n_bytes_per_elt) - sizeof (f[0]);
-  return f;
+    clib_smp_fifo_data_footer_t *f;
+    f = d + clib_smp_fifo_round_elt_bytes (n_bytes_per_elt) - sizeof (f[0]);
+    return f;
 }
 
 always_inline void *
 clib_smp_fifo_elt_at_index (clib_smp_fifo_t * f, uword n_bytes_per_elt,
-			    uword i)
+                            uword i)
 {
-  uword n_bytes_per_elt_cache_aligned;
+    uword n_bytes_per_elt_cache_aligned;
 
-  ASSERT (i <= f->max_n_elts_less_one);
+    ASSERT (i <= f->max_n_elts_less_one);
 
-  n_bytes_per_elt_cache_aligned =
-    clib_smp_fifo_round_elt_bytes (n_bytes_per_elt);
+    n_bytes_per_elt_cache_aligned =
+        clib_smp_fifo_round_elt_bytes (n_bytes_per_elt);
 
-  return f->data + i * n_bytes_per_elt_cache_aligned;
+    return f->data + i * n_bytes_per_elt_cache_aligned;
 }
 
 always_inline void *
 clib_smp_fifo_write_alloc (clib_smp_fifo_t * f, uword n_bytes_per_elt)
 {
-  void *d;
-  clib_smp_fifo_data_footer_t *t;
-  clib_smp_fifo_data_state_t s;
-  u32 wi0, wi1;
+    void *d;
+    clib_smp_fifo_data_footer_t *t;
+    clib_smp_fifo_data_state_t s;
+    u32 wi0, wi1;
 
-  wi0 = f->write_index;
+    wi0 = f->write_index;
 
-  /* Fifo full? */
-  if (wi0 - f->read_index > f->max_n_elts_less_one)
-    return 0;
+    /* Fifo full? */
+    if (wi0 - f->read_index > f->max_n_elts_less_one)
+        return 0;
 
-  while (1)
-    {
-      wi1 = wi0 + 1;
+    while (1) {
+        wi1 = wi0 + 1;
 
-      d =
-	clib_smp_fifo_elt_at_index (f, n_bytes_per_elt,
-				    wi0 & f->max_n_elts_less_one);
-      t = clib_smp_fifo_get_data_footer (d, n_bytes_per_elt);
+        d =
+            clib_smp_fifo_elt_at_index (f, n_bytes_per_elt,
+                                        wi0 & f->max_n_elts_less_one);
+        t = clib_smp_fifo_get_data_footer (d, n_bytes_per_elt);
 
-      s = clib_smp_fifo_data_footer_get_state (t);
-      if (s != CLIB_SMP_FIFO_DATA_STATE_free)
-	{
-	  d = 0;
-	  break;
-	}
+        s = clib_smp_fifo_data_footer_get_state (t);
+        if (s != CLIB_SMP_FIFO_DATA_STATE_free) {
+            d = 0;
+            break;
+        }
 
-      wi1 = clib_smp_compare_and_swap (&f->write_index, wi1, wi0);
+        wi1 = clib_smp_compare_and_swap (&f->write_index, wi1, wi0);
 
-      if (wi1 == wi0)
-	{
-	  clib_smp_fifo_data_footer_set_state (t,
-					       CLIB_SMP_FIFO_DATA_STATE_write_alloc);
-	  break;
-	}
+        if (wi1 == wi0) {
+            clib_smp_fifo_data_footer_set_state (t,
+                                                 CLIB_SMP_FIFO_DATA_STATE_write_alloc);
+            break;
+        }
 
-      /* Other cpu wrote write index first: try again. */
-      wi0 = wi1;
+        /* Other cpu wrote write index first: try again. */
+        wi0 = wi1;
     }
 
-  return d;
+    return d;
 }
 
 always_inline void
 clib_smp_fifo_write_done (clib_smp_fifo_t * f, void *d, uword n_bytes_per_elt)
 {
-  clib_smp_fifo_data_footer_t *t;
+    clib_smp_fifo_data_footer_t *t;
 
-  /* Flush out pending writes before we change state to write_done.
-     This will hold off readers until data is flushed. */
-  CLIB_MEMORY_BARRIER ();
+    /* Flush out pending writes before we change state to write_done.
+       This will hold off readers until data is flushed. */
+    CLIB_MEMORY_BARRIER ();
 
-  t = clib_smp_fifo_get_data_footer (d, n_bytes_per_elt);
+    t = clib_smp_fifo_get_data_footer (d, n_bytes_per_elt);
 
-  ASSERT (clib_smp_fifo_data_footer_get_state (t) ==
-	  CLIB_SMP_FIFO_DATA_STATE_write_alloc);
-  clib_smp_fifo_data_footer_set_state (t,
-				       CLIB_SMP_FIFO_DATA_STATE_write_done);
+    ASSERT (clib_smp_fifo_data_footer_get_state (t) ==
+            CLIB_SMP_FIFO_DATA_STATE_write_alloc);
+    clib_smp_fifo_data_footer_set_state (t,
+                                         CLIB_SMP_FIFO_DATA_STATE_write_done);
 }
 
 always_inline void *
 clib_smp_fifo_read_fetch (clib_smp_fifo_t * f, uword n_bytes_per_elt)
 {
-  void *d;
-  clib_smp_fifo_data_footer_t *t;
-  clib_smp_fifo_data_state_t s;
-  u32 ri0, ri1;
+    void *d;
+    clib_smp_fifo_data_footer_t *t;
+    clib_smp_fifo_data_state_t s;
+    u32 ri0, ri1;
 
-  ri0 = f->read_index;
+    ri0 = f->read_index;
 
-  /* Fifo empty? */
-  if (f->write_index - ri0 == 0)
-    return 0;
+    /* Fifo empty? */
+    if (f->write_index - ri0 == 0)
+        return 0;
 
-  while (1)
-    {
-      ri1 = ri0 + 1;
+    while (1) {
+        ri1 = ri0 + 1;
 
-      d =
-	clib_smp_fifo_elt_at_index (f, n_bytes_per_elt,
-				    ri0 & f->max_n_elts_less_one);
-      t = clib_smp_fifo_get_data_footer (d, n_bytes_per_elt);
+        d =
+            clib_smp_fifo_elt_at_index (f, n_bytes_per_elt,
+                                        ri0 & f->max_n_elts_less_one);
+        t = clib_smp_fifo_get_data_footer (d, n_bytes_per_elt);
 
-      s = clib_smp_fifo_data_footer_get_state (t);
-      if (s != CLIB_SMP_FIFO_DATA_STATE_write_done)
-	{
-	  d = 0;
-	  break;
-	}
+        s = clib_smp_fifo_data_footer_get_state (t);
+        if (s != CLIB_SMP_FIFO_DATA_STATE_write_done) {
+            d = 0;
+            break;
+        }
 
-      ri1 = clib_smp_compare_and_swap (&f->read_index, ri1, ri0);
-      if (ri1 == ri0)
-	{
-	  clib_smp_fifo_data_footer_set_state (t,
-					       CLIB_SMP_FIFO_DATA_STATE_read_fetch);
-	  break;
-	}
+        ri1 = clib_smp_compare_and_swap (&f->read_index, ri1, ri0);
+        if (ri1 == ri0) {
+            clib_smp_fifo_data_footer_set_state (t,
+                                                 CLIB_SMP_FIFO_DATA_STATE_read_fetch);
+            break;
+        }
 
-      ri0 = ri1;
+        ri0 = ri1;
     }
 
-  return d;
+    return d;
 }
 
 always_inline void
 clib_smp_fifo_read_done (clib_smp_fifo_t * f, void *d, uword n_bytes_per_elt)
 {
-  clib_smp_fifo_data_footer_t *t;
+    clib_smp_fifo_data_footer_t *t;
 
-  t = clib_smp_fifo_get_data_footer (d, n_bytes_per_elt);
+    t = clib_smp_fifo_get_data_footer (d, n_bytes_per_elt);
 
-  ASSERT (clib_smp_fifo_data_footer_get_state (t) ==
-	  CLIB_SMP_FIFO_DATA_STATE_read_fetch);
-  clib_smp_fifo_data_footer_set_state (t, CLIB_SMP_FIFO_DATA_STATE_free);
+    ASSERT (clib_smp_fifo_data_footer_get_state (t) ==
+            CLIB_SMP_FIFO_DATA_STATE_read_fetch);
+    clib_smp_fifo_data_footer_set_state (t, CLIB_SMP_FIFO_DATA_STATE_free);
 }
 
 always_inline void
 clib_smp_fifo_memcpy (uword * dst, uword * src, uword n_bytes)
 {
-  word n_bytes_left = n_bytes;
+    word n_bytes_left = n_bytes;
 
-  while (n_bytes_left >= 4 * sizeof (uword))
-    {
-      dst[0] = src[0];
-      dst[1] = src[1];
-      dst[2] = src[2];
-      dst[3] = src[3];
-      dst += 4;
-      src += 4;
-      n_bytes_left -= 4 * sizeof (dst[0]);
+    while (n_bytes_left >= 4 * sizeof (uword)) {
+        dst[0] = src[0];
+        dst[1] = src[1];
+        dst[2] = src[2];
+        dst[3] = src[3];
+        dst += 4;
+        src += 4;
+        n_bytes_left -= 4 * sizeof (dst[0]);
     }
 
-  while (n_bytes_left > 0)
-    {
-      dst[0] = src[0];
-      dst += 1;
-      src += 1;
-      n_bytes_left -= 1 * sizeof (dst[0]);
+    while (n_bytes_left > 0) {
+        dst[0] = src[0];
+        dst += 1;
+        src += 1;
+        n_bytes_left -= 1 * sizeof (dst[0]);
     }
 }
 
 always_inline void
 clib_smp_fifo_write_inline (clib_smp_fifo_t * f, void *elt_to_write,
-			    uword n_bytes_per_elt)
+                            uword n_bytes_per_elt)
 {
-  uword *dst;
-  dst = clib_smp_fifo_write_alloc (f, n_bytes_per_elt);
-  clib_smp_fifo_memcpy (dst, elt_to_write, n_bytes_per_elt);
-  clib_smp_fifo_write_done (f, dst, n_bytes_per_elt);
+    uword *dst;
+    dst = clib_smp_fifo_write_alloc (f, n_bytes_per_elt);
+    clib_smp_fifo_memcpy (dst, elt_to_write, n_bytes_per_elt);
+    clib_smp_fifo_write_done (f, dst, n_bytes_per_elt);
 }
 
 always_inline void
 clib_smp_fifo_read_inline (clib_smp_fifo_t * f, void *elt_to_read,
-			   uword n_bytes_per_elt)
+                           uword n_bytes_per_elt)
 {
-  uword *src;
-  src = clib_smp_fifo_read_fetch (f, n_bytes_per_elt);
-  clib_smp_fifo_memcpy (elt_to_read, src, n_bytes_per_elt);
-  clib_smp_fifo_read_done (f, src, n_bytes_per_elt);
+    uword *src;
+    src = clib_smp_fifo_read_fetch (f, n_bytes_per_elt);
+    clib_smp_fifo_memcpy (elt_to_read, src, n_bytes_per_elt);
+    clib_smp_fifo_read_done (f, src, n_bytes_per_elt);
 }
 
 #endif /* included_clib_smp_vec_h */

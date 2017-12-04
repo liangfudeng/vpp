@@ -21,17 +21,16 @@
 #include <vlib/vlib.h>
 #include <vnet/vnet.h>
 
-typedef struct
-{
-  /* hash bd_id -> bd_index */
-  uword *bd_index_by_bd_id;
+typedef struct {
+    /* hash bd_id -> bd_index */
+    uword *bd_index_by_bd_id;
 
-  /* Busy bd_index bitmap */
-  uword *bd_index_bitmap;
+    /* Busy bd_index bitmap */
+    uword *bd_index_bitmap;
 
-  /* convenience */
-  vlib_main_t *vlib_main;
-  vnet_main_t *vnet_main;
+    /* convenience */
+    vlib_main_t *vlib_main;
+    vnet_main_t *vnet_main;
 } bd_main_t;
 
 extern bd_main_t bd_main;
@@ -41,79 +40,76 @@ extern bd_main_t bd_main;
 #define L2_FLOOD_MEMBER_NORMAL 0
 #define L2_FLOOD_MEMBER_BVI    1
 
-typedef struct
-{
-  u32 sw_if_index;		/* the output L2 interface */
-  u8 flags;			/* 0=normal, 1=bvi */
-  u8 shg;			/* split horizon group number  */
-  u16 spare;
+typedef struct {
+    u32 sw_if_index;      /* the output L2 interface */
+    u8 flags;         /* 0=normal, 1=bvi */
+    u8 shg;           /* split horizon group number  */
+    u16 spare;
 } l2_flood_member_t;
 
 /* Per-bridge domain configuration */
 
-typedef struct
-{
-  u32 feature_bitmap;
-  /*
-   * Contains bit enables for flooding, learning, and forwarding.
-   * All other feature bits should always be set.
-   *
-   * identity of the bridge-domain's BVI interface
-   * set to ~0 if there is no BVI
-   */
-  u32 bvi_sw_if_index;
+typedef struct {
+    u32 feature_bitmap;
+    /*
+     * Contains bit enables for flooding, learning, and forwarding.
+     * All other feature bits should always be set.
+     *
+     * identity of the bridge-domain's BVI interface
+     * set to ~0 if there is no BVI
+     */
+    u32 bvi_sw_if_index;
 
-  /* bridge domain id, not to be confused with bd_index */
-  u32 bd_id;
+    /* bridge domain id, not to be confused with bd_index */
+    u32 bd_id;
 
-  /* Vector of member ports */
-  l2_flood_member_t *members;
+    /* Vector of member ports */
+    l2_flood_member_t *members;
 
-  /* First flood_count member ports are flooded */
-  u32 flood_count;
+    /* First flood_count member ports are flooded */
+    u32 flood_count;
 
-  /* Tunnel Master (Multicast vxlan) are always flooded */
-  u32 tun_master_count;
+    /* Tunnel Master (Multicast vxlan) are always flooded */
+    u32 tun_master_count;
 
-  /* Tunnels (Unicast vxlan) are flooded if there are no masters */
-  u32 tun_normal_count;
+    /* Tunnels (Unicast vxlan) are flooded if there are no masters */
+    u32 tun_normal_count;
 
-  /* hash ip4/ip6 -> mac for arp/nd termination */
-  uword *mac_by_ip4;
-  uword *mac_by_ip6;
+    /* hash ip4/ip6 -> mac for arp/nd termination */
+    uword *mac_by_ip4;
+    uword *mac_by_ip6;
 
-  /* mac aging */
-  u8 mac_age;
+    /* mac aging */
+    u8 mac_age;
 
-  /* sequence number for bridge domain based flush of MACs */
-  u8 seq_num;
+    /* sequence number for bridge domain based flush of MACs */
+    u8 seq_num;
 
-  /* Bridge domain tag (C string NULL terminated) */
-  u8 *bd_tag;
+    /* Bridge domain tag (C string NULL terminated) */
+    u8 *bd_tag;
 
 } l2_bridge_domain_t;
 
 /* Limit Bridge Domain ID to 24 bits to match 24-bit VNI range */
 #define L2_BD_ID_MAX ((1<<24)-1)
 
-typedef struct
-{
-  u32 bd_id;
-  u8 flood;
-  u8 uu_flood;
-  u8 forward;
-  u8 learn;
-  u8 arp_term;
-  u8 mac_age;
-  u8 *bd_tag;
-  u8 is_add;
+typedef struct {
+    u32 bd_id;
+    u8 flood;
+    u8 uu_flood;
+    u8 forward;
+    u8 learn;
+    u8 arp_term;
+    u8 mac_age;
+    u8 *bd_tag;
+    u8 is_add;
 } l2_bridge_domain_add_del_args_t;
 
 /* Return 1 if bridge domain has been initialized */
 always_inline u32
 bd_is_valid (l2_bridge_domain_t * bd_config)
 {
-  return (bd_config->feature_bitmap != 0);
+    return (bd_config->feature_bitmap != 0);
 }
 
 /* Init bridge domain if not done already */
@@ -170,14 +166,14 @@ u32 bd_add_bd_index (bd_main_t * bdm, u32 bd_id);
 static inline u32
 bd_find_or_add_bd_index (bd_main_t * bdm, u32 bd_id)
 {
-  u32 bd_index = bd_find_index (bdm, bd_id);
-  if (bd_index == ~0)
-    return bd_add_bd_index (bdm, bd_id);
-  return bd_index;
+    u32 bd_index = bd_find_index (bdm, bd_id);
+    if (bd_index == ~0)
+        return bd_add_bd_index (bdm, bd_id);
+    return bd_index;
 }
 
 u32 bd_add_del_ip_mac (u32 bd_index,
-		       u8 * ip_addr, u8 * mac_addr, u8 is_ip6, u8 is_add);
+                       u8 * ip_addr, u8 * mac_addr, u8 is_ip6, u8 is_add);
 
 #endif
 

@@ -46,44 +46,41 @@
 
 extern vnet_hw_interface_class_t hdlc_hw_interface_class;
 
-typedef enum
-{
+typedef enum {
 #define hdlc_error(n,s) HDLC_ERROR_##n,
 #include <vnet/hdlc/error.def>
 #undef hdlc_error
-  HDLC_N_ERROR,
+    HDLC_N_ERROR,
 } hdlc_error_t;
 
-typedef struct
-{
-  /* Name (a c string). */
-  char *name;
+typedef struct {
+    /* Name (a c string). */
+    char *name;
 
-  /* HDLC protocol type in host byte order. */
-  hdlc_protocol_t protocol;
+    /* HDLC protocol type in host byte order. */
+    hdlc_protocol_t protocol;
 
-  /* Node which handles this type. */
-  u32 node_index;
+    /* Node which handles this type. */
+    u32 node_index;
 
-  /* Next index for this type. */
-  u32 next_index;
+    /* Next index for this type. */
+    u32 next_index;
 } hdlc_protocol_info_t;
 
-typedef struct
-{
-  vlib_main_t *vlib_main;
+typedef struct {
+    vlib_main_t *vlib_main;
 
-  hdlc_protocol_info_t *protocol_infos;
+    hdlc_protocol_info_t *protocol_infos;
 
-  /* Hash tables mapping name/protocol to protocol info index. */
-  uword *protocol_info_by_name, *protocol_info_by_protocol;
+    /* Hash tables mapping name/protocol to protocol info index. */
+    uword *protocol_info_by_name, *protocol_info_by_protocol;
 } hdlc_main_t;
 
 always_inline hdlc_protocol_info_t *
 hdlc_get_protocol_info (hdlc_main_t * em, hdlc_protocol_t protocol)
 {
-  uword *p = hash_get (em->protocol_info_by_protocol, protocol);
-  return p ? vec_elt_at_index (em->protocol_infos, p[0]) : 0;
+    uword *p = hash_get (em->protocol_info_by_protocol, protocol);
+    return p ? vec_elt_at_index (em->protocol_infos, p[0]) : 0;
 }
 
 extern hdlc_main_t hdlc_main;
@@ -91,7 +88,7 @@ extern hdlc_main_t hdlc_main;
 /* Register given node index to take input for given hdlc type. */
 void
 hdlc_register_input_type (vlib_main_t * vm,
-			  hdlc_protocol_t protocol, u32 node_index);
+                          hdlc_protocol_t protocol, u32 node_index);
 
 format_function_t format_hdlc_protocol;
 format_function_t format_hdlc_header;
@@ -109,17 +106,17 @@ unformat_function_t unformat_pg_hdlc_header;
 always_inline void
 hdlc_setup_node (vlib_main_t * vm, u32 node_index)
 {
-  vlib_node_t *n = vlib_get_node (vm, node_index);
-  pg_node_t *pn = pg_get_node (node_index);
+    vlib_node_t *n = vlib_get_node (vm, node_index);
+    pg_node_t *pn = pg_get_node (node_index);
 
-  n->format_buffer = format_hdlc_header_with_length;
-  n->unformat_buffer = unformat_hdlc_header;
-  pn->unformat_edit = unformat_pg_hdlc_header;
+    n->format_buffer = format_hdlc_header_with_length;
+    n->unformat_buffer = unformat_hdlc_header;
+    pn->unformat_edit = unformat_pg_hdlc_header;
 }
 
 void
 hdlc_register_input_protocol (vlib_main_t * vm,
-			      hdlc_protocol_t protocol, u32 node_index);
+                              hdlc_protocol_t protocol, u32 node_index);
 
 #endif /* included_hdlc_h */
 

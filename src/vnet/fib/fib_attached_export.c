@@ -24,8 +24,7 @@
 /**
  * A description of the need to import routes from the export table
  */
-typedef struct fib_ae_import_t_
-{
+typedef struct fib_ae_import_t_ {
     /**
      * The entry in the epxort table that this importer
      * is importing covereds from
@@ -101,19 +100,16 @@ fib_entry_ae_add_or_lock (fib_node_index_t connected)
     fed = fib_entry_delegate_get(entry,
                                  FIB_ENTRY_DELEGATE_ATTACHED_EXPORT);
 
-    if (NULL == fed)
-    {
+    if (NULL == fed) {
         fed = fib_entry_delegate_find_or_add(entry,
                                              FIB_ENTRY_DELEGATE_ATTACHED_EXPORT);
-	pool_get(fib_ae_export_pool, export);
-	memset(export, 0, sizeof(*export));
+        pool_get(fib_ae_export_pool, export);
+        memset(export, 0, sizeof(*export));
 
-	fed->fd_index = (export - fib_ae_export_pool);
-	export->faee_ei = connected;
-    }
-    else
-    {
-	export = pool_elt_at_index(fib_ae_export_pool, fed->fd_index);
+        fed->fd_index = (export - fib_ae_export_pool);
+        export->faee_ei = connected;
+    } else {
+        export = pool_elt_at_index(fib_ae_export_pool, fed->fd_index);
     }
 
     export->faee_locks++;
@@ -123,7 +119,7 @@ fib_entry_ae_add_or_lock (fib_node_index_t connected)
 
 static void
 fib_entry_import_remove (fib_ae_import_t *import,
-			 fib_node_index_t entry_index)
+                         fib_node_index_t entry_index)
 {
     fib_prefix_t prefix;
     u32 index;
@@ -133,25 +129,24 @@ fib_entry_import_remove (fib_ae_import_t *import,
      */
     index = vec_search(import->faei_importeds, entry_index);
 
-    if (index < vec_len(import->faei_importeds))
-    {
-	/*
-	 * this is an entry that was previsouly imported
-	 */
-	fib_entry_get_prefix(entry_index, &prefix);
+    if (index < vec_len(import->faei_importeds)) {
+        /*
+         * this is an entry that was previsouly imported
+         */
+        fib_entry_get_prefix(entry_index, &prefix);
 
-	fib_table_entry_special_remove(import->faei_import_fib,
-				       &prefix,
-				       FIB_SOURCE_AE);
+        fib_table_entry_special_remove(import->faei_import_fib,
+                                       &prefix,
+                                       FIB_SOURCE_AE);
 
-	fib_entry_unlock(entry_index);
-	vec_del1(import->faei_importeds, index);
+        fib_entry_unlock(entry_index);
+        vec_del1(import->faei_importeds, index);
     }
 }
 
 static void
 fib_entry_import_add (fib_ae_import_t *import,
-		      fib_node_index_t entry_index)
+                      fib_node_index_t entry_index)
 {
     fib_node_index_t *existing;
     fib_prefix_t prefix;
@@ -160,12 +155,10 @@ fib_entry_import_add (fib_ae_import_t *import,
      * ensure we only add the exported entry once, since
      * sourcing prefixes in the table is reference counted
      */
-    vec_foreach(existing, import->faei_importeds)
-    {
-	if (*existing == entry_index)
-	{
-	    return;
-	}
+    vec_foreach(existing, import->faei_importeds) {
+        if (*existing == entry_index) {
+            return;
+        }
     }
 
     /*
@@ -178,14 +171,12 @@ fib_entry_import_add (fib_ae_import_t *import,
      * don't import entries that have the same prefix the import entry
      */
     if (0 != fib_prefix_cmp(&prefix,
-			    &import->faei_prefix))
-    {
+                            &import->faei_prefix)) {
         const dpo_id_t *dpo;
 
         dpo = fib_entry_contribute_ip_forwarding(entry_index);
 
-        if (dpo_id_is_valid(dpo))
-        {
+        if (dpo_id_is_valid(dpo)) {
             fib_table_entry_special_dpo_add(import->faei_import_fib,
                                             &prefix,
                                             FIB_SOURCE_AE,
@@ -209,8 +200,8 @@ fib_entry_import_add (fib_ae_import_t *import,
  */
 static int
 fib_entry_covered_walk_import (fib_entry_t *cover,
-			       fib_node_index_t covered,
-			       void *ctx)
+                               fib_node_index_t covered,
+                               void *ctx)
 {
     fib_ae_import_t *import = ctx;
 
@@ -226,7 +217,7 @@ fib_entry_covered_walk_import (fib_entry_t *cover,
  */
 static void
 fib_ae_export_import_add (fib_ae_export_t *export,
-			  fib_ae_import_t *import)
+                          fib_ae_import_t *import)
 {
     fib_entry_t *entry;
 
@@ -234,13 +225,13 @@ fib_ae_export_import_add (fib_ae_export_t *export,
     entry = fib_entry_get(export->faee_ei);
 
     fib_entry_cover_walk(entry,
-			 fib_entry_covered_walk_import,
-			 import);
+                         fib_entry_covered_walk_import,
+                         import);
 }
 
 void
 fib_attached_export_import (fib_entry_t *fib_entry,
-			    fib_node_index_t export_fib)
+                            fib_node_index_t export_fib)
 {
     fib_entry_delegate_t *fed;
     fib_ae_import_t *import;
@@ -263,37 +254,33 @@ fib_attached_export_import (fib_entry_t *fib_entry,
      * do an exact match in the export table
      */
     import->faei_export_entry =
-	fib_table_lookup_exact_match(import->faei_export_fib,
-				     &import->faei_prefix);
+        fib_table_lookup_exact_match(import->faei_export_fib,
+                                     &import->faei_prefix);
 
-    if (FIB_NODE_INDEX_INVALID == import->faei_export_entry)
-    {
-	/*
-	 * no exact matching entry in the export table. can't be good.
-	 * track the next best thing
-	 */
-	import->faei_export_entry =
-	    fib_table_lookup(import->faei_export_fib,
-			     &import->faei_prefix);
-	import->faei_exporter = FIB_NODE_INDEX_INVALID;
-    }
-    else
-    {
-	/*
-	 * found the entry in the export table. import the
-	 * the prefixes that it covers.
-	 * only if the prefix found in the export FIB really is
-	 * attached do we want to import its covered
-	 */
-	if (FIB_ENTRY_FLAG_ATTACHED &
-	    fib_entry_get_flags_i(fib_entry_get(import->faei_export_entry)))
-	{
-	    fib_ae_export_t *export;
+    if (FIB_NODE_INDEX_INVALID == import->faei_export_entry) {
+        /*
+         * no exact matching entry in the export table. can't be good.
+         * track the next best thing
+         */
+        import->faei_export_entry =
+            fib_table_lookup(import->faei_export_fib,
+                             &import->faei_prefix);
+        import->faei_exporter = FIB_NODE_INDEX_INVALID;
+    } else {
+        /*
+         * found the entry in the export table. import the
+         * the prefixes that it covers.
+         * only if the prefix found in the export FIB really is
+         * attached do we want to import its covered
+         */
+        if (FIB_ENTRY_FLAG_ATTACHED &
+            fib_entry_get_flags_i(fib_entry_get(import->faei_export_entry))) {
+            fib_ae_export_t *export;
 
-	    export = fib_entry_ae_add_or_lock(import->faei_export_entry);
-	    vec_add1(export->faee_importers, (import - fib_ae_import_pool));
-	    fib_ae_export_import_add(export, import);
-	}
+            export = fib_entry_ae_add_or_lock(import->faei_export_entry);
+            vec_add1(export->faee_importers, (import - fib_ae_import_pool));
+            fib_ae_export_import_add(export, import);
+        }
     }
 
     /*
@@ -304,7 +291,7 @@ fib_attached_export_import (fib_entry_t *fib_entry,
      */
     fib_entry = fib_entry_get(fei);
     import->faei_export_sibling =
-	fib_entry_cover_track(fib_entry_get(import->faei_export_entry), fei);
+        fib_entry_cover_track(fib_entry_get(import->faei_export_entry), fei);
 
     fed = fib_entry_delegate_find_or_add(fib_entry,
                                          FIB_ENTRY_DELEGATE_ATTACHED_IMPORT);
@@ -322,145 +309,136 @@ fib_attached_export_purge (fib_entry_t *fib_entry)
     fed = fib_entry_delegate_get(fib_entry,
                                  FIB_ENTRY_DELEGATE_ATTACHED_IMPORT);
 
-    if (NULL != fed)
-    {
- 	fib_node_index_t *import_index;
-	fib_entry_t *export_entry;
-	fib_ae_import_t *import;
-	fib_ae_export_t *export;
+    if (NULL != fed) {
+        fib_node_index_t *import_index;
+        fib_entry_t *export_entry;
+        fib_ae_import_t *import;
+        fib_ae_export_t *export;
 
-	import = pool_elt_at_index(fib_ae_import_pool, fed->fd_index);
+        import = pool_elt_at_index(fib_ae_import_pool, fed->fd_index);
 
-	/*
-	 * remove each imported entry
-	 */
-	vec_foreach(import_index, import->faei_importeds)
-	{
-	    fib_prefix_t prefix;
+        /*
+         * remove each imported entry
+         */
+        vec_foreach(import_index, import->faei_importeds) {
+            fib_prefix_t prefix;
 
-	    fib_entry_get_prefix(*import_index, &prefix);
+            fib_entry_get_prefix(*import_index, &prefix);
 
-	    fib_table_entry_delete(import->faei_import_fib,
-				   &prefix,
-				   FIB_SOURCE_AE);
-	    fib_entry_unlock(*import_index);
-	}
-	vec_free(import->faei_importeds);
+            fib_table_entry_delete(import->faei_import_fib,
+                                   &prefix,
+                                   FIB_SOURCE_AE);
+            fib_entry_unlock(*import_index);
+        }
+        vec_free(import->faei_importeds);
 
-	/*
-	 * stop tracking the export entry
-	 */
-	if (~0 != import->faei_export_sibling)
-	{
-	    fib_entry_cover_untrack(fib_entry_get(import->faei_export_entry),
-				    import->faei_export_sibling);
-	}
-	import->faei_export_sibling = ~0;
+        /*
+         * stop tracking the export entry
+         */
+        if (~0 != import->faei_export_sibling) {
+            fib_entry_cover_untrack(fib_entry_get(import->faei_export_entry),
+                                    import->faei_export_sibling);
+        }
+        import->faei_export_sibling = ~0;
 
-	/*
-	 * remove this import tracker from the export's list,
-	 * if it is attached to one. It won't be in the case the tracked
-	 * export entry is not an attached exact match.
-	 */
-	if (FIB_NODE_INDEX_INVALID != import->faei_exporter)
-	{
+        /*
+         * remove this import tracker from the export's list,
+         * if it is attached to one. It won't be in the case the tracked
+         * export entry is not an attached exact match.
+         */
+        if (FIB_NODE_INDEX_INVALID != import->faei_exporter) {
             fib_entry_delegate_t *fed;
 
-	    export_entry = fib_entry_get(import->faei_export_entry);
+            export_entry = fib_entry_get(import->faei_export_entry);
 
             fed = fib_entry_delegate_get(export_entry,
                                          FIB_ENTRY_DELEGATE_ATTACHED_EXPORT);
             ASSERT(NULL != fed);
 
-	    export = pool_elt_at_index(fib_ae_export_pool, fed->fd_index);
+            export = pool_elt_at_index(fib_ae_export_pool, fed->fd_index);
 
-	    u32 index = vec_search(export->faee_importers,
-				   (import - fib_ae_import_pool));
+            u32 index = vec_search(export->faee_importers,
+                                   (import - fib_ae_import_pool));
 
-	    ASSERT(index < vec_len(export->faee_importers));
-	    vec_del1(export->faee_importers, index);
+            ASSERT(index < vec_len(export->faee_importers));
+            vec_del1(export->faee_importers, index);
 
-	    /*
-	     * free the exporter if there are no longer importers
-	     */
-	    if (0 == --export->faee_locks)
-	    {
-		pool_put(fib_ae_export_pool, export);
+            /*
+             * free the exporter if there are no longer importers
+             */
+            if (0 == --export->faee_locks) {
+                pool_put(fib_ae_export_pool, export);
                 fib_entry_delegate_remove(export_entry,
                                           FIB_ENTRY_DELEGATE_ATTACHED_EXPORT);
-	    }
-	}
+            }
+        }
 
-	/*
-	 * free the import tracker
-	 */
-	pool_put(fib_ae_import_pool, import);
+        /*
+         * free the import tracker
+         */
+        pool_put(fib_ae_import_pool, import);
         fib_entry_delegate_remove(fib_entry,
                                   FIB_ENTRY_DELEGATE_ATTACHED_IMPORT);
-    }	
+    }
 }
 
 void
 fib_attached_export_covered_added (fib_entry_t *cover,
-				   fib_node_index_t covered)
+                                   fib_node_index_t covered)
 {
     fib_entry_delegate_t *fed;
 
     fed = fib_entry_delegate_get(cover,
                                  FIB_ENTRY_DELEGATE_ATTACHED_EXPORT);
 
-    if (NULL != fed)
-    {
-	/*
-	 * the covering prefix is exporting to other tables
-	 */
- 	fib_node_index_t *import_index;
-	fib_ae_import_t *import;
-	fib_ae_export_t *export;
+    if (NULL != fed) {
+        /*
+         * the covering prefix is exporting to other tables
+         */
+        fib_node_index_t *import_index;
+        fib_ae_import_t *import;
+        fib_ae_export_t *export;
 
-	export = pool_elt_at_index(fib_ae_export_pool, fed->fd_index);
+        export = pool_elt_at_index(fib_ae_export_pool, fed->fd_index);
 
-	/*
-	 * export the covered entry to each of the importers
-	 */
-	vec_foreach(import_index, export->faee_importers)
-	{
-	    import = pool_elt_at_index(fib_ae_import_pool, *import_index);
+        /*
+         * export the covered entry to each of the importers
+         */
+        vec_foreach(import_index, export->faee_importers) {
+            import = pool_elt_at_index(fib_ae_import_pool, *import_index);
 
-	    fib_entry_import_add(import, covered);
-	}
+            fib_entry_import_add(import, covered);
+        }
     }
 }
 
 void
 fib_attached_export_covered_removed (fib_entry_t *cover,
-				     fib_node_index_t covered)
+                                     fib_node_index_t covered)
 {
     fib_entry_delegate_t *fed;
 
     fed = fib_entry_delegate_get(cover,
                                  FIB_ENTRY_DELEGATE_ATTACHED_EXPORT);
 
-    if (NULL != fed)
-    {
-	/*
-	 * the covering prefix is exporting to other tables
-	 */
- 	fib_node_index_t *import_index;
-	fib_ae_import_t *import;
-	fib_ae_export_t *export;
+    if (NULL != fed) {
+        /*
+         * the covering prefix is exporting to other tables
+         */
+        fib_node_index_t *import_index;
+        fib_ae_import_t *import;
+        fib_ae_export_t *export;
 
-	export = pool_elt_at_index(fib_ae_export_pool, fed->fd_index);
+        export = pool_elt_at_index(fib_ae_export_pool, fed->fd_index);
 
-	/*
-	 * remove the covered entry from each of the importers
-	 */
-	vec_foreach(import_index, export->faee_importers)
-	{
-	    import = pool_elt_at_index(fib_ae_import_pool, *import_index);
+        /*
+         * remove the covered entry from each of the importers
+         */
+        vec_foreach(import_index, export->faee_importers) {
+            import = pool_elt_at_index(fib_ae_import_pool, *import_index);
 
-	    fib_entry_import_remove(import, covered);
-	}
+            fib_entry_import_remove(import, covered);
+        }
     }
 }
 
@@ -472,24 +450,23 @@ fib_attached_export_cover_modified_i (fib_entry_t *fib_entry)
     fed = fib_entry_delegate_get(fib_entry,
                                  FIB_ENTRY_DELEGATE_ATTACHED_IMPORT);
 
-    if (NULL != fed)
-    {
-	fib_ae_import_t *import;
-	u32 export_fib;
+    if (NULL != fed) {
+        fib_ae_import_t *import;
+        u32 export_fib;
 
-	/*
-	 * safe the temporaries we need from the existing import
-	 * since it will be toast after the purge.
-	 */
-	import = pool_elt_at_index(fib_ae_import_pool, fed->fd_index);
-	export_fib = import->faei_export_fib;
+        /*
+         * safe the temporaries we need from the existing import
+         * since it will be toast after the purge.
+         */
+        import = pool_elt_at_index(fib_ae_import_pool, fed->fd_index);
+        export_fib = import->faei_export_fib;
 
-	/*
-	 * keep it simple. purge anything that was previously imported.
-	 * then re-evaluate the need to import.
-	 */
-	fib_attached_export_purge(fib_entry);
-	fib_attached_export_import(fib_entry, export_fib);
+        /*
+         * keep it simple. purge anything that was previously imported.
+         * then re-evaluate the need to import.
+         */
+        fib_attached_export_purge(fib_entry);
+        fib_attached_export_import(fib_entry, export_fib);
     }
 }
 
@@ -515,7 +492,7 @@ fib_attached_export_cover_update (fib_entry_t *fib_entry)
 
 u8*
 fib_ae_import_format (fib_node_index_t impi,
-		      u8* s)
+                      u8* s)
 {
     fib_node_index_t *index;
     fib_ae_import_t *import;
@@ -528,13 +505,12 @@ fib_ae_import_format (fib_node_index_t impi,
     s = format(s, "export-sibling:%d ", import->faei_export_sibling);
     s = format(s, "exporter:%d ", import->faei_exporter);
     s = format(s, "export-fib:%d ", import->faei_export_fib);
- 
+
     s = format(s, "import-entry:%d ", import->faei_import_entry);
     s = format(s, "import-fib:%d ", import->faei_import_fib);
 
     s = format(s, "importeds:[");
-    vec_foreach(index, import->faei_importeds)
-    {
+    vec_foreach(index, import->faei_importeds) {
         s = format(s, "%d, ", *index);
     }
     s = format(s, "]]");
@@ -544,19 +520,18 @@ fib_ae_import_format (fib_node_index_t impi,
 
 u8*
 fib_ae_export_format (fib_node_index_t expi,
-		      u8* s)
+                      u8* s)
 {
     fib_node_index_t *index;
     fib_ae_export_t *export;
 
     export = pool_elt_at_index(fib_ae_export_pool, expi);
-    
+
     s = format(s, "\n  Attached-Export:%d:[", (export - fib_ae_export_pool));
     s = format(s, "export-entry:%d ", export->faee_ei);
 
     s = format(s, "importers:[");
-    vec_foreach(index, export->faee_importers)
-    {
+    vec_foreach(index, export->faee_importers) {
         s = format(s, "%d, ", *index);
     }
     s = format(s, "]]");

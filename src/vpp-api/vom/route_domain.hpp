@@ -24,162 +24,163 @@
 
 #include <vapi/ip.api.vapi.hpp>
 
-namespace VOM {
-/**
- * A route-domain is a VRF.
- *  creating a route-domain object will construct both an IPv4
- *  and IPv6 table.
- */
-class route_domain : public object_base
+namespace VOM
 {
-public:
-  /**
-   * The Key for a route-domain
-   */
-  typedef route::table_id_t key_t;
-
-  /**
-   * Construct a new object matching the desried state
-   */
-  route_domain(route::table_id_t id);
-
-  /**
-   * Copy Constructor
-   */
-  route_domain(const route_domain& o);
-
-  /**
-   * Destructor
-   */
-  ~route_domain();
-
-  /**
-   * comparison operator - for UT
-   */
-  bool operator==(const route_domain& r) const;
-
-  /**
-   * Return the matching 'singular instance'
-   */
-  std::shared_ptr<route_domain> singular() const;
-
-  /**
-   * Debug print function
-   */
-  std::string to_string() const;
-
-  /**
-   * Get the table ID
-   */
-  route::table_id_t table_id() const;
-
-  /**
-   * Get the route-domain's key
-   */
-  key_t key() const;
-
-  /**
-   * Find the instnace of the route domain in the OM
-   */
-  static std::shared_ptr<route_domain> find(const route_domain& temp);
-
-  /**
-   * Dump all route-doamin into the stream provided
-   */
-  static void dump(std::ostream& os);
-
-  /**
-   * Return the sigular instance for the default table
-   */
-  static std::shared_ptr<route_domain> get_default();
-
-  /**
-   * replay the object to create it in hardware
-   */
-  void replay(void);
-
-private:
-  /**
-   * Class definition for listeners to OM events
-   */
-  class event_handler : public OM::listener, public inspect::command_handler
-  {
-  public:
-    event_handler();
-    virtual ~event_handler() = default;
-
     /**
-     * Handle a populate event
+     * A route-domain is a VRF.
+     *  creating a route-domain object will construct both an IPv4
+     *  and IPv6 table.
      */
-    void handle_populate(const client_db::key_t& key);
+    class route_domain : public object_base
+    {
+    public:
+        /**
+         * The Key for a route-domain
+         */
+        typedef route::table_id_t key_t;
 
-    /**
-     * Handle a replay event
-     */
-    void handle_replay();
+        /**
+         * Construct a new object matching the desried state
+         */
+        route_domain(route::table_id_t id);
 
-    /**
-     * Show the object in the Singular DB
-     */
-    void show(std::ostream& os);
+        /**
+         * Copy Constructor
+         */
+        route_domain(const route_domain& o);
 
-    /**
-     * Get the sortable Id of the listener
-     */
-    dependency_t order() const;
-  };
+        /**
+         * Destructor
+         */
+        ~route_domain();
 
-  /**
-   * Instance of the event handler to register with OM
-   */
-  static event_handler m_evh;
+        /**
+         * comparison operator - for UT
+         */
+        bool operator==(const route_domain& r) const;
 
-  /**
-   * Commit the acculmulated changes into VPP. i.e. to a 'HW" write.
-   */
-  void update(const route_domain& obj);
+        /**
+         * Return the matching 'singular instance'
+         */
+        std::shared_ptr<route_domain> singular() const;
 
-  /**
-   * Find or add the instnace of the route domain in the OM
-   */
-  static std::shared_ptr<route_domain> find_or_add(const route_domain& temp);
+        /**
+         * Debug print function
+         */
+        std::string to_string() const;
 
-  /*
-   * It's the OM class that updates the objects in HW
-   */
-  friend class OM;
+        /**
+         * Get the table ID
+         */
+        route::table_id_t table_id() const;
 
-  /**
-   * It's the singular_db class that calls replay()
-   */
-  friend class singular_db<route::table_id_t, route_domain>;
+        /**
+         * Get the route-domain's key
+         */
+        key_t key() const;
 
-  /**
-   * Sweep/reap the object if still stale
-   */
-  void sweep(void);
+        /**
+         * Find the instnace of the route domain in the OM
+         */
+        static std::shared_ptr<route_domain> find(const route_domain& temp);
 
-  /**
-   * HW configuration for the result of creating the v4 table
-   */
-  HW::item<bool> m_hw_v4;
+        /**
+         * Dump all route-doamin into the stream provided
+         */
+        static void dump(std::ostream& os);
 
-  /**
-   * HW configuration for the result of creating the v6 table
-   */
-  HW::item<bool> m_hw_v6;
+        /**
+         * Return the sigular instance for the default table
+         */
+        static std::shared_ptr<route_domain> get_default();
 
-  /**
-   * VPP understands Table-IDs not table names.
-   *  The table IDs for V4 and V6 are the same.
-   */
-  route::table_id_t m_table_id;
+        /**
+         * replay the object to create it in hardware
+         */
+        void replay(void);
 
-  /**
-   * A map of all interfaces key against the interface's name
-   */
-  static singular_db<route::table_id_t, route_domain> m_db;
-};
+    private:
+        /**
+         * Class definition for listeners to OM events
+         */
+        class event_handler : public OM::listener, public inspect::command_handler
+        {
+        public:
+            event_handler();
+            virtual ~event_handler() = default;
+
+            /**
+             * Handle a populate event
+             */
+            void handle_populate(const client_db::key_t& key);
+
+            /**
+             * Handle a replay event
+             */
+            void handle_replay();
+
+            /**
+             * Show the object in the Singular DB
+             */
+            void show(std::ostream& os);
+
+            /**
+             * Get the sortable Id of the listener
+             */
+            dependency_t order() const;
+        };
+
+        /**
+         * Instance of the event handler to register with OM
+         */
+        static event_handler m_evh;
+
+        /**
+         * Commit the acculmulated changes into VPP. i.e. to a 'HW" write.
+         */
+        void update(const route_domain& obj);
+
+        /**
+         * Find or add the instnace of the route domain in the OM
+         */
+        static std::shared_ptr<route_domain> find_or_add(const route_domain& temp);
+
+        /*
+         * It's the OM class that updates the objects in HW
+         */
+        friend class OM;
+
+        /**
+         * It's the singular_db class that calls replay()
+         */
+        friend class singular_db<route::table_id_t, route_domain>;
+
+        /**
+         * Sweep/reap the object if still stale
+         */
+        void sweep(void);
+
+        /**
+         * HW configuration for the result of creating the v4 table
+         */
+        HW::item<bool> m_hw_v4;
+
+        /**
+         * HW configuration for the result of creating the v6 table
+         */
+        HW::item<bool> m_hw_v6;
+
+        /**
+         * VPP understands Table-IDs not table names.
+         *  The table IDs for V4 and V6 are the same.
+         */
+        route::table_id_t m_table_id;
+
+        /**
+         * A map of all interfaces key against the interface's name
+         */
+        static singular_db<route::table_id_t, route_domain> m_db;
+    };
 }; // namespace VOM
 
 /*

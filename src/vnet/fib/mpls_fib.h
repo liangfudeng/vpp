@@ -38,19 +38,18 @@
  */
 #define MPLS_FLOW_HASH_DEFAULT 0
 
-typedef struct mpls_fib_t_
-{
-  /**
-   * A hash table of entries. 21 bit key
-   * Hash table for reduced memory footprint
-   */
-  uword * mf_entries;
+typedef struct mpls_fib_t_ {
+    /**
+     * A hash table of entries. 21 bit key
+     * Hash table for reduced memory footprint
+     */
+    uword * mf_entries;
 
-  /**
-   * The load-balance indices keyed by 21 bit label+eos bit.
-   * A flat array for maximum lookup performace.
-   */
-  index_t mf_lbs[MPLS_FIB_DB_SIZE];
+    /**
+     * The load-balance indices keyed by 21 bit label+eos bit.
+     * A flat array for maximum lookup performace.
+     */
+    index_t mf_lbs[MPLS_FIB_DB_SIZE];
 } mpls_fib_t;
 
 static inline mpls_fib_t*
@@ -60,7 +59,7 @@ mpls_fib_get (fib_node_index_t index)
 }
 
 extern u32 mpls_fib_table_find_or_create_and_lock(u32 table_id,
-                                                  fib_source_t src);
+        fib_source_t src);
 extern u32 mpls_fib_table_create_and_lock(fib_source_t src);
 // extern mpls_fib_t * mpls_fib_find(u32 table_id);
 extern u32 mpls_fib_index_from_table_id(u32 table_id);
@@ -75,26 +74,26 @@ extern fib_node_index_t mpls_fib_table_entry_add_from_ip_fib_entry (
 
 
 extern fib_node_index_t mpls_fib_table_lookup(const mpls_fib_t *mf,
-					      mpls_label_t label,
-					      mpls_eos_bit_t eos);
+        mpls_label_t label,
+        mpls_eos_bit_t eos);
 
 extern void mpls_fib_table_entry_remove(mpls_fib_t *mf,
-					mpls_label_t label,
-					mpls_eos_bit_t eos);
+                                        mpls_label_t label,
+                                        mpls_eos_bit_t eos);
 extern void mpls_fib_table_entry_insert(mpls_fib_t *mf,
-					mpls_label_t label,
-					mpls_eos_bit_t eos,
-					fib_node_index_t fei);
+                                        mpls_label_t label,
+                                        mpls_eos_bit_t eos,
+                                        fib_node_index_t fei);
 extern void mpls_fib_table_destroy(u32 fib_index);
 
 
 extern void mpls_fib_forwarding_table_update(mpls_fib_t *mf,
-					     mpls_label_t label,
-					     mpls_eos_bit_t eos,
-					     const dpo_id_t *dpo);
+        mpls_label_t label,
+        mpls_eos_bit_t eos,
+        const dpo_id_t *dpo);
 extern void mpls_fib_forwarding_table_reset(mpls_fib_t *mf,
-					    mpls_label_t label,
-					    mpls_eos_bit_t eos);
+        mpls_label_t label,
+        mpls_eos_bit_t eos);
 
 /**
  * @brief Walk all entries in a FIB table
@@ -114,7 +113,7 @@ extern u8 *format_mpls_fib_table_memory(u8 * s, va_list * args);
  */
 static inline index_t
 mpls_fib_table_forwarding_lookup (u32 mpls_fib_index,
-				  const mpls_unicast_header_t *hdr)
+                                  const mpls_unicast_header_t *hdr)
 {
     mpls_label_t label;
     mpls_fib_t *mf;

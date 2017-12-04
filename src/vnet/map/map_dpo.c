@@ -24,24 +24,24 @@ dpo_type_t map_t_dpo_type;
 
 void
 map_dpo_create (dpo_proto_t dproto,
-		u32 domain_index,
-		dpo_id_t *dpo)
+                u32 domain_index,
+                dpo_id_t *dpo)
 {
     dpo_set(dpo,
-	    map_dpo_type,
-	    dproto,
-	    domain_index);
+            map_dpo_type,
+            dproto,
+            domain_index);
 }
 
 void
 map_t_dpo_create (dpo_proto_t dproto,
-		  u32 domain_index,
-		  dpo_id_t *dpo)
+                  u32 domain_index,
+                  dpo_id_t *dpo)
 {
     dpo_set(dpo,
-	    map_t_dpo_type,
-	    dproto,
-	    domain_index);
+            map_t_dpo_type,
+            dproto,
+            domain_index);
 }
 
 
@@ -80,19 +80,16 @@ const static dpo_vft_t md_vft = {
     .dv_format = format_map_dpo,
 };
 
-const static char* const map_ip4_nodes[] =
-{
+const static char* const map_ip4_nodes[] = {
     "ip4-map",
     NULL,
 };
-const static char* const map_ip6_nodes[] =
-{
+const static char* const map_ip6_nodes[] = {
     "ip6-map",
     NULL,
 };
 
-const static char* const * const map_nodes[DPO_PROTO_NUM] =
-{
+const static char* const * const map_nodes[DPO_PROTO_NUM] = {
     [DPO_PROTO_IP4]  = map_ip4_nodes,
     [DPO_PROTO_IP6]  = map_ip6_nodes,
     [DPO_PROTO_MPLS] = NULL,
@@ -104,19 +101,16 @@ const static dpo_vft_t md_t_vft = {
     .dv_format = format_map_t_dpo,
 };
 
-const static char* const map_t_ip4_nodes[] =
-{
+const static char* const map_t_ip4_nodes[] = {
     "ip4-map-t",
     NULL,
 };
-const static char* const map_t_ip6_nodes[] =
-{
+const static char* const map_t_ip6_nodes[] = {
     "ip6-map-t",
     NULL,
 };
 
-const static char* const * const map_t_nodes[DPO_PROTO_NUM] =
-{
+const static char* const * const map_t_nodes[DPO_PROTO_NUM] = {
     [DPO_PROTO_IP4]  = map_t_ip4_nodes,
     [DPO_PROTO_IP6]  = map_t_ip6_nodes,
     [DPO_PROTO_MPLS] = NULL,

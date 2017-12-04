@@ -35,8 +35,7 @@ static uword *lb_maps_by_path_index;
  */
 static uword *load_balance_map_db;
 
-typedef enum load_balance_map_path_flags_t_
-{
+typedef enum load_balance_map_path_flags_t_ {
     LOAD_BALANCE_MAP_PATH_UP     = (1 << 0),
     LOAD_BALANCE_MAP_PATH_USABLE = (1 << 1),
 } __attribute__ ((packed)) load_balance_map_path_flags_t;
@@ -100,13 +99,11 @@ format_load_balance_map (u8 *s, va_list * ap)
 
     s = format(s, "load-balance-map: index:%d buckets:%d", lbmi, n_buckets);
     s = format(s, "\n%U index:", format_white_space, indent+2);
-    for (ii = 0; ii < n_buckets; ii++)
-    {
+    for (ii = 0; ii < n_buckets; ii++) {
         s = format(s, "%5d", ii);
     }
     s = format(s, "\n%U   map:", format_white_space, indent+2);
-    for (ii = 0; ii < n_buckets; ii++)
-    {
+    for (ii = 0; ii < n_buckets; ii++) {
         s = format(s, "%5d", lbm->lbm_buckets[ii]);
     }
 
@@ -122,8 +119,7 @@ load_balance_map_hash (load_balance_map_t *lbm)
 
     new_lbm_hash = old_lbm_hash = vec_len(lbm->lbm_paths);
 
-    vec_foreach (lb_path, lbm->lbm_paths)
-    {
+    vec_foreach (lb_path, lbm->lbm_paths) {
         hash = lb_path->lbmp_index;
         hash_mix32(hash, old_lbm_hash, new_lbm_hash);
     }
@@ -155,15 +151,12 @@ load_balance_map_db_get_from_hash_key (uword key)
 {
     load_balance_map_t *lbm;
 
-    if (load_balance_map_db_hash_key_is_index (key))
-    {
+    if (load_balance_map_db_hash_key_is_index (key)) {
         index_t lbm_index;
 
         lbm_index = load_balance_map_db_hash_key_2_index(key);
         lbm = load_balance_map_get(lbm_index);
-    }
-    else
-    {
+    } else {
         lbm = uword_to_pointer (key, load_balance_map_t *);
     }
 
@@ -202,8 +195,7 @@ load_balance_map_db_find (load_balance_map_t *lbm)
 
     p = hash_get(load_balance_map_db, lbm);
 
-    if (NULL != p)
-    {
+    if (NULL != p) {
         return p[0];
     }
 
@@ -230,17 +222,13 @@ load_balance_map_db_insert (load_balance_map_t *lbm)
     /*
      * insert into each per-path list.
      */
-    vec_foreach(lbmp, lbm->lbm_paths)
-    {
+    vec_foreach(lbmp, lbm->lbm_paths) {
         p = hash_get(lb_maps_by_path_index, lbmp->lbmp_index);
 
-        if (NULL == p)
-        {
+        if (NULL == p) {
             list = fib_node_list_create();
             hash_set(lb_maps_by_path_index, lbmp->lbmp_index, list);
-        }
-        else
-        {
+        } else {
             list = p[0];
         }
 
@@ -268,8 +256,7 @@ load_balance_map_db_remove (load_balance_map_t *lbm)
     /*
      * remove from each per-path list.
      */
-    vec_foreach(lbmp, lbm->lbm_paths)
-    {
+    vec_foreach(lbmp, lbm->lbm_paths) {
         p = hash_get(lb_maps_by_path_index, lbmp->lbmp_index);
 
         ASSERT(NULL != p);
@@ -301,17 +288,12 @@ load_balance_map_fill (load_balance_map_t *lbm)
     vec_validate(tmp_buckets, n_buckets-1);
 
     bucket = jj = 0;
-    vec_foreach (lbmp, lbm->lbm_paths)
-    {
-        if (fib_path_is_resolved(lbmp->lbmp_index))
-        {
-            for (ii = 0; ii < lbmp->lbmp_weight; ii++)
-            {
+    vec_foreach (lbmp, lbm->lbm_paths) {
+        if (fib_path_is_resolved(lbmp->lbmp_index)) {
+            for (ii = 0; ii < lbmp->lbmp_weight; ii++) {
                 tmp_buckets[jj++] = bucket++;
             }
-        }
-        else 
-        {
+        } else {
             bucket += lbmp->lbmp_weight;
         }
     }
@@ -322,59 +304,46 @@ load_balance_map_fill (load_balance_map_t *lbm)
      * all paths were up, then we can simply copy the scratch area over the
      * actual buckets' memory
      */
-    if (jj == n_buckets)
-    {
+    if (jj == n_buckets) {
         memcpy(lbm->lbm_buckets,
                tmp_buckets,
                sizeof(lbm->lbm_buckets[0]) * n_buckets);
-    }
-    else
-    {
+    } else {
         /*
          * one or more paths are down.
          */
-        if (0 == vec_len(tmp_buckets))
-        {
+        if (0 == vec_len(tmp_buckets)) {
             /*
              * if the scratch area is empty, then no paths are usable.
              * they will all drop. so use them all, lest we account drops
              * against only one.
              */
-            for (bucket = 0; bucket < n_buckets; bucket++)
-            {
+            for (bucket = 0; bucket < n_buckets; bucket++) {
                 lbm->lbm_buckets[bucket] = bucket;
             }
-        }
-        else
-        {
+        } else {
             bucket = jj = 0;
-            vec_foreach (lbmp, lbm->lbm_paths)
-            {
-                if (fib_path_is_resolved(lbmp->lbmp_index))
-                {
-                    for (ii = 0; ii < lbmp->lbmp_weight; ii++)
-                    {
+            vec_foreach (lbmp, lbm->lbm_paths) {
+                if (fib_path_is_resolved(lbmp->lbmp_index)) {
+                    for (ii = 0; ii < lbmp->lbmp_weight; ii++) {
                         lbm->lbm_buckets[bucket] = bucket;
                         bucket++;
                     }
-                }
-                else
-                {
+                } else {
                     /*
                      * path is unusable
                      * cycle through the scratch space selecting a index.
                      * this means we load balance, in the intended ratio,
                      * over the paths that are still usable.
                      */
-                    for (ii = 0; ii < lbmp->lbmp_weight; ii++)
-                    {
+                    for (ii = 0; ii < lbmp->lbmp_weight; ii++) {
                         lbm->lbm_buckets[bucket] = tmp_buckets[jj];
                         jj = (jj + 1) % vec_len(tmp_buckets);
                         bucket++;
                     }
                 }
             }
-       }
+        }
     }
 
     vec_free(tmp_buckets);
@@ -391,8 +360,7 @@ load_balance_map_alloc (const load_balance_path_t *paths)
 
     vec_validate(lbm->lbm_paths, vec_len(paths)-1);
 
-    vec_foreach_index(ii, paths)
-    {
+    vec_foreach_index(ii, paths) {
         lbm->lbm_paths[ii].lbmp_index  = paths[ii].path_index;
         lbm->lbm_paths[ii].lbmp_weight = paths[ii].path_weight;
     }
@@ -435,12 +403,9 @@ load_balance_map_add_or_lock (u32 n_buckets,
 
     lbmi = load_balance_map_db_find(tmp);
 
-    if (INDEX_INVALID == lbmi)
-    {
+    if (INDEX_INVALID == lbmi) {
         lbm = load_balance_map_init(tmp, n_buckets, sum_of_weights);
-    }
-    else
-    {
+    } else {
         lbm = load_balance_map_get(lbmi);
         load_balance_map_destroy(tmp);
     }
@@ -465,8 +430,7 @@ load_balance_map_unlock (index_t lbmi)
 {
     load_balance_map_t *lbm;
 
-    if (INDEX_INVALID == lbmi)
-    {
+    if (INDEX_INVALID == lbmi) {
         return;
     }
 
@@ -474,8 +438,7 @@ load_balance_map_unlock (index_t lbmi)
 
     lbm->lbm_locks--;
 
-    if (0 == lbm->lbm_locks)
-    {
+    if (0 == lbm->lbm_locks) {
         load_balance_map_db_remove(lbm);
         load_balance_map_destroy(lbm);
     }
@@ -483,7 +446,7 @@ load_balance_map_unlock (index_t lbmi)
 
 static int
 load_balance_map_path_state_change_walk (fib_node_ptr_t *fptr,
-                                         void *ctx)
+        void *ctx)
 {
     load_balance_map_t *lbm;
 
@@ -523,12 +486,12 @@ load_balance_map_module_init (void)
 {
     load_balance_map_db =
         hash_create2 (/* elts */ 0,
-                      /* user */ 0,
-                      /* value_bytes */ sizeof (index_t),
-                      load_balance_map_db_hash_key_sum,
-                      load_balance_map_db_hash_key_equal,
-                      /* format pair/arg */
-                      0, 0);
+                                 /* user */ 0,
+                                 /* value_bytes */ sizeof (index_t),
+                                 load_balance_map_db_hash_key_sum,
+                                 load_balance_map_db_hash_key_equal,
+                                 /* format pair/arg */
+                                 0, 0);
 
     lb_maps_by_path_index = hash_create(0, sizeof(fib_node_list_t));
 }
@@ -537,9 +500,9 @@ void
 load_balance_map_show_mem (void)
 {
     fib_show_memory_usage("Load-Balance Map",
-			  pool_elts(load_balance_map_pool),
-			  pool_len(load_balance_map_pool),
-			  sizeof(load_balance_map_t));
+                          pool_elts(load_balance_map_pool),
+                          pool_len(load_balance_map_pool),
+                          sizeof(load_balance_map_t));
 }
 
 static clib_error_t *
@@ -549,20 +512,16 @@ load_balance_map_show (vlib_main_t * vm,
 {
     index_t lbmi = INDEX_INVALID;
 
-    while (unformat_check_input (input) != UNFORMAT_END_OF_INPUT)
-    {
+    while (unformat_check_input (input) != UNFORMAT_END_OF_INPUT) {
         if (unformat (input, "%d", &lbmi))
             ;
         else
             break;
     }
 
-    if (INDEX_INVALID != lbmi)
-    {
+    if (INDEX_INVALID != lbmi) {
         vlib_cli_output (vm, "%U", format_load_balance_map, lbmi, 0);
-    }
-    else
-    {
+    } else {
         load_balance_map_t *lbm;
 
         pool_foreach(lbm, load_balance_map_pool,

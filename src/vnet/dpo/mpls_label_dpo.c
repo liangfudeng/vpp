@@ -47,7 +47,7 @@ mpls_label_dpo_create (mpls_label_t *label_stack,
                        u8 ttl,
                        u8 exp,
                        dpo_proto_t payload_proto,
-		       const dpo_id_t *dpo)
+                       const dpo_id_t *dpo)
 {
     mpls_label_dpo_t *mld;
     u32 ii;
@@ -63,14 +63,13 @@ mpls_label_dpo_create (mpls_label_t *label_stack,
      * on a packet in the data-plane
      */
 
-    for (ii = 0; ii < mld->mld_n_labels-1; ii++)
-    {
-	vnet_mpls_uc_set_label(&mld->mld_hdr[ii].label_exp_s_ttl, label_stack[ii]);
-	vnet_mpls_uc_set_ttl(&mld->mld_hdr[ii].label_exp_s_ttl, 255);
-	vnet_mpls_uc_set_exp(&mld->mld_hdr[ii].label_exp_s_ttl, 0);
-	vnet_mpls_uc_set_s(&mld->mld_hdr[ii].label_exp_s_ttl, MPLS_NON_EOS);
-	mld->mld_hdr[ii].label_exp_s_ttl =
-	    clib_host_to_net_u32(mld->mld_hdr[ii].label_exp_s_ttl);
+    for (ii = 0; ii < mld->mld_n_labels-1; ii++) {
+        vnet_mpls_uc_set_label(&mld->mld_hdr[ii].label_exp_s_ttl, label_stack[ii]);
+        vnet_mpls_uc_set_ttl(&mld->mld_hdr[ii].label_exp_s_ttl, 255);
+        vnet_mpls_uc_set_exp(&mld->mld_hdr[ii].label_exp_s_ttl, 0);
+        vnet_mpls_uc_set_s(&mld->mld_hdr[ii].label_exp_s_ttl, MPLS_NON_EOS);
+        mld->mld_hdr[ii].label_exp_s_ttl =
+            clib_host_to_net_u32(mld->mld_hdr[ii].label_exp_s_ttl);
     }
 
     /*
@@ -83,7 +82,7 @@ mpls_label_dpo_create (mpls_label_t *label_stack,
     vnet_mpls_uc_set_exp(&mld->mld_hdr[ii].label_exp_s_ttl, exp);
     vnet_mpls_uc_set_s(&mld->mld_hdr[ii].label_exp_s_ttl, eos);
     mld->mld_hdr[ii].label_exp_s_ttl =
-	clib_host_to_net_u32(mld->mld_hdr[ii].label_exp_s_ttl);
+        clib_host_to_net_u32(mld->mld_hdr[ii].label_exp_s_ttl);
 
     /*
      * stack this label objct on its parent.
@@ -107,8 +106,7 @@ format_mpls_label_dpo (u8 *s, va_list *args)
 
     s = format(s, "mpls-label:[%d]:", index);
 
-    if (pool_is_free_index(mpls_label_dpo_pool, index))
-    {
+    if (pool_is_free_index(mpls_label_dpo_pool, index)) {
         /*
          * the packet trace can be printed after the DPO has been deleted
          */
@@ -117,11 +115,10 @@ format_mpls_label_dpo (u8 *s, va_list *args)
 
     mld = mpls_label_dpo_get(index);
 
-    for (ii = 0; ii < mld->mld_n_labels; ii++)
-    {
-	hdr.label_exp_s_ttl =
-	    clib_net_to_host_u32(mld->mld_hdr[ii].label_exp_s_ttl);
-	s = format(s, "%U", format_mpls_header, hdr);
+    for (ii = 0; ii < mld->mld_n_labels; ii++) {
+        hdr.label_exp_s_ttl =
+            clib_net_to_host_u32(mld->mld_hdr[ii].label_exp_s_ttl);
+        s = format(s, "%U", format_mpls_header, hdr);
     }
 
     s = format(s, "\n%U", format_white_space, indent);
@@ -149,10 +146,9 @@ mpls_label_dpo_unlock (dpo_id_t *dpo)
 
     mld->mld_locks--;
 
-    if (0 == mld->mld_locks)
-    {
-	dpo_reset(&mld->mld_dpo);
-	pool_put(mpls_label_dpo_pool, mld);
+    if (0 == mld->mld_locks) {
+        dpo_reset(&mld->mld_dpo);
+        pool_put(mpls_label_dpo_pool, mld);
     }
 }
 
@@ -160,8 +156,7 @@ mpls_label_dpo_unlock (dpo_id_t *dpo)
  * @brief A struct to hold tracing information for the MPLS label imposition
  * node.
  */
-typedef struct mpls_label_imposition_trace_t_
-{
+typedef struct mpls_label_imposition_trace_t_ {
     /**
      * The MPLS header imposed
      */
@@ -179,13 +174,10 @@ mpls_label_paint (vlib_buffer_t * b0,
 
     hdr0 = vlib_buffer_get_current(b0);
 
-    if (1 == mld0->mld_n_labels)
-    {
+    if (1 == mld0->mld_n_labels) {
         /* optimise for the common case of one label */
         *hdr0 = mld0->mld_hdr[0];
-    }
-    else
-    {
+    } else {
         clib_memcpy(hdr0, mld0->mld_hdr, mld0->mld_n_hdr_bytes);
         hdr0 = hdr0 + (mld0->mld_n_labels - 1);
     }
@@ -210,14 +202,12 @@ mpls_label_imposition_inline (vlib_main_t * vm,
 
     next_index = node->cached_next_index;
 
-    while (n_left_from > 0)
-    {
+    while (n_left_from > 0) {
         u32 n_left_to_next;
 
         vlib_get_next_frame(vm, node, next_index, to_next, n_left_to_next);
 
-        while (n_left_from >= 8 && n_left_to_next >= 4)
-        {
+        while (n_left_from >= 8 && n_left_to_next >= 4) {
             u32 bi0, mldi0, bi1, mldi1, bi2, mldi2, bi3, mldi3;
             mpls_unicast_header_t *hdr0, *hdr1, *hdr2, *hdr3;
             mpls_label_dpo_t *mld0, *mld1, *mld2, *mld3;
@@ -270,8 +260,7 @@ mpls_label_imposition_inline (vlib_main_t * vm,
             mld2 = mpls_label_dpo_get(mldi2);
             mld3 = mpls_label_dpo_get(mldi3);
 
-            if (payload_is_ip4)
-            {
+            if (payload_is_ip4) {
                 /*
                  * decrement the TTL on ingress to the LSP
                  */
@@ -308,9 +297,7 @@ mpls_label_imposition_inline (vlib_main_t * vm,
                 ttl0 = ip0->ttl;
                 ttl3 = ip3->ttl;
                 ttl2 = ip2->ttl;
-            }
-            else if (payload_is_ip6)
-            {
+            } else if (payload_is_ip6) {
                 /*
                  * decrement the TTL on ingress to the LSP
                  */
@@ -328,21 +315,16 @@ mpls_label_imposition_inline (vlib_main_t * vm,
                 ttl1 = ip1->hop_limit;
                 ttl2 = ip2->hop_limit;
                 ttl3 = ip3->hop_limit;
-            }
-            else if (payload_is_ethernet)
-            {
+            } else if (payload_is_ethernet) {
                 /*
                  * nothing to chang ein the ethernet header
                  */
                 ttl0 = ttl1 = ttl2 = ttl3 = 255;
-            }
-            else
-            {
+            } else {
                 /*
                  * else, the packet to be encapped is an MPLS packet
                  */
-                if (PREDICT_TRUE(vnet_buffer(b0)->mpls.first))
-                {
+                if (PREDICT_TRUE(vnet_buffer(b0)->mpls.first)) {
                     /*
                      * The first label to be imposed on the packet. this is a label swap.
                      * in which case we stashed the TTL and EXP bits in the
@@ -351,9 +333,7 @@ mpls_label_imposition_inline (vlib_main_t * vm,
                     ASSERT(0 != vnet_buffer (b0)->mpls.ttl);
 
                     ttl0 = vnet_buffer(b0)->mpls.ttl - 1;
-                }
-                else
-                {
+                } else {
                     /*
                      * not the first label. implying we are recusring down a chain of
                      * output labels.
@@ -361,32 +341,23 @@ mpls_label_imposition_inline (vlib_main_t * vm,
                      */
                     ttl0 = 255;
                 }
-                if (PREDICT_TRUE(vnet_buffer(b1)->mpls.first))
-                {
+                if (PREDICT_TRUE(vnet_buffer(b1)->mpls.first)) {
                     ASSERT(1 != vnet_buffer (b1)->mpls.ttl);
                     ttl1 = vnet_buffer(b1)->mpls.ttl - 1;
-                }
-                else
-                {
+                } else {
                     ttl1 = 255;
                 }
-                if (PREDICT_TRUE(vnet_buffer(b2)->mpls.first))
-                {
+                if (PREDICT_TRUE(vnet_buffer(b2)->mpls.first)) {
                     ASSERT(1 != vnet_buffer (b2)->mpls.ttl);
 
                     ttl2 = vnet_buffer(b2)->mpls.ttl - 1;
-                }
-                else
-                {
+                } else {
                     ttl2 = 255;
                 }
-                if (PREDICT_TRUE(vnet_buffer(b3)->mpls.first))
-                {
+                if (PREDICT_TRUE(vnet_buffer(b3)->mpls.first)) {
                     ASSERT(1 != vnet_buffer (b3)->mpls.ttl);
                     ttl3 = vnet_buffer(b3)->mpls.ttl - 1;
-                }
-                else
-                {
+                } else {
                     ttl3 = 255;
                 }
             }
@@ -410,26 +381,22 @@ mpls_label_imposition_inline (vlib_main_t * vm,
             vnet_buffer(b2)->ip.adj_index[VLIB_TX] = mld2->mld_dpo.dpoi_index;
             vnet_buffer(b3)->ip.adj_index[VLIB_TX] = mld3->mld_dpo.dpoi_index;
 
-            if (PREDICT_FALSE(b0->flags & VLIB_BUFFER_IS_TRACED))
-            {
+            if (PREDICT_FALSE(b0->flags & VLIB_BUFFER_IS_TRACED)) {
                 mpls_label_imposition_trace_t *tr =
                     vlib_add_trace (vm, node, b0, sizeof (*tr));
                 tr->hdr = *hdr0;
             }
-            if (PREDICT_FALSE(b1->flags & VLIB_BUFFER_IS_TRACED))
-            {
+            if (PREDICT_FALSE(b1->flags & VLIB_BUFFER_IS_TRACED)) {
                 mpls_label_imposition_trace_t *tr =
                     vlib_add_trace (vm, node, b1, sizeof (*tr));
                 tr->hdr = *hdr1;
             }
-            if (PREDICT_FALSE(b2->flags & VLIB_BUFFER_IS_TRACED))
-            {
+            if (PREDICT_FALSE(b2->flags & VLIB_BUFFER_IS_TRACED)) {
                 mpls_label_imposition_trace_t *tr =
                     vlib_add_trace (vm, node, b2, sizeof (*tr));
                 tr->hdr = *hdr2;
             }
-            if (PREDICT_FALSE(b3->flags & VLIB_BUFFER_IS_TRACED))
-            {
+            if (PREDICT_FALSE(b3->flags & VLIB_BUFFER_IS_TRACED)) {
                 mpls_label_imposition_trace_t *tr =
                     vlib_add_trace (vm, node, b3, sizeof (*tr));
                 tr->hdr = *hdr3;
@@ -441,8 +408,7 @@ mpls_label_imposition_inline (vlib_main_t * vm,
                                             next0, next1, next2, next3);
         }
 
-        while (n_left_from > 0 && n_left_to_next > 0)
-        {
+        while (n_left_from > 0 && n_left_to_next > 0) {
             mpls_unicast_header_t *hdr0;
             mpls_label_dpo_t *mld0;
             vlib_buffer_t * b0;
@@ -463,8 +429,7 @@ mpls_label_imposition_inline (vlib_main_t * vm,
             mldi0 = vnet_buffer(b0)->ip.adj_index[VLIB_TX];
             mld0 = mpls_label_dpo_get(mldi0);
 
-            if (payload_is_ip4)
-            {
+            if (payload_is_ip4) {
                 /*
                  * decrement the TTL on ingress to the LSP
                  */
@@ -477,9 +442,7 @@ mpls_label_imposition_inline (vlib_main_t * vm,
                 ip0->checksum = checksum0;
                 ip0->ttl -= 1;
                 ttl = ip0->ttl;
-            }
-            else if (payload_is_ip6)
-            {
+            } else if (payload_is_ip6) {
                 /*
                  * decrement the TTL on ingress to the LSP
                  */
@@ -487,14 +450,11 @@ mpls_label_imposition_inline (vlib_main_t * vm,
 
                 ip0->hop_limit -= 1;
                 ttl = ip0->hop_limit;
-            }
-            else
-            {
+            } else {
                 /*
                  * else, the packet to be encapped is an MPLS packet
                  */
-                if (vnet_buffer(b0)->mpls.first)
-                {
+                if (vnet_buffer(b0)->mpls.first) {
                     /*
                      * The first label to be imposed on the packet. this is a label swap.
                      * in which case we stashed the TTL and EXP bits in the
@@ -503,9 +463,7 @@ mpls_label_imposition_inline (vlib_main_t * vm,
                     ASSERT(0 != vnet_buffer (b0)->mpls.ttl);
 
                     ttl = vnet_buffer(b0)->mpls.ttl - 1;
-                }
-                else
-                {
+                } else {
                     /*
                      * not the first label. implying we are recusring down a chain of
                      * output labels.
@@ -528,8 +486,7 @@ mpls_label_imposition_inline (vlib_main_t * vm,
             next0 = mld0->mld_dpo.dpoi_next_node;
             vnet_buffer(b0)->ip.adj_index[VLIB_TX] = mld0->mld_dpo.dpoi_index;
 
-            if (PREDICT_FALSE(b0->flags & VLIB_BUFFER_IS_TRACED))
-            {
+            if (PREDICT_FALSE(b0->flags & VLIB_BUFFER_IS_TRACED)) {
                 mpls_label_imposition_trace_t *tr =
                     vlib_add_trace (vm, node, b0, sizeof (*tr));
                 tr->hdr = *hdr0;
@@ -654,9 +611,9 @@ static void
 mpls_label_dpo_mem_show (void)
 {
     fib_show_memory_usage("MPLS label",
-			  pool_elts(mpls_label_dpo_pool),
-			  pool_len(mpls_label_dpo_pool),
-			  sizeof(mpls_label_dpo_t));
+                          pool_elts(mpls_label_dpo_pool),
+                          pool_len(mpls_label_dpo_pool),
+                          sizeof(mpls_label_dpo_t));
 }
 
 const static dpo_vft_t mld_vft = {
@@ -666,29 +623,24 @@ const static dpo_vft_t mld_vft = {
     .dv_mem_show = mpls_label_dpo_mem_show,
 };
 
-const static char* const mpls_label_imp_ip4_nodes[] =
-{
+const static char* const mpls_label_imp_ip4_nodes[] = {
     "ip4-mpls-label-imposition",
     NULL,
 };
-const static char* const mpls_label_imp_ip6_nodes[] =
-{
+const static char* const mpls_label_imp_ip6_nodes[] = {
     "ip6-mpls-label-imposition",
     NULL,
 };
-const static char* const mpls_label_imp_mpls_nodes[] =
-{
+const static char* const mpls_label_imp_mpls_nodes[] = {
     "mpls-label-imposition",
     NULL,
 };
-const static char* const mpls_label_imp_ethernet_nodes[] =
-{
+const static char* const mpls_label_imp_ethernet_nodes[] = {
     "ethernet-mpls-label-imposition",
     NULL,
 };
 
-const static char* const * const mpls_label_imp_nodes[DPO_PROTO_NUM] =
-{
+const static char* const * const mpls_label_imp_nodes[DPO_PROTO_NUM] = {
     [DPO_PROTO_IP4]  = mpls_label_imp_ip4_nodes,
     [DPO_PROTO_IP6]  = mpls_label_imp_ip6_nodes,
     [DPO_PROTO_MPLS] = mpls_label_imp_mpls_nodes,

@@ -16,195 +16,196 @@
 #include "vom/neighbour.hpp"
 #include "vom/neighbour_cmds.hpp"
 
-namespace VOM {
-singular_db<neighbour::key_t, neighbour> neighbour::m_db;
-neighbour::event_handler neighbour::m_evh;
-
-neighbour::neighbour(const interface& itf,
-                     const boost::asio::ip::address& ip_addr,
-                     const mac_address_t& mac)
-  : m_hw(false)
-  , m_itf(itf.singular())
-  , m_ip_addr(ip_addr)
-  , m_mac(mac)
+namespace VOM
 {
-}
+    singular_db<neighbour::key_t, neighbour> neighbour::m_db;
+    neighbour::event_handler neighbour::m_evh;
 
-neighbour::neighbour(const neighbour& bde)
-  : m_hw(bde.m_hw)
-  , m_itf(bde.m_itf)
-  , m_ip_addr(bde.m_ip_addr)
-  , m_mac(bde.m_mac)
-{
-}
+    neighbour::neighbour(const interface& itf,
+                         const boost::asio::ip::address& ip_addr,
+                         const mac_address_t& mac)
+        : m_hw(false)
+        , m_itf(itf.singular())
+        , m_ip_addr(ip_addr)
+        , m_mac(mac)
+    {
+    }
 
-neighbour::~neighbour()
-{
-  sweep();
+    neighbour::neighbour(const neighbour& bde)
+        : m_hw(bde.m_hw)
+        , m_itf(bde.m_itf)
+        , m_ip_addr(bde.m_ip_addr)
+        , m_mac(bde.m_mac)
+    {
+    }
 
-  // not in the DB anymore.
-  m_db.release(key(), this);
-}
+    neighbour::~neighbour()
+    {
+        sweep();
 
-bool
-neighbour::operator==(const neighbour& n) const
-{
-  return ((key() == n.key()) && (m_mac == n.m_mac));
-}
+        // not in the DB anymore.
+        m_db.release(key(), this);
+    }
 
-const neighbour::key_t
-neighbour::key() const
-{
-  return (std::make_pair(m_itf->key(), m_ip_addr));
-}
+    bool
+    neighbour::operator==(const neighbour& n) const
+    {
+        return ((key() == n.key()) && (m_mac == n.m_mac));
+    }
 
-void
-neighbour::sweep()
-{
-  if (m_hw) {
-    HW::enqueue(
-      new neighbour_cmds::delete_cmd(m_hw, m_itf->handle(), m_mac, m_ip_addr));
-  }
-  HW::write();
-}
+    const neighbour::key_t
+    neighbour::key() const
+    {
+        return (std::make_pair(m_itf->key(), m_ip_addr));
+    }
 
-void
-neighbour::replay()
-{
-  if (m_hw) {
-    HW::enqueue(
-      new neighbour_cmds::create_cmd(m_hw, m_itf->handle(), m_mac, m_ip_addr));
-  }
-}
+    void
+    neighbour::sweep()
+    {
+        if (m_hw) {
+            HW::enqueue(
+                new neighbour_cmds::delete_cmd(m_hw, m_itf->handle(), m_mac, m_ip_addr));
+        }
+        HW::write();
+    }
 
-std::string
-neighbour::to_string() const
-{
-  std::ostringstream s;
-  s << "arp-entry:[" << m_itf->to_string() << ", " << m_mac.to_string() << ", "
-    << m_ip_addr.to_string() << "]";
+    void
+    neighbour::replay()
+    {
+        if (m_hw) {
+            HW::enqueue(
+                new neighbour_cmds::create_cmd(m_hw, m_itf->handle(), m_mac, m_ip_addr));
+        }
+    }
 
-  return (s.str());
-}
+    std::string
+    neighbour::to_string() const
+    {
+        std::ostringstream s;
+        s << "arp-entry:[" << m_itf->to_string() << ", " << m_mac.to_string() << ", "
+          << m_ip_addr.to_string() << "]";
 
-void
-neighbour::update(const neighbour& r)
-{
-  /*
- * create the table if it is not yet created
- */
-  if (rc_t::OK != m_hw.rc()) {
-    HW::enqueue(
-      new neighbour_cmds::create_cmd(m_hw, m_itf->handle(), m_mac, m_ip_addr));
-  }
-}
+        return (s.str());
+    }
 
-std::shared_ptr<neighbour>
-neighbour::find_or_add(const neighbour& temp)
-{
-  return (m_db.find_or_add(temp.key(), temp));
-}
+    void
+    neighbour::update(const neighbour& r)
+    {
+        /*
+        * create the table if it is not yet created
+        */
+        if (rc_t::OK != m_hw.rc()) {
+            HW::enqueue(
+                new neighbour_cmds::create_cmd(m_hw, m_itf->handle(), m_mac, m_ip_addr));
+        }
+    }
 
-std::shared_ptr<neighbour>
-neighbour::find(const key_t& k)
-{
-  return (m_db.find(k));
-}
+    std::shared_ptr<neighbour>
+    neighbour::find_or_add(const neighbour& temp)
+    {
+        return (m_db.find_or_add(temp.key(), temp));
+    }
 
-std::shared_ptr<neighbour>
-neighbour::singular() const
-{
-  return find_or_add(*this);
-}
+    std::shared_ptr<neighbour>
+    neighbour::find(const key_t& k)
+    {
+        return (m_db.find(k));
+    }
 
-void
-neighbour::dump(std::ostream& os)
-{
-  m_db.dump(os);
-}
+    std::shared_ptr<neighbour>
+    neighbour::singular() const
+    {
+        return find_or_add(*this);
+    }
 
-std::ostream&
-operator<<(std::ostream& os, const neighbour::key_t& key)
-{
-  os << "[" << key.first << ", " << key.second << "]";
+    void
+    neighbour::dump(std::ostream& os)
+    {
+        m_db.dump(os);
+    }
 
-  return (os);
-}
+    std::ostream&
+    operator<<(std::ostream& os, const neighbour::key_t& key)
+    {
+        os << "[" << key.first << ", " << key.second << "]";
 
-neighbour::event_handler::event_handler()
-{
-  OM::register_listener(this);
-  inspect::register_handler({ "neighbour" }, "Neighbours", this);
-}
+        return (os);
+    }
 
-void
-neighbour::event_handler::handle_replay()
-{
-  m_db.replay();
-}
+    neighbour::event_handler::event_handler()
+    {
+        OM::register_listener(this);
+        inspect::register_handler({ "neighbour" }, "Neighbours", this);
+    }
 
-void
-neighbour::populate_i(const client_db::key_t& key,
-                      std::shared_ptr<interface> itf,
-                      const l3_proto_t& proto)
-{
-  /*
-   * dump VPP current states
-   */
-  std::shared_ptr<neighbour_cmds::dump_cmd> cmd =
-    std::make_shared<neighbour_cmds::dump_cmd>(
-      neighbour_cmds::dump_cmd(itf->handle(), proto));
+    void
+    neighbour::event_handler::handle_replay()
+    {
+        m_db.replay();
+    }
 
-  HW::enqueue(cmd);
-  HW::write();
+    void
+    neighbour::populate_i(const client_db::key_t& key,
+                          std::shared_ptr<interface> itf,
+                          const l3_proto_t& proto)
+    {
+        /*
+         * dump VPP current states
+         */
+        std::shared_ptr<neighbour_cmds::dump_cmd> cmd =
+            std::make_shared<neighbour_cmds::dump_cmd>(
+                neighbour_cmds::dump_cmd(itf->handle(), proto));
 
-  for (auto& record : *cmd) {
-    /*
-     * construct a neighbour from each recieved record.
-     */
-    auto& payload = record.get_payload();
+        HW::enqueue(cmd);
+        HW::write();
 
-    mac_address_t mac(payload.mac_address);
-    boost::asio::ip::address ip_addr =
-      from_bytes(payload.is_ipv6, payload.ip_address);
-    neighbour n(*itf, ip_addr, mac);
+        for (auto& record : *cmd) {
+            /*
+             * construct a neighbour from each recieved record.
+             */
+            auto& payload = record.get_payload();
 
-    VOM_LOG(log_level_t::DEBUG) << "neighbour-dump: " << itf->to_string()
-                                << mac.to_string() << ip_addr.to_string();
+            mac_address_t mac(payload.mac_address);
+            boost::asio::ip::address ip_addr =
+                from_bytes(payload.is_ipv6, payload.ip_address);
+            neighbour n(*itf, ip_addr, mac);
 
-    /*
-     * Write each of the discovered interfaces into the OM,
-     * but disable the HW Command q whilst we do, so that no
-     * commands are sent to VPP
-     */
-    OM::commit(key, n);
-  }
-}
+            VOM_LOG(log_level_t::DEBUG) << "neighbour-dump: " << itf->to_string()
+                                        << mac.to_string() << ip_addr.to_string();
 
-void
-neighbour::event_handler::handle_populate(const client_db::key_t& key)
-{
-  auto it = interface::cbegin();
+            /*
+             * Write each of the discovered interfaces into the OM,
+             * but disable the HW Command q whilst we do, so that no
+             * commands are sent to VPP
+             */
+            OM::commit(key, n);
+        }
+    }
 
-  while (it != interface::cend()) {
-    neighbour::populate_i(key, it->second.lock(), l3_proto_t::IPV4);
-    neighbour::populate_i(key, it->second.lock(), l3_proto_t::IPV6);
+    void
+    neighbour::event_handler::handle_populate(const client_db::key_t& key)
+    {
+        auto it = interface::cbegin();
 
-    ++it;
-  }
-}
+        while (it != interface::cend()) {
+            neighbour::populate_i(key, it->second.lock(), l3_proto_t::IPV4);
+            neighbour::populate_i(key, it->second.lock(), l3_proto_t::IPV6);
 
-dependency_t
-neighbour::event_handler::order() const
-{
-  return (dependency_t::ENTRY);
-}
+            ++it;
+        }
+    }
 
-void
-neighbour::event_handler::show(std::ostream& os)
-{
-  m_db.dump(os);
-}
+    dependency_t
+    neighbour::event_handler::order() const
+    {
+        return (dependency_t::ENTRY);
+    }
+
+    void
+    neighbour::event_handler::show(std::ostream& os)
+    {
+        m_db.dump(os);
+    }
 }
 
 /*

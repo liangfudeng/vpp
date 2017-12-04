@@ -1,4 +1,4 @@
-/* 
+/*
  *------------------------------------------------------------------
  * Copyright (c) 2006-2016 Cisco and/or its affiliates.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -96,7 +96,7 @@ int strtab_pass1(cpel_section_header_t *sh, int verbose, FILE *ofp)
 {
     uword *p;
     u8 *strtab_data_area = (u8 *)(sh+1);
-    
+
     /* Multiple string tables with the same name are Bad... */
     p = hash_get_mem(the_strtab_hash, strtab_data_area);
     if (p) {
@@ -104,7 +104,7 @@ int strtab_pass1(cpel_section_header_t *sh, int verbose, FILE *ofp)
     }
     /*
      * Looks funny, but we really do want key = first string in the
-     * table, value = address(first string in the table) 
+     * table, value = address(first string in the table)
      */
     hash_set_mem(the_strtab_hash, strtab_data_area, strtab_data_area);
     if (verbose) {
@@ -126,7 +126,7 @@ int evtdef_pass1(cpel_section_header_t *sh, int verbose, FILE *ofp)
 
     edh = (event_definition_section_header_t *)(sh+1);
     nevents = ntohl(edh->number_of_event_definitions);
-    
+
     if (verbose) {
         fprintf(stderr, "Event Definition Section: %d definitions\n",
                 nevents);
@@ -140,7 +140,7 @@ int evtdef_pass1(cpel_section_header_t *sh, int verbose, FILE *ofp)
     this_strtab = (u8 *)p[0];
 
     ep = (event_definition_t *)(edh+1);
-    
+
     for (i = 0; i < nevents; i++) {
         event_code = ntohl(ep->event);
         p = hash_get(the_evtdef_hash, event_code);
@@ -160,7 +160,7 @@ int evtdef_pass1(cpel_section_header_t *sh, int verbose, FILE *ofp)
             int seen_percent=0;
 
             for (j = 0; j < strlen((char *)bp->datum_str); j++) {
-                if (bp->datum_str[j] == '%'){
+                if (bp->datum_str[j] == '%') {
                     seen_percent=1;
                     continue;
                 }
@@ -169,7 +169,7 @@ int evtdef_pass1(cpel_section_header_t *sh, int verbose, FILE *ofp)
                 }
             }
         }
-        
+
         hash_set(the_evtdef_hash, event_code, bp - bound_events);
 
         thislen = strlen((char *)bp->event_str);
@@ -194,7 +194,7 @@ int trackdef_pass1(cpel_section_header_t *sh, int verbose, FILE *ofp)
 
     tdh = (track_definition_section_header_t *)(sh+1);
     nevents = ntohl(tdh->number_of_track_definitions);
-    
+
     if (verbose) {
         fprintf(stderr, "Track Definition Section: %d definitions\n",
                 nevents);
@@ -208,7 +208,7 @@ int trackdef_pass1(cpel_section_header_t *sh, int verbose, FILE *ofp)
     this_strtab = (u8 *)p[0];
 
     tp = (track_definition_t *)(tdh+1);
-    
+
     for (i = 0; i < nevents; i++) {
         track_code = ntohl(tp->track);
         p = hash_get(the_trackdef_hash, track_code);
@@ -274,7 +274,7 @@ int event_pass2(cpel_section_header_t *sh, int verbose, FILE *ofp)
     ticks_per_us = ((double)ntohl(eh->clock_ticks_per_second)) / 1e6;
 
     if (verbose) {
-        fprintf(stderr, "Event section: %d events, %.3f ticks_per_us\n", 
+        fprintf(stderr, "Event section: %d events, %.3f ticks_per_us\n",
                 nevents, ticks_per_us);
     }
 
@@ -297,7 +297,7 @@ int event_pass2(cpel_section_header_t *sh, int verbose, FILE *ofp)
         time1 = ntohl (ep->time[1]);
 
         now = (((u64) time0)<<32) | time1;
-        
+
         /* Convert from bus ticks to usec */
         d = now;
         d /= ticks_per_us;
@@ -306,13 +306,13 @@ int event_pass2(cpel_section_header_t *sh, int verbose, FILE *ofp)
 
         if (starttime == 0xFFFFFFFFFFFFFFFFULL)
             starttime = now;
-        
+
         delta = now - starttime;
 
         /* Delta = time since first event, in usec */
 
         hours = delta / USEC_PER_HOUR;
-        if (hours) 
+        if (hours)
             delta -= ((u64) hours * USEC_PER_HOUR);
         minutes = delta / USEC_PER_MINUTE;
         if (minutes)
@@ -363,7 +363,7 @@ int event_pass2(cpel_section_header_t *sh, int verbose, FILE *ofp)
         fprintf(ofp, (char *)evtpad, s);
         vec_free(s);
         if (bp->is_strtab_ref) {
-            fprintf(ofp, (char *) bp->datum_str, 
+            fprintf(ofp, (char *) bp->datum_str,
                     &this_strtab[ntohl(ep->event_datum)]);
         } else {
             fprintf(ofp, (char *) bp->datum_str, ntohl(ep->event_datum));
@@ -376,18 +376,17 @@ int event_pass2(cpel_section_header_t *sh, int verbose, FILE *ofp)
     return(0);
 }
 
-/* 
- * Note: If necessary, add passes / columns to this table to 
+/*
+ * Note: If necessary, add passes / columns to this table to
  * handle section order dependencies.
  */
 
-section_processor_t processors[CPEL_NUM_SECTION_TYPES+1] =
-{
-    {bad_section,	noop_pass}, 		/* type 0 -- f**ked */
-    {strtab_pass1, 	noop_pass}, 		/* type 1 -- STRTAB */
-    {unsupported_pass,  noop_pass}, 		/* type 2 -- SYMTAB */
+section_processor_t processors[CPEL_NUM_SECTION_TYPES+1] = {
+    {bad_section,   noop_pass},         /* type 0 -- f**ked */
+    {strtab_pass1,  noop_pass},         /* type 1 -- STRTAB */
+    {unsupported_pass,  noop_pass},         /* type 2 -- SYMTAB */
     {evtdef_pass1,      noop_pass},             /* type 3 -- EVTDEF */
-    {trackdef_pass1,    noop_pass},		/* type 4 -- TRACKDEF */
+    {trackdef_pass1,    noop_pass},     /* type 4 -- TRACKDEF */
     {noop_pass,         event_pass2},           /* type 5 -- EVENTS */
 };
 
@@ -405,17 +404,17 @@ int process_section(cpel_section_header_t *sh, int verbose, FILE *ofp,
         return(1);
     }
     switch(pass) {
-    case PASS1:
-        fp = processors[type].pass1;
-        break;
+        case PASS1:
+            fp = processors[type].pass1;
+            break;
 
-    case PASS2:
-        fp = processors[type].pass2;
-        break;
-        
-    default:
-        fprintf(stderr, "Unknown pass %d\n", pass);
-        return(1);
+        case PASS2:
+            fp = processors[type].pass2;
+            break;
+
+        default:
+            fprintf(stderr, "Unknown pass %d\n", pass);
+            return(1);
     }
 
     rv = (*fp)(sh, verbose, ofp);
@@ -429,14 +428,14 @@ int cpel_dump_file_header(cpel_file_header_t *fh, int verbose, FILE *ofp)
 
     if (verbose) {
         fprintf(stderr, "CPEL file: %s-endian, version %d\n",
-                ((fh->endian_version & CPEL_FILE_LITTLE_ENDIAN) ? 
-                 "little" : "big"), 
+                ((fh->endian_version & CPEL_FILE_LITTLE_ENDIAN) ?
+                 "little" : "big"),
                 fh->endian_version & CPEL_FILE_VERSION_MASK);
-        
+
         file_time = ntohl(fh->file_date);
-        
+
         fprintf(stderr, "File created %s", ctime(&file_time));
-        fprintf(stderr, "File has %d sections\n", 
+        fprintf(stderr, "File has %d sections\n",
                 ntohs(fh->nsections));
     }
 
@@ -459,7 +458,7 @@ int cpel_dump(u8 *cpel, int verbose, FILE *ofp)
             fprintf(stderr, "Little endian data format not supported\n");
             return(1);
         }
-        fprintf(stderr, "Unsupported file version 0x%x\n", 
+        fprintf(stderr, "Unsupported file version 0x%x\n",
                 fh->endian_version);
         return(1);
     }
@@ -476,7 +475,7 @@ int cpel_dump(u8 *cpel, int verbose, FILE *ofp)
         section_size = ntohl(sh->data_length);
 
         if(verbose) {
-            fprintf(stderr, 
+            fprintf(stderr,
                     "Section type %d, size %d\n", ntohl(sh->section_type),
                     section_size);
         }
@@ -506,17 +505,15 @@ char *mapfile (char *file)
     char *rv;
     int maphfile;
     size_t mapfsize;
-    
+
     maphfile = open (file, O_RDONLY);
 
-    if (maphfile < 0)
-    {
+    if (maphfile < 0) {
         fprintf (stderr, "Couldn't read %s, skipping it...\n", file);
         return (NULL);
     }
 
-    if (fstat (maphfile, &statb) < 0)
-    {
+    if (fstat (maphfile, &statb) < 0) {
         fprintf (stderr, "Couldn't get size of %s, skipping it...\n", file);
         return (NULL);
     }
@@ -529,8 +526,7 @@ char *mapfile (char *file)
 
     mapfsize = statb.st_size;
 
-    if (mapfsize < 3)
-    {
+    if (mapfsize < 3) {
         fprintf (stderr, "%s zero-length, skipping it...\n", file);
         close (maphfile);
         return (NULL);
@@ -538,8 +534,7 @@ char *mapfile (char *file)
 
     rv = mmap (0, mapfsize, PROT_READ, MAP_SHARED, maphfile, 0);
 
-    if (rv == 0)
-    {
+    if (rv == 0) {
         fprintf (stderr, "%s problem mapping, I quit...\n", file);
         exit (-1);
     }
@@ -548,7 +543,7 @@ char *mapfile (char *file)
 }
 
 /*
- * main 
+ * main
  */
 int main (int argc, char **argv)
 {
@@ -585,8 +580,8 @@ int main (int argc, char **argv)
         }
 
     usage:
-        fprintf(stderr, 
-          "cpeldump --input-file <filename> [--output-file <filename>]\n");
+        fprintf(stderr,
+                "cpeldump --input-file <filename> [--output-file <filename>]\n");
         fprintf(stderr, "%s\n", version);
         exit(1);
     }

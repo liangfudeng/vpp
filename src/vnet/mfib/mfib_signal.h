@@ -26,8 +26,7 @@
 /**
  * A pair of indicies, for the entry and interface resp.
  */
-typedef struct mfib_signal_t_
-{
+typedef struct mfib_signal_t_ {
     fib_node_index_t mfs_entry;
     index_t mfs_itf;
 

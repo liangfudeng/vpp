@@ -27,15 +27,15 @@ typedef CLIB_PACKED(struct {
 /* *INDENT-ON* */
 
 typedef struct ioam_e2e_data_t_ {
-  u32 flow_ctx;
-  u32 pad;
-  ioam_seqno_data seqno_data;
+    u32 flow_ctx;
+    u32 pad;
+    ioam_seqno_data seqno_data;
 } ioam_e2e_data_t;
 
 typedef struct {
-  ioam_e2e_data_t *e2e_data;
-  vlib_main_t *vlib_main;
-  vnet_main_t *vnet_main;
+    ioam_e2e_data_t *e2e_data;
+    vlib_main_t *vlib_main;
+    vnet_main_t *vnet_main;
 } ioam_e2e_main_t;
 
 extern ioam_e2e_main_t ioam_e2e_main;
@@ -43,22 +43,22 @@ extern ioam_e2e_main_t ioam_e2e_main;
 static inline ioam_seqno_data *
 ioam_e2ec_get_seqno_data_from_flow_ctx (u32 flow_ctx)
 {
-  ioam_e2e_data_t *data = NULL;
-  u32 index;
+    ioam_e2e_data_t *data = NULL;
+    u32 index;
 
-  index =  get_flow_data_from_flow_ctx(flow_ctx,
-                                       HBH_OPTION_TYPE_IOAM_EDGE_TO_EDGE);
-  data = &ioam_e2e_main.e2e_data[index];
-  return &(data->seqno_data);
+    index =  get_flow_data_from_flow_ctx(flow_ctx,
+                                         HBH_OPTION_TYPE_IOAM_EDGE_TO_EDGE);
+    data = &ioam_e2e_main.e2e_data[index];
+    return &(data->seqno_data);
 }
 
 static inline u32
 ioam_e2e_get_cur_seqno_from_flow_ctx (u32 flow_ctx)
 {
-  ioam_seqno_data *data = NULL;
+    ioam_seqno_data *data = NULL;
 
-  data =  ioam_e2ec_get_seqno_data_from_flow_ctx(flow_ctx);
-  return data->seq_num;
+    data =  ioam_e2ec_get_seqno_data_from_flow_ctx(flow_ctx);
+    return data->seq_num;
 }
 
 #endif /* __included_ioam_e2e_h__ */

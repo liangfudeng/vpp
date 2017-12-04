@@ -1,4 +1,4 @@
-/* 
+/*
  *------------------------------------------------------------------
  * Copyright (c) 2005-2016 Cisco and/or its affiliates.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,7 +24,7 @@ typedef struct cpel_file_header_ {
     unsigned int file_date;
 } cpel_file_header_t;
 
-#define CPEL_FILE_LITTLE_ENDIAN	0x80
+#define CPEL_FILE_LITTLE_ENDIAN 0x80
 #define CPEL_FILE_VERSION       0x01
 #define CPEL_FILE_VERSION_MASK  0x7F
 
@@ -33,7 +33,7 @@ typedef struct cpel_section_header_ {
     unsigned int data_length;        /* does NOT include type and itself */
 } cpel_section_header_t;
 
-#define CPEL_SECTION_STRTAB	1
+#define CPEL_SECTION_STRTAB 1
 /* string at offset 0 is the name of the table */
 
 #define CPEL_SECTION_SYMTAB     2

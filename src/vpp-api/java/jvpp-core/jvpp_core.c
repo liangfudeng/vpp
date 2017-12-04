@@ -47,7 +47,8 @@ core_main_t core_main __attribute__((aligned (64)));
 #include "jvpp_core_gen.h"
 
 JNIEXPORT void JNICALL Java_io_fd_vpp_jvpp_core_JVppCoreImpl_init0
-(JNIEnv * env, jclass clazz, jobject callback, jlong queue_address, jint my_client_index) {
+(JNIEnv * env, jclass clazz, jobject callback, jlong queue_address, jint my_client_index)
+{
     core_main_t * plugin_main = &core_main;
     plugin_main->my_client_index = my_client_index;
     plugin_main->vl_input_queue = uword_to_pointer (queue_address, unix_shared_memory_queue_t *);
@@ -56,24 +57,25 @@ JNIEXPORT void JNICALL Java_io_fd_vpp_jvpp_core_JVppCoreImpl_init0
     plugin_main->callbackClass = (jclass)(*env)->NewGlobalRef(env, (*env)->GetObjectClass(env, callback));
 
     // verify API has not changed since jar generation (exit on mismatch)
-    #define _(N)             \
+#define _(N)             \
         if (get_message_id(env, #N) == 0) return;
-        foreach_supported_api_message;
-    #undef _
+    foreach_supported_api_message;
+#undef _
 
-    #define _(N,n)                                  \
+#define _(N,n)                                  \
         vl_msg_api_set_handlers(get_message_id(env, #N), #n,     \
                 vl_api_##n##_t_handler,             \
                 vl_noop_handler,                    \
                 vl_noop_handler,              \
                 vl_noop_handler,               \
                 sizeof(vl_api_##n##_t), 1);
-        foreach_api_reply_handler;
-    #undef _
+    foreach_api_reply_handler;
+#undef _
 }
 
 JNIEXPORT void JNICALL Java_io_fd_vpp_jvpp_core_JVppCoreImpl_close0
-(JNIEnv *env, jclass clazz) {
+(JNIEnv *env, jclass clazz)
+{
     core_main_t * plugin_main = &core_main;
 
     // cleanup:
@@ -84,7 +86,8 @@ JNIEXPORT void JNICALL Java_io_fd_vpp_jvpp_core_JVppCoreImpl_close0
     plugin_main->callbackObject = NULL;
 }
 
-jint JNI_OnLoad(JavaVM *vm, void *reserved) {
+jint JNI_OnLoad(JavaVM *vm, void *reserved)
+{
     JNIEnv* env;
 
     if ((*vm)->GetEnv(vm, (void**) &env, JNI_VERSION_1_8) != JNI_OK) {
@@ -99,7 +102,8 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     return JNI_VERSION_1_8;
 }
 
-void JNI_OnUnload(JavaVM *vm, void *reserved) {
+void JNI_OnUnload(JavaVM *vm, void *reserved)
+{
     JNIEnv* env;
     if ((*vm)->GetEnv(vm, (void**) &env, JNI_VERSION_1_8) != JNI_OK) {
         return;

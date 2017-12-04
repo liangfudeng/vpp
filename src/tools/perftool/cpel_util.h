@@ -1,4 +1,4 @@
-/* 
+/*
  *------------------------------------------------------------------
  * Copyright (c) 2006-2016 Cisco and/or its affiliates.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,7 +22,7 @@
  */
 typedef struct evt_ {
     u64 timestamp;
-    u32 track_id;               
+    u32 track_id;
     u32 event_id;
     u32 datum;
 } evt_t;
@@ -31,7 +31,7 @@ evt_t *the_events;
 
 /*
  * Track object, so we can sort the tracks alphabetically and
- * fix the events later 
+ * fix the events later
  */
 typedef struct track_ {
     u32 original_index;

@@ -24,11 +24,11 @@ extern ioam_export_main_t vxlan_gpe_ioam_export_main;
 
 static uword
 vxlan_gpe_ioam_export_process (vlib_main_t * vm,
-			       vlib_node_runtime_t * rt, vlib_frame_t * f)
+                               vlib_node_runtime_t * rt, vlib_frame_t * f)
 {
-  return (ioam_export_process_common (&vxlan_gpe_ioam_export_main,
-				      vm, rt, f,
-				      vxlan_gpe_ioam_export_process_node.index));
+    return (ioam_export_process_common (&vxlan_gpe_ioam_export_main,
+                                        vm, rt, f,
+                                        vxlan_gpe_ioam_export_process_node.index));
 }
 
 

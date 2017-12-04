@@ -86,25 +86,26 @@ extern u8 *format_bier_hdr_len_id(u8 *s, va_list *ap);
  * convert from prefix len to hdr ID
  */
 static inline bier_hdr_len_id_t
-bier_prefix_len_to_hdr_id (u16 prfx_len) {
+bier_prefix_len_to_hdr_id (u16 prfx_len)
+{
 
     switch (prfx_len) {
-    case 7:
-        return (BIER_HDR_LEN_64);
-    case 8:
-        return (BIER_HDR_LEN_128);
-    case 9:
-        return (BIER_HDR_LEN_256);
-    case 10:
-        return (BIER_HDR_LEN_512);
-    case 11:
-        return (BIER_HDR_LEN_1024);
-    case 12:
-        return (BIER_HDR_LEN_2048);
-    case 13:
-        return (BIER_HDR_LEN_4096);
-    default:
-        break;
+        case 7:
+            return (BIER_HDR_LEN_64);
+        case 8:
+            return (BIER_HDR_LEN_128);
+        case 9:
+            return (BIER_HDR_LEN_256);
+        case 10:
+            return (BIER_HDR_LEN_512);
+        case 11:
+            return (BIER_HDR_LEN_1024);
+        case 12:
+            return (BIER_HDR_LEN_2048);
+        case 13:
+            return (BIER_HDR_LEN_4096);
+        default:
+            break;
     }
 
     return (BIER_HDR_LEN_INVALID);
@@ -114,20 +115,20 @@ static inline bier_hdr_len_id_t
 bier_hdr_byte_len_to_id (u32 bytes)
 {
     switch (bytes) {
-    case 8:
-        return (BIER_HDR_LEN_64);
-    case 16:
-        return (BIER_HDR_LEN_128);
-    case 32:
-        return (BIER_HDR_LEN_256);
-    case 64:
-        return (BIER_HDR_LEN_512);
-    case 128:
-        return (BIER_HDR_LEN_1024);
-    case 256:
-        return (BIER_HDR_LEN_2048);
-    case 512:
-        return (BIER_HDR_LEN_4096);
+        case 8:
+            return (BIER_HDR_LEN_64);
+        case 16:
+            return (BIER_HDR_LEN_128);
+        case 32:
+            return (BIER_HDR_LEN_256);
+        case 64:
+            return (BIER_HDR_LEN_512);
+        case 128:
+            return (BIER_HDR_LEN_1024);
+        case 256:
+            return (BIER_HDR_LEN_2048);
+        case 512:
+            return (BIER_HDR_LEN_4096);
     }
 
     return (BIER_HDR_LEN_INVALID);
@@ -137,20 +138,20 @@ static inline bier_hdr_len_id_t
 bier_hdr_bit_len_to_id (u32 bytes)
 {
     switch (bytes) {
-    case 64:
-        return (BIER_HDR_LEN_64);
-    case 128:
-        return (BIER_HDR_LEN_128);
-    case 256:
-        return (BIER_HDR_LEN_256);
-    case 512:
-        return (BIER_HDR_LEN_512);
-    case 1024:
-        return (BIER_HDR_LEN_1024);
-    case 2048:
-        return (BIER_HDR_LEN_2048);
-    case 4096:
-        return (BIER_HDR_LEN_4096);
+        case 64:
+            return (BIER_HDR_LEN_64);
+        case 128:
+            return (BIER_HDR_LEN_128);
+        case 256:
+            return (BIER_HDR_LEN_256);
+        case 512:
+            return (BIER_HDR_LEN_512);
+        case 1024:
+            return (BIER_HDR_LEN_1024);
+        case 2048:
+            return (BIER_HDR_LEN_2048);
+        case 4096:
+            return (BIER_HDR_LEN_4096);
     }
 
     return (BIER_HDR_LEN_INVALID);
@@ -187,7 +188,7 @@ typedef enum bier_hdr_proto_id_t_ {
 #define BIER_HDR_N_PROTO (BIER_HDR_PROTO_OAM + 1)
 
 #define BIER_HDR_PROTO_ID_NAMES {                               \
-    [BIER_HDR_PROTO_INVALID] = "invalid",			\
+    [BIER_HDR_PROTO_INVALID] = "invalid",           \
     [BIER_HDR_PROTO_MPLS_DOWN_STREAM] = "mpls-down-stream",     \
     [BIER_HDR_PROTO_MPLS_UP_STREAM] = "mpls-up-stream",         \
     [BIER_HDR_PROTO_ETHERNET] = "ethernet",                     \
@@ -470,9 +471,9 @@ typedef struct bier_table_id_t_ {
      */
     bier_hdr_len_id_t bti_hdr_len;
 
-   /**
-     * The type of the table; SPF or TE, MPLS or IPv6
-     */
+    /**
+      * The type of the table; SPF or TE, MPLS or IPv6
+      */
     bier_table_type_t bti_type;
 } bier_table_id_t;
 

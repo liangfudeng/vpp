@@ -22,79 +22,81 @@
 
 #include <vapi/interface.api.vapi.hpp>
 
-namespace VOM {
-namespace sub_interface_cmds {
-
-/**
- * A functor class that creates an interface
- */
-class create_cmd : public interface::create_cmd<vapi::Create_vlan_subif>
+namespace VOM
 {
-public:
-  /**
-   * Cstrunctor taking the reference to the parent
-   * and the sub-interface's VLAN
-   */
-  create_cmd(HW::item<handle_t>& item,
-             const std::string& name,
-             const handle_t& parent,
-             uint16_t vlan);
+    namespace sub_interface_cmds
+    {
 
-  /**
-   * Issue the command to VPP/HW
-   */
-  rc_t issue(connection& con);
+        /**
+         * A functor class that creates an interface
+         */
+        class create_cmd : public interface::create_cmd<vapi::Create_vlan_subif>
+            {
+            public:
+                /**
+                 * Cstrunctor taking the reference to the parent
+                 * and the sub-interface's VLAN
+                 */
+                create_cmd(HW::item<handle_t>& item,
+                           const std::string& name,
+                           const handle_t& parent,
+                           uint16_t vlan);
 
-  /**
-   * convert to string format for debug purposes
-   */
-  std::string to_string() const;
+                /**
+                 * Issue the command to VPP/HW
+                 */
+                rc_t issue(connection& con);
 
-  /**
-   * Comparison operator - only used for UT
-   */
-  bool operator==(const create_cmd& i) const;
+                /**
+                 * convert to string format for debug purposes
+                 */
+                std::string to_string() const;
 
-private:
-  /**
-   * Refernece to the parents handle
-   */
-  const handle_t& m_parent;
+                /**
+                 * Comparison operator - only used for UT
+                 */
+                bool operator==(const create_cmd& i) const;
 
-  /**
-   * The VLAN of the sub-interface
-   */
-  uint16_t m_vlan;
-};
+            private:
+                /**
+                 * Refernece to the parents handle
+                 */
+                const handle_t& m_parent;
 
-/**
- * A cmd class that Delete an interface
- */
-class delete_cmd : public interface::delete_cmd<vapi::Delete_subif>
-{
-public:
-  /**
-   * Constructor
-   */
-  delete_cmd(HW::item<handle_t>& item);
+                /**
+                 * The VLAN of the sub-interface
+                 */
+                uint16_t m_vlan;
+            };
 
-  /**
-   * Issue the command to VPP/HW
-   */
-  rc_t issue(connection& con);
+        /**
+         * A cmd class that Delete an interface
+         */
+        class delete_cmd : public interface::delete_cmd<vapi::Delete_subif>
+            {
+            public:
+                /**
+                 * Constructor
+                 */
+                delete_cmd(HW::item<handle_t>& item);
 
-  /**
-   * convert to string format for debug purposes
-   */
-  std::string to_string() const;
+                /**
+                 * Issue the command to VPP/HW
+                 */
+                rc_t issue(connection& con);
 
-  /**
-   * Comparison operator - only used for UT
-   */
-  bool operator==(const delete_cmd& i) const;
-};
+                /**
+                 * convert to string format for debug purposes
+                 */
+                std::string to_string() const;
 
-}; // namespace sub_interface_cmds
+                /**
+                 * Comparison operator - only used for UT
+                 */
+                bool operator==(const delete_cmd& i) const;
+            };
+
+    }; // namespace sub_interface_cmds
 }; // namespace VOM
 
 /*

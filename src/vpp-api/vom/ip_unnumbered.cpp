@@ -16,120 +16,121 @@
 #include "vom/ip_unnumbered.hpp"
 #include "vom/ip_unnumbered_cmds.hpp"
 
-namespace VOM {
-/**
- * A DB of all LLDP configs
- */
-singular_db<ip_unnumbered::key_t, ip_unnumbered> ip_unnumbered::m_db;
-
-ip_unnumbered::event_handler ip_unnumbered::m_evh;
-
-ip_unnumbered::ip_unnumbered(const interface& itf, const interface& l3_itf)
-  : m_itf(itf.singular())
-  , m_l3_itf(l3_itf.singular())
+namespace VOM
 {
-}
+    /**
+     * A DB of all LLDP configs
+     */
+    singular_db<ip_unnumbered::key_t, ip_unnumbered> ip_unnumbered::m_db;
 
-ip_unnumbered::ip_unnumbered(const ip_unnumbered& o)
-  : m_itf(o.m_itf)
-  , m_l3_itf(o.m_l3_itf)
-  , m_config(o.m_config)
-{
-}
+    ip_unnumbered::event_handler ip_unnumbered::m_evh;
 
-ip_unnumbered::~ip_unnumbered()
-{
-  sweep();
+    ip_unnumbered::ip_unnumbered(const interface& itf, const interface& l3_itf)
+        : m_itf(itf.singular())
+        , m_l3_itf(l3_itf.singular())
+    {
+    }
 
-  // not in the DB anymore.
-  m_db.release(m_itf->key(), this);
-}
+    ip_unnumbered::ip_unnumbered(const ip_unnumbered& o)
+        : m_itf(o.m_itf)
+        , m_l3_itf(o.m_l3_itf)
+        , m_config(o.m_config)
+    {
+    }
 
-void
-ip_unnumbered::sweep()
-{
-  if (m_config) {
-    HW::enqueue(new ip_unnumbered_cmds::unconfig_cmd(m_config, m_itf->handle(),
-                                                     m_l3_itf->handle()));
-  }
-  HW::write();
-}
+    ip_unnumbered::~ip_unnumbered()
+    {
+        sweep();
 
-void
-ip_unnumbered::dump(std::ostream& os)
-{
-  m_db.dump(os);
-}
+        // not in the DB anymore.
+        m_db.release(m_itf->key(), this);
+    }
 
-void
-ip_unnumbered::replay()
-{
-  if (m_config) {
-    HW::enqueue(new ip_unnumbered_cmds::config_cmd(m_config, m_itf->handle(),
-                                                   m_l3_itf->handle()));
-  }
-}
+    void
+    ip_unnumbered::sweep()
+    {
+        if (m_config) {
+            HW::enqueue(new ip_unnumbered_cmds::unconfig_cmd(m_config, m_itf->handle(),
+                        m_l3_itf->handle()));
+        }
+        HW::write();
+    }
 
-std::string
-ip_unnumbered::to_string() const
-{
-  std::ostringstream s;
-  s << "IP Unnumbered-config:"
-    << " itf:" << m_itf->to_string() << " l3-itf:" << m_l3_itf->to_string();
+    void
+    ip_unnumbered::dump(std::ostream& os)
+    {
+        m_db.dump(os);
+    }
 
-  return (s.str());
-}
+    void
+    ip_unnumbered::replay()
+    {
+        if (m_config) {
+            HW::enqueue(new ip_unnumbered_cmds::config_cmd(m_config, m_itf->handle(),
+                        m_l3_itf->handle()));
+        }
+    }
 
-void
-ip_unnumbered::update(const ip_unnumbered& desired)
-{
-  if (!m_config) {
-    HW::enqueue(new ip_unnumbered_cmds::config_cmd(m_config, m_itf->handle(),
-                                                   m_l3_itf->handle()));
-  }
-}
+    std::string
+    ip_unnumbered::to_string() const
+    {
+        std::ostringstream s;
+        s << "IP Unnumbered-config:"
+          << " itf:" << m_itf->to_string() << " l3-itf:" << m_l3_itf->to_string();
 
-std::shared_ptr<ip_unnumbered>
-ip_unnumbered::find_or_add(const ip_unnumbered& temp)
-{
-  return (m_db.find_or_add(temp.m_itf->key(), temp));
-}
+        return (s.str());
+    }
 
-std::shared_ptr<ip_unnumbered>
-ip_unnumbered::singular() const
-{
-  return find_or_add(*this);
-}
+    void
+    ip_unnumbered::update(const ip_unnumbered& desired)
+    {
+        if (!m_config) {
+            HW::enqueue(new ip_unnumbered_cmds::config_cmd(m_config, m_itf->handle(),
+                        m_l3_itf->handle()));
+        }
+    }
 
-ip_unnumbered::event_handler::event_handler()
-{
-  OM::register_listener(this);
-  inspect::register_handler({ "ip-un" }, "IP unnumbered configurations", this);
-}
+    std::shared_ptr<ip_unnumbered>
+    ip_unnumbered::find_or_add(const ip_unnumbered& temp)
+    {
+        return (m_db.find_or_add(temp.m_itf->key(), temp));
+    }
 
-void
-ip_unnumbered::event_handler::handle_replay()
-{
-  m_db.replay();
-}
+    std::shared_ptr<ip_unnumbered>
+    ip_unnumbered::singular() const
+    {
+        return find_or_add(*this);
+    }
 
-void
-ip_unnumbered::event_handler::handle_populate(const client_db::key_t& key)
-{
-  // VPP provides no dump for IP unnumbered
-}
+    ip_unnumbered::event_handler::event_handler()
+    {
+        OM::register_listener(this);
+        inspect::register_handler({ "ip-un" }, "IP unnumbered configurations", this);
+    }
 
-dependency_t
-ip_unnumbered::event_handler::order() const
-{
-  return (dependency_t::BINDING);
-}
+    void
+    ip_unnumbered::event_handler::handle_replay()
+    {
+        m_db.replay();
+    }
 
-void
-ip_unnumbered::event_handler::show(std::ostream& os)
-{
-  m_db.dump(os);
-}
+    void
+    ip_unnumbered::event_handler::handle_populate(const client_db::key_t& key)
+    {
+        // VPP provides no dump for IP unnumbered
+    }
+
+    dependency_t
+    ip_unnumbered::event_handler::order() const
+    {
+        return (dependency_t::BINDING);
+    }
+
+    void
+    ip_unnumbered::event_handler::show(std::ostream& os)
+    {
+        m_db.dump(os);
+    }
 }
 
 /*

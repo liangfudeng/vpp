@@ -45,8 +45,7 @@
 /**
  * @brief flags
  */
-typedef enum fib_urpf_list_flag_t_
-{
+typedef enum fib_urpf_list_flag_t_ {
     /**
      * @brief Set to indicated that the uRPF list has already been baked.
      * This is protection against it being baked more than once. These
@@ -55,8 +54,7 @@ typedef enum fib_urpf_list_flag_t_
     FIB_URPF_LIST_BAKED = (1 << 0),
 } fib_urpf_list_flag_t;
 
-typedef struct fib_urpf_list_t_
-{
+typedef struct fib_urpf_list_t_ {
     /**
      * The list of interfaces that comprise the allowed accepting interfaces
      */
@@ -115,10 +113,9 @@ fib_urpf_check (index_t ui, u32 sw_if_index)
 
     urpf = fib_urpf_list_get(ui);
 
-    vec_foreach(swi, urpf->furpf_itfs)
-    {
-	if (*swi == sw_if_index)
-	    return (1);
+    vec_foreach(swi, urpf->furpf_itfs) {
+        if (*swi == sw_if_index)
+            return (1);
     }
 
     return (0);

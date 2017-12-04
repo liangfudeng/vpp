@@ -27,9 +27,8 @@ _(ESP_ENCRYPT, "esp-encrypt")                    \
 _(AH_ENCRYPT, "ah-encrypt")
 
 #define _(v, s) IPSEC_OUTPUT_NEXT_##v,
-typedef enum
-{
-  foreach_ipsec_output_next
+typedef enum {
+    foreach_ipsec_output_next
 #undef _
     IPSEC_OUTPUT_N_NEXT,
 } ipsec_output_next_t;
@@ -41,9 +40,8 @@ _(ESP_DECRYPT, "esp-decrypt")                   \
 _(AH_DECRYPT, "ah-decrypt")
 
 #define _(v, s) IPSEC_INPUT_NEXT_##v,
-typedef enum
-{
-  foreach_ipsec_input_next
+typedef enum {
+    foreach_ipsec_input_next
 #undef _
     IPSEC_INPUT_N_NEXT,
 } ipsec_input_next_t;
@@ -55,10 +53,9 @@ typedef enum
   _(2, RESOLVE, "resolve")         \
   _(3, PROTECT, "protect")
 
-typedef enum
-{
+typedef enum {
 #define _(v,f,s) IPSEC_POLICY_ACTION_##f = v,
-  foreach_ipsec_policy_action
+    foreach_ipsec_policy_action
 #undef _
     IPSEC_POLICY_N_ACTION,
 } ipsec_policy_action_t;
@@ -77,10 +74,9 @@ typedef enum
   _(10, DES_CBC, "des-cbc")         \
   _(11, 3DES_CBC, "3des-cbc")
 
-typedef enum
-{
+typedef enum {
 #define _(v,f,s) IPSEC_CRYPTO_ALG_##f = v,
-  foreach_ipsec_crypto_alg
+    foreach_ipsec_crypto_alg
 #undef _
     IPSEC_CRYPTO_N_ALG,
 } ipsec_crypto_alg_t;
@@ -92,206 +88,191 @@ typedef enum
   _(3, SHA_256_96, "sha-256-96")   /* draft-ietf-ipsec-ciph-sha-256-00 */ \
   _(4, SHA_256_128, "sha-256-128") /* RFC4868 */                          \
   _(5, SHA_384_192, "sha-384-192") /* RFC4868 */                          \
-  _(6, SHA_512_256, "sha-512-256")	/* RFC4868 */
+  _(6, SHA_512_256, "sha-512-256")  /* RFC4868 */
 
-typedef enum
-{
+typedef enum {
 #define _(v,f,s) IPSEC_INTEG_ALG_##f = v,
-  foreach_ipsec_integ_alg
+    foreach_ipsec_integ_alg
 #undef _
     IPSEC_INTEG_N_ALG,
 } ipsec_integ_alg_t;
 
-typedef enum
-{
-  IPSEC_PROTOCOL_AH = 0,
-  IPSEC_PROTOCOL_ESP = 1
+typedef enum {
+    IPSEC_PROTOCOL_AH = 0,
+    IPSEC_PROTOCOL_ESP = 1
 } ipsec_protocol_t;
 
-typedef struct
-{
-  u32 id;
-  u32 spi;
-  ipsec_protocol_t protocol;
+typedef struct {
+    u32 id;
+    u32 spi;
+    ipsec_protocol_t protocol;
 
-  ipsec_crypto_alg_t crypto_alg;
-  u8 crypto_key_len;
-  u8 crypto_key[128];
+    ipsec_crypto_alg_t crypto_alg;
+    u8 crypto_key_len;
+    u8 crypto_key[128];
 
-  ipsec_integ_alg_t integ_alg;
-  u8 integ_key_len;
-  u8 integ_key[128];
+    ipsec_integ_alg_t integ_alg;
+    u8 integ_key_len;
+    u8 integ_key[128];
 
-  u8 use_esn;
-  u8 use_anti_replay;
+    u8 use_esn;
+    u8 use_anti_replay;
 
-  u8 is_tunnel;
-  u8 is_tunnel_ip6;
-  ip46_address_t tunnel_src_addr;
-  ip46_address_t tunnel_dst_addr;
+    u8 is_tunnel;
+    u8 is_tunnel_ip6;
+    ip46_address_t tunnel_src_addr;
+    ip46_address_t tunnel_dst_addr;
 
-  u32 salt;
+    u32 salt;
 
-  /* runtime */
-  u32 seq;
-  u32 seq_hi;
-  u32 last_seq;
-  u32 last_seq_hi;
-  u64 replay_window;
+    /* runtime */
+    u32 seq;
+    u32 seq_hi;
+    u32 last_seq;
+    u32 last_seq_hi;
+    u64 replay_window;
 
-  /*lifetime data */
-  u64 total_data_size;
+    /*lifetime data */
+    u64 total_data_size;
 } ipsec_sa_t;
 
-typedef struct
-{
-  ip46_address_t start, stop;
+typedef struct {
+    ip46_address_t start, stop;
 } ip46_address_range_t;
 
-typedef struct
-{
-  u16 start, stop;
+typedef struct {
+    u16 start, stop;
 } port_range_t;
 
-typedef struct
-{
-  u8 is_add;
-  u8 esn;
-  u8 anti_replay;
-  ip4_address_t local_ip, remote_ip;
-  u32 local_spi;
-  u32 remote_spi;
-  ipsec_crypto_alg_t crypto_alg;
-  u8 local_crypto_key_len;
-  u8 local_crypto_key[128];
-  u8 remote_crypto_key_len;
-  u8 remote_crypto_key[128];
-  ipsec_integ_alg_t integ_alg;
-  u8 local_integ_key_len;
-  u8 local_integ_key[128];
-  u8 remote_integ_key_len;
-  u8 remote_integ_key[128];
+typedef struct {
+    u8 is_add;
+    u8 esn;
+    u8 anti_replay;
+    ip4_address_t local_ip, remote_ip;
+    u32 local_spi;
+    u32 remote_spi;
+    ipsec_crypto_alg_t crypto_alg;
+    u8 local_crypto_key_len;
+    u8 local_crypto_key[128];
+    u8 remote_crypto_key_len;
+    u8 remote_crypto_key[128];
+    ipsec_integ_alg_t integ_alg;
+    u8 local_integ_key_len;
+    u8 local_integ_key[128];
+    u8 remote_integ_key_len;
+    u8 remote_integ_key[128];
 } ipsec_add_del_tunnel_args_t;
 
-typedef struct
-{
-  u8 is_add;
-  u32 local_sa_id;
-  u32 remote_sa_id;
-  ip4_address_t local_ip;
-  ip4_address_t remote_ip;
+typedef struct {
+    u8 is_add;
+    u32 local_sa_id;
+    u32 remote_sa_id;
+    ip4_address_t local_ip;
+    ip4_address_t remote_ip;
 } ipsec_add_del_ipsec_gre_tunnel_args_t;
 
-typedef enum
-{
-  IPSEC_IF_SET_KEY_TYPE_NONE,
-  IPSEC_IF_SET_KEY_TYPE_LOCAL_CRYPTO,
-  IPSEC_IF_SET_KEY_TYPE_REMOTE_CRYPTO,
-  IPSEC_IF_SET_KEY_TYPE_LOCAL_INTEG,
-  IPSEC_IF_SET_KEY_TYPE_REMOTE_INTEG,
+typedef enum {
+    IPSEC_IF_SET_KEY_TYPE_NONE,
+    IPSEC_IF_SET_KEY_TYPE_LOCAL_CRYPTO,
+    IPSEC_IF_SET_KEY_TYPE_REMOTE_CRYPTO,
+    IPSEC_IF_SET_KEY_TYPE_LOCAL_INTEG,
+    IPSEC_IF_SET_KEY_TYPE_REMOTE_INTEG,
 } ipsec_if_set_key_type_t;
 
-typedef struct
-{
-  u32 id;
-  i32 priority;
-  u8 is_outbound;
+typedef struct {
+    u32 id;
+    i32 priority;
+    u8 is_outbound;
 
-  // Selector
-  u8 is_ipv6;
-  ip46_address_range_t laddr;
-  ip46_address_range_t raddr;
-  u8 protocol;
-  port_range_t lport;
-  port_range_t rport;
+    // Selector
+    u8 is_ipv6;
+    ip46_address_range_t laddr;
+    ip46_address_range_t raddr;
+    u8 protocol;
+    port_range_t lport;
+    port_range_t rport;
 
-  // Policy
-  u8 policy;
-  u32 sa_id;
-  u32 sa_index;
+    // Policy
+    u8 policy;
+    u32 sa_id;
+    u32 sa_index;
 
-  // Counter
-  vlib_counter_t counter;
+    // Counter
+    vlib_counter_t counter;
 } ipsec_policy_t;
 
-typedef struct
-{
-  u32 id;
-  /* pool of policies */
-  ipsec_policy_t *policies;
-  /* vectors of policy indices */
-  u32 *ipv4_outbound_policies;
-  u32 *ipv6_outbound_policies;
-  u32 *ipv4_inbound_protect_policy_indices;
-  u32 *ipv4_inbound_policy_discard_and_bypass_indices;
-  u32 *ipv6_inbound_protect_policy_indices;
-  u32 *ipv6_inbound_policy_discard_and_bypass_indices;
+typedef struct {
+    u32 id;
+    /* pool of policies */
+    ipsec_policy_t *policies;
+    /* vectors of policy indices */
+    u32 *ipv4_outbound_policies;
+    u32 *ipv6_outbound_policies;
+    u32 *ipv4_inbound_protect_policy_indices;
+    u32 *ipv4_inbound_policy_discard_and_bypass_indices;
+    u32 *ipv6_inbound_protect_policy_indices;
+    u32 *ipv6_inbound_policy_discard_and_bypass_indices;
 } ipsec_spd_t;
 
-typedef struct
-{
-  u32 spd_index;
+typedef struct {
+    u32 spd_index;
 } ip4_ipsec_config_t;
 
-typedef struct
-{
-  u32 spd_index;
+typedef struct {
+    u32 spd_index;
 } ip6_ipsec_config_t;
 
-typedef struct
-{
-  u32 input_sa_index;
-  u32 output_sa_index;
-  u32 hw_if_index;
+typedef struct {
+    u32 input_sa_index;
+    u32 output_sa_index;
+    u32 hw_if_index;
 } ipsec_tunnel_if_t;
 
-typedef struct
-{
-  clib_error_t *(*add_del_sa_sess_cb) (u32 sa_index, u8 is_add);
-  clib_error_t *(*check_support_cb) (ipsec_sa_t * sa);
+typedef struct {
+    clib_error_t *(*add_del_sa_sess_cb) (u32 sa_index, u8 is_add);
+    clib_error_t *(*check_support_cb) (ipsec_sa_t * sa);
 } ipsec_main_callbacks_t;
 
-typedef struct
-{
-  /* pool of tunnel instances */
-  ipsec_spd_t *spds;
-  ipsec_sa_t *sad;
+typedef struct {
+    /* pool of tunnel instances */
+    ipsec_spd_t *spds;
+    ipsec_sa_t *sad;
 
-  /* pool of tunnel interfaces */
-  ipsec_tunnel_if_t *tunnel_interfaces;
-  u32 *free_tunnel_if_indices;
+    /* pool of tunnel interfaces */
+    ipsec_tunnel_if_t *tunnel_interfaces;
+    u32 *free_tunnel_if_indices;
 
-  u32 **empty_buffers;
+    u32 **empty_buffers;
 
-  uword *tunnel_index_by_key;
+    uword *tunnel_index_by_key;
 
-  /* convenience */
-  vlib_main_t *vlib_main;
-  vnet_main_t *vnet_main;
+    /* convenience */
+    vlib_main_t *vlib_main;
+    vnet_main_t *vnet_main;
 
-  /* next node indices */
-  u32 feature_next_node_index[32];
+    /* next node indices */
+    u32 feature_next_node_index[32];
 
-  /* hashes */
-  uword *spd_index_by_spd_id;
-  uword *spd_index_by_sw_if_index;
-  uword *sa_index_by_sa_id;
-  uword *ipsec_if_pool_index_by_key;
+    /* hashes */
+    uword *spd_index_by_spd_id;
+    uword *spd_index_by_sw_if_index;
+    uword *sa_index_by_sa_id;
+    uword *ipsec_if_pool_index_by_key;
 
-  /* node indeces */
-  u32 error_drop_node_index;
-  u32 esp_encrypt_node_index;
-  u32 esp_decrypt_node_index;
-  u32 ah_encrypt_node_index;
-  u32 ah_decrypt_node_index;
-  /* next node indeces */
-  u32 esp_encrypt_next_index;
-  u32 esp_decrypt_next_index;
-  u32 ah_encrypt_next_index;
-  u32 ah_decrypt_next_index;
+    /* node indeces */
+    u32 error_drop_node_index;
+    u32 esp_encrypt_node_index;
+    u32 esp_decrypt_node_index;
+    u32 ah_encrypt_node_index;
+    u32 ah_decrypt_node_index;
+    /* next node indeces */
+    u32 esp_encrypt_next_index;
+    u32 esp_decrypt_next_index;
+    u32 ah_encrypt_next_index;
+    u32 ah_decrypt_next_index;
 
-  /* callbacks */
-  ipsec_main_callbacks_t cb;
+    /* callbacks */
+    ipsec_main_callbacks_t cb;
 } ipsec_main_t;
 
 extern ipsec_main_t ipsec_main;
@@ -308,10 +289,10 @@ extern vlib_node_registration_t ipsec_if_input_node;
  * functions
  */
 int ipsec_set_interface_spd (vlib_main_t * vm, u32 sw_if_index, u32 spd_id,
-			     int is_add);
+                             int is_add);
 int ipsec_add_del_spd (vlib_main_t * vm, u32 spd_id, int is_add);
 int ipsec_add_del_policy (vlib_main_t * vm, ipsec_policy_t * policy,
-			  int is_add);
+                          int is_add);
 int ipsec_add_del_sa (vlib_main_t * vm, ipsec_sa_t * new_sa, int is_add);
 int ipsec_set_sa_key (vlib_main_t * vm, ipsec_sa_t * sa_update);
 
@@ -327,16 +308,16 @@ uword unformat_ipsec_crypto_alg (unformat_input_t * input, va_list * args);
 uword unformat_ipsec_integ_alg (unformat_input_t * input, va_list * args);
 
 int ipsec_add_del_tunnel_if_internal (vnet_main_t * vnm,
-				      ipsec_add_del_tunnel_args_t * args,
-				      u32 * sw_if_index);
+                                      ipsec_add_del_tunnel_args_t * args,
+                                      u32 * sw_if_index);
 int ipsec_add_del_tunnel_if (ipsec_add_del_tunnel_args_t * args);
 int ipsec_add_del_ipsec_gre_tunnel (vnet_main_t * vnm,
-				    ipsec_add_del_ipsec_gre_tunnel_args_t *
-				    args);
+                                    ipsec_add_del_ipsec_gre_tunnel_args_t *
+                                    args);
 int ipsec_set_interface_key (vnet_main_t * vnm, u32 hw_if_index,
-			     ipsec_if_set_key_type_t type, u8 alg, u8 * key);
+                             ipsec_if_set_key_type_t type, u8 alg, u8 * key);
 int ipsec_set_interface_sa (vnet_main_t * vnm, u32 hw_if_index, u32 sa_id,
-			    u8 is_outbound);
+                            u8 is_outbound);
 
 
 /*
@@ -346,35 +327,33 @@ int ipsec_set_interface_sa (vnet_main_t * vnm, u32 hw_if_index, u32 sa_id,
 always_inline void
 ipsec_alloc_empty_buffers (vlib_main_t * vm, ipsec_main_t * im)
 {
-  u32 thread_index = vlib_get_thread_index ();
-  uword l = vec_len (im->empty_buffers[thread_index]);
-  uword n_alloc = 0;
+    u32 thread_index = vlib_get_thread_index ();
+    uword l = vec_len (im->empty_buffers[thread_index]);
+    uword n_alloc = 0;
 
-  if (PREDICT_FALSE (l < VLIB_FRAME_SIZE))
-    {
-      if (!im->empty_buffers[thread_index])
-	{
-	  vec_alloc (im->empty_buffers[thread_index], 2 * VLIB_FRAME_SIZE);
-	}
+    if (PREDICT_FALSE (l < VLIB_FRAME_SIZE)) {
+        if (!im->empty_buffers[thread_index]) {
+            vec_alloc (im->empty_buffers[thread_index], 2 * VLIB_FRAME_SIZE);
+        }
 
-      n_alloc = vlib_buffer_alloc (vm, im->empty_buffers[thread_index] + l,
-				   2 * VLIB_FRAME_SIZE - l);
+        n_alloc = vlib_buffer_alloc (vm, im->empty_buffers[thread_index] + l,
+                                     2 * VLIB_FRAME_SIZE - l);
 
-      _vec_len (im->empty_buffers[thread_index]) = l + n_alloc;
+        _vec_len (im->empty_buffers[thread_index]) = l + n_alloc;
     }
 }
 
 static_always_inline u32
 get_next_output_feature_node_index (vlib_buffer_t * b,
-				    vlib_node_runtime_t * nr)
+                                    vlib_node_runtime_t * nr)
 {
-  u32 next;
-  u32 sw_if_index = vnet_buffer (b)->sw_if_index[VLIB_TX];
-  vlib_main_t *vm = vlib_get_main ();
-  vlib_node_t *node = vlib_get_node (vm, nr->node_index);
+    u32 next;
+    u32 sw_if_index = vnet_buffer (b)->sw_if_index[VLIB_TX];
+    vlib_main_t *vm = vlib_get_main ();
+    vlib_node_t *node = vlib_get_node (vm, nr->node_index);
 
-  vnet_feature_next (sw_if_index, &next, b);
-  return node->next_nodes[next];
+    vnet_feature_next (sw_if_index, &next, b);
+    return node->next_nodes[next];
 }
 
 #endif /* __IPSEC_H__ */

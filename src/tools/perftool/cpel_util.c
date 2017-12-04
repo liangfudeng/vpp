@@ -1,4 +1,4 @@
-/* 
+/*
  *------------------------------------------------------------------
  * Copyright (c) 2006-2016 Cisco and/or its affiliates.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -71,16 +71,16 @@ u32 find_or_add_strtab(void *s_arg)
     }
 
     /*
-     * Here's a CLIB bear-trap. We can't add the string-table 
-     * strings to the to the hash table (directly), since it 
+     * Here's a CLIB bear-trap. We can't add the string-table
+     * strings to the to the hash table (directly), since it
      * expands and moves periodically. All of the hash table
-     * entries turn into dangling references, yadda yadda. 
+     * entries turn into dangling references, yadda yadda.
      */
 
     len = strlen(s)+1;
     vec_add2(the_strtab, this_string, len);
     memcpy(this_string, s, len);
-    
+
     /* Make a copy which won't be moving around... */
     vec_validate(scopy, len);
     memcpy(scopy, s, len);
@@ -116,7 +116,7 @@ u32 find_or_add_track(void *s_arg)
     return(this_track - the_tracks);
 }
 
-/* 
+/*
  * find_or_add_event
  * Adds an event to the event definition vector and add it to
  * the event hash table
@@ -163,11 +163,11 @@ int write_string_table(FILE *ofp)
 
     sh.section_type = ntohl(CPEL_SECTION_STRTAB);
     sh.data_length = ntohl(vec_len(the_strtab));
-    
+
     if (fwrite(&sh, sizeof(sh), 1, ofp) != 1)
         return(0);
-    
-    if (fwrite(the_strtab, 1, vec_len(the_strtab), ofp) != 
+
+    if (fwrite(the_strtab, 1, vec_len(the_strtab), ofp) !=
         vec_len(the_strtab))
         return(0);
 
@@ -180,9 +180,9 @@ int write_string_table(FILE *ofp)
 int write_cpel_header(FILE *ofp, u32 nsections)
 {
     cpel_file_header_t h;
-    
+
     h.endian_version = CPEL_FILE_VERSION;
-    h.pad = 0; 
+    h.pad = 0;
     h.nsections = ntohs(nsections);
     h.file_date = ntohl(time(0));
     if (fwrite(&h, sizeof(h), 1, ofp) != 1)
@@ -191,7 +191,7 @@ int write_cpel_header(FILE *ofp, u32 nsections)
     return(1);
 }
 
-/* 
+/*
  * write_event_defs
  */
 int write_event_defs(FILE *ofp)
@@ -204,7 +204,7 @@ int write_event_defs(FILE *ofp)
     /* Next, the event definitions */
     sh.section_type = ntohl(CPEL_SECTION_EVTDEF);
     sh.data_length = ntohl(vec_len(the_event_definitions)
-                           *sizeof(the_event_definitions[0]) 
+                           *sizeof(the_event_definitions[0])
                            + sizeof(event_definition_section_header_t));
 
     if (fwrite(&sh, sizeof(sh), 1, ofp) != 1)
@@ -214,7 +214,7 @@ int write_event_defs(FILE *ofp)
 
     strcpy(edsh.string_table_name, "FileStrtab");
     edsh.number_of_event_definitions = ntohl(vec_len(the_event_definitions));
-    
+
     if (fwrite(&edsh, sizeof(edsh), 1, ofp) != 1)
         return(0);
 
@@ -222,12 +222,12 @@ int write_event_defs(FILE *ofp)
         this_event_definition = &the_event_definitions[i];
         /* Endian fixup */
         this_event_definition->event = ntohl(this_event_definition->event);
-        this_event_definition->event_format = 
+        this_event_definition->event_format =
             ntohl(this_event_definition->event_format);
         this_event_definition->datum_format =
             ntohl(this_event_definition->datum_format);
 
-        if (fwrite(this_event_definition, sizeof(the_event_definitions[0]), 
+        if (fwrite(this_event_definition, sizeof(the_event_definitions[0]),
                    1, ofp) != 1)
             return(0);
     }
@@ -237,21 +237,22 @@ int write_event_defs(FILE *ofp)
 /*
  * ntohll
  */
-u64 ntohll (u64 x) {
+u64 ntohll (u64 x)
+{
     if (clib_arch_is_little_endian)
-	x = ((((x >> 0) & 0xff) << 56)
-	     | (((x >> 8) & 0xff) << 48)
-	     | (((x >> 16) & 0xff) << 40)
-	     | (((x >> 24) & 0xff) << 32)
-	     | (((x >> 32) & 0xff) << 24)
-	     | (((x >> 40) & 0xff) << 16)
-	     | (((x >> 48) & 0xff) << 8)
-	     | (((x >> 56) & 0xff) << 0));
-    
+        x = ((((x >> 0) & 0xff) << 56)
+             | (((x >> 8) & 0xff) << 48)
+             | (((x >> 16) & 0xff) << 40)
+             | (((x >> 24) & 0xff) << 32)
+             | (((x >> 32) & 0xff) << 24)
+             | (((x >> 40) & 0xff) << 16)
+             | (((x >> 48) & 0xff) << 8)
+             | (((x >> 56) & 0xff) << 0));
+
     return x;
 }
 
-/* 
+/*
  * write_events
  */
 int write_events(FILE *ofp, u64 clock_ticks_per_second)
@@ -273,28 +274,28 @@ int write_events(FILE *ofp, u64 clock_ticks_per_second)
 
     if (fwrite(&sh, sizeof(sh), 1, ofp) != 1)
         return(0);
-    
+
     memset(&eh, 0, sizeof(eh));
     strcpy(eh.string_table_name, "FileStrtab");
     eh.number_of_events = ntohl(number_of_events);
     eh.clock_ticks_per_second = ntohl(clock_ticks_per_second);
-    
+
     if (fwrite(&eh, sizeof(eh), 1, ofp) != 1)
         return(0);
 
     for (i = 0; i < number_of_events; i++) {
         this_event = &the_events[i];
         net_timestamp = ntohll(this_event->timestamp);
-    
+
         time1 = net_timestamp>>32;
         time0 = net_timestamp & 0xFFFFFFFF;
-        
+
         e.time[0] = time0;
         e.time[1] = time1;
         e.track = ntohl(this_event->track_id);
         e.event_code = ntohl(this_event->event_id);
         e.event_datum = ntohl(this_event->datum);
-        
+
         if (fwrite(&e, sizeof(e), 1, ofp) != 1)
             return(0);
     }
@@ -316,7 +317,7 @@ int write_track_defs(FILE *ofp)
     /* Next, the event definitions */
     sh.section_type = ntohl(CPEL_SECTION_TRACKDEF);
     sh.data_length = ntohl(vec_len(the_tracks)
-                           *sizeof(this_track_definition[0]) 
+                           *sizeof(this_track_definition[0])
                            + sizeof(track_definition_section_header_t));
 
     if (fwrite(&sh, sizeof(sh), 1, ofp) != 1)
@@ -326,13 +327,13 @@ int write_track_defs(FILE *ofp)
 
     strcpy(tdsh.string_table_name, "FileStrtab");
     tdsh.number_of_track_definitions = ntohl(vec_len(the_tracks));
-    
+
     if (fwrite(&tdsh, sizeof(edsh), 1, ofp) != 1)
         return(0);
 
     for (i = 0; i < vec_len(the_tracks); i++) {
         this_track_definition->track = ntohl(i);
-        this_track_definition->track_format = 
+        this_track_definition->track_format =
             ntohl(the_tracks[i].strtab_offset);
 
         if (fwrite(this_track_definition, sizeof(this_track_definition[0]),
@@ -351,7 +352,7 @@ void cpel_util_init (void)
     the_track_hash = hash_create_string (0, sizeof (uword));
     the_pidtid_hash = hash_create_string (0, sizeof(uword));
     the_pid_to_name_hash = hash_create(0, sizeof(uword));
-    
+
     /* Must be first, or no supper... */
     find_or_add_strtab("FileStrtab");
 
@@ -362,25 +363,25 @@ void cpel_util_init (void)
         vec_add1(eventstr, 0);
         find_or_add_event(eventstr, "%s");
         vec_free(eventstr);
-        
+
         /* event 1 (thread on CPU) */
         eventstr = format(0, "THREAD/THRUNNING");
         vec_add1(eventstr, 0);
         find_or_add_event(eventstr, "%s");
         vec_free(eventstr);
-        
+
         /* event 2 (thread ready) */
         eventstr = format(0, "THREAD/THREADY");
         vec_add1(eventstr, 0);
         find_or_add_event(eventstr, "%s");
         vec_free(eventstr);
-        
+
         /* event 3 (function enter) */
         eventstr = format(0, "FUNC/ENTER");
         vec_add1(eventstr, 0);
         find_or_add_event(eventstr, "0x%x");
         vec_free(eventstr);
-        
+
         /* event 4 (function enter) */
         eventstr = format(0, "FUNC/EXIT");
         vec_add1(eventstr, 0);

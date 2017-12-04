@@ -28,12 +28,12 @@ static inline vlib_node_registration_t*
 adj_get_glean_node (fib_protocol_t proto)
 {
     switch (proto) {
-    case FIB_PROTOCOL_IP4:
-	return (&ip4_glean_node);
-    case FIB_PROTOCOL_IP6:
-	return (&ip6_glean_node);
-    case FIB_PROTOCOL_MPLS:
-	break;
+        case FIB_PROTOCOL_IP4:
+            return (&ip4_glean_node);
+        case FIB_PROTOCOL_IP6:
+            return (&ip6_glean_node);
+        case FIB_PROTOCOL_MPLS:
+            break;
     }
     ASSERT(0);
     return (NULL);
@@ -48,39 +48,35 @@ adj_get_glean_node (fib_protocol_t proto)
  */
 adj_index_t
 adj_glean_add_or_lock (fib_protocol_t proto,
-		       u32 sw_if_index,
-		       const ip46_address_t *nh_addr)
+                       u32 sw_if_index,
+                       const ip46_address_t *nh_addr)
 {
     ip_adjacency_t * adj;
 
     vec_validate_init_empty(adj_gleans[proto], sw_if_index, ADJ_INDEX_INVALID);
 
-    if (ADJ_INDEX_INVALID == adj_gleans[proto][sw_if_index])
-    {
-	adj = adj_alloc(proto);
+    if (ADJ_INDEX_INVALID == adj_gleans[proto][sw_if_index]) {
+        adj = adj_alloc(proto);
 
-	adj->lookup_next_index = IP_LOOKUP_NEXT_GLEAN;
-	adj->ia_nh_proto = proto;
-	adj_gleans[proto][sw_if_index] = adj_get_index(adj);
+        adj->lookup_next_index = IP_LOOKUP_NEXT_GLEAN;
+        adj->ia_nh_proto = proto;
+        adj_gleans[proto][sw_if_index] = adj_get_index(adj);
 
-	if (NULL != nh_addr)
-	{
-	    adj->sub_type.glean.receive_addr = *nh_addr;
-	}
+        if (NULL != nh_addr) {
+            adj->sub_type.glean.receive_addr = *nh_addr;
+        }
 
-	adj->rewrite_header.data_bytes = 0;
+        adj->rewrite_header.data_bytes = 0;
 
-	vnet_rewrite_for_sw_interface(vnet_get_main(),
-				      adj_fib_proto_2_nd(proto),
-				      sw_if_index,
-				      adj_get_glean_node(proto)->index,
-				      VNET_REWRITE_FOR_SW_INTERFACE_ADDRESS_BROADCAST,
-				      &adj->rewrite_header,
-				      sizeof (adj->rewrite_data));
-    }
-    else
-    {
-	adj = adj_get(adj_gleans[proto][sw_if_index]);
+        vnet_rewrite_for_sw_interface(vnet_get_main(),
+                                      adj_fib_proto_2_nd(proto),
+                                      sw_if_index,
+                                      adj_get_glean_node(proto)->index,
+                                      VNET_REWRITE_FOR_SW_INTERFACE_ADDRESS_BROADCAST,
+                                      &adj->rewrite_header,
+                                      sizeof (adj->rewrite_data));
+    } else {
+        adj = adj_get(adj_gleans[proto][sw_if_index]);
     }
 
     adj_lock(adj_get_index(adj));
@@ -90,7 +86,7 @@ adj_glean_add_or_lock (fib_protocol_t proto,
 
 void
 adj_glean_remove (fib_protocol_t proto,
-		  u32 sw_if_index)
+                  u32 sw_if_index)
 {
     ASSERT(sw_if_index < vec_len(adj_gleans[proto]));
 
@@ -99,8 +95,8 @@ adj_glean_remove (fib_protocol_t proto,
 
 static clib_error_t *
 adj_glean_interface_state_change (vnet_main_t * vnm,
-				  u32 sw_if_index,
-				  u32 flags)
+                                  u32 sw_if_index,
+                                  u32 flags)
 {
     /*
      * for each glean on the interface trigger a walk back to the children
@@ -109,21 +105,20 @@ adj_glean_interface_state_change (vnet_main_t * vnm,
     ip_adjacency_t *adj;
 
 
-    for (proto = FIB_PROTOCOL_IP4; proto <= FIB_PROTOCOL_IP6; proto++)
-    {
-	if (sw_if_index >= vec_len(adj_gleans[proto]) ||
-	    ADJ_INDEX_INVALID == adj_gleans[proto][sw_if_index])
-	    continue;
+    for (proto = FIB_PROTOCOL_IP4; proto <= FIB_PROTOCOL_IP6; proto++) {
+        if (sw_if_index >= vec_len(adj_gleans[proto]) ||
+            ADJ_INDEX_INVALID == adj_gleans[proto][sw_if_index])
+            continue;
 
-	adj = adj_get(adj_gleans[proto][sw_if_index]);
+        adj = adj_get(adj_gleans[proto][sw_if_index]);
 
-	fib_node_back_walk_ctx_t bw_ctx = {
-	    .fnbw_reason = (flags & VNET_SW_INTERFACE_FLAG_ADMIN_UP ?
-			    FIB_NODE_BW_REASON_FLAG_INTERFACE_UP :
-			    FIB_NODE_BW_REASON_FLAG_INTERFACE_DOWN),
-	};
+        fib_node_back_walk_ctx_t bw_ctx = {
+            .fnbw_reason = (flags & VNET_SW_INTERFACE_FLAG_ADMIN_UP ?
+                            FIB_NODE_BW_REASON_FLAG_INTERFACE_UP :
+                            FIB_NODE_BW_REASON_FLAG_INTERFACE_DOWN),
+        };
 
-	fib_walk_sync(FIB_NODE_TYPE_ADJ, adj_get_index(adj), &bw_ctx);
+        fib_walk_sync(FIB_NODE_TYPE_ADJ, adj_get_index(adj), &bw_ctx);
     }
 
     return (NULL);
@@ -172,8 +167,8 @@ VNET_HW_INTERFACE_LINK_UP_DOWN_FUNCTION(
 
 static clib_error_t *
 adj_glean_interface_delete (vnet_main_t * vnm,
-			    u32 sw_if_index,
-			    u32 is_add)
+                            u32 sw_if_index,
+                            u32 is_add)
 {
     /*
      * for each glean on the interface trigger a walk back to the children
@@ -181,37 +176,35 @@ adj_glean_interface_delete (vnet_main_t * vnm,
     fib_protocol_t proto;
     ip_adjacency_t *adj;
 
-    if (is_add)
-    {
-	/*
-	 * not interested in interface additions. we will not back walk
-	 * to resolve paths through newly added interfaces. Why? The control
-	 * plane should have the brains to add interfaces first, then routes.
-	 * So the case where there are paths with a interface that matches
-	 * one just created is the case where the path resolved through an
-	 * interface that was deleted, and still has not been removed. The
-	 * new interface added, is NO GUARANTEE that the interface being
-	 * added now, even though it may have the same sw_if_index, is the
-	 * same interface that the path needs. So tough!
-	 * If the control plane wants these routes to resolve it needs to
-	 * remove and add them again.
-	 */
-	return (NULL);
+    if (is_add) {
+        /*
+         * not interested in interface additions. we will not back walk
+         * to resolve paths through newly added interfaces. Why? The control
+         * plane should have the brains to add interfaces first, then routes.
+         * So the case where there are paths with a interface that matches
+         * one just created is the case where the path resolved through an
+         * interface that was deleted, and still has not been removed. The
+         * new interface added, is NO GUARANTEE that the interface being
+         * added now, even though it may have the same sw_if_index, is the
+         * same interface that the path needs. So tough!
+         * If the control plane wants these routes to resolve it needs to
+         * remove and add them again.
+         */
+        return (NULL);
     }
 
-    for (proto = FIB_PROTOCOL_IP4; proto <= FIB_PROTOCOL_IP6; proto++)
-    {
-	if (sw_if_index >= vec_len(adj_gleans[proto]) ||
-	    ADJ_INDEX_INVALID == adj_gleans[proto][sw_if_index])
-	    continue;
+    for (proto = FIB_PROTOCOL_IP4; proto <= FIB_PROTOCOL_IP6; proto++) {
+        if (sw_if_index >= vec_len(adj_gleans[proto]) ||
+            ADJ_INDEX_INVALID == adj_gleans[proto][sw_if_index])
+            continue;
 
-	adj = adj_get(adj_gleans[proto][sw_if_index]);
+        adj = adj_get(adj_gleans[proto][sw_if_index]);
 
-	fib_node_back_walk_ctx_t bw_ctx = {
-	    .fnbw_reason =  FIB_NODE_BW_REASON_FLAG_INTERFACE_DELETE,
-	};
+        fib_node_back_walk_ctx_t bw_ctx = {
+            .fnbw_reason =  FIB_NODE_BW_REASON_FLAG_INTERFACE_DELETE,
+        };
 
-	fib_walk_sync(FIB_NODE_TYPE_ADJ, adj_get_index(adj), &bw_ctx);
+        fib_walk_sync(FIB_NODE_TYPE_ADJ, adj_get_index(adj), &bw_ctx);
     }
 
     return (NULL);
@@ -228,7 +221,7 @@ format_adj_glean (u8* s, va_list *ap)
     ip_adjacency_t * adj = adj_get(index);
 
     return (format(s, "%U-glean: %U",
-		   format_fib_protocol, adj->ia_nh_proto,
+                   format_fib_protocol, adj->ia_nh_proto,
                    format_vnet_sw_interface_name,
                    vnm,
                    vnet_get_sw_interface(vnm,
@@ -261,19 +254,16 @@ const static dpo_vft_t adj_glean_dpo_vft = {
  * this means that these graph nodes are ones from which a glean is the
  * parent object in the DPO-graph.
  */
-const static char* const glean_ip4_nodes[] =
-{
+const static char* const glean_ip4_nodes[] = {
     "ip4-glean",
     NULL,
 };
-const static char* const glean_ip6_nodes[] =
-{
+const static char* const glean_ip6_nodes[] = {
     "ip6-glean",
     NULL,
 };
 
-const static char* const * const glean_nodes[DPO_PROTO_NUM] =
-{
+const static char* const * const glean_nodes[DPO_PROTO_NUM] = {
     [DPO_PROTO_IP4]  = glean_ip4_nodes,
     [DPO_PROTO_IP6]  = glean_ip6_nodes,
     [DPO_PROTO_MPLS] = NULL,

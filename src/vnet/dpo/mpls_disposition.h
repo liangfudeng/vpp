@@ -24,8 +24,7 @@
 /**
  * A representation of an MPLS label for imposition in the data-path
  */
-typedef struct mpls_disp_dpo_t
-{
+typedef struct mpls_disp_dpo_t {
     /**
      * Next DPO in the graph
      */
@@ -53,7 +52,7 @@ typedef struct mpls_disp_dpo_t
  * can be pushed in one object.
  */
 _Static_assert((sizeof(mpls_disp_dpo_t) <= CLIB_CACHE_LINE_BYTES),
-	       "MPLS Disposition DPO is larger than one cache line.");
+               "MPLS Disposition DPO is larger than one cache line.");
 
 /**
  * @brief Create an MPLS label object

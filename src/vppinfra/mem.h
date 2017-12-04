@@ -42,11 +42,11 @@
 #include <unistd.h>
 #include <sys/mman.h>
 
-#include <vppinfra/clib.h>	/* uword, etc */
+#include <vppinfra/clib.h>  /* uword, etc */
 #include <vppinfra/clib_error.h>
 #include <vppinfra/mheap_bootstrap.h>
 #include <vppinfra/os.h>
-#include <vppinfra/string.h>	/* memcpy, memset */
+#include <vppinfra/string.h>    /* memcpy, memset */
 #include <vppinfra/valgrind.h>
 
 #define CLIB_MAX_MHEAPS 256
@@ -57,53 +57,49 @@ extern void *clib_per_cpu_mheaps[CLIB_MAX_MHEAPS];
 always_inline void *
 clib_mem_get_per_cpu_heap (void)
 {
-  int cpu = os_get_thread_index ();
-  return clib_per_cpu_mheaps[cpu];
+    int cpu = os_get_thread_index ();
+    return clib_per_cpu_mheaps[cpu];
 }
 
 always_inline void *
 clib_mem_set_per_cpu_heap (u8 * new_heap)
 {
-  int cpu = os_get_thread_index ();
-  void *old = clib_per_cpu_mheaps[cpu];
-  clib_per_cpu_mheaps[cpu] = new_heap;
-  return old;
+    int cpu = os_get_thread_index ();
+    void *old = clib_per_cpu_mheaps[cpu];
+    clib_per_cpu_mheaps[cpu] = new_heap;
+    return old;
 }
 
 /* Memory allocator which may call os_out_of_memory() if it fails */
 always_inline void *
 clib_mem_alloc_aligned_at_offset (uword size, uword align, uword align_offset,
-				  int os_out_of_memory_on_failure)
+                                  int os_out_of_memory_on_failure)
 {
-  void *heap, *p;
-  uword offset, cpu;
+    void *heap, *p;
+    uword offset, cpu;
 
-  if (align_offset > align)
-    {
-      if (align > 0)
-	align_offset %= align;
-      else
-	align_offset = align;
+    if (align_offset > align) {
+        if (align > 0)
+            align_offset %= align;
+        else
+            align_offset = align;
     }
 
-  cpu = os_get_thread_index ();
-  heap = clib_per_cpu_mheaps[cpu];
-  heap = mheap_get_aligned (heap, size, align, align_offset, &offset);
-  clib_per_cpu_mheaps[cpu] = heap;
+    cpu = os_get_thread_index ();
+    heap = clib_per_cpu_mheaps[cpu];
+    heap = mheap_get_aligned (heap, size, align, align_offset, &offset);
+    clib_per_cpu_mheaps[cpu] = heap;
 
-  if (offset != ~0)
-    {
-      p = heap + offset;
+    if (offset != ~0) {
+        p = heap + offset;
 #if CLIB_DEBUG > 0
-      VALGRIND_MALLOCLIKE_BLOCK (p, mheap_data_bytes (heap, offset), 0, 0);
+        VALGRIND_MALLOCLIKE_BLOCK (p, mheap_data_bytes (heap, offset), 0, 0);
 #endif
-      return p;
-    }
-  else
-    {
-      if (os_out_of_memory_on_failure)
-	os_out_of_memory ();
-      return 0;
+        return p;
+    } else {
+        if (os_out_of_memory_on_failure)
+            os_out_of_memory ();
+        return 0;
     }
 }
 
@@ -111,46 +107,46 @@ clib_mem_alloc_aligned_at_offset (uword size, uword align, uword align_offset,
 always_inline void *
 clib_mem_alloc (uword size)
 {
-  return clib_mem_alloc_aligned_at_offset (size, /* align */ 1,
-					   /* align_offset */ 0,
-					   /* os_out_of_memory */ 1);
+    return clib_mem_alloc_aligned_at_offset (size, /* align */ 1,
+            /* align_offset */ 0,
+            /* os_out_of_memory */ 1);
 }
 
 always_inline void *
 clib_mem_alloc_aligned (uword size, uword align)
 {
-  return clib_mem_alloc_aligned_at_offset (size, align, /* align_offset */ 0,
-					   /* os_out_of_memory */ 1);
+    return clib_mem_alloc_aligned_at_offset (size, align, /* align_offset */ 0,
+            /* os_out_of_memory */ 1);
 }
 
 /* Memory allocator which calls os_out_of_memory() when it fails */
 always_inline void *
 clib_mem_alloc_or_null (uword size)
 {
-  return clib_mem_alloc_aligned_at_offset (size, /* align */ 1,
-					   /* align_offset */ 0,
-					   /* os_out_of_memory */ 0);
+    return clib_mem_alloc_aligned_at_offset (size, /* align */ 1,
+            /* align_offset */ 0,
+            /* os_out_of_memory */ 0);
 }
 
 always_inline void *
 clib_mem_alloc_aligned_or_null (uword size, uword align)
 {
-  return clib_mem_alloc_aligned_at_offset (size, align, /* align_offset */ 0,
-					   /* os_out_of_memory */ 0);
+    return clib_mem_alloc_aligned_at_offset (size, align, /* align_offset */ 0,
+            /* os_out_of_memory */ 0);
 }
 
 
 
 /* Memory allocator which panics when it fails.
    Use macro so that clib_panic macro can expand __FUNCTION__ and __LINE__. */
-#define clib_mem_alloc_aligned_no_fail(size,align)				\
-({										\
-  uword _clib_mem_alloc_size = (size);						\
-  void * _clib_mem_alloc_p;							\
-  _clib_mem_alloc_p = clib_mem_alloc_aligned (_clib_mem_alloc_size, (align));	\
-  if (! _clib_mem_alloc_p)							\
-    clib_panic ("failed to allocate %d bytes", _clib_mem_alloc_size);		\
-  _clib_mem_alloc_p;								\
+#define clib_mem_alloc_aligned_no_fail(size,align)              \
+({                                      \
+  uword _clib_mem_alloc_size = (size);                      \
+  void * _clib_mem_alloc_p;                         \
+  _clib_mem_alloc_p = clib_mem_alloc_aligned (_clib_mem_alloc_size, (align));   \
+  if (! _clib_mem_alloc_p)                          \
+    clib_panic ("failed to allocate %d bytes", _clib_mem_alloc_size);       \
+  _clib_mem_alloc_p;                                \
 })
 
 #define clib_mem_alloc_no_fail(size) clib_mem_alloc_aligned_no_fail(size,1)
@@ -161,71 +157,70 @@ clib_mem_alloc_aligned_or_null (uword size, uword align)
 always_inline uword
 clib_mem_is_heap_object (void *p)
 {
-  void *heap = clib_mem_get_per_cpu_heap ();
-  uword offset = (uword) p - (uword) heap;
-  mheap_elt_t *e, *n;
+    void *heap = clib_mem_get_per_cpu_heap ();
+    uword offset = (uword) p - (uword) heap;
+    mheap_elt_t *e, *n;
 
-  if (offset >= vec_len (heap))
-    return 0;
+    if (offset >= vec_len (heap))
+        return 0;
 
-  e = mheap_elt_at_uoffset (heap, offset);
-  n = mheap_next_elt (e);
+    e = mheap_elt_at_uoffset (heap, offset);
+    n = mheap_next_elt (e);
 
-  /* Check that heap forward and reverse pointers agree. */
-  return e->n_user_data == n->prev_n_user_data;
+    /* Check that heap forward and reverse pointers agree. */
+    return e->n_user_data == n->prev_n_user_data;
 }
 
 always_inline void
 clib_mem_free (void *p)
 {
-  u8 *heap = clib_mem_get_per_cpu_heap ();
+    u8 *heap = clib_mem_get_per_cpu_heap ();
 
-  /* Make sure object is in the correct heap. */
-  ASSERT (clib_mem_is_heap_object (p));
+    /* Make sure object is in the correct heap. */
+    ASSERT (clib_mem_is_heap_object (p));
 
-  mheap_put (heap, (u8 *) p - heap);
+    mheap_put (heap, (u8 *) p - heap);
 
 #if CLIB_DEBUG > 0
-  VALGRIND_FREELIKE_BLOCK (p, 0);
+    VALGRIND_FREELIKE_BLOCK (p, 0);
 #endif
 }
 
 always_inline void *
 clib_mem_realloc (void *p, uword new_size, uword old_size)
 {
-  /* By default use alloc, copy and free to emulate realloc. */
-  void *q = clib_mem_alloc (new_size);
-  if (q)
-    {
-      uword copy_size;
-      if (old_size < new_size)
-	copy_size = old_size;
-      else
-	copy_size = new_size;
-      clib_memcpy (q, p, copy_size);
-      clib_mem_free (p);
+    /* By default use alloc, copy and free to emulate realloc. */
+    void *q = clib_mem_alloc (new_size);
+    if (q) {
+        uword copy_size;
+        if (old_size < new_size)
+            copy_size = old_size;
+        else
+            copy_size = new_size;
+        clib_memcpy (q, p, copy_size);
+        clib_mem_free (p);
     }
-  return q;
+    return q;
 }
 
 always_inline uword
 clib_mem_size (void *p)
 {
-  ASSERT (clib_mem_is_heap_object (p));
-  mheap_elt_t *e = mheap_user_pointer_to_elt (p);
-  return mheap_elt_data_bytes (e);
+    ASSERT (clib_mem_is_heap_object (p));
+    mheap_elt_t *e = mheap_user_pointer_to_elt (p);
+    return mheap_elt_data_bytes (e);
 }
 
 always_inline void *
 clib_mem_get_heap (void)
 {
-  return clib_mem_get_per_cpu_heap ();
+    return clib_mem_get_per_cpu_heap ();
 }
 
 always_inline void *
 clib_mem_set_heap (void *heap)
 {
-  return clib_mem_set_per_cpu_heap (heap);
+    return clib_mem_set_per_cpu_heap (heap);
 }
 
 void *clib_mem_init (void *heap, uword size);
@@ -238,29 +233,28 @@ void clib_mem_validate (void);
 
 void clib_mem_trace (int enable);
 
-typedef struct
-{
-  /* Total number of objects allocated. */
-  uword object_count;
+typedef struct {
+    /* Total number of objects allocated. */
+    uword object_count;
 
-  /* Total allocated bytes.  Bytes used and free.
-     used + free = total */
-  uword bytes_total, bytes_used, bytes_free;
+    /* Total allocated bytes.  Bytes used and free.
+       used + free = total */
+    uword bytes_total, bytes_used, bytes_free;
 
-  /* Number of bytes used by mheap data structure overhead
-     (e.g. free lists, mheap header). */
-  uword bytes_overhead;
+    /* Number of bytes used by mheap data structure overhead
+       (e.g. free lists, mheap header). */
+    uword bytes_overhead;
 
-  /* Amount of free space returned to operating system. */
-  uword bytes_free_reclaimed;
+    /* Amount of free space returned to operating system. */
+    uword bytes_free_reclaimed;
 
-  /* For malloc which puts small objects in sbrk region and
-     large objects in mmap'ed regions. */
-  uword bytes_used_sbrk;
-  uword bytes_used_mmap;
+    /* For malloc which puts small objects in sbrk region and
+       large objects in mmap'ed regions. */
+    uword bytes_used_sbrk;
+    uword bytes_used_mmap;
 
-  /* Max. number of bytes in this heap. */
-  uword bytes_max;
+    /* Max. number of bytes in this heap. */
+    uword bytes_max;
 } clib_mem_usage_t;
 
 void clib_mem_usage (clib_mem_usage_t * usage);
@@ -271,80 +265,79 @@ u8 *format_clib_mem_usage (u8 * s, va_list * args);
 always_inline void *
 clib_mem_vm_alloc (uword size)
 {
-  void *mmap_addr;
-  uword flags = MAP_PRIVATE;
+    void *mmap_addr;
+    uword flags = MAP_PRIVATE;
 
 #ifdef MAP_ANONYMOUS
-  flags |= MAP_ANONYMOUS;
+    flags |= MAP_ANONYMOUS;
 #endif
 
-  mmap_addr = mmap (0, size, PROT_READ | PROT_WRITE, flags, -1, 0);
-  if (mmap_addr == (void *) -1)
-    mmap_addr = 0;
+    mmap_addr = mmap (0, size, PROT_READ | PROT_WRITE, flags, -1, 0);
+    if (mmap_addr == (void *) -1)
+        mmap_addr = 0;
 
-  return mmap_addr;
+    return mmap_addr;
 }
 
 always_inline void
 clib_mem_vm_free (void *addr, uword size)
 {
-  munmap (addr, size);
+    munmap (addr, size);
 }
 
 always_inline void *
 clib_mem_vm_unmap (void *addr, uword size)
 {
-  void *mmap_addr;
-  uword flags = MAP_PRIVATE | MAP_FIXED;
+    void *mmap_addr;
+    uword flags = MAP_PRIVATE | MAP_FIXED;
 
-  /* To unmap we "map" with no protection.  If we actually called
-     munmap then other callers could steal the address space.  By
-     changing to PROT_NONE the kernel can free up the pages which is
-     really what we want "unmap" to mean. */
-  mmap_addr = mmap (addr, size, PROT_NONE, flags, -1, 0);
-  if (mmap_addr == (void *) -1)
-    mmap_addr = 0;
+    /* To unmap we "map" with no protection.  If we actually called
+       munmap then other callers could steal the address space.  By
+       changing to PROT_NONE the kernel can free up the pages which is
+       really what we want "unmap" to mean. */
+    mmap_addr = mmap (addr, size, PROT_NONE, flags, -1, 0);
+    if (mmap_addr == (void *) -1)
+        mmap_addr = 0;
 
-  return mmap_addr;
+    return mmap_addr;
 }
 
 always_inline void *
 clib_mem_vm_map (void *addr, uword size)
 {
-  void *mmap_addr;
-  uword flags = MAP_PRIVATE | MAP_FIXED;
+    void *mmap_addr;
+    uword flags = MAP_PRIVATE | MAP_FIXED;
 
-  mmap_addr = mmap (addr, size, (PROT_READ | PROT_WRITE), flags, -1, 0);
-  if (mmap_addr == (void *) -1)
-    mmap_addr = 0;
+    mmap_addr = mmap (addr, size, (PROT_READ | PROT_WRITE), flags, -1, 0);
+    if (mmap_addr == (void *) -1)
+        mmap_addr = 0;
 
-  return mmap_addr;
+    return mmap_addr;
 }
 
-typedef struct
-{
+typedef struct {
 #define CLIB_MEM_VM_F_SHARED (1 << 0)
 #define CLIB_MEM_VM_F_HUGETLB (1 << 1)
 #define CLIB_MEM_VM_F_NUMA_PREFER (1 << 2)
 #define CLIB_MEM_VM_F_NUMA_FORCE (1 << 3)
 #define CLIB_MEM_VM_F_HUGETLB_PREALLOC (1 << 4)
-  u32 flags; /**< vm allocation flags:
+    u32 flags; /**< vm allocation flags:
                 <br> CLIB_MEM_VM_F_SHARED: request shared memory, file
-		destiptor will be provided on successful allocation.
+        destiptor will be provided on successful allocation.
                 <br> CLIB_MEM_VM_F_HUGETLB: request hugepages.
-		<br> CLIB_MEM_VM_F_NUMA_PREFER: numa_node field contains valid
-		numa node preference.
-		<br> CLIB_MEM_VM_F_NUMA_FORCE: fail if setting numa policy fails.
-		<br> CLIB_MEM_VM_F_HUGETLB_PREALLOC: pre-allocate hugepages if
-		number of available pages is not sufficient.
+        <br> CLIB_MEM_VM_F_NUMA_PREFER: numa_node field contains valid
+        numa node preference.
+        <br> CLIB_MEM_VM_F_NUMA_FORCE: fail if setting numa policy fails.
+        <br> CLIB_MEM_VM_F_HUGETLB_PREALLOC: pre-allocate hugepages if
+        number of available pages is not sufficient.
              */
-  char *name; /**< Name for memory allocation, set by caller. */
-  uword size; /**< Allocation size, set by caller. */
-  int numa_node; /**< numa node preference. Valid if CLIB_MEM_VM_F_NUMA_PREFER set. */
-  void *addr; /**< Pointer to allocated memory, set on successful allocation. */
-  int fd; /**< File desriptor, set on successful allocation if CLIB_MEM_VM_F_SHARED is set. */
-  int log2_page_size;		/* Page size in log2 format, set on successful allocation. */
-  int n_pages;			/* Number of pages. */
+    char *name; /**< Name for memory allocation, set by caller. */
+    uword size; /**< Allocation size, set by caller. */
+    int numa_node; /**< numa node preference. Valid if CLIB_MEM_VM_F_NUMA_PREFER set. */
+    void *addr; /**< Pointer to allocated memory, set on successful allocation. */
+    int fd; /**< File desriptor, set on successful allocation if CLIB_MEM_VM_F_SHARED is set. */
+    int log2_page_size;       /* Page size in log2 format, set on successful allocation. */
+    int n_pages;          /* Number of pages. */
 } clib_mem_vm_alloc_t;
 
 clib_error_t *clib_mem_vm_ext_alloc (clib_mem_vm_alloc_t * a);
@@ -352,7 +345,7 @@ int clib_mem_vm_get_log2_page_size (int fd);
 u64 *clib_mem_vm_get_paddr (void *mem, int log2_page_size, int n_pages);
 
 
-#include <vppinfra/error.h>	/* clib_panic */
+#include <vppinfra/error.h> /* clib_panic */
 
 #endif /* _included_clib_mem_h */
 

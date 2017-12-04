@@ -59,10 +59,9 @@ _(IP6_INPUT, "ip6-input")                       \
 _(L2_INPUT, "l2-input")
 
 /** Enum of possible next nodes post LISP-GPE decap */
-typedef enum
-{
+typedef enum {
 #define _(s,n) LISP_GPE_INPUT_NEXT_##s,
-  foreach_lisp_gpe_ip_input_next
+    foreach_lisp_gpe_ip_input_next
 #undef _
     LISP_GPE_INPUT_N_NEXT,
 } lisp_gpe_input_next_t;
@@ -70,110 +69,104 @@ typedef enum
 /* Arc to nsh-input added only if nsh-input exists */
 #define LISP_GPE_INPUT_NEXT_NSH_INPUT 4
 
-typedef enum
-{
+typedef enum {
 #define lisp_gpe_error(n,s) LISP_GPE_ERROR_##n,
 #include <vnet/lisp-gpe/lisp_gpe_error.def>
 #undef lisp_gpe_error
-  LISP_GPE_N_ERROR,
+    LISP_GPE_N_ERROR,
 } lisp_gpe_error_t;
 
-typedef struct tunnel_lookup
-{
-  /** Lookup lisp-gpe interfaces by dp table (eg. vrf/bridge index) */
-  uword *hw_if_index_by_dp_table;
+typedef struct tunnel_lookup {
+    /** Lookup lisp-gpe interfaces by dp table (eg. vrf/bridge index) */
+    uword *hw_if_index_by_dp_table;
 
-  /** lookup decap tunnel termination sw_if_index by vni and vice versa */
-  uword *sw_if_index_by_vni;
+    /** lookup decap tunnel termination sw_if_index by vni and vice versa */
+    uword *sw_if_index_by_vni;
 
-  // FIXME - Need this?
-  uword *vni_by_sw_if_index;
+    // FIXME - Need this?
+    uword *vni_by_sw_if_index;
 } tunnel_lookup_t;
 
-typedef struct
-{
-  u32 fwd_entry_index;
-  u32 tunnel_index;
+typedef struct {
+    u32 fwd_entry_index;
+    u32 tunnel_index;
 } lisp_stats_key_t;
 
-typedef struct
-{
-  u32 vni;
-  dp_address_t deid;
-  dp_address_t seid;
-  ip_address_t loc_rloc;
-  ip_address_t rmt_rloc;
+typedef struct {
+    u32 vni;
+    dp_address_t deid;
+    dp_address_t seid;
+    ip_address_t loc_rloc;
+    ip_address_t rmt_rloc;
 
-  vlib_counter_t counters;
+    vlib_counter_t counters;
 } lisp_api_stats_t;
 
-typedef enum gpe_encap_mode_e
-{
-  GPE_ENCAP_LISP,
-  GPE_ENCAP_VXLAN,
-  GPE_ENCAP_COUNT
+typedef enum gpe_encap_mode_e {
+    GPE_ENCAP_LISP,
+    GPE_ENCAP_VXLAN,
+    GPE_ENCAP_COUNT
 } gpe_encap_mode_t;
 
 /** LISP-GPE global state*/
-typedef struct lisp_gpe_main
-{
-  /**
-   * @brief DB of all forwarding entries. The Key is:{l-EID,r-EID,vni}
-   * where the EID encodes L2 or L3
-   */
-  uword *lisp_gpe_fwd_entries;
+typedef struct lisp_gpe_main {
+    /**
+     * @brief DB of all forwarding entries. The Key is:{l-EID,r-EID,vni}
+     * where the EID encodes L2 or L3
+     */
+    uword *lisp_gpe_fwd_entries;
 
-  /**
-   * @brief A Pool of all LISP forwarding entries
-   */
-  struct lisp_gpe_fwd_entry_t_ *lisp_fwd_entry_pool;
+    /**
+     * @brief A Pool of all LISP forwarding entries
+     */
+    struct lisp_gpe_fwd_entry_t_ *lisp_fwd_entry_pool;
 
-  /** Free vlib hw_if_indices */
-  u32 *free_tunnel_hw_if_indices;
+    /** Free vlib hw_if_indices */
+    u32 *free_tunnel_hw_if_indices;
 
-  u8 is_en;
+    u8 is_en;
 
-  /* L3 data structures
-   * ================== */
-  tunnel_lookup_t l3_ifaces;
+    /* L3 data structures
+     * ================== */
+    tunnel_lookup_t l3_ifaces;
 
-  /* L2 data structures
-   * ================== */
+    /* L2 data structures
+     * ================== */
 
-  /** L2 LISP FIB */
+    /** L2 LISP FIB */
     BVT (clib_bihash) l2_fib;
 
-  tunnel_lookup_t l2_ifaces;
+    tunnel_lookup_t l2_ifaces;
 
-  /** Load-balance for a miss in the table */
-  dpo_id_t l2_lb_cp_lkup;
+    /** Load-balance for a miss in the table */
+    dpo_id_t l2_lb_cp_lkup;
 
-  /* NSH data structures
-   * ================== */
+    /* NSH data structures
+     * ================== */
 
     BVT (clib_bihash) nsh_fib;
 
-  tunnel_lookup_t nsh_ifaces;
+    tunnel_lookup_t nsh_ifaces;
 
-  const dpo_id_t *nsh_cp_lkup;
+    const dpo_id_t *nsh_cp_lkup;
 
-  gpe_encap_mode_t encap_mode;
+    gpe_encap_mode_t encap_mode;
 
-  u8 *dummy_stats_pool;
-  uword *lisp_stats_index_by_key;
-  vlib_combined_counter_main_t counters;
+    u8 *dummy_stats_pool;
+    uword *lisp_stats_index_by_key;
+    vlib_combined_counter_main_t counters;
 
-  /** Native fwd data structures */
-  fib_route_path_t *native_fwd_rpath[2];
-  u32 *native_fwd_lfes[2];
+    /** Native fwd data structures */
+    fib_route_path_t *native_fwd_rpath[2];
+    u32 *native_fwd_lfes[2];
 
-  /** convenience */
-  vlib_main_t *vlib_main;
-  vnet_main_t *vnet_main;
-  ip4_main_t *im4;
-  ip6_main_t *im6;
-  ip_lookup_main_t *lm4;
-  ip_lookup_main_t *lm6;
+    /** convenience */
+    vlib_main_t *vlib_main;
+    vnet_main_t *vnet_main;
+    ip4_main_t *im4;
+    ip6_main_t *im6;
+    ip_lookup_main_t *lm4;
+    ip_lookup_main_t *lm6;
 } lisp_gpe_main_t;
 
 /** LISP-GPE global state*/
@@ -182,7 +175,7 @@ extern lisp_gpe_main_t lisp_gpe_main;
 always_inline lisp_gpe_main_t *
 vnet_lisp_gpe_get_main ()
 {
-  return &lisp_gpe_main;
+    return &lisp_gpe_main;
 }
 
 
@@ -197,107 +190,100 @@ u8 vnet_lisp_gpe_enable_disable_status (void);
 
 u32
 lisp_gpe_l3_iface_find_or_create (lisp_gpe_main_t * lgm,
-				  u32 overlay_table_id, u32 vni);
+                                  u32 overlay_table_id, u32 vni);
 
 /** Add/del LISP-GPE interface. */
 extern void lisp_gpe_del_l2_iface (lisp_gpe_main_t * lgm, u32 vni, u32 bd_id);
 extern u32 lisp_gpe_add_l2_iface (lisp_gpe_main_t * lgm, u32 vni, u32 bd_id);
 extern void lisp_gpe_del_l3_iface (lisp_gpe_main_t * lgm, u32 vni, u32 bd_id);
 extern u32 lisp_gpe_add_l3_iface (lisp_gpe_main_t * lgm, u32 vni, u32 bd_id,
-				  u8 with_default_route);
+                                  u8 with_default_route);
 
 
-typedef struct
-{
-  u8 is_en;
+typedef struct {
+    u8 is_en;
 } vnet_lisp_gpe_enable_disable_args_t;
 
 clib_error_t
-  * vnet_lisp_gpe_enable_disable (vnet_lisp_gpe_enable_disable_args_t * a);
+* vnet_lisp_gpe_enable_disable (vnet_lisp_gpe_enable_disable_args_t * a);
 
-typedef enum
-{
-  NO_ACTION,
-  FORWARD_NATIVE,
-  SEND_MAP_REQUEST,
-  DROP
+typedef enum {
+    NO_ACTION,
+    FORWARD_NATIVE,
+    SEND_MAP_REQUEST,
+    DROP
 } negative_fwd_actions_e;
 
 /** */
-typedef struct
-{
-  /** forwarding entry index of */
-  u32 fwd_entry_index;
+typedef struct {
+    /** forwarding entry index of */
+    u32 fwd_entry_index;
 
-  u8 is_src_dst;
+    u8 is_src_dst;
 
-  u8 is_add;
+    u8 is_add;
 
-  /** type of mapping */
-  u8 is_negative;
+    /** type of mapping */
+    u8 is_negative;
 
-  /** action for negative mappings */
-  negative_fwd_actions_e action;
+    /** action for negative mappings */
+    negative_fwd_actions_e action;
 
-  /** local eid */
-  gid_address_t lcl_eid;
+    /** local eid */
+    gid_address_t lcl_eid;
 
-  /** remote eid */
-  gid_address_t rmt_eid;
+    /** remote eid */
+    gid_address_t rmt_eid;
 
-  /** vector of locator pairs */
-  locator_pair_t *locator_pairs;
+    /** vector of locator pairs */
+    locator_pair_t *locator_pairs;
 
-  /** FIB index to lookup remote locator at encap */
-  u32 encap_fib_index;
+    /** FIB index to lookup remote locator at encap */
+    u32 encap_fib_index;
 
-  /** FIB index to lookup inner IP at decap */
-  u32 decap_fib_index;
+    /** FIB index to lookup inner IP at decap */
+    u32 decap_fib_index;
 
-  /* TODO remove */
-  u32 decap_next_index;
+    /* TODO remove */
+    u32 decap_next_index;
 
-  /** VNI/tenant id in HOST byte order */
-  u32 vni;
+    /** VNI/tenant id in HOST byte order */
+    u32 vni;
 
-  /** vrf or bd where fwd entry should be inserted */
-  union
-  {
-    /** table (vrf) id */
-    u32 table_id;
+    /** vrf or bd where fwd entry should be inserted */
+    union {
+        /** table (vrf) id */
+        u32 table_id;
 
-    /** bridge domain id */
-    u32 bd_id;
+        /** bridge domain id */
+        u32 bd_id;
 
-    /** generic access */
-    u32 dp_table;
-  };
+        /** generic access */
+        u32 dp_table;
+    };
 } vnet_lisp_gpe_add_del_fwd_entry_args_t;
 
-typedef struct
-{
-  fib_route_path_t rpath;
-  u8 is_add;
+typedef struct {
+    fib_route_path_t rpath;
+    u8 is_add;
 } vnet_gpe_native_fwd_rpath_args_t;
 
-typedef struct
-{
-  u32 fwd_entry_index;
-  u32 dp_table;
-  u32 vni;
-  u8 action;
-  dp_address_t leid;
-  dp_address_t reid;
+typedef struct {
+    u32 fwd_entry_index;
+    u32 dp_table;
+    u32 vni;
+    u8 action;
+    dp_address_t leid;
+    dp_address_t reid;
 } lisp_api_gpe_fwd_entry_t;
 
 #define foreach_lgpe_ip4_lookup_next    \
   _(DROP, "error-drop")                 \
   _(LISP_CP_LOOKUP, "lisp-cp-lookup")
 
-typedef enum lgpe_ip4_lookup_next
-{
+typedef enum lgpe_ip4_lookup_next {
 #define _(sym,str) LGPE_IP4_LOOKUP_NEXT_##sym,
-  foreach_lgpe_ip4_lookup_next
+    foreach_lgpe_ip4_lookup_next
 #undef _
     LGPE_IP4_LOOKUP_N_NEXT,
 } lgpe_ip4_lookup_next_t;
@@ -306,10 +292,9 @@ typedef enum lgpe_ip4_lookup_next
   _(DROP, "error-drop")                 \
   _(LISP_CP_LOOKUP, "lisp-cp-lookup")
 
-typedef enum lgpe_ip6_lookup_next
-{
+typedef enum lgpe_ip6_lookup_next {
 #define _(sym,str) LGPE_IP6_LOOKUP_NEXT_##sym,
-  foreach_lgpe_ip6_lookup_next
+    foreach_lgpe_ip6_lookup_next
 #undef _
     LGPE_IP6_LOOKUP_N_NEXT,
 } lgpe_ip6_lookup_next_t;

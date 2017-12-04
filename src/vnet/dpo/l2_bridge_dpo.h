@@ -24,8 +24,7 @@
  * If a packet encounters an object of this type in the L3 data-path, it
  * is injected back into the L2 bridge.
  */
-typedef struct l2_bridge_dpo_t_
-{
+typedef struct l2_bridge_dpo_t_ {
     /**
      * The Software interface index that the packets will output on
      */

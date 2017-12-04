@@ -47,79 +47,75 @@
 struct clib_file;
 typedef clib_error_t *(clib_file_function_t) (struct clib_file * f);
 
-typedef struct clib_file
-{
-  /* Unix file descriptor from open/socket. */
-  u32 file_descriptor;
+typedef struct clib_file {
+    /* Unix file descriptor from open/socket. */
+    u32 file_descriptor;
 
-  u32 flags;
+    u32 flags;
 #define UNIX_FILE_DATA_AVAILABLE_TO_WRITE (1 << 0)
 #define UNIX_FILE_EVENT_EDGE_TRIGGERED   (1 << 1)
 
-  /* Data available for function's use. */
-  uword private_data;
+    /* Data available for function's use. */
+    uword private_data;
 
-  /* Functions to be called when read/write data becomes ready. */
-  clib_file_function_t *read_function, *write_function, *error_function;
+    /* Functions to be called when read/write data becomes ready. */
+    clib_file_function_t *read_function, *write_function, *error_function;
 } clib_file_t;
 
-typedef enum
-{
-  UNIX_FILE_UPDATE_ADD,
-  UNIX_FILE_UPDATE_MODIFY,
-  UNIX_FILE_UPDATE_DELETE,
+typedef enum {
+    UNIX_FILE_UPDATE_ADD,
+    UNIX_FILE_UPDATE_MODIFY,
+    UNIX_FILE_UPDATE_DELETE,
 } clib_file_update_type_t;
 
-typedef struct
-{
-  /* Pool of files to poll for input/output. */
-  clib_file_t *file_pool;
+typedef struct {
+    /* Pool of files to poll for input/output. */
+    clib_file_t *file_pool;
 
-  void (*file_update) (clib_file_t * file,
-		       clib_file_update_type_t update_type);
+    void (*file_update) (clib_file_t * file,
+                         clib_file_update_type_t update_type);
 
 } clib_file_main_t;
 
 always_inline uword
 clib_file_add (clib_file_main_t * um, clib_file_t * template)
 {
-  clib_file_t *f;
-  pool_get (um->file_pool, f);
-  f[0] = template[0];
-  um->file_update (f, UNIX_FILE_UPDATE_ADD);
-  return f - um->file_pool;
+    clib_file_t *f;
+    pool_get (um->file_pool, f);
+    f[0] = template[0];
+    um->file_update (f, UNIX_FILE_UPDATE_ADD);
+    return f - um->file_pool;
 }
 
 always_inline void
 clib_file_del (clib_file_main_t * um, clib_file_t * f)
 {
-  um->file_update (f, UNIX_FILE_UPDATE_DELETE);
-  close (f->file_descriptor);
-  f->file_descriptor = ~0;
-  pool_put (um->file_pool, f);
+    um->file_update (f, UNIX_FILE_UPDATE_DELETE);
+    close (f->file_descriptor);
+    f->file_descriptor = ~0;
+    pool_put (um->file_pool, f);
 }
 
 always_inline void
 clib_file_del_by_index (clib_file_main_t * um, uword index)
 {
-  clib_file_t *uf;
-  uf = pool_elt_at_index (um->file_pool, index);
-  clib_file_del (um, uf);
+    clib_file_t *uf;
+    uf = pool_elt_at_index (um->file_pool, index);
+    clib_file_del (um, uf);
 }
 
 always_inline uword
 clib_file_set_data_available_to_write (clib_file_main_t * um,
-				       u32 clib_file_index,
-				       uword is_available)
+                                       u32 clib_file_index,
+                                       uword is_available)
 {
-  clib_file_t *uf = pool_elt_at_index (um->file_pool, clib_file_index);
-  uword was_available = (uf->flags & UNIX_FILE_DATA_AVAILABLE_TO_WRITE);
-  if ((was_available != 0) != (is_available != 0))
-    {
-      uf->flags ^= UNIX_FILE_DATA_AVAILABLE_TO_WRITE;
-      um->file_update (uf, UNIX_FILE_UPDATE_MODIFY);
+    clib_file_t *uf = pool_elt_at_index (um->file_pool, clib_file_index);
+    uword was_available = (uf->flags & UNIX_FILE_DATA_AVAILABLE_TO_WRITE);
+    if ((was_available != 0) != (is_available != 0)) {
+        uf->flags ^= UNIX_FILE_DATA_AVAILABLE_TO_WRITE;
+        um->file_update (uf, UNIX_FILE_UPDATE_MODIFY);
     }
-  return was_available != 0;
+    return was_available != 0;
 }
 
 

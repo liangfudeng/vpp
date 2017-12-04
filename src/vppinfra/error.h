@@ -38,7 +38,7 @@
 #ifndef included_error_h
 #define included_error_h
 
-#include <vppinfra/clib.h>	/* for CLIB_LINUX_KERNEL */
+#include <vppinfra/clib.h>  /* for CLIB_LINUX_KERNEL */
 #include <vppinfra/error_bootstrap.h>
 
 #ifdef CLIB_UNIX
@@ -75,10 +75,10 @@ void clib_error_register_handler (clib_error_handler_func_t func, void *arg);
 #include <vppinfra/clib_error.h>
 
 #define clib_error_get_code(err) ((err) ? (err)->code : 0)
-#define clib_error_set_code(err, c)		\
-do {						\
-  if (err)					\
-    (err)->code = (c);				\
+#define clib_error_set_code(err, c)     \
+do {                        \
+  if (err)                  \
+    (err)->code = (c);              \
 } while (0)
 
 extern void *clib_error_free_vector (clib_error_t * errors);
@@ -86,9 +86,9 @@ extern void *clib_error_free_vector (clib_error_t * errors);
 #define clib_error_free(e) e = clib_error_free_vector(e)
 
 extern clib_error_t *_clib_error_return (clib_error_t * errors,
-					 any code,
-					 uword flags,
-					 char *where, char *fmt, ...);
+        any code,
+        uword flags,
+        char *where, char *fmt, ...);
 
 #define clib_error_return_code(e,code,flags,args...) \
   _clib_error_return((e),(code),(flags),(char *)clib_error_function,args)
@@ -118,64 +118,63 @@ always_inline word
 unix_error_is_fatal (word error)
 {
 #ifdef CLIB_UNIX
-  switch (error)
-    {
-    case EWOULDBLOCK:
-    case EINTR:
-      return 0;
+    switch (error) {
+        case EWOULDBLOCK:
+        case EINTR:
+            return 0;
     }
 #endif
-  return 1;
+    return 1;
 }
 
-#define IF_ERROR_IS_FATAL_RETURN_ELSE_FREE(e)			\
-do {								\
-  if (e)							\
-    {								\
-      if (unix_error_is_fatal (clib_error_get_code (e)))	\
-	return (e);						\
-      else							\
-	clib_error_free (e);					\
-    }								\
+#define IF_ERROR_IS_FATAL_RETURN_ELSE_FREE(e)           \
+do {                                \
+  if (e)                            \
+    {                               \
+      if (unix_error_is_fatal (clib_error_get_code (e)))    \
+    return (e);                     \
+      else                          \
+    clib_error_free (e);                    \
+    }                               \
 } while (0)
 
-#define ERROR_RETURN_IF(x)				\
-do {							\
-  clib_error_t * _error_return_if = (x);		\
-  if (_error_return_if)					\
-    return clib_error_return (_error_return_if, 0);	\
+#define ERROR_RETURN_IF(x)              \
+do {                            \
+  clib_error_t * _error_return_if = (x);        \
+  if (_error_return_if)                 \
+    return clib_error_return (_error_return_if, 0); \
 } while (0)
 
-#define ERROR_ASSERT(truth)			\
-({						\
-  clib_error_t * _error_assert = 0;		\
-  if (CLIB_DEBUG > 0 && ! (truth))		\
-    {						\
-      _error_assert = clib_error_return_fatal	\
-        (0, "%s:%d (%s) assertion `%s' fails",	\
-	 __FILE__,				\
-	 (uword) __LINE__,			\
-	 clib_error_function,			\
-	 # truth);				\
-    }						\
-  _error_assert;				\
+#define ERROR_ASSERT(truth)         \
+({                      \
+  clib_error_t * _error_assert = 0;     \
+  if (CLIB_DEBUG > 0 && ! (truth))      \
+    {                       \
+      _error_assert = clib_error_return_fatal   \
+        (0, "%s:%d (%s) assertion `%s' fails",  \
+     __FILE__,              \
+     (uword) __LINE__,          \
+     clib_error_function,           \
+     # truth);              \
+    }                       \
+  _error_assert;                \
 })
 
 /* Assert to remain even if CLIB_DEBUG is set to 0. */
-#define CLIB_ERROR_ASSERT(truth)		\
-({						\
-  clib_error_t * _error_assert = 0;		\
-  if (! (truth))				\
-    {						\
-      _error_assert =				\
-        clib_error_return_fatal			\
-        (0, "%s:%d (%s) assertion `%s' fails",	\
-         __FILE__,				\
-	 (uword) __LINE__,			\
-	 clib_error_function,			\
-	 # truth);				\
-    }						\
-  _error_assert;				\
+#define CLIB_ERROR_ASSERT(truth)        \
+({                      \
+  clib_error_t * _error_assert = 0;     \
+  if (! (truth))                \
+    {                       \
+      _error_assert =               \
+        clib_error_return_fatal         \
+        (0, "%s:%d (%s) assertion `%s' fails",  \
+         __FILE__,              \
+     (uword) __LINE__,          \
+     clib_error_function,           \
+     # truth);              \
+    }                       \
+  _error_assert;                \
 })
 
 /*

@@ -23,105 +23,107 @@
 #include <vapi/vapi.hpp>
 #include <vapi/vxlan.api.vapi.hpp>
 
-namespace VOM {
-namespace vxlan_tunnel_cmds {
-
-/**
- * A Command class that creates an VXLAN tunnel
- */
-class create_cmd : public interface::create_cmd<vapi::Vxlan_add_del_tunnel>
+namespace VOM
 {
-public:
-  /**
-   * Create command constructor taking HW item to update and the
-   * endpoint values
-   */
-  create_cmd(HW::item<handle_t>& item,
-             const std::string& name,
-             const vxlan_tunnel::endpoint_t& ep);
+    namespace vxlan_tunnel_cmds
+    {
 
-  /**
-   * Issue the command to VPP/HW
-   */
-  rc_t issue(connection& con);
-  /**
-   * convert to string format for debug purposes
-   */
-  std::string to_string() const;
+        /**
+         * A Command class that creates an VXLAN tunnel
+         */
+        class create_cmd : public interface::create_cmd<vapi::Vxlan_add_del_tunnel>
+            {
+            public:
+                /**
+                 * Create command constructor taking HW item to update and the
+                 * endpoint values
+                 */
+                create_cmd(HW::item<handle_t>& item,
+                           const std::string& name,
+                           const vxlan_tunnel::endpoint_t& ep);
 
-  /**
-   * Comparison operator - only used for UT
-   */
-  bool operator==(const create_cmd& i) const;
+                /**
+                 * Issue the command to VPP/HW
+                 */
+                rc_t issue(connection& con);
+                /**
+                 * convert to string format for debug purposes
+                 */
+                std::string to_string() const;
 
-private:
-  /**
-   * Enpoint values of the tunnel to be created
-   */
-  const vxlan_tunnel::endpoint_t m_ep;
-};
+                /**
+                 * Comparison operator - only used for UT
+                 */
+                bool operator==(const create_cmd& i) const;
 
-/**
- * A functor class that creates an VXLAN tunnel
- */
-class delete_cmd : public interface::delete_cmd<vapi::Vxlan_add_del_tunnel>
-{
-public:
-  /**
-   * delete command constructor taking HW item to update and the
-   * endpoint values
-   */
-  delete_cmd(HW::item<handle_t>& item, const vxlan_tunnel::endpoint_t& ep);
+            private:
+                /**
+                 * Enpoint values of the tunnel to be created
+                 */
+                const vxlan_tunnel::endpoint_t m_ep;
+            };
 
-  /**
-   * Issue the command to VPP/HW
-   */
-  rc_t issue(connection& con);
+        /**
+         * A functor class that creates an VXLAN tunnel
+         */
+        class delete_cmd : public interface::delete_cmd<vapi::Vxlan_add_del_tunnel>
+            {
+            public:
+                /**
+                 * delete command constructor taking HW item to update and the
+                 * endpoint values
+                 */
+                delete_cmd(HW::item<handle_t>& item, const vxlan_tunnel::endpoint_t& ep);
 
-  /**
-   * convert to string format for debug purposes
-   */
-  std::string to_string() const;
+                /**
+                 * Issue the command to VPP/HW
+                 */
+                rc_t issue(connection& con);
 
-  /**
-   * Comparison operator - only used for UT
-   */
-  bool operator==(const delete_cmd& i) const;
+                /**
+                 * convert to string format for debug purposes
+                 */
+                std::string to_string() const;
 
-private:
-  /**
-   * Enpoint values of the tunnel to be deleted
-   */
-  const vxlan_tunnel::endpoint_t m_ep;
-};
+                /**
+                 * Comparison operator - only used for UT
+                 */
+                bool operator==(const delete_cmd& i) const;
 
-/**
- * A cmd class that Dumps all the Vpp interfaces
- */
-class dump_cmd : public VOM::dump_cmd<vapi::Vxlan_tunnel_dump>
-{
-public:
-  /**
-   * Default Constructor
-   */
-  dump_cmd();
+            private:
+                /**
+                 * Enpoint values of the tunnel to be deleted
+                 */
+                const vxlan_tunnel::endpoint_t m_ep;
+            };
 
-  /**
-   * Issue the command to VPP/HW
-   */
-  rc_t issue(connection& con);
-  /**
-   * convert to string format for debug purposes
-   */
-  std::string to_string() const;
+        /**
+         * A cmd class that Dumps all the Vpp interfaces
+         */
+        class dump_cmd : public VOM::dump_cmd<vapi::Vxlan_tunnel_dump>
+        {
+        public:
+            /**
+             * Default Constructor
+             */
+            dump_cmd();
 
-  /**
-   * Comparison operator - only used for UT
-   */
-  bool operator==(const dump_cmd& i) const;
-};
+            /**
+             * Issue the command to VPP/HW
+             */
+            rc_t issue(connection& con);
+            /**
+             * convert to string format for debug purposes
+             */
+            std::string to_string() const;
 
-}; // namespace vxlan_tunnel_cmds
+            /**
+             * Comparison operator - only used for UT
+             */
+            bool operator==(const dump_cmd& i) const;
+        };
+
+    }; // namespace vxlan_tunnel_cmds
 }; // namespace VOM
 
 /*

@@ -25,20 +25,20 @@ static dpo_id_t lisp_cp_dpos[DPO_PROTO_NUM];
 const dpo_id_t *
 lisp_cp_dpo_get (dpo_proto_t proto)
 {
-  /*
-   * there are only two instances of this DPO type.
-   * we can use the protocol as the index
-   */
-  return (&lisp_cp_dpos[proto]);
+    /*
+     * there are only two instances of this DPO type.
+     * we can use the protocol as the index
+     */
+    return (&lisp_cp_dpos[proto]);
 }
 
 static u8 *
 format_lisp_cp_dpo (u8 * s, va_list * args)
 {
-  index_t index = va_arg (*args, index_t);
-  CLIB_UNUSED (u32 indent) = va_arg (*args, u32);
+    index_t index = va_arg (*args, index_t);
+    CLIB_UNUSED (u32 indent) = va_arg (*args, u32);
 
-  return (format (s, "lisp-cp-punt-%U", format_dpo_proto, index));
+    return (format (s, "lisp-cp-punt-%U", format_dpo_proto, index));
 }
 
 static void
@@ -52,9 +52,9 @@ lisp_cp_dpo_unlock (dpo_id_t * dpo)
 }
 
 const static dpo_vft_t lisp_cp_vft = {
-  .dv_lock = lisp_cp_dpo_lock,
-  .dv_unlock = lisp_cp_dpo_unlock,
-  .dv_format = format_lisp_cp_dpo,
+    .dv_lock = lisp_cp_dpo_lock,
+    .dv_unlock = lisp_cp_dpo_unlock,
+    .dv_format = format_lisp_cp_dpo,
 };
 
 /**
@@ -65,50 +65,49 @@ const static dpo_vft_t lisp_cp_vft = {
  * parent object in the DPO-graph.
  */
 const static char *const lisp_cp_ip4_nodes[] = {
-  "lisp-cp-lookup-ip4",
-  NULL,
+    "lisp-cp-lookup-ip4",
+    NULL,
 };
 
 const static char *const lisp_cp_ip6_nodes[] = {
-  "lisp-cp-lookup-ip6",
-  NULL,
+    "lisp-cp-lookup-ip6",
+    NULL,
 };
 
 const static char *const lisp_cp_ethernet_nodes[] = {
-  "lisp-cp-lookup-l2",
-  NULL,
+    "lisp-cp-lookup-l2",
+    NULL,
 };
 
 const static char *const lisp_cp_nsh_nodes[] = {
-  "lisp-cp-lookup-nsh",
-  NULL,
+    "lisp-cp-lookup-nsh",
+    NULL,
 };
 
 const static char *const *const lisp_cp_nodes[DPO_PROTO_NUM] = {
-  [DPO_PROTO_IP4] = lisp_cp_ip4_nodes,
-  [DPO_PROTO_IP6] = lisp_cp_ip6_nodes,
-  [DPO_PROTO_ETHERNET] = lisp_cp_ethernet_nodes,
-  [DPO_PROTO_MPLS] = NULL,
-  [DPO_PROTO_NSH] = lisp_cp_nsh_nodes,
+    [DPO_PROTO_IP4] = lisp_cp_ip4_nodes,
+    [DPO_PROTO_IP6] = lisp_cp_ip6_nodes,
+    [DPO_PROTO_ETHERNET] = lisp_cp_ethernet_nodes,
+    [DPO_PROTO_MPLS] = NULL,
+    [DPO_PROTO_NSH] = lisp_cp_nsh_nodes,
 };
 
 clib_error_t *
 lisp_cp_dpo_module_init (vlib_main_t * vm)
 {
-  dpo_proto_t dproto;
+    dpo_proto_t dproto;
 
-  /*
-   * there are no exit arcs from the LIS-CP VLIB node, so we
-   * pass NULL as said node array.
-   */
-  dpo_register (DPO_LISP_CP, &lisp_cp_vft, lisp_cp_nodes);
+    /*
+     * there are no exit arcs from the LIS-CP VLIB node, so we
+     * pass NULL as said node array.
+     */
+    dpo_register (DPO_LISP_CP, &lisp_cp_vft, lisp_cp_nodes);
 
-  FOR_EACH_DPO_PROTO (dproto)
-  {
-    dpo_set (&lisp_cp_dpos[dproto], DPO_LISP_CP, dproto, dproto);
-  }
+    FOR_EACH_DPO_PROTO (dproto) {
+        dpo_set (&lisp_cp_dpos[dproto], DPO_LISP_CP, dproto, dproto);
+    }
 
-  return (NULL);
+    return (NULL);
 }
 
 VLIB_INIT_FUNCTION (lisp_cp_dpo_module_init);

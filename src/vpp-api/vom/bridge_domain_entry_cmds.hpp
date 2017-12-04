@@ -22,114 +22,116 @@
 
 #include <vapi/l2.api.vapi.hpp>
 
-namespace VOM {
-namespace bridge_domain_entry_cmds {
-
-/**
-* A command class that creates or updates the bridge_domain
-*/
-class create_cmd : public rpc_cmd<HW::item<bool>, rc_t, vapi::L2fib_add_del>
+namespace VOM
 {
-public:
-  /**
-   * Constructor
-   */
-  create_cmd(HW::item<bool>& item,
-             const mac_address_t& mac,
-             uint32_t id,
-             handle_t tx_intf,
-             bool is_bvi);
+    namespace bridge_domain_entry_cmds
+    {
 
-  /**
-   * Issue the command to VPP/HW
-   */
-  rc_t issue(connection& con);
+        /**
+        * A command class that creates or updates the bridge_domain
+        */
+        class create_cmd : public rpc_cmd<HW::item<bool>, rc_t, vapi::L2fib_add_del>
+        {
+        public:
+            /**
+             * Constructor
+             */
+            create_cmd(HW::item<bool>& item,
+                       const mac_address_t& mac,
+                       uint32_t id,
+                       handle_t tx_intf,
+                       bool is_bvi);
 
-  /**
-   * convert to string format for debug purposes
-   */
-  std::string to_string() const;
+            /**
+             * Issue the command to VPP/HW
+             */
+            rc_t issue(connection& con);
 
-  /**
-   * Comparison operator - only used for UT
-   */
-  bool operator==(const create_cmd& i) const;
+            /**
+             * convert to string format for debug purposes
+             */
+            std::string to_string() const;
 
-private:
-  mac_address_t m_mac;
-  uint32_t m_bd;
-  handle_t m_tx_itf;
-  bool m_is_bvi;
-};
+            /**
+             * Comparison operator - only used for UT
+             */
+            bool operator==(const create_cmd& i) const;
 
-/**
- * A cmd class that deletes a bridge_domain
- */
-class delete_cmd : public rpc_cmd<HW::item<bool>, rc_t, vapi::L2fib_add_del>
-{
-public:
-  /**
-   * Constructor
-   */
-  delete_cmd(HW::item<bool>& item,
-             const mac_address_t& mac,
-             uint32_t id,
-             bool is_bvi);
+        private:
+            mac_address_t m_mac;
+            uint32_t m_bd;
+            handle_t m_tx_itf;
+            bool m_is_bvi;
+        };
 
-  /**
-   * Issue the command to VPP/HW
-   */
-  rc_t issue(connection& con);
+        /**
+         * A cmd class that deletes a bridge_domain
+         */
+        class delete_cmd : public rpc_cmd<HW::item<bool>, rc_t, vapi::L2fib_add_del>
+        {
+        public:
+            /**
+             * Constructor
+             */
+            delete_cmd(HW::item<bool>& item,
+                       const mac_address_t& mac,
+                       uint32_t id,
+                       bool is_bvi);
 
-  /**
-   * convert to string format for debug purposes
-   */
-  std::string to_string() const;
+            /**
+             * Issue the command to VPP/HW
+             */
+            rc_t issue(connection& con);
 
-  /**
-   * Comparison operator - only used for UT
-   */
-  bool operator==(const delete_cmd& i) const;
+            /**
+             * convert to string format for debug purposes
+             */
+            std::string to_string() const;
 
-private:
-  mac_address_t m_mac;
-  uint32_t m_bd;
-  bool m_is_bvi;
-};
+            /**
+             * Comparison operator - only used for UT
+             */
+            bool operator==(const delete_cmd& i) const;
 
-/**
- * A cmd class that Dumps all the interface spans
- */
-class dump_cmd : public VOM::dump_cmd<vapi::L2_fib_table_dump>
-{
-public:
-  /**
-   * Constructor
-   */
-  dump_cmd();
-  dump_cmd(const dump_cmd& d);
+        private:
+            mac_address_t m_mac;
+            uint32_t m_bd;
+            bool m_is_bvi;
+        };
 
-  /**
-   * Issue the command to VPP/HW
-   */
-  rc_t issue(connection& con);
-  /**
-   * convert to string format for debug purposes
-   */
-  std::string to_string() const;
+        /**
+         * A cmd class that Dumps all the interface spans
+         */
+        class dump_cmd : public VOM::dump_cmd<vapi::L2_fib_table_dump>
+        {
+        public:
+            /**
+             * Constructor
+             */
+            dump_cmd();
+            dump_cmd(const dump_cmd& d);
 
-  /**
-   * Comparison operator - only used for UT
-   */
-  bool operator==(const dump_cmd& i) const;
+            /**
+             * Issue the command to VPP/HW
+             */
+            rc_t issue(connection& con);
+            /**
+             * convert to string format for debug purposes
+             */
+            std::string to_string() const;
 
-private:
-  /**
-   * HW reutrn code
-   */
-  HW::item<bool> item;
-};
-};
+            /**
+             * Comparison operator - only used for UT
+             */
+            bool operator==(const dump_cmd& i) const;
+
+        private:
+            /**
+             * HW reutrn code
+             */
+            HW::item<bool> item;
+        };
+    };
 };
 
 /*

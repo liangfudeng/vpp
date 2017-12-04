@@ -17,154 +17,156 @@
 
 DEFINE_VAPI_MSG_IDS_DHCP_API_JSON;
 
-namespace VOM {
-namespace dhcp_config_cmds {
-
-bind_cmd::bind_cmd(HW::item<bool>& item,
-                   const handle_t& itf,
-                   const std::string& hostname,
-                   const l2_address_t& client_id)
-  : rpc_cmd(item)
-  , m_itf(itf)
-  , m_hostname(hostname)
-  , m_client_id(client_id)
+namespace VOM
 {
-}
+    namespace dhcp_config_cmds
+    {
 
-bool
-bind_cmd::operator==(const bind_cmd& other) const
-{
-  return ((m_itf == other.m_itf) && (m_hostname == other.m_hostname));
-}
+        bind_cmd::bind_cmd(HW::item<bool>& item,
+                           const handle_t& itf,
+                           const std::string& hostname,
+                           const l2_address_t& client_id)
+            : rpc_cmd(item)
+            , m_itf(itf)
+            , m_hostname(hostname)
+            , m_client_id(client_id)
+        {
+        }
 
-rc_t
-bind_cmd::issue(connection& con)
-{
-  msg_t req(con.ctx(), std::ref(*this));
+        bool
+        bind_cmd::operator==(const bind_cmd& other) const
+        {
+            return ((m_itf == other.m_itf) && (m_hostname == other.m_hostname));
+        }
 
-  auto& payload = req.get_request().get_payload();
-  payload.sw_if_index = m_itf.value();
-  payload.is_add = 1;
-  payload.pid = getpid();
-  payload.want_dhcp_event = 1;
+        rc_t
+        bind_cmd::issue(connection& con)
+        {
+            msg_t req(con.ctx(), std::ref(*this));
 
-  memset(payload.hostname, 0, sizeof(payload.hostname));
-  memcpy(payload.hostname, m_hostname.c_str(),
-         std::min(sizeof(payload.hostname), m_hostname.length()));
+            auto& payload = req.get_request().get_payload();
+            payload.sw_if_index = m_itf.value();
+            payload.is_add = 1;
+            payload.pid = getpid();
+            payload.want_dhcp_event = 1;
 
-  memset(payload.client_id, 0, sizeof(payload.client_id));
-  payload.client_id[0] = 1;
-  std::copy_n(begin(m_client_id.bytes),
-              std::min(sizeof(payload.client_id), m_client_id.bytes.size()),
-              payload.client_id + 1);
+            memset(payload.hostname, 0, sizeof(payload.hostname));
+            memcpy(payload.hostname, m_hostname.c_str(),
+                   std::min(sizeof(payload.hostname), m_hostname.length()));
 
-  VAPI_CALL(req.execute());
+            memset(payload.client_id, 0, sizeof(payload.client_id));
+            payload.client_id[0] = 1;
+            std::copy_n(begin(m_client_id.bytes),
+                        std::min(sizeof(payload.client_id), m_client_id.bytes.size()),
+                        payload.client_id + 1);
 
-  m_hw_item.set(wait());
+            VAPI_CALL(req.execute());
 
-  return rc_t::OK;
-}
+            m_hw_item.set(wait());
 
-std::string
-bind_cmd::to_string() const
-{
-  std::ostringstream s;
-  s << "Dhcp-config-bind: " << m_hw_item.to_string()
-    << " itf:" << m_itf.to_string() << " hostname:" << m_hostname;
+            return rc_t::OK;
+        }
 
-  return (s.str());
-}
+        std::string
+        bind_cmd::to_string() const
+        {
+            std::ostringstream s;
+            s << "Dhcp-config-bind: " << m_hw_item.to_string()
+              << " itf:" << m_itf.to_string() << " hostname:" << m_hostname;
 
-unbind_cmd::unbind_cmd(HW::item<bool>& item,
-                       const handle_t& itf,
-                       const std::string& hostname)
-  : rpc_cmd(item)
-  , m_itf(itf)
-  , m_hostname(hostname)
-{
-}
+            return (s.str());
+        }
 
-bool
-unbind_cmd::operator==(const unbind_cmd& other) const
-{
-  return ((m_itf == other.m_itf) && (m_hostname == other.m_hostname));
-}
+        unbind_cmd::unbind_cmd(HW::item<bool>& item,
+                               const handle_t& itf,
+                               const std::string& hostname)
+            : rpc_cmd(item)
+            , m_itf(itf)
+            , m_hostname(hostname)
+        {
+        }
 
-rc_t
-unbind_cmd::issue(connection& con)
-{
-  msg_t req(con.ctx(), std::ref(*this));
+        bool
+        unbind_cmd::operator==(const unbind_cmd& other) const
+        {
+            return ((m_itf == other.m_itf) && (m_hostname == other.m_hostname));
+        }
 
-  auto& payload = req.get_request().get_payload();
-  payload.sw_if_index = m_itf.value();
-  payload.is_add = 0;
-  payload.pid = getpid();
-  payload.want_dhcp_event = 0;
+        rc_t
+        unbind_cmd::issue(connection& con)
+        {
+            msg_t req(con.ctx(), std::ref(*this));
 
-  memcpy(payload.hostname, m_hostname.c_str(),
-         std::min(sizeof(payload.hostname), m_hostname.length()));
+            auto& payload = req.get_request().get_payload();
+            payload.sw_if_index = m_itf.value();
+            payload.is_add = 0;
+            payload.pid = getpid();
+            payload.want_dhcp_event = 0;
 
-  VAPI_CALL(req.execute());
+            memcpy(payload.hostname, m_hostname.c_str(),
+                   std::min(sizeof(payload.hostname), m_hostname.length()));
 
-  wait();
-  m_hw_item.set(rc_t::NOOP);
+            VAPI_CALL(req.execute());
 
-  return rc_t::OK;
-}
+            wait();
+            m_hw_item.set(rc_t::NOOP);
 
-std::string
-unbind_cmd::to_string() const
-{
-  std::ostringstream s;
-  s << "Dhcp-config-unbind: " << m_hw_item.to_string()
-    << " itf:" << m_itf.to_string() << " hostname:" << m_hostname;
+            return rc_t::OK;
+        }
 
-  return (s.str());
-}
+        std::string
+        unbind_cmd::to_string() const
+        {
+            std::ostringstream s;
+            s << "Dhcp-config-unbind: " << m_hw_item.to_string()
+              << " itf:" << m_itf.to_string() << " hostname:" << m_hostname;
 
-events_cmd::events_cmd(dhcp_config::event_listener& el)
-  : event_cmd(el.status())
-  , m_listener(el)
-{
-}
+            return (s.str());
+        }
 
-bool
-events_cmd::operator==(const events_cmd& other) const
-{
-  return (true);
-}
+        events_cmd::events_cmd(dhcp_config::event_listener& el)
+            : event_cmd(el.status())
+            , m_listener(el)
+        {
+        }
 
-rc_t
-events_cmd::issue(connection& con)
-{
-  /*
-   * Set the call back to handle DHCP complete envets.
-   */
-  m_reg.reset(new reg_t(con.ctx(), std::ref(*this)));
+        bool
+        events_cmd::operator==(const events_cmd& other) const
+        {
+            return (true);
+        }
 
-  /*
-   * return in-progress so the command stays in the pending list.
-   */
-  return (rc_t::OK);
-}
+        rc_t
+        events_cmd::issue(connection& con)
+        {
+            /*
+             * Set the call back to handle DHCP complete envets.
+             */
+            m_reg.reset(new reg_t(con.ctx(), std::ref(*this)));
 
-void
-events_cmd::retire(connection& con)
-{
-}
+            /*
+             * return in-progress so the command stays in the pending list.
+             */
+            return (rc_t::OK);
+        }
 
-void
-events_cmd::notify()
-{
-  m_listener.handle_dhcp_event(this);
-}
+        void
+        events_cmd::retire(connection& con)
+        {
+        }
 
-std::string
-events_cmd::to_string() const
-{
-  return ("dhcp-events");
-}
-}
+        void
+        events_cmd::notify()
+        {
+            m_listener.handle_dhcp_event(this);
+        }
+
+        std::string
+        events_cmd::to_string() const
+        {
+            return ("dhcp-events");
+        }
+    }
 };
 /*
  * fd.io coding-style-patch-verification: ON

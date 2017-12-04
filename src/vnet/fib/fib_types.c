@@ -52,22 +52,22 @@ format_fib_forw_chain_type (u8 * s, va_list * args)
 
 void
 fib_prefix_from_ip46_addr (const ip46_address_t *addr,
-			   fib_prefix_t *pfx)
+                           fib_prefix_t *pfx)
 {
     ASSERT(!ip46_address_is_zero(addr));
 
     pfx->fp_proto = ((ip46_address_is_ip4(addr) ?
-		      FIB_PROTOCOL_IP4 :
-		      FIB_PROTOCOL_IP6));
+                      FIB_PROTOCOL_IP4 :
+                      FIB_PROTOCOL_IP6));
     pfx->fp_len = ((ip46_address_is_ip4(addr) ?
-		    32 : 128));
+                    32 : 128));
     pfx->fp_addr = *addr;
 }
 
 void
 fib_prefix_from_mpls_label (mpls_label_t label,
                             mpls_eos_bit_t eos,
-			    fib_prefix_t *pfx)
+                            fib_prefix_t *pfx)
 {
     pfx->fp_proto = FIB_PROTOCOL_MPLS;
     pfx->fp_len = 21;
@@ -77,34 +77,30 @@ fib_prefix_from_mpls_label (mpls_label_t label,
 
 int
 fib_prefix_cmp (const fib_prefix_t *p1,
-		const fib_prefix_t *p2)
+                const fib_prefix_t *p2)
 {
     int res;
 
     res = (p1->fp_proto - p2->fp_proto);
 
-    if (0 == res)
-    {
-	switch (p1->fp_proto)
-	{
-	case FIB_PROTOCOL_IP4:
-	case FIB_PROTOCOL_IP6:
-	    res = (p1->fp_len - p2->fp_len);
+    if (0 == res) {
+        switch (p1->fp_proto) {
+            case FIB_PROTOCOL_IP4:
+            case FIB_PROTOCOL_IP6:
+                res = (p1->fp_len - p2->fp_len);
 
-	    if (0 == res)
-	    {
-		res = ip46_address_cmp(&p1->fp_addr, &p2->fp_addr);
-	    }
-	    break;
-	case FIB_PROTOCOL_MPLS:
-	    res = (p1->fp_label - p2->fp_label);
+                if (0 == res) {
+                    res = ip46_address_cmp(&p1->fp_addr, &p2->fp_addr);
+                }
+                break;
+            case FIB_PROTOCOL_MPLS:
+                res = (p1->fp_label - p2->fp_label);
 
-	    if (0 == res)
-	    {
-		res = (p1->fp_eos - p2->fp_eos);
-	    }
-	    break;
-	}
+                if (0 == res) {
+                    res = (p1->fp_eos - p2->fp_eos);
+                }
+                break;
+        }
     }
 
     return (res);
@@ -112,22 +108,21 @@ fib_prefix_cmp (const fib_prefix_t *p1,
 
 int
 fib_prefix_is_cover (const fib_prefix_t *p1,
-		     const fib_prefix_t *p2)
+                     const fib_prefix_t *p2)
 {
-    switch (p1->fp_proto)
-    {
-    case FIB_PROTOCOL_IP4:
-	return (ip4_destination_matches_route(&ip4_main,
-					      &p1->fp_addr.ip4,
-					      &p2->fp_addr.ip4,
-					      p1->fp_len));
-    case FIB_PROTOCOL_IP6:
-	return (ip6_destination_matches_route(&ip6_main,
-					      &p1->fp_addr.ip6,
-					      &p2->fp_addr.ip6,
-					      p1->fp_len));
-    case FIB_PROTOCOL_MPLS:
-	break;
+    switch (p1->fp_proto) {
+        case FIB_PROTOCOL_IP4:
+            return (ip4_destination_matches_route(&ip4_main,
+                                                  &p1->fp_addr.ip4,
+                                                  &p2->fp_addr.ip4,
+                                                  p1->fp_len));
+        case FIB_PROTOCOL_IP6:
+            return (ip6_destination_matches_route(&ip6_main,
+                                                  &p1->fp_addr.ip6,
+                                                  &p2->fp_addr.ip6,
+                                                  p1->fp_len));
+        case FIB_PROTOCOL_MPLS:
+            break;
     }
     return (0);
 }
@@ -135,14 +130,13 @@ fib_prefix_is_cover (const fib_prefix_t *p1,
 int
 fib_prefix_is_host (const fib_prefix_t *prefix)
 {
-    switch (prefix->fp_proto)
-    {
-    case FIB_PROTOCOL_IP4:
-	return (prefix->fp_len == 32);
-    case FIB_PROTOCOL_IP6:
-	return (prefix->fp_len == 128);
-    case FIB_PROTOCOL_MPLS:
-	return (!0);
+    switch (prefix->fp_proto) {
+        case FIB_PROTOCOL_IP4:
+            return (prefix->fp_len == 32);
+        case FIB_PROTOCOL_IP6:
+            return (prefix->fp_len == 128);
+        case FIB_PROTOCOL_MPLS:
+            return (!0);
     }
     return (0);
 }
@@ -155,29 +149,26 @@ format_fib_prefix (u8 * s, va_list * args)
     /*
      * protocol specific so it prints ::/0 correctly.
      */
-    switch (fp->fp_proto)
-    {
-    case FIB_PROTOCOL_IP6:
-    {
-	ip6_address_t p6 = fp->fp_addr.ip6;
+    switch (fp->fp_proto) {
+        case FIB_PROTOCOL_IP6: {
+            ip6_address_t p6 = fp->fp_addr.ip6;
 
-	ip6_address_mask(&p6, &(ip6_main.fib_masks[fp->fp_len]));
-	s = format (s, "%U", format_ip6_address, &p6);
-	break;
-    }
-    case FIB_PROTOCOL_IP4:
-    {
-	ip4_address_t p4 = fp->fp_addr.ip4;
-	p4.as_u32 &= ip4_main.fib_masks[fp->fp_len];
+            ip6_address_mask(&p6, &(ip6_main.fib_masks[fp->fp_len]));
+            s = format (s, "%U", format_ip6_address, &p6);
+            break;
+        }
+        case FIB_PROTOCOL_IP4: {
+            ip4_address_t p4 = fp->fp_addr.ip4;
+            p4.as_u32 &= ip4_main.fib_masks[fp->fp_len];
 
-	s = format (s, "%U", format_ip4_address, &p4);
-	break;
-    }
-    case FIB_PROTOCOL_MPLS:
-	s = format (s, "%U:%U",
-		    format_mpls_unicast_label, fp->fp_label,
-		    format_mpls_eos_bit, fp->fp_eos);
-	break;
+            s = format (s, "%U", format_ip4_address, &p4);
+            break;
+        }
+        case FIB_PROTOCOL_MPLS:
+            s = format (s, "%U:%U",
+                        format_mpls_unicast_label, fp->fp_label,
+                        format_mpls_eos_bit, fp->fp_eos);
+            break;
     }
     s = format (s, "/%d", fp->fp_len);
 
@@ -186,12 +177,12 @@ format_fib_prefix (u8 * s, va_list * args)
 
 int
 fib_route_path_cmp (const fib_route_path_t *rpath1,
-		    const fib_route_path_t *rpath2)
+                    const fib_route_path_t *rpath2)
 {
     int res;
 
     res = ip46_address_cmp(&rpath1->frp_addr,
-			   &rpath2->frp_addr);
+                           &rpath2->frp_addr);
 
     if (0 != res) return (res);
 
@@ -199,9 +190,8 @@ fib_route_path_cmp (const fib_route_path_t *rpath1,
 
     if (0 != res) return (res);
 
-    if (ip46_address_is_zero(&rpath1->frp_addr))
-    {
-	res = rpath1->frp_fib_index - rpath2->frp_fib_index;
+    if (ip46_address_is_zero(&rpath1->frp_addr)) {
+        res = rpath1->frp_fib_index - rpath2->frp_fib_index;
     }
 
     return (res);
@@ -210,14 +200,13 @@ fib_route_path_cmp (const fib_route_path_t *rpath1,
 dpo_proto_t
 fib_proto_to_dpo (fib_protocol_t fib_proto)
 {
-    switch (fib_proto)
-    {
-    case FIB_PROTOCOL_IP6:
-        return (DPO_PROTO_IP6);
-    case FIB_PROTOCOL_IP4:
-        return (DPO_PROTO_IP4);
-    case FIB_PROTOCOL_MPLS:
-        return (DPO_PROTO_MPLS);
+    switch (fib_proto) {
+        case FIB_PROTOCOL_IP6:
+            return (DPO_PROTO_IP6);
+        case FIB_PROTOCOL_IP4:
+            return (DPO_PROTO_IP4);
+        case FIB_PROTOCOL_MPLS:
+            return (DPO_PROTO_MPLS);
     }
     ASSERT(0);
     return (0);
@@ -226,16 +215,15 @@ fib_proto_to_dpo (fib_protocol_t fib_proto)
 fib_protocol_t
 dpo_proto_to_fib (dpo_proto_t dpo_proto)
 {
-    switch (dpo_proto)
-    {
-    case DPO_PROTO_IP6:
-        return (FIB_PROTOCOL_IP6);
-    case DPO_PROTO_IP4:
-        return (FIB_PROTOCOL_IP4);
-    case DPO_PROTO_MPLS:
-        return (FIB_PROTOCOL_MPLS);
-    default:
-	break;
+    switch (dpo_proto) {
+        case DPO_PROTO_IP6:
+            return (FIB_PROTOCOL_IP6);
+        case DPO_PROTO_IP4:
+            return (FIB_PROTOCOL_IP4);
+        case DPO_PROTO_MPLS:
+            return (FIB_PROTOCOL_MPLS);
+        default:
+            break;
     }
     ASSERT(0);
     return (0);
@@ -244,14 +232,13 @@ dpo_proto_to_fib (dpo_proto_t dpo_proto)
 vnet_link_t
 fib_proto_to_link (fib_protocol_t proto)
 {
-    switch (proto)
-    {
-    case FIB_PROTOCOL_IP4:
-	return (VNET_LINK_IP4);
-    case FIB_PROTOCOL_IP6:
-	return (VNET_LINK_IP6);
-    case FIB_PROTOCOL_MPLS:
-	return (VNET_LINK_MPLS);
+    switch (proto) {
+        case FIB_PROTOCOL_IP4:
+            return (VNET_LINK_IP4);
+        case FIB_PROTOCOL_IP6:
+            return (VNET_LINK_IP6);
+        case FIB_PROTOCOL_MPLS:
+            return (VNET_LINK_MPLS);
     }
     ASSERT(0);
     return (0);
@@ -260,20 +247,19 @@ fib_proto_to_link (fib_protocol_t proto)
 fib_forward_chain_type_t
 fib_forw_chain_type_from_dpo_proto (dpo_proto_t proto)
 {
-    switch (proto)
-    {
-    case DPO_PROTO_IP4:
-	return (FIB_FORW_CHAIN_TYPE_UNICAST_IP4);
-    case DPO_PROTO_IP6:
-	return (FIB_FORW_CHAIN_TYPE_UNICAST_IP6);
-    case DPO_PROTO_MPLS:
-	return (FIB_FORW_CHAIN_TYPE_MPLS_NON_EOS);
-    case DPO_PROTO_ETHERNET:
-	return (FIB_FORW_CHAIN_TYPE_ETHERNET);
-    case DPO_PROTO_NSH:
-        return (FIB_FORW_CHAIN_TYPE_NSH);
-    case DPO_PROTO_BIER:
-	return (FIB_FORW_CHAIN_TYPE_BIER);
+    switch (proto) {
+        case DPO_PROTO_IP4:
+            return (FIB_FORW_CHAIN_TYPE_UNICAST_IP4);
+        case DPO_PROTO_IP6:
+            return (FIB_FORW_CHAIN_TYPE_UNICAST_IP6);
+        case DPO_PROTO_MPLS:
+            return (FIB_FORW_CHAIN_TYPE_MPLS_NON_EOS);
+        case DPO_PROTO_ETHERNET:
+            return (FIB_FORW_CHAIN_TYPE_ETHERNET);
+        case DPO_PROTO_NSH:
+            return (FIB_FORW_CHAIN_TYPE_NSH);
+        case DPO_PROTO_BIER:
+            return (FIB_FORW_CHAIN_TYPE_BIER);
     }
     ASSERT(0);
     return (FIB_FORW_CHAIN_TYPE_UNICAST_IP4);
@@ -282,27 +268,26 @@ fib_forw_chain_type_from_dpo_proto (dpo_proto_t proto)
 vnet_link_t
 fib_forw_chain_type_to_link_type (fib_forward_chain_type_t fct)
 {
-    switch (fct)
-    {
-    case FIB_FORW_CHAIN_TYPE_UNICAST_IP4:
-    case FIB_FORW_CHAIN_TYPE_MCAST_IP4:
-	return (VNET_LINK_IP4);
-    case FIB_FORW_CHAIN_TYPE_UNICAST_IP6:
-    case FIB_FORW_CHAIN_TYPE_MCAST_IP6:
-	return (VNET_LINK_IP6);
-    case FIB_FORW_CHAIN_TYPE_ETHERNET:
-	return (VNET_LINK_ETHERNET);
-    case FIB_FORW_CHAIN_TYPE_NSH:
-        return (VNET_LINK_NSH);
-    case FIB_FORW_CHAIN_TYPE_MPLS_EOS:
-    case FIB_FORW_CHAIN_TYPE_BIER:
-	/*
-	 * insufficient information to to convert
-	 */
-	ASSERT(0);
-	break;
-    case FIB_FORW_CHAIN_TYPE_MPLS_NON_EOS:
-	return (VNET_LINK_MPLS);
+    switch (fct) {
+        case FIB_FORW_CHAIN_TYPE_UNICAST_IP4:
+        case FIB_FORW_CHAIN_TYPE_MCAST_IP4:
+            return (VNET_LINK_IP4);
+        case FIB_FORW_CHAIN_TYPE_UNICAST_IP6:
+        case FIB_FORW_CHAIN_TYPE_MCAST_IP6:
+            return (VNET_LINK_IP6);
+        case FIB_FORW_CHAIN_TYPE_ETHERNET:
+            return (VNET_LINK_ETHERNET);
+        case FIB_FORW_CHAIN_TYPE_NSH:
+            return (VNET_LINK_NSH);
+        case FIB_FORW_CHAIN_TYPE_MPLS_EOS:
+        case FIB_FORW_CHAIN_TYPE_BIER:
+            /*
+             * insufficient information to to convert
+             */
+            ASSERT(0);
+            break;
+        case FIB_FORW_CHAIN_TYPE_MPLS_NON_EOS:
+            return (VNET_LINK_MPLS);
     }
     return (VNET_LINK_IP4);
 }
@@ -310,23 +295,22 @@ fib_forw_chain_type_to_link_type (fib_forward_chain_type_t fct)
 dpo_proto_t
 fib_forw_chain_type_to_dpo_proto (fib_forward_chain_type_t fct)
 {
-    switch (fct)
-    {
-    case FIB_FORW_CHAIN_TYPE_UNICAST_IP4:
-    case FIB_FORW_CHAIN_TYPE_MCAST_IP4:
-	return (DPO_PROTO_IP4);
-    case FIB_FORW_CHAIN_TYPE_UNICAST_IP6:
-    case FIB_FORW_CHAIN_TYPE_MCAST_IP6:
-	return (DPO_PROTO_IP6);
-    case FIB_FORW_CHAIN_TYPE_ETHERNET:
-	return (DPO_PROTO_ETHERNET);
-    case FIB_FORW_CHAIN_TYPE_NSH:
-        return (DPO_PROTO_NSH);
-    case FIB_FORW_CHAIN_TYPE_BIER:
-	return (DPO_PROTO_BIER);
-    case FIB_FORW_CHAIN_TYPE_MPLS_EOS:
-    case FIB_FORW_CHAIN_TYPE_MPLS_NON_EOS:
-	return (DPO_PROTO_MPLS);
+    switch (fct) {
+        case FIB_FORW_CHAIN_TYPE_UNICAST_IP4:
+        case FIB_FORW_CHAIN_TYPE_MCAST_IP4:
+            return (DPO_PROTO_IP4);
+        case FIB_FORW_CHAIN_TYPE_UNICAST_IP6:
+        case FIB_FORW_CHAIN_TYPE_MCAST_IP6:
+            return (DPO_PROTO_IP6);
+        case FIB_FORW_CHAIN_TYPE_ETHERNET:
+            return (DPO_PROTO_ETHERNET);
+        case FIB_FORW_CHAIN_TYPE_NSH:
+            return (DPO_PROTO_NSH);
+        case FIB_FORW_CHAIN_TYPE_BIER:
+            return (DPO_PROTO_BIER);
+        case FIB_FORW_CHAIN_TYPE_MPLS_EOS:
+        case FIB_FORW_CHAIN_TYPE_MPLS_NON_EOS:
+            return (DPO_PROTO_MPLS);
     }
     return (DPO_PROTO_IP4);
 }
@@ -345,146 +329,103 @@ unformat_fib_route_path (unformat_input_t * input, va_list * args)
     rpath->frp_weight = 1;
     rpath->frp_sw_if_index = ~0;
 
-    while (unformat_check_input (input) != UNFORMAT_END_OF_INPUT)
-    {
+    while (unformat_check_input (input) != UNFORMAT_END_OF_INPUT) {
         if (unformat (input, "%U %U",
                       unformat_ip4_address,
                       &rpath->frp_addr.ip4,
                       unformat_vnet_sw_interface, vnm,
-                      &rpath->frp_sw_if_index))
-        {
+                      &rpath->frp_sw_if_index)) {
             rpath->frp_proto = DPO_PROTO_IP4;
-        }
-        else if (unformat (input, "%U %U",
-                           unformat_ip6_address,
-                           &rpath->frp_addr.ip6,
-                           unformat_vnet_sw_interface, vnm,
-                           &rpath->frp_sw_if_index))
-        {
+        } else if (unformat (input, "%U %U",
+                             unformat_ip6_address,
+                             &rpath->frp_addr.ip6,
+                             unformat_vnet_sw_interface, vnm,
+                             &rpath->frp_sw_if_index)) {
             rpath->frp_proto = DPO_PROTO_IP6;
-        }
-        else if (unformat (input, "weight %u", &weight))
-        {
+        } else if (unformat (input, "weight %u", &weight)) {
             rpath->frp_weight = weight;
-        }
-        else if (unformat (input, "preference %u", &preference))
-        {
+        } else if (unformat (input, "preference %u", &preference)) {
             rpath->frp_preference = preference;
-        }
-        else if (unformat (input, "%U next-hop-table %d",
-                           unformat_ip4_address,
-                           &rpath->frp_addr.ip4,
-                           &rpath->frp_fib_index))
-        {
+        } else if (unformat (input, "%U next-hop-table %d",
+                             unformat_ip4_address,
+                             &rpath->frp_addr.ip4,
+                             &rpath->frp_fib_index)) {
             rpath->frp_sw_if_index = ~0;
             rpath->frp_proto = DPO_PROTO_IP4;
-        }
-        else if (unformat (input, "%U next-hop-table %d",
-                           unformat_ip6_address,
-                           &rpath->frp_addr.ip6,
-                           &rpath->frp_fib_index))
-        {
+        } else if (unformat (input, "%U next-hop-table %d",
+                             unformat_ip6_address,
+                             &rpath->frp_addr.ip6,
+                             &rpath->frp_fib_index)) {
             rpath->frp_sw_if_index = ~0;
             rpath->frp_proto = DPO_PROTO_IP6;
-        }
-        else if (unformat (input, "%U",
-                           unformat_ip4_address,
-                           &rpath->frp_addr.ip4))
-        {
+        } else if (unformat (input, "%U",
+                             unformat_ip4_address,
+                             &rpath->frp_addr.ip4)) {
             /*
              * the recursive next-hops are by default in the default table
              */
             rpath->frp_fib_index = 0;
             rpath->frp_sw_if_index = ~0;
             rpath->frp_proto = DPO_PROTO_IP4;
-        }
-        else if (unformat (input, "%U",
-                           unformat_ip6_address,
-                           &rpath->frp_addr.ip6))
-        {
+        } else if (unformat (input, "%U",
+                             unformat_ip6_address,
+                             &rpath->frp_addr.ip6)) {
             rpath->frp_fib_index = 0;
             rpath->frp_sw_if_index = ~0;
             rpath->frp_proto = DPO_PROTO_IP6;
-        }
-        else if (unformat (input, "udp-encap %d", &udp_encap_id))
-        {
+        } else if (unformat (input, "udp-encap %d", &udp_encap_id)) {
             rpath->frp_udp_encap_id = udp_encap_id;
             rpath->frp_flags |= FIB_ROUTE_PATH_UDP_ENCAP;
             rpath->frp_proto = *payload_proto;
-        }
-        else if (unformat (input, "lookup in table %d", &rpath->frp_fib_index))
-        {
+        } else if (unformat (input, "lookup in table %d", &rpath->frp_fib_index)) {
             rpath->frp_proto = *payload_proto;
             rpath->frp_sw_if_index = ~0;
-        }
-        else if (unformat (input, "resolve-via-host"))
-        {
+        } else if (unformat (input, "resolve-via-host")) {
             rpath->frp_flags |= FIB_ROUTE_PATH_RESOLVE_VIA_HOST;
-        }
-        else if (unformat (input, "resolve-via-attached"))
-        {
+        } else if (unformat (input, "resolve-via-attached")) {
             rpath->frp_flags |= FIB_ROUTE_PATH_RESOLVE_VIA_ATTACHED;
-        }
-        else if (unformat (input,
-                           "ip4-lookup-in-table %d",
-                           &rpath->frp_fib_index))
-        {
+        } else if (unformat (input,
+                             "ip4-lookup-in-table %d",
+                             &rpath->frp_fib_index)) {
             rpath->frp_proto = DPO_PROTO_IP4;
             *payload_proto = DPO_PROTO_IP4;
-        }
-        else if (unformat (input,
-                           "ip6-lookup-in-table %d",
-                           &rpath->frp_fib_index))
-        {
+        } else if (unformat (input,
+                             "ip6-lookup-in-table %d",
+                             &rpath->frp_fib_index)) {
             rpath->frp_proto = DPO_PROTO_IP6;
             *payload_proto = DPO_PROTO_IP6;
-        }
-        else if (unformat (input,
-                           "mpls-lookup-in-table %d",
-                           &rpath->frp_fib_index))
-        {
+        } else if (unformat (input,
+                             "mpls-lookup-in-table %d",
+                             &rpath->frp_fib_index)) {
             rpath->frp_proto = DPO_PROTO_MPLS;
             *payload_proto = DPO_PROTO_MPLS;
-        }
-        else if (unformat (input,
-                           "l2-input-on %U",
-                           unformat_vnet_sw_interface, vnm,
-                           &rpath->frp_sw_if_index))
-        {
+        } else if (unformat (input,
+                             "l2-input-on %U",
+                             unformat_vnet_sw_interface, vnm,
+                             &rpath->frp_sw_if_index)) {
             rpath->frp_proto = DPO_PROTO_ETHERNET;
             *payload_proto = DPO_PROTO_ETHERNET;
-        }
-        else if (unformat (input, "via-label %U",
-                           unformat_mpls_unicast_label,
-                           &rpath->frp_local_label))
-        {
+        } else if (unformat (input, "via-label %U",
+                             unformat_mpls_unicast_label,
+                             &rpath->frp_local_label)) {
             rpath->frp_eos = MPLS_NON_EOS;
             rpath->frp_proto = DPO_PROTO_MPLS;
             rpath->frp_sw_if_index = ~0;
-        }
-        else if (unformat (input, "rx-ip4 %U",
-                           unformat_vnet_sw_interface, vnm,
-                           &rpath->frp_sw_if_index))
-        {
+        } else if (unformat (input, "rx-ip4 %U",
+                             unformat_vnet_sw_interface, vnm,
+                             &rpath->frp_sw_if_index)) {
             rpath->frp_proto = DPO_PROTO_IP4;
             rpath->frp_flags = FIB_ROUTE_PATH_INTF_RX;
-        }
-        else if (unformat (input, "out-labels"))
-        {
+        } else if (unformat (input, "out-labels")) {
             while (unformat (input, "%U",
-                             unformat_mpls_unicast_label, &out_label))
-            {
+                             unformat_mpls_unicast_label, &out_label)) {
                 vec_add1(rpath->frp_label_stack, out_label);
             }
-        }
-        else if (unformat (input, "%U",
-                           unformat_vnet_sw_interface, vnm,
-                           &rpath->frp_sw_if_index))
-        {
+        } else if (unformat (input, "%U",
+                             unformat_vnet_sw_interface, vnm,
+                             &rpath->frp_sw_if_index)) {
             rpath->frp_proto = *payload_proto;
-        }
-        else
-        {
+        } else {
             return (0);
         }
     }

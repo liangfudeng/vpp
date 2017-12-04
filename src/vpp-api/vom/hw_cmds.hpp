@@ -22,35 +22,37 @@
 #include "vom/hw.hpp"
 #include "vom/rpc_cmd.hpp"
 
-namespace VOM {
-namespace hw_cmds {
-/**
-*A command poll the HW for liveness
-*/
-class poll : public rpc_cmd<HW::item<bool>, rc_t, vapi::Control_ping>
+namespace VOM
 {
-public:
-  /**
-   * Constructor taking the HW::item to update
-   */
-  poll(HW::item<bool>& item);
+    namespace hw_cmds
+    {
+        /**
+        *A command poll the HW for liveness
+        */
+        class poll : public rpc_cmd<HW::item<bool>, rc_t, vapi::Control_ping>
+        {
+        public:
+            /**
+             * Constructor taking the HW::item to update
+             */
+            poll(HW::item<bool>& item);
 
-  /**
-   * Issue the command to VPP/HW
-   */
-  rc_t issue(connection& con);
+            /**
+             * Issue the command to VPP/HW
+             */
+            rc_t issue(connection& con);
 
-  /**
-   * convert to string format for debug purposes
-   */
-  std::string to_string() const;
+            /**
+             * convert to string format for debug purposes
+             */
+            std::string to_string() const;
 
-  /**
-   * Comparison operator - only used for UT
-   */
-  bool operator==(const poll& i) const;
-};
-};
+            /**
+             * Comparison operator - only used for UT
+             */
+            bool operator==(const poll& i) const;
+        };
+    };
 };
 
 /*

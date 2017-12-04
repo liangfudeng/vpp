@@ -18,80 +18,96 @@
 
 #include <string>
 
-namespace VOM {
-/**
- * A template base class for all enum types.
- * This enum type exists to associate an enum value with a string for
- * display/debug purposes.
- * Concrete enum types use the CRTP. Derived classes thus inherit this
- * base's function, but are not polymorphic.
- */
-template <typename T>
-class enum_base
+namespace VOM
 {
-public:
-  /**
-   * convert to string format for debug purposes
-   */
-  const std::string& to_string() const { return (m_desc); }
+    /**
+     * A template base class for all enum types.
+     * This enum type exists to associate an enum value with a string for
+     * display/debug purposes.
+     * Concrete enum types use the CRTP. Derived classes thus inherit this
+     * base's function, but are not polymorphic.
+     */
+    template <typename T>
+    class enum_base
+    {
+    public:
+        /**
+         * convert to string format for debug purposes
+         */
+        const std::string& to_string() const
+        {
+            return (m_desc);
+        }
 
-  /**
-   * Comparison operator
-   */
-  bool operator==(const enum_base& e) const { return (e.m_value == m_value); }
+        /**
+         * Comparison operator
+         */
+        bool operator==(const enum_base& e) const
+        {
+            return (e.m_value == m_value);
+        }
 
-  /**
-   * Assignment
-   */
-  enum_base& operator=(const enum_base& e)
-  {
-    m_value = e.m_value;
-    m_desc = e.m_desc;
+        /**
+         * Assignment
+         */
+        enum_base& operator=(const enum_base& e)
+        {
+            m_value = e.m_value;
+            m_desc = e.m_desc;
 
-    return (*this);
-  }
+            return (*this);
+        }
 
-  /**
-   * Comparison operator
-   */
-  bool operator!=(const enum_base& e) const { return (e.m_value != m_value); }
+        /**
+         * Comparison operator
+         */
+        bool operator!=(const enum_base& e) const
+        {
+            return (e.m_value != m_value);
+        }
 
-  /**
-   * integer conversion operator
-   */
-  operator int() const { return (m_value); }
+        /**
+         * integer conversion operator
+         */
+        operator int() const
+        {
+            return (m_value);
+        }
 
-  /**
-   * Return the value of the enum - same as integer conversion
-   */
-  int value() const { return (m_value); }
+        /**
+         * Return the value of the enum - same as integer conversion
+         */
+        int value() const
+        {
+            return (m_value);
+        }
 
-protected:
-  /**
-   * Constructor of an enum - takes value and string description
-   */
-  enum_base(int value, const std::string desc)
-    : m_value(value)
-    , m_desc(desc)
-  {
-  }
+    protected:
+        /**
+         * Constructor of an enum - takes value and string description
+         */
+        enum_base(int value, const std::string desc)
+            : m_value(value)
+            , m_desc(desc)
+        {
+        }
 
-  /**
-   * Constructor
-   */
-  virtual ~enum_base() {}
+        /**
+         * Constructor
+         */
+        virtual ~enum_base() {}
 
-private:
-  /**
-   * Integer value of the enum
-   */
-  int m_value;
+    private:
+        /**
+         * Integer value of the enum
+         */
+        int m_value;
 
-  /**
-   * String description
-   */
-  std::string m_desc;
-};
+        /**
+         * String description
+         */
+        std::string m_desc;
+    };
 };
 
 /*

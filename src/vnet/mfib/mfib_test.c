@@ -27,31 +27,31 @@
 #include <vnet/dpo/replicate_dpo.h>
 #include <vnet/adj/adj_mcast.h>
 
-#define MFIB_TEST_I(_cond, _comment, _args...)			\
-({								\
-    int _evald = (_cond);					\
-    if (!(_evald)) {						\
-        fformat(stderr, "FAIL:%d: " _comment "\n",		\
-                __LINE__, ##_args);				\
-    } else {							\
-        fformat(stderr, "PASS:%d: " _comment "\n",		\
-                __LINE__, ##_args);				\
-    }								\
-    _evald;							\
+#define MFIB_TEST_I(_cond, _comment, _args...)          \
+({                              \
+    int _evald = (_cond);                   \
+    if (!(_evald)) {                        \
+        fformat(stderr, "FAIL:%d: " _comment "\n",      \
+                __LINE__, ##_args);             \
+    } else {                            \
+        fformat(stderr, "PASS:%d: " _comment "\n",      \
+                __LINE__, ##_args);             \
+    }                               \
+    _evald;                         \
 })
-#define MFIB_TEST(_cond, _comment, _args...)			\
-{								\
-    if (!MFIB_TEST_I(_cond, _comment, ##_args)) {		\
+#define MFIB_TEST(_cond, _comment, _args...)            \
+{                               \
+    if (!MFIB_TEST_I(_cond, _comment, ##_args)) {       \
         return 1;\
-        ASSERT(!("FAIL: " _comment));				\
-    }								\
+        ASSERT(!("FAIL: " _comment));               \
+    }                               \
 }
 #define MFIB_TEST_NS(_cond)                                     \
-{								\
+{                               \
     if (!MFIB_TEST_I(_cond, "")) {                              \
         return 1;\
         ASSERT(!("FAIL: "));                                    \
-    }								\
+    }                               \
 }
 
 /**
@@ -73,16 +73,16 @@ static test_main_t test_main;
 /* fake ethernet device class, distinct from "fake-ethX" */
 static u8 * format_test_interface_name (u8 * s, va_list * args)
 {
-  u32 dev_instance = va_arg (*args, u32);
-  return format (s, "test-eth%d", dev_instance);
+    u32 dev_instance = va_arg (*args, u32);
+    return format (s, "test-eth%d", dev_instance);
 }
 
 static uword dummy_interface_tx (vlib_main_t * vm,
                                  vlib_node_runtime_t * node,
                                  vlib_frame_t * frame)
 {
-  clib_warning ("you shouldn't be here, leaking buffers...");
-  return frame->n_vectors;
+    clib_warning ("you shouldn't be here, leaking buffers...");
+    return frame->n_vectors;
 }
 
 static clib_error_t *
@@ -90,17 +90,17 @@ test_interface_admin_up_down (vnet_main_t * vnm,
                               u32 hw_if_index,
                               u32 flags)
 {
-  u32 hw_flags = (flags & VNET_SW_INTERFACE_FLAG_ADMIN_UP) ?
-    VNET_HW_INTERFACE_FLAG_LINK_UP : 0;
-  vnet_hw_interface_set_flags (vnm, hw_if_index, hw_flags);
-  return 0;
+    u32 hw_flags = (flags & VNET_SW_INTERFACE_FLAG_ADMIN_UP) ?
+                   VNET_HW_INTERFACE_FLAG_LINK_UP : 0;
+    vnet_hw_interface_set_flags (vnm, hw_if_index, hw_flags);
+    return 0;
 }
 
 VNET_DEVICE_CLASS (test_interface_device_class,static) = {
-  .name = "Test interface",
-  .format_device_name = format_test_interface_name,
-  .tx_function = dummy_interface_tx,
-  .admin_up_down_function = test_interface_admin_up_down,
+    .name = "Test interface",
+    .format_device_name = format_test_interface_name,
+    .tx_function = dummy_interface_tx,
+    .admin_up_down_function = test_interface_admin_up_down,
 };
 
 static u8 *hw_address;
@@ -115,14 +115,12 @@ mfib_test_mk_intf (u32 ninterfaces)
 
     ASSERT(ninterfaces <= ARRAY_LEN(tm->hw_if_indicies));
 
-    for (i=0; i<6; i++)
-    {
+    for (i=0; i<6; i++) {
         byte = 0xd0+i;
         vec_add1(hw_address, byte);
     }
 
-    for (i = 0; i < ninterfaces; i++)
-    {
+    for (i = 0; i < ninterfaces; i++) {
         hw_address[5] = i;
 
         error = ethernet_register_interface(vnet_get_main(),
@@ -161,8 +159,7 @@ mfib_test_mk_intf (u32 ninterfaces)
     /*
      * re-eval after the inevitable realloc
      */
-    for (i = 0; i < ninterfaces; i++)
-    {
+    for (i = 0; i < ninterfaces; i++) {
         tm->hw[i] = vnet_get_hw_interface(vnet_get_main(),
                                           tm->hw_if_indicies[i]);
     }
@@ -170,11 +167,11 @@ mfib_test_mk_intf (u32 ninterfaces)
     return (0);
 }
 
-#define MFIB_TEST_REP(_cond, _comment, _args...)		\
-{								\
-    if (!MFIB_TEST_I(_cond, _comment, ##_args)) {		\
-        return (0);						\
-    }								\
+#define MFIB_TEST_REP(_cond, _comment, _args...)        \
+{                               \
+    if (!MFIB_TEST_I(_cond, _comment, ##_args)) {       \
+        return (0);                     \
+    }                               \
 }
 
 static int
@@ -190,8 +187,7 @@ mfib_test_validate_rep_v (const replicate_t *rep,
     MFIB_TEST_REP((n_buckets == rep->rep_n_buckets),
                   "n_buckets = %d", rep->rep_n_buckets);
 
-    for (bucket = 0; bucket < n_buckets; bucket++)
-    {
+    for (bucket = 0; bucket < n_buckets; bucket++) {
         dt = va_arg(*ap, int);  // type promotion
         ai = va_arg(*ap, adj_index_t);
         dpo = replicate_get_bucket_i(rep, bucket);
@@ -201,8 +197,7 @@ mfib_test_validate_rep_v (const replicate_t *rep,
                       bucket,
                       format_dpo_type, dpo->dpoi_type);
 
-        if (DPO_RECEIVE != dt)
-        {
+        if (DPO_RECEIVE != dt) {
             MFIB_TEST_REP((ai == dpo->dpoi_index),
                           "bucket %d [exp:%d] stacks on %U",
                           bucket, ai,
@@ -215,14 +210,13 @@ mfib_test_validate_rep_v (const replicate_t *rep,
 static fib_forward_chain_type_t
 fib_forw_chain_type_from_fib_proto (fib_protocol_t proto)
 {
-    switch (proto)
-    {
-    case FIB_PROTOCOL_IP4:
-        return (FIB_FORW_CHAIN_TYPE_UNICAST_IP4);
-    case FIB_PROTOCOL_IP6:
-        return (FIB_FORW_CHAIN_TYPE_UNICAST_IP6);
-    default:
-        break;
+    switch (proto) {
+        case FIB_PROTOCOL_IP4:
+            return (FIB_FORW_CHAIN_TYPE_UNICAST_IP4);
+        case FIB_PROTOCOL_IP6:
+            return (FIB_FORW_CHAIN_TYPE_UNICAST_IP6);
+        default:
+            break;
     }
     ASSERT(0);
     return (0);
@@ -252,16 +246,13 @@ mfib_test_entry (fib_node_index_t fei,
                   format_mfib_entry_flags, mfe->mfe_flags,
                   format_mfib_entry_flags, eflags);
 
-    if (0 == n_buckets)
-    {
+    if (0 == n_buckets) {
         MFIB_TEST_REP((DPO_DROP == mfe->mfe_rep.dpoi_type),
                       "%U links to %U",
                       format_mfib_prefix, &pfx,
                       format_dpo_id, &mfe->mfe_rep, 0);
         res = !0;
-    }
-    else
-    {
+    } else {
         dpo_id_t tmp = DPO_INVALID;
 
         mfib_entry_contribute_forwarding(
@@ -722,7 +713,7 @@ mfib_test_i (fib_protocol_t PROTO,
               format_mfib_prefix, pfx_s_g);
     MFIB_TEST_NS(mfib_test_entry_itf(mfei, tm->hw[0]->sw_if_index,
                                      MFIB_ITF_FLAG_ACCEPT));
-     MFIB_TEST_NS(mfib_test_entry_itf(mfei, tm->hw[1]->sw_if_index,
+    MFIB_TEST_NS(mfib_test_entry_itf(mfei, tm->hw[1]->sw_if_index,
                                      MFIB_ITF_FLAG_FORWARD));
     MFIB_TEST_NS(mfib_test_entry_itf(mfei, tm->hw[2]->sw_if_index,
                                      MFIB_ITF_FLAG_FORWARD));
@@ -846,7 +837,7 @@ mfib_test_i (fib_protocol_t PROTO,
                                             MFIB_SOURCE_API,
                                             &path_via_if0,
                                             (MFIB_ITF_FLAG_ACCEPT |
-                                             MFIB_ITF_FLAG_NEGATE_SIGNAL));
+                                                    MFIB_ITF_FLAG_NEGATE_SIGNAL));
     MFIB_TEST(mfib_test_entry(mfei_g_2,
                               MFIB_ENTRY_FLAG_NONE,
                               0),
@@ -874,7 +865,7 @@ mfib_test_i (fib_protocol_t PROTO,
                                             MFIB_SOURCE_API,
                                             &path_via_if0,
                                             (MFIB_ITF_FLAG_ACCEPT |
-                                             MFIB_ITF_NEGATE_SIGNAL));
+                                                    MFIB_ITF_NEGATE_SIGNAL));
     MFIB_TEST(mfib_test_entry(mfei_g_3,
                               MFIB_ENTRY_FLAG_NONE,
                               0),
@@ -894,8 +885,7 @@ mfib_test_i (fib_protocol_t PROTO,
         mfib_signal_push(mfe, mfi, NULL);
     }
 
-    if (FIB_PROTOCOL_IP6 == PROTO)
-    {
+    if (FIB_PROTOCOL_IP6 == PROTO) {
         /*
          * All the entries are present. let's ensure we can find them all
          * via exact and longest prefix matches.
@@ -912,9 +902,9 @@ mfib_test_i (fib_protocol_t PROTO,
          * Find the (*,G/m)
          */
         MFIB_TEST((mfei_g_m == ip6_mfib_table_lookup2(
-                                   ip6_mfib_get(fib_index),
-                                   &src,
-                                   &pfx_star_g_slash_m->fp_grp_addr.ip6)),
+                       ip6_mfib_get(fib_index),
+                       &src,
+                       &pfx_star_g_slash_m->fp_grp_addr.ip6)),
                   "%U found via DP LPM grp=%U",
                   format_mfib_prefix, pfx_star_g_slash_m,
                   format_ip6_address, &pfx_star_g_slash_m->fp_grp_addr.ip6);
@@ -923,9 +913,9 @@ mfib_test_i (fib_protocol_t PROTO,
         tmp.as_u8[15] = 0xff;
 
         MFIB_TEST((mfei_g_m == ip6_mfib_table_lookup2(
-                                   ip6_mfib_get(fib_index),
-                                   &pfx_s_g->fp_src_addr.ip6,
-                                   &tmp)),
+                       ip6_mfib_get(fib_index),
+                       &pfx_s_g->fp_src_addr.ip6,
+                       &tmp)),
                   "%U found via DP LPM grp=%U",
                   format_mfib_prefix, pfx_star_g_slash_m,
                   format_ip6_address, &tmp);
@@ -1084,29 +1074,29 @@ mfib_test_i (fib_protocol_t PROTO,
      */
     fib_node_index_t ai_mpls_10_10_10_1, lfei;
     ip46_address_t nh_10_10_10_1 = {
-	.ip4 = {
-	    .as_u32 = clib_host_to_net_u32(0x0a0a0a01),
-	},
+        .ip4 = {
+            .as_u32 = clib_host_to_net_u32(0x0a0a0a01),
+        },
     };
     ai_mpls_10_10_10_1 = adj_nbr_add_or_lock(FIB_PROTOCOL_IP4,
-                                             VNET_LINK_MPLS,
-                                             &nh_10_10_10_1,
-                                             tm->hw[0]->sw_if_index);
+                         VNET_LINK_MPLS,
+                         &nh_10_10_10_1,
+                         tm->hw[0]->sw_if_index);
 
     fib_prefix_t pfx_3500 = {
-	.fp_len = 21,
-	.fp_proto = FIB_PROTOCOL_MPLS,
-	.fp_label = 3500,
-	.fp_eos = MPLS_EOS,
-	.fp_payload_proto = DPO_PROTO_IP4,
+        .fp_len = 21,
+        .fp_proto = FIB_PROTOCOL_MPLS,
+        .fp_label = 3500,
+        .fp_eos = MPLS_EOS,
+        .fp_payload_proto = DPO_PROTO_IP4,
     };
     fib_test_rep_bucket_t mc_0 = {
         .type = FT_REP_LABEL_O_ADJ,
-	.label_o_adj = {
-	    .adj = ai_mpls_10_10_10_1,
-	    .label = 3300,
-	    .eos = MPLS_EOS,
-	},
+        .label_o_adj = {
+            .adj = ai_mpls_10_10_10_1,
+            .label = 3300,
+            .eos = MPLS_EOS,
+        },
     };
     mpls_label_t *l3300 = NULL;
     vec_add1(l3300, 3300);
@@ -1380,12 +1370,9 @@ mfib_test (vlib_main_t * vm,
     res += mfib_test_v4();
     res += mfib_test_v6();
 
-    if (res)
-    {
+    if (res) {
         return clib_error_return(0, "MFIB Unit Test Failed");
-    }
-    else
-    {
+    } else {
         return (NULL);
     }
 }

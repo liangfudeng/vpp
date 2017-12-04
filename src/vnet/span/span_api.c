@@ -26,11 +26,11 @@
 
 #include <vnet/vnet_msg_enum.h>
 
-#define vl_typedefs		/* define message structures */
+#define vl_typedefs     /* define message structures */
 #include <vnet/vnet_all_api_h.h>
 #undef vl_typedefs
 
-#define vl_endianfun		/* define message structures */
+#define vl_endianfun        /* define message structures */
 #include <vnet/vnet_all_api_h.h>
 #undef vl_endianfun
 
@@ -47,35 +47,35 @@ _(SW_INTERFACE_SPAN_ENABLE_DISABLE, sw_interface_span_enable_disable)   \
 _(SW_INTERFACE_SPAN_DUMP, sw_interface_span_dump)                       \
 
 static void
-  vl_api_sw_interface_span_enable_disable_t_handler
-  (vl_api_sw_interface_span_enable_disable_t * mp)
+vl_api_sw_interface_span_enable_disable_t_handler
+(vl_api_sw_interface_span_enable_disable_t * mp)
 {
-  vl_api_sw_interface_span_enable_disable_reply_t *rmp;
-  int rv;
+    vl_api_sw_interface_span_enable_disable_reply_t *rmp;
+    int rv;
 
-  vlib_main_t *vm = vlib_get_main ();
+    vlib_main_t *vm = vlib_get_main ();
 
-  rv = span_add_delete_entry (vm, ntohl (mp->sw_if_index_from),
-			      ntohl (mp->sw_if_index_to), mp->state,
-			      mp->is_l2 ? SPAN_FEAT_L2 : SPAN_FEAT_DEVICE);
+    rv = span_add_delete_entry (vm, ntohl (mp->sw_if_index_from),
+                                ntohl (mp->sw_if_index_to), mp->state,
+                                mp->is_l2 ? SPAN_FEAT_L2 : SPAN_FEAT_DEVICE);
 
-  REPLY_MACRO (VL_API_SW_INTERFACE_SPAN_ENABLE_DISABLE_REPLY);
+    REPLY_MACRO (VL_API_SW_INTERFACE_SPAN_ENABLE_DISABLE_REPLY);
 }
 
 static void
 vl_api_sw_interface_span_dump_t_handler (vl_api_sw_interface_span_dump_t * mp)
 {
 
-  unix_shared_memory_queue_t *q;
-  span_interface_t *si;
-  vl_api_sw_interface_span_details_t *rmp;
-  span_main_t *sm = &span_main;
+    unix_shared_memory_queue_t *q;
+    span_interface_t *si;
+    vl_api_sw_interface_span_details_t *rmp;
+    span_main_t *sm = &span_main;
 
-  q = vl_api_client_index_to_input_queue (mp->client_index);
-  if (!q)
-    return;
+    q = vl_api_client_index_to_input_queue (mp->client_index);
+    if (!q)
+        return;
 
-  span_feat_t sf = mp->is_l2 ? SPAN_FEAT_L2 : SPAN_FEAT_DEVICE;
+    span_feat_t sf = mp->is_l2 ? SPAN_FEAT_L2 : SPAN_FEAT_DEVICE;
   /* *INDENT-OFF* */
   vec_foreach (si, sm->interfaces)
   {
@@ -121,14 +121,14 @@ static void
 setup_message_id_table (api_main_t * am)
 {
 #define _(id,n,crc) vl_msg_api_add_msg_name_crc (am, #n "_" #crc, id);
-  foreach_vl_msg_name_crc_span;
+    foreach_vl_msg_name_crc_span;
 #undef _
 }
 
 static clib_error_t *
 span_api_hookup (vlib_main_t * vm)
 {
-  api_main_t *am = &api_main;
+    api_main_t *am = &api_main;
 
 #define _(N,n)                                                  \
     vl_msg_api_set_handlers(VL_API_##N, #n,                     \
@@ -137,15 +137,15 @@ span_api_hookup (vlib_main_t * vm)
                            vl_api_##n##_t_endian,               \
                            vl_api_##n##_t_print,                \
                            sizeof(vl_api_##n##_t), 1);
-  foreach_vpe_api_msg;
+    foreach_vpe_api_msg;
 #undef _
 
-  /*
-   * Set up the (msg_name, crc, message-id) table
-   */
-  setup_message_id_table (am);
+    /*
+     * Set up the (msg_name, crc, message-id) table
+     */
+    setup_message_id_table (am);
 
-  return 0;
+    return 0;
 }
 
 VLIB_API_INIT_FUNCTION (span_api_hookup);

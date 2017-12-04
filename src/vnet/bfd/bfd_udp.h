@@ -41,19 +41,17 @@ typedef CLIB_PACKED (struct {
 /* *INDENT-ON* */
 
 /** UDP transport specific data embedded in bfd_session's union */
-typedef struct
-{
-  /** key identifying this session */
-  bfd_udp_key_t key;
-  /** adjacency index returned from adj lock call */
-  adj_index_t adj_index;
+typedef struct {
+    /** key identifying this session */
+    bfd_udp_key_t key;
+    /** adjacency index returned from adj lock call */
+    adj_index_t adj_index;
 } bfd_udp_session_t;
 
 /** bfd udp echo packet trace capture */
-typedef struct
-{
-  u32 len;
-  u8 data[400];
+typedef struct {
+    u32 len;
+    u8 data[400];
 } bfd_udp_echo_input_trace_t;
 
 struct bfd_session_s;
@@ -67,7 +65,7 @@ struct bfd_session_s;
  * @return 1 on success, 0 on failure
  */
 int bfd_add_udp4_transport (vlib_main_t * vm, u32 bi,
-			    const struct bfd_session_s *bs, int is_echo);
+                            const struct bfd_session_s *bs, int is_echo);
 
 /**
  * @brief add the necessary transport layer by prepending it to existing data
@@ -77,7 +75,7 @@ int bfd_add_udp4_transport (vlib_main_t * vm, u32 bi,
  * @return 1 on success, 0 on failure
  */
 int bfd_add_udp6_transport (vlib_main_t * vm, u32 bi,
-			    const struct bfd_session_s *bs, int is_echo);
+                            const struct bfd_session_s *bs, int is_echo);
 
 /**
  * @brief transport packet over udpv4
@@ -87,7 +85,7 @@ int bfd_add_udp6_transport (vlib_main_t * vm, u32 bi,
  * @return 1 on success, 0 on failure
  */
 int bfd_transport_udp4 (vlib_main_t * vm, u32 bi,
-			const struct bfd_session_s *bs);
+                        const struct bfd_session_s *bs);
 
 /**
  * @brief transport packet over udpv6
@@ -97,7 +95,7 @@ int bfd_transport_udp4 (vlib_main_t * vm, u32 bi,
  * @return 1 on success, 0 on failure
  */
 int bfd_transport_udp6 (vlib_main_t * vm, u32 bi,
-			const struct bfd_session_s *bs);
+                        const struct bfd_session_s *bs);
 
 /**
  * @brief check if the bfd udp layer is echo-capable at this time
@@ -110,8 +108,8 @@ int bfd_udp_is_echo_available (bfd_transport_e transport);
  * @brief get echo source information - used by CLI
  */
 void bfd_udp_get_echo_source (int *is_set, u32 * sw_if_index,
-			      int *have_usable_ip4, ip4_address_t * ip4,
-			      int *have_usable_ip6, ip6_address_t * ip6);
+                              int *have_usable_ip4, ip4_address_t * ip4,
+                              int *have_usable_ip6, ip6_address_t * ip6);
 
 #endif /* __included_bfd_udp_h__ */
 

@@ -23,8 +23,7 @@
 /**
  * A representation of an MPLS label for imposition in the data-path
  */
-typedef struct mpls_label_dpo_t
-{
+typedef struct mpls_label_dpo_t {
     /**
      * The MPLS label header to impose. Outer most label first.
      */
@@ -80,7 +79,7 @@ extern index_t mpls_label_dpo_create(mpls_label_t *label_stack,
                                      u8 ttl,
                                      u8 exp,
                                      dpo_proto_t payload_proto,
-				     const dpo_id_t *dpo);
+                                     const dpo_id_t *dpo);
 
 extern u8* format_mpls_label_dpo(u8 *s, va_list *args);
 

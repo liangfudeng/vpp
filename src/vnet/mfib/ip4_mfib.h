@@ -31,13 +31,13 @@
 #include <vnet/mfib/mfib_table.h>
 
 extern fib_node_index_t ip4_mfib_table_lookup(const ip4_mfib_t *fib,
-                                              const ip4_address_t *src,
-                                              const ip4_address_t *grp,
-                                              u32 len);
+        const ip4_address_t *src,
+        const ip4_address_t *grp,
+        u32 len);
 extern fib_node_index_t ip4_mfib_table_lookup_exact_match(const ip4_mfib_t *fib,
-                                                          const ip4_address_t *grp,
-                                                          const ip4_address_t *src,
-                                                          u32 len);
+        const ip4_address_t *grp,
+        const ip4_address_t *src,
+        u32 len);
 
 extern void ip4_mfib_table_entry_remove(ip4_mfib_t *fib,
                                         const ip4_address_t *grp,
@@ -73,20 +73,20 @@ ip4_mfib_get (u32 index)
  *
  */
 extern u32 ip4_mfib_table_find_or_create_and_lock(u32 table_id,
-                                                  mfib_source_t src);
+        mfib_source_t src);
 extern u32 ip4_mfib_table_create_and_lock(mfib_source_t src);
 
 static inline
 u32 ip4_mfib_index_from_table_id (u32 table_id)
 {
-  ip4_main_t * im = &ip4_main;
-  uword * p;
+    ip4_main_t * im = &ip4_main;
+    uword * p;
 
-  p = hash_get (im->mfib_index_by_table_id, table_id);
-  if (!p)
-    return ~0;
+    p = hash_get (im->mfib_index_by_table_id, table_id);
+    if (!p)
+        return ~0;
 
-  return p[0];
+    return p[0];
 }
 
 extern u32 ip4_mfib_table_get_index_for_sw_if_index(u32 sw_if_index);

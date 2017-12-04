@@ -70,18 +70,17 @@ static char vcom_app_name[MAX_VCOM_APP_NAME];
 int
 vcom_set_app_name (char *__app_name)
 {
-  return snprintf (vcom_app_name, MAX_VCOM_APP_NAME, "vcom-%s-%d",
-		   __app_name, getpid ()) < 0 ? -1 : 0;
+    return snprintf (vcom_app_name, MAX_VCOM_APP_NAME, "vcom-%s-%d",
+                     __app_name, getpid ()) < 0 ? -1 : 0;
 }
 
 static char *
 vcom_get_app_name ()
 {
-  if (vcom_app_name[0] == '\0')
-    {
-      snprintf (vcom_app_name, MAX_VCOM_APP_NAME, "vcom-app-%d", getpid ());
+    if (vcom_app_name[0] == '\0') {
+        snprintf (vcom_app_name, MAX_VCOM_APP_NAME, "vcom-app-%d", getpid ());
     }
-  return vcom_app_name;
+    return vcom_app_name;
 }
 
 /*
@@ -100,59 +99,55 @@ static int is_vcom_init;
 static inline int
 vcom_init (void)
 {
-  pid_t pid = getpid ();
-  int rv;
+    pid_t pid = getpid ();
+    int rv;
 
-  if (!is_vcom_init)
-    {
-      rv = vppcom_app_create (vcom_get_app_name ());
-      if (rv)
-	{
-	  printf ("\n[%d] vcom_init...failed!\n", pid);
-	  if (VCOM_DEBUG > 0)
-	    fprintf (stderr,
-		     "[%d] vcom_init: vppcom_app_create failed!\n", pid);
-	  return rv;
-	}
-      if (vcom_socket_main_init () != 0)
-	{
-	  printf ("\n[%d] vcom_init...failed!\n", pid);
-	  if (VCOM_DEBUG > 0)
-	    fprintf (stderr,
-		     "[%d] vcom_init: vcom_socket_main_init failed!\n", pid);
-	  return -1;
-	}
+    if (!is_vcom_init) {
+        rv = vppcom_app_create (vcom_get_app_name ());
+        if (rv) {
+            printf ("\n[%d] vcom_init...failed!\n", pid);
+            if (VCOM_DEBUG > 0)
+                fprintf (stderr,
+                         "[%d] vcom_init: vppcom_app_create failed!\n", pid);
+            return rv;
+        }
+        if (vcom_socket_main_init () != 0) {
+            printf ("\n[%d] vcom_init...failed!\n", pid);
+            if (VCOM_DEBUG > 0)
+                fprintf (stderr,
+                         "[%d] vcom_init: vcom_socket_main_init failed!\n", pid);
+            return -1;
+        }
 
-      is_vcom_init = 1;
-      printf ("\n[%d] vcom_init...done!\n", pid);
+        is_vcom_init = 1;
+        printf ("\n[%d] vcom_init...done!\n", pid);
     }
-  return 0;
+    return 0;
 }
 
 static inline void
 vcom_destroy (void)
 {
-  pid_t pid = getpid ();
+    pid_t pid = getpid ();
 
-  if (is_vcom_init)
-    {
-      vcom_socket_main_destroy ();
-      vppcom_app_destroy ();
-      is_vcom_init = 0;
-      fprintf (stderr, "\n[%d] vcom_destroy...done!\n", pid);
+    if (is_vcom_init) {
+        vcom_socket_main_destroy ();
+        vppcom_app_destroy ();
+        is_vcom_init = 0;
+        fprintf (stderr, "\n[%d] vcom_destroy...done!\n", pid);
     }
 }
 
 static inline int
 is_vcom_socket_fd (int fd)
 {
-  return vcom_socket_is_vcom_fd (fd);
+    return vcom_socket_is_vcom_fd (fd);
 }
 
 static inline int
 is_vcom_epfd (int epfd)
 {
-  return vcom_socket_is_vcom_epfd (epfd);
+    return vcom_socket_is_vcom_epfd (epfd);
 }
 
 
@@ -173,17 +168,15 @@ is_vcom_epfd (int epfd)
 int
 vcom_close (int __fd)
 {
-  if (vcom_init () != 0)
-    {
-      return -1;
+    if (vcom_init () != 0) {
+        return -1;
     }
 
-  if (vcom_socket_close (__fd) != 0)
-    {
-      return -1;
+    if (vcom_socket_close (__fd) != 0) {
+        return -1;
     }
 
-  return 0;
+    return 0;
 }
 
 /*
@@ -192,24 +185,22 @@ vcom_close (int __fd)
 int
 close (int __fd)
 {
-  int rv;
-  pid_t pid = getpid ();
+    int rv;
+    pid_t pid = getpid ();
 
-  if (is_vcom_socket_fd (__fd) || is_vcom_epfd (__fd))
-    {
-      if (VCOM_DEBUG > 0)
-	fprintf (stderr, "[%d] close: fd %d\n", pid, __fd);
-      rv = vcom_close (__fd);
-      if (VCOM_DEBUG > 0)
-	fprintf (stderr, "[%d] close: vcom_close() returned %d\n", pid, rv);
-      if (rv != 0)
-	{
-	  errno = -rv;
-	  return -1;
-	}
-      return 0;
+    if (is_vcom_socket_fd (__fd) || is_vcom_epfd (__fd)) {
+        if (VCOM_DEBUG > 0)
+            fprintf (stderr, "[%d] close: fd %d\n", pid, __fd);
+        rv = vcom_close (__fd);
+        if (VCOM_DEBUG > 0)
+            fprintf (stderr, "[%d] close: vcom_close() returned %d\n", pid, rv);
+        if (rv != 0) {
+            errno = -rv;
+            return -1;
+        }
+        return 0;
     }
-  return libc_close (__fd);
+    return libc_close (__fd);
 }
 
 /* Read NBYTES into BUF from FD.  Return the
@@ -220,74 +211,67 @@ close (int __fd)
 ssize_t
 vcom_read (int __fd, void *__buf, size_t __nbytes)
 {
-  if (vcom_init () != 0)
-    {
-      return -1;
+    if (vcom_init () != 0) {
+        return -1;
     }
 
-  return vcom_socket_read (__fd, __buf, __nbytes);
+    return vcom_socket_read (__fd, __buf, __nbytes);
 }
 
 ssize_t
 read (int __fd, void *__buf, size_t __nbytes)
 {
-  ssize_t size = 0;
-  pid_t pid = getpid ();
-  pthread_t tid = pthread_self ();
+    ssize_t size = 0;
+    pid_t pid = getpid ();
+    pthread_t tid = pthread_self ();
 
-  if (is_vcom_socket_fd (__fd))
-    {
-      if (VCOM_DEBUG > 2)
-	fprintf (stderr,
-		 "[%d][%lu (0x%lx)] read:1 "
-		 "'%04d'='%04d', '%p', '%04d'\n",
-		 pid, (unsigned long) tid, (unsigned long) tid,
-		 (int) size, __fd, __buf, (int) __nbytes);
-      size = vcom_read (__fd, __buf, __nbytes);
-      if (VCOM_DEBUG > 2)
-	fprintf (stderr,
-		 "[%d][%lu (0x%lx)] read:2 "
-		 "'%04d'='%04d', '%p', '%04d'\n",
-		 pid, (unsigned long) tid, (unsigned long) tid,
-		 (int) size, __fd, __buf, (int) __nbytes);
-      if (size < 0)
-	{
-	  errno = -size;
-	  return -1;
-	}
-      return size;
+    if (is_vcom_socket_fd (__fd)) {
+        if (VCOM_DEBUG > 2)
+            fprintf (stderr,
+                     "[%d][%lu (0x%lx)] read:1 "
+                     "'%04d'='%04d', '%p', '%04d'\n",
+                     pid, (unsigned long) tid, (unsigned long) tid,
+                     (int) size, __fd, __buf, (int) __nbytes);
+        size = vcom_read (__fd, __buf, __nbytes);
+        if (VCOM_DEBUG > 2)
+            fprintf (stderr,
+                     "[%d][%lu (0x%lx)] read:2 "
+                     "'%04d'='%04d', '%p', '%04d'\n",
+                     pid, (unsigned long) tid, (unsigned long) tid,
+                     (int) size, __fd, __buf, (int) __nbytes);
+        if (size < 0) {
+            errno = -size;
+            return -1;
+        }
+        return size;
     }
-  return libc_read (__fd, __buf, __nbytes);
+    return libc_read (__fd, __buf, __nbytes);
 }
 
 ssize_t
 vcom_readv (int __fd, const struct iovec * __iov, int __iovcnt)
 {
-  if (vcom_init () != 0)
-    {
-      return -1;
+    if (vcom_init () != 0) {
+        return -1;
     }
 
-  return vcom_socket_readv (__fd, __iov, __iovcnt);
+    return vcom_socket_readv (__fd, __iov, __iovcnt);
 }
 
 ssize_t
 readv (int __fd, const struct iovec * __iov, int __iovcnt)
 {
-  ssize_t size = 0;
+    ssize_t size = 0;
 
-  if (is_vcom_socket_fd (__fd))
-    {
-      size = vcom_readv (__fd, __iov, __iovcnt);
-      if (size < 0)
-	{
-	  errno = -size;
-	  return -1;
-	}
-      return size;
-    }
-  else
-    return libc_readv (__fd, __iov, __iovcnt);
+    if (is_vcom_socket_fd (__fd)) {
+        size = vcom_readv (__fd, __iov, __iovcnt);
+        if (size < 0) {
+            errno = -size;
+            return -1;
+        }
+        return size;
+    } else
+        return libc_readv (__fd, __iov, __iovcnt);
 }
 
 /* Write N bytes of BUF to FD.  Return the number written, or -1.
@@ -297,74 +281,67 @@ readv (int __fd, const struct iovec * __iov, int __iovcnt)
 ssize_t
 vcom_write (int __fd, const void *__buf, size_t __n)
 {
-  if (vcom_init () != 0)
-    {
-      return -1;
+    if (vcom_init () != 0) {
+        return -1;
     }
 
-  return vcom_socket_write (__fd, (void *) __buf, __n);
+    return vcom_socket_write (__fd, (void *) __buf, __n);
 }
 
 ssize_t
 write (int __fd, const void *__buf, size_t __n)
 {
-  ssize_t size = 0;
-  pid_t pid = getpid ();
-  pthread_t tid = pthread_self ();
+    ssize_t size = 0;
+    pid_t pid = getpid ();
+    pthread_t tid = pthread_self ();
 
-  if (is_vcom_socket_fd (__fd))
-    {
-      if (VCOM_DEBUG > 2)
-	fprintf (stderr,
-		 "[%d][%lu (0x%lx)] write:1 "
-		 "'%04d'='%04d', '%p', '%04d'\n",
-		 pid, (unsigned long) tid, (unsigned long) tid,
-		 (int) size, __fd, __buf, (int) __n);
-      size = vcom_write (__fd, __buf, __n);
-      if (VCOM_DEBUG > 2)
-	fprintf (stderr,
-		 "[%d][%lu (0x%lx)] write:2 "
-		 "'%04d'='%04d', '%p', '%04d'\n",
-		 pid, (unsigned long) tid, (unsigned long) tid,
-		 (int) size, __fd, __buf, (int) __n);
-      if (size < 0)
-	{
-	  errno = -size;
-	  return -1;
-	}
-      return size;
+    if (is_vcom_socket_fd (__fd)) {
+        if (VCOM_DEBUG > 2)
+            fprintf (stderr,
+                     "[%d][%lu (0x%lx)] write:1 "
+                     "'%04d'='%04d', '%p', '%04d'\n",
+                     pid, (unsigned long) tid, (unsigned long) tid,
+                     (int) size, __fd, __buf, (int) __n);
+        size = vcom_write (__fd, __buf, __n);
+        if (VCOM_DEBUG > 2)
+            fprintf (stderr,
+                     "[%d][%lu (0x%lx)] write:2 "
+                     "'%04d'='%04d', '%p', '%04d'\n",
+                     pid, (unsigned long) tid, (unsigned long) tid,
+                     (int) size, __fd, __buf, (int) __n);
+        if (size < 0) {
+            errno = -size;
+            return -1;
+        }
+        return size;
     }
-  return libc_write (__fd, __buf, __n);
+    return libc_write (__fd, __buf, __n);
 }
 
 ssize_t
 vcom_writev (int __fd, const struct iovec * __iov, int __iovcnt)
 {
-  if (vcom_init () != 0)
-    {
-      return -1;
+    if (vcom_init () != 0) {
+        return -1;
     }
 
-  return vcom_socket_writev (__fd, __iov, __iovcnt);
+    return vcom_socket_writev (__fd, __iov, __iovcnt);
 }
 
 ssize_t
 writev (int __fd, const struct iovec * __iov, int __iovcnt)
 {
-  ssize_t size = 0;
+    ssize_t size = 0;
 
-  if (is_vcom_socket_fd (__fd))
-    {
-      size = vcom_writev (__fd, __iov, __iovcnt);
-      if (size < 0)
-	{
-	  errno = -size;
-	  return -1;
-	}
-      return size;
-    }
-  else
-    return libc_writev (__fd, __iov, __iovcnt);
+    if (is_vcom_socket_fd (__fd)) {
+        size = vcom_writev (__fd, __iov, __iovcnt);
+        if (size < 0) {
+            errno = -size;
+            return -1;
+        }
+        return size;
+    } else
+        return libc_writev (__fd, __iov, __iovcnt);
 }
 
 /* Do the file control operation described by CMD on FD.
@@ -375,111 +352,103 @@ writev (int __fd, const struct iovec * __iov, int __iovcnt)
 int
 vcom_fcntl_va (int __fd, int __cmd, va_list __ap)
 {
-  if (vcom_init () != 0)
-    {
-      return -1;
+    if (vcom_init () != 0) {
+        return -1;
     }
 
-  return vcom_socket_fcntl_va (__fd, __cmd, __ap);
+    return vcom_socket_fcntl_va (__fd, __cmd, __ap);
 }
 
 int
 vcom_fcntl (int __fd, int __cmd, ...)
 {
-  int rv = -1;
-  va_list ap;
+    int rv = -1;
+    va_list ap;
 
-  if (is_vcom_socket_fd (__fd))
-    {
-      va_start (ap, __cmd);
-      rv = vcom_fcntl_va (__fd, __cmd, ap);
-      va_end (ap);
+    if (is_vcom_socket_fd (__fd)) {
+        va_start (ap, __cmd);
+        rv = vcom_fcntl_va (__fd, __cmd, ap);
+        va_end (ap);
     }
-  return rv;
+    return rv;
 }
 
 int
 fcntl (int __fd, int __cmd, ...)
 {
-  int rv;
-  va_list ap;
-  pid_t pid = getpid ();
+    int rv;
+    va_list ap;
+    pid_t pid = getpid ();
 
-  va_start (ap, __cmd);
-  if (is_vcom_socket_fd (__fd))
-    {
-      rv = vcom_fcntl_va (__fd, __cmd, ap);
-      if (VCOM_DEBUG > 0)
-	fprintf (stderr,
-		 "[%d] fcntl: "
-		 "'%04d'='%04d', '%04d'\n", pid, rv, __fd, __cmd);
-      if (rv < 0)
-	{
-	  errno = -rv;
-	  rv = -1;
-	}
-      goto out;
+    va_start (ap, __cmd);
+    if (is_vcom_socket_fd (__fd)) {
+        rv = vcom_fcntl_va (__fd, __cmd, ap);
+        if (VCOM_DEBUG > 0)
+            fprintf (stderr,
+                     "[%d] fcntl: "
+                     "'%04d'='%04d', '%04d'\n", pid, rv, __fd, __cmd);
+        if (rv < 0) {
+            errno = -rv;
+            rv = -1;
+        }
+        goto out;
     }
-  rv = libc_vfcntl (__fd, __cmd, ap);
+    rv = libc_vfcntl (__fd, __cmd, ap);
 
 out:
-  va_end (ap);
-  return rv;
+    va_end (ap);
+    return rv;
 }
 
 int
 vcom_ioctl_va (int __fd, unsigned long int __cmd, va_list __ap)
 {
-  if (vcom_init () != 0)
-    {
-      return -1;
+    if (vcom_init () != 0) {
+        return -1;
     }
 
-  return vcom_socket_ioctl_va (__fd, __cmd, __ap);
+    return vcom_socket_ioctl_va (__fd, __cmd, __ap);
 }
 
 int
 vcom_ioctl (int __fd, unsigned long int __cmd, ...)
 {
-  int rv = -1;
-  va_list ap;
+    int rv = -1;
+    va_list ap;
 
-  if (is_vcom_socket_fd (__fd))
-    {
-      va_start (ap, __cmd);
-      rv = vcom_ioctl_va (__fd, __cmd, ap);
-      va_end (ap);
+    if (is_vcom_socket_fd (__fd)) {
+        va_start (ap, __cmd);
+        rv = vcom_ioctl_va (__fd, __cmd, ap);
+        va_end (ap);
     }
-  return rv;
+    return rv;
 }
 
 int
 ioctl (int __fd, unsigned long int __cmd, ...)
 {
-  int rv;
-  va_list ap;
-  pid_t pid = getpid ();
+    int rv;
+    va_list ap;
+    pid_t pid = getpid ();
 
-  va_start (ap, __cmd);
-  if (is_vcom_socket_fd (__fd))
-    {
-      rv = vcom_ioctl_va (__fd, __cmd, ap);
-      if (VCOM_DEBUG > 0)
-	fprintf (stderr,
-		 "[%d] ioctl: "
-		 "'%04d'='%04d', '%04ld'\n", pid, rv, __fd, __cmd);
-      if (rv < 0)
-	{
-	  errno = -rv;
-	  rv = -1;
-	}
-      goto out;
+    va_start (ap, __cmd);
+    if (is_vcom_socket_fd (__fd)) {
+        rv = vcom_ioctl_va (__fd, __cmd, ap);
+        if (VCOM_DEBUG > 0)
+            fprintf (stderr,
+                     "[%d] ioctl: "
+                     "'%04d'='%04d', '%04ld'\n", pid, rv, __fd, __cmd);
+        if (rv < 0) {
+            errno = -rv;
+            rv = -1;
+        }
+        goto out;
     }
-  rv = libc_vioctl (__fd, __cmd, ap);
+    rv = libc_vioctl (__fd, __cmd, ap);
 
 out:
-  va_end (ap);
-  return rv;
+    va_end (ap);
+    return rv;
 }
 
 /*
@@ -507,25 +476,24 @@ out:
  */
 static inline int
 vcom_fd_clear (int __nfds,
-	       int *__new_nfds,
-	       fd_set * __restrict __readfds,
-	       fd_set * __restrict __writefds,
-	       fd_set * __restrict __exceptfds)
+               int *__new_nfds,
+               fd_set * __restrict __readfds,
+               fd_set * __restrict __writefds,
+               fd_set * __restrict __exceptfds)
 {
-  int fd;
-  /* invalid max_fd is -1 */
-  int max_fd = -1;
-  int nfd = 0;
+    int fd;
+    /* invalid max_fd is -1 */
+    int max_fd = -1;
+    int nfd = 0;
 
 
-  /* clear all vcom fd from the sets */
-  for (fd = 0; fd < __nfds; fd++)
-    {
+    /* clear all vcom fd from the sets */
+    for (fd = 0; fd < __nfds; fd++) {
 
-      /* clear vcom fd from set */
-      /*
-       * F fd set
-       */
+        /* clear vcom fd from set */
+        /*
+         * F fd set
+         */
 #define _(F)                                    \
       if ((F) && FD_ISSET (fd, (F)))            \
         {                                       \
@@ -536,21 +504,20 @@ vcom_fd_clear (int __nfds,
         }
 
 
-      _(__readfds);
-      _(__writefds);
-      _(__exceptfds);
+        _(__readfds);
+        _(__writefds);
+        _(__exceptfds);
 #undef _
     }
 
-  /*
-   *  compute nfd and __new_nfds
-   */
-  for (fd = 0; fd < __nfds; fd++)
-    {
+    /*
+     *  compute nfd and __new_nfds
+     */
+    for (fd = 0; fd < __nfds; fd++) {
 
-      /*
-       * F fd set
-       */
+        /*
+         * F fd set
+         */
 #define _(F)                                    \
       if ((F) && FD_ISSET (fd, (F)))            \
         {                                       \
@@ -562,14 +529,14 @@ vcom_fd_clear (int __nfds,
         }
 
 
-      _(__readfds);
-      _(__writefds);
-      _(__exceptfds);
+        _(__readfds);
+        _(__writefds);
+        _(__exceptfds);
 #undef _
     }
 
-  *__new_nfds = max_fd != -1 ? max_fd + 1 : 0;
-  return nfd;
+    *__new_nfds = max_fd != -1 ? max_fd + 1 : 0;
+    return nfd;
 }
 
 /*
@@ -579,26 +546,25 @@ vcom_fd_clear (int __nfds,
  */
 static inline int
 vcom_fd_set (int __nfds,
-	     /* dest */
-	     int *__new_nfds,
-	     fd_set * __restrict __readfds,
-	     fd_set * __restrict __writefds, fd_set * __restrict __exceptfds,
-	     /* src */
-	     fd_set * __restrict __saved_readfds,
-	     fd_set * __restrict __saved_writefds,
-	     fd_set * __restrict __saved_exceptfds)
+             /* dest */
+             int *__new_nfds,
+             fd_set * __restrict __readfds,
+             fd_set * __restrict __writefds, fd_set * __restrict __exceptfds,
+             /* src */
+             fd_set * __restrict __saved_readfds,
+             fd_set * __restrict __saved_writefds,
+             fd_set * __restrict __saved_exceptfds)
 {
-  int fd;
-  /* invalid max_fd is -1 */
-  int max_fd = -1;
-  int nfd = 0;
+    int fd;
+    /* invalid max_fd is -1 */
+    int max_fd = -1;
+    int nfd = 0;
 
-  for (fd = 0; fd < __nfds; fd++)
-    {
-      /*
-       * F fd set
-       * S saved fd set
-       */
+    for (fd = 0; fd < __nfds; fd++) {
+        /*
+         * F fd set
+         * S saved fd set
+         */
 #define _(S,F)                                  \
       if ((F) && (S) && FD_ISSET (fd, (S)))     \
         {                                       \
@@ -609,21 +575,20 @@ vcom_fd_set (int __nfds,
         }
 
 
-      _(__saved_readfds, __readfds);
-      _(__saved_writefds, __writefds);
+        _(__saved_readfds, __readfds);
+        _(__saved_writefds, __writefds);
 #undef _
     }
 
 
-  /*
-   *  compute nfd and __new_nfds
-   */
-  for (fd = 0; fd < __nfds; fd++)
-    {
+    /*
+     *  compute nfd and __new_nfds
+     */
+    for (fd = 0; fd < __nfds; fd++) {
 
-      /*
-       * F fd set
-       */
+        /*
+         * F fd set
+         */
 #define _(F)                                    \
       if ((F) && FD_ISSET (fd, (F)))            \
         {                                       \
@@ -635,14 +600,14 @@ vcom_fd_set (int __nfds,
         }
 
 
-      _(__readfds);
-      _(__writefds);
-      _(__exceptfds);
+        _(__readfds);
+        _(__writefds);
+        _(__exceptfds);
 #undef _
     }
 
-  *__new_nfds = max_fd != -1 ? max_fd + 1 : 0;
-  return nfd;
+    *__new_nfds = max_fd != -1 ? max_fd + 1 : 0;
+    return nfd;
 }
 
 /*
@@ -651,42 +616,41 @@ vcom_fd_set (int __nfds,
  */
 static inline void
 vcom_fd_set_split (
-		    /* src, select sets */
-		    int nfds,
-		    fd_set * __restrict readfds,
-		    fd_set * __restrict writefds,
-		    fd_set * __restrict exceptfds,
-		    /* dest1, vcom sets */
-		    int *vcom_nfds,
-		    fd_set * __restrict vcom_readfds,
-		    fd_set * __restrict vcom_writefds,
-		    fd_set * __restrict vcom_exceptfds, int *vcom_nfd,
-		    /* dest2, libc sets */
-		    int *libc_nfds,
-		    fd_set * __restrict libc_readfds,
-		    fd_set * __restrict libc_writefds,
-		    fd_set * __restrict libc_exceptfds, int *libc_nfd)
+    /* src, select sets */
+    int nfds,
+    fd_set * __restrict readfds,
+    fd_set * __restrict writefds,
+    fd_set * __restrict exceptfds,
+    /* dest1, vcom sets */
+    int *vcom_nfds,
+    fd_set * __restrict vcom_readfds,
+    fd_set * __restrict vcom_writefds,
+    fd_set * __restrict vcom_exceptfds, int *vcom_nfd,
+    /* dest2, libc sets */
+    int *libc_nfds,
+    fd_set * __restrict libc_readfds,
+    fd_set * __restrict libc_writefds,
+    fd_set * __restrict libc_exceptfds, int *libc_nfd)
 {
-  int fd;
+    int fd;
 
-  /* vcom */
-  /* invalid max_fd is -1 */
-  int vcom_max_fd = -1;
-  int vcom_nfd2 = 0;
+    /* vcom */
+    /* invalid max_fd is -1 */
+    int vcom_max_fd = -1;
+    int vcom_nfd2 = 0;
 
-  /* libc */
-  /* invalid max_fd is -1 */
-  int libc_max_fd = -1;
-  int libc_nfd2 = 0;
+    /* libc */
+    /* invalid max_fd is -1 */
+    int libc_max_fd = -1;
+    int libc_nfd2 = 0;
 
 
-  for (fd = 0; fd < nfds; fd++)
-    {
-      /*
-       * S select fd set
-       * V vcom fd set
-       * L libc fd set
-       */
+    for (fd = 0; fd < nfds; fd++) {
+        /*
+         * S select fd set
+         * V vcom fd set
+         * L libc fd set
+         */
 #define _(S,V,L)                            \
       if ((S) && FD_ISSET (fd, (S)))        \
         {                                   \
@@ -717,20 +681,20 @@ vcom_fd_set_split (
         }
 
 
-      _(readfds, vcom_readfds, libc_readfds);
-      _(writefds, vcom_writefds, libc_writefds);
-      _(exceptfds, vcom_exceptfds, libc_exceptfds);
+        _(readfds, vcom_readfds, libc_readfds);
+        _(writefds, vcom_writefds, libc_writefds);
+        _(exceptfds, vcom_exceptfds, libc_exceptfds);
 #undef _
     }
 
-  if (vcom_nfds)
-    *vcom_nfds = vcom_max_fd != -1 ? vcom_max_fd + 1 : 0;
-  if (vcom_nfd)
-    *vcom_nfd = vcom_nfd2;
-  if (libc_nfds)
-    *libc_nfds = libc_max_fd != -1 ? libc_max_fd + 1 : 0;
-  if (libc_nfd)
-    *libc_nfd = libc_nfd2;
+    if (vcom_nfds)
+        *vcom_nfds = vcom_max_fd != -1 ? vcom_max_fd + 1 : 0;
+    if (vcom_nfd)
+        *vcom_nfd = vcom_nfd2;
+    if (libc_nfds)
+        *libc_nfds = libc_max_fd != -1 ? libc_max_fd + 1 : 0;
+    if (libc_nfd)
+        *libc_nfd = libc_nfd2;
 }
 
 /*
@@ -739,41 +703,41 @@ vcom_fd_set_split (
  */
 static inline void
 vcom_fd_set_merge (
-		    /* dest, select sets */
-		    int *nfds,
-		    fd_set * __restrict readfds,
-		    fd_set * __restrict writefds,
-		    fd_set * __restrict exceptfds, int *nfd,
-		    /* src1, vcom sets */
-		    int vcom_nfds,
-		    fd_set * __restrict vcom_readfds,
-		    fd_set * __restrict vcom_writefds,
-		    fd_set * __restrict vcom_exceptfds, int vcom_nfd,
-		    /* src2, libc sets */
-		    int libc_nfds,
-		    fd_set * __restrict libc_readfds,
-		    fd_set * __restrict libc_writefds,
-		    fd_set * __restrict libc_exceptfds, int libc_nfd)
+    /* dest, select sets */
+    int *nfds,
+    fd_set * __restrict readfds,
+    fd_set * __restrict writefds,
+    fd_set * __restrict exceptfds, int *nfd,
+    /* src1, vcom sets */
+    int vcom_nfds,
+    fd_set * __restrict vcom_readfds,
+    fd_set * __restrict vcom_writefds,
+    fd_set * __restrict vcom_exceptfds, int vcom_nfd,
+    /* src2, libc sets */
+    int libc_nfds,
+    fd_set * __restrict libc_readfds,
+    fd_set * __restrict libc_writefds,
+    fd_set * __restrict libc_exceptfds, int libc_nfd)
 {
-  int fd;
-  /* invalid max_fd is -1 */
-  int max_fd = -1;
-  int nfd2 = 0;
+    int fd;
+    /* invalid max_fd is -1 */
+    int max_fd = -1;
+    int nfd2 = 0;
 
 
-  /* FD_BIT_OR
-   *
-   * dest |= src at current bit index
-   * update MAX and NFD of dest fd set
-   *
-   *
-   * FS source fd set
-   * FD dest fd set
-   * BI bit index
-   * MAX current max_fd of dest fd sets
-   * NFD current nfd of dest fd sets
-   * N  nfds of source fd set
-   */
+    /* FD_BIT_OR
+     *
+     * dest |= src at current bit index
+     * update MAX and NFD of dest fd set
+     *
+     *
+     * FS source fd set
+     * FD dest fd set
+     * BI bit index
+     * MAX current max_fd of dest fd sets
+     * NFD current nfd of dest fd sets
+     * N  nfds of source fd set
+     */
 #define FD_BIT_OR(FD,FS,BI,          \
                   MAX,NFD)           \
   if ((FS) && (FD) && FD_ISSET ((BI), (FS)))    \
@@ -787,15 +751,15 @@ vcom_fd_set_merge (
     }
 
 
-  /* FD_RWE_SET_OR */
-  /*
-   * SR,SW,SE source RWE fd sets
-   * DR,DW,DE dest RWE fd sets
-   * BI bit index
-   * NFDS  nfds of source fd sets
-   * MAX current max_fd of dest fd sets
-   * NFD current nfd of dest fd sets
-   */
+    /* FD_RWE_SET_OR */
+    /*
+     * SR,SW,SE source RWE fd sets
+     * DR,DW,DE dest RWE fd sets
+     * BI bit index
+     * NFDS  nfds of source fd sets
+     * MAX current max_fd of dest fd sets
+     * NFD current nfd of dest fd sets
+     */
 #define FD_RWE_SETS_OR(DR,DW,DE,      \
                       SR,SW,SE,       \
                       BI,NFDS,        \
@@ -812,23 +776,23 @@ vcom_fd_set_merge (
     while (0);
 
 
-  /* source(vcom) to dest(select) rwe fd sets */
-  FD_RWE_SETS_OR (readfds, writefds, exceptfds,
-		  vcom_readfds, vcom_writefds, vcom_exceptfds,
-		  fd, vcom_nfds, max_fd, nfd2);
+    /* source(vcom) to dest(select) rwe fd sets */
+    FD_RWE_SETS_OR (readfds, writefds, exceptfds,
+                    vcom_readfds, vcom_writefds, vcom_exceptfds,
+                    fd, vcom_nfds, max_fd, nfd2);
 
-  /* source(libc) to dest(select) rwe fd sets */
-  FD_RWE_SETS_OR (readfds, writefds, exceptfds,
-		  libc_readfds, libc_writefds, libc_exceptfds,
-		  fd, libc_nfds, max_fd, nfd2);
+    /* source(libc) to dest(select) rwe fd sets */
+    FD_RWE_SETS_OR (readfds, writefds, exceptfds,
+                    libc_readfds, libc_writefds, libc_exceptfds,
+                    fd, libc_nfds, max_fd, nfd2);
 
 #undef FD_RWE_SETS_OR
 #undef FD_BIT_OR
 
-  if (nfds)
-    *nfds = max_fd != -1 ? max_fd + 1 : 0;
-  if (nfd)
-    *nfd = nfd2;
+    if (nfds)
+        *nfds = max_fd != -1 ? max_fd + 1 : 0;
+    if (nfd)
+        *nfd = nfd2;
 }
 
 /*
@@ -837,22 +801,20 @@ vcom_fd_set_merge (
 static inline int
 fd_set_iszero (fd_set * __restrict fds)
 {
-  int fd;
+    int fd;
 
-  /* NULL fds */
-  if (!fds)
-    return 1;
+    /* NULL fds */
+    if (!fds)
+        return 1;
 
-  for (fd = 0; fd < FD_SETSIZE; fd++)
-    {
-      if (FD_ISSET (fd, fds))
-	{
-	  /* non-empty fds */
-	  return 0;
-	}
+    for (fd = 0; fd < FD_SETSIZE; fd++) {
+        if (FD_ISSET (fd, fds)) {
+            /* non-empty fds */
+            return 0;
+        }
     }
-  /* empty fds */
-  return 1;
+    /* empty fds */
+    return 1;
 }
 
 
@@ -893,7 +855,7 @@ typedef __u64 timeu64_t;
 static inline int
 timespec_equal (const struct timespec *a, const struct timespec *b)
 {
-  return (a->tv_sec == b->tv_sec) && (a->tv_nsec == b->tv_nsec);
+    return (a->tv_sec == b->tv_sec) && (a->tv_nsec == b->tv_nsec);
 }
 #endif
 
@@ -905,35 +867,35 @@ timespec_equal (const struct timespec *a, const struct timespec *b)
 static inline int
 timespec_compare (const struct timespec *lhs, const struct timespec *rhs)
 {
-  if (lhs->tv_sec < rhs->tv_sec)
-    return -1;
-  if (lhs->tv_sec > rhs->tv_sec)
-    return 1;
-  return lhs->tv_nsec - rhs->tv_nsec;
+    if (lhs->tv_sec < rhs->tv_sec)
+        return -1;
+    if (lhs->tv_sec > rhs->tv_sec)
+        return 1;
+    return lhs->tv_nsec - rhs->tv_nsec;
 }
 
 #ifdef VCOM_USE_TIMEVAL_COMPARE
 static inline int
 timeval_compare (const struct timeval *lhs, const struct timeval *rhs)
 {
-  if (lhs->tv_sec < rhs->tv_sec)
-    return -1;
-  if (lhs->tv_sec > rhs->tv_sec)
-    return 1;
-  return lhs->tv_usec - rhs->tv_usec;
+    if (lhs->tv_sec < rhs->tv_sec)
+        return -1;
+    if (lhs->tv_sec > rhs->tv_sec)
+        return 1;
+    return lhs->tv_usec - rhs->tv_usec;
 }
 #endif
 
 extern void set_normalized_timespec (struct timespec *ts, time_t sec,
-				     s64 nsec);
+                                     s64 nsec);
 
 static inline struct timespec
 timespec_add (struct timespec lhs, struct timespec rhs)
 {
-  struct timespec ts_delta;
-  set_normalized_timespec (&ts_delta, lhs.tv_sec + rhs.tv_sec,
-			   lhs.tv_nsec + rhs.tv_nsec);
-  return ts_delta;
+    struct timespec ts_delta;
+    set_normalized_timespec (&ts_delta, lhs.tv_sec + rhs.tv_sec,
+                             lhs.tv_nsec + rhs.tv_nsec);
+    return ts_delta;
 }
 
 /*
@@ -942,10 +904,10 @@ timespec_add (struct timespec lhs, struct timespec rhs)
 static inline struct timespec
 timespec_sub (struct timespec lhs, struct timespec rhs)
 {
-  struct timespec ts_delta;
-  set_normalized_timespec (&ts_delta, lhs.tv_sec - rhs.tv_sec,
-			   lhs.tv_nsec - rhs.tv_nsec);
-  return ts_delta;
+    struct timespec ts_delta;
+    set_normalized_timespec (&ts_delta, lhs.tv_sec - rhs.tv_sec,
+                             lhs.tv_nsec - rhs.tv_nsec);
+    return ts_delta;
 }
 
 /*
@@ -972,25 +934,23 @@ timespec_sub (struct timespec lhs, struct timespec rhs)
 void
 set_normalized_timespec (struct timespec *ts, time_t sec, s64 nsec)
 {
-  while (nsec >= NSEC_PER_SEC)
-    {
-      /*
-       * The following asm() prevents the compiler from
-       * optimising this loop into a modulo operation. See
-       * also __iter_div_u64_rem() in include/linux/time.h
-       */
-    asm ("":"+rm" (nsec));
-      nsec -= NSEC_PER_SEC;
-      ++sec;
+    while (nsec >= NSEC_PER_SEC) {
+        /*
+         * The following asm() prevents the compiler from
+         * optimising this loop into a modulo operation. See
+         * also __iter_div_u64_rem() in include/linux/time.h
+         */
+        asm ("":"+rm" (nsec));
+        nsec -= NSEC_PER_SEC;
+        ++sec;
     }
-  while (nsec < 0)
-    {
-    asm ("":"+rm" (nsec));
-      nsec += NSEC_PER_SEC;
-      --sec;
+    while (nsec < 0) {
+        asm ("":"+rm" (nsec));
+        nsec += NSEC_PER_SEC;
+        --sec;
     }
-  ts->tv_sec = sec;
-  ts->tv_nsec = nsec;
+    ts->tv_sec = sec;
+    ts->tv_nsec = nsec;
 }
 
 #define vcom_timerisvalid(tvp)        (!((tvp)->tv_sec < 0 || (tvp)->tv_usec < 0))
@@ -1007,153 +967,138 @@ set_normalized_timespec (struct timespec *ts, time_t sec, s64 nsec)
 
 static inline int
 vcom_select_impl (int vcom_nfds, fd_set * __restrict vcom_readfds,
-		  fd_set * __restrict vcom_writefds,
-		  fd_set * __restrict vcom_exceptfds,
-		  struct timeval *__restrict timeout)
+                  fd_set * __restrict vcom_writefds,
+                  fd_set * __restrict vcom_exceptfds,
+                  struct timeval *__restrict timeout)
 {
-  return vcom_socket_select (vcom_nfds, vcom_readfds,
-			     vcom_writefds, vcom_exceptfds, timeout);
+    return vcom_socket_select (vcom_nfds, vcom_readfds,
+                               vcom_writefds, vcom_exceptfds, timeout);
 }
 
 int
 vcom_select (int __nfds, fd_set * __restrict __readfds,
-	     fd_set * __restrict __writefds,
-	     fd_set * __restrict __exceptfds,
-	     struct timeval *__restrict __timeout)
+             fd_set * __restrict __writefds,
+             fd_set * __restrict __exceptfds,
+             struct timeval *__restrict __timeout)
 {
-  int rv;
-  int rv2 = 0;
-  pid_t pid = getpid ();
+    int rv;
+    int rv2 = 0;
+    pid_t pid = getpid ();
 
-  int timedout = 0;
-  /* block indefinitely */
-  int no_timeout = 0;
-  int first_clock_gettime_failed = 0;
-  /* timeout value in units of timespec */
-  struct timespec timeout_ts;
-  struct timespec start_time, now, end_time;
+    int timedout = 0;
+    /* block indefinitely */
+    int no_timeout = 0;
+    int first_clock_gettime_failed = 0;
+    /* timeout value in units of timespec */
+    struct timespec timeout_ts;
+    struct timespec start_time, now, end_time;
 
-  /* select sets attributes - after merge */
-  int new_nfds = 0;
-  int new_nfd = -1;
+    /* select sets attributes - after merge */
+    int new_nfds = 0;
+    int new_nfd = -1;
 
-  /* vcom */
-  int vcom_nfds = 0;
-  fd_set vcom_readfds;
-  fd_set vcom_writefds;
-  fd_set vcom_exceptfds;
-  int vcom_nfd = -1;
+    /* vcom */
+    int vcom_nfds = 0;
+    fd_set vcom_readfds;
+    fd_set vcom_writefds;
+    fd_set vcom_exceptfds;
+    int vcom_nfd = -1;
 
-  /* libc */
-  int libc_nfds = 0;
-  fd_set libc_readfds;
-  fd_set libc_writefds;
-  fd_set libc_exceptfds;
-  int libc_nfd = -1;
+    /* libc */
+    int libc_nfds = 0;
+    fd_set libc_readfds;
+    fd_set libc_writefds;
+    fd_set libc_exceptfds;
+    int libc_nfd = -1;
 
-  /* for polling */
-  struct timeval tv = {.tv_sec = 0,.tv_usec = 0 };
+    /* for polling */
+    struct timeval tv = {.tv_sec = 0,.tv_usec = 0 };
 
-  /* validate __timeout */
-  if (__timeout)
-    {
-      /* validate tv_sec */
-      /* bogus */
-      if (!vcom_timerisvalid (__timeout))
-	{
-	  rv = -EINVAL;
-	  goto select_done;
-	}
+    /* validate __timeout */
+    if (__timeout) {
+        /* validate tv_sec */
+        /* bogus */
+        if (!vcom_timerisvalid (__timeout)) {
+            rv = -EINVAL;
+            goto select_done;
+        }
 
-      /* validate tv_usec */
-      /* TBD: */
-      /* init timeout_ts */
-      VCOM_TIMEVAL_TO_TIMESPEC (__timeout, &timeout_ts);
-      set_normalized_timespec (&timeout_ts,
-			       timeout_ts.tv_sec, timeout_ts.tv_nsec);
+        /* validate tv_usec */
+        /* TBD: */
+        /* init timeout_ts */
+        VCOM_TIMEVAL_TO_TIMESPEC (__timeout, &timeout_ts);
+        set_normalized_timespec (&timeout_ts,
+                                 timeout_ts.tv_sec, timeout_ts.tv_nsec);
     }
 
-  rv = clock_gettime (CLOCK_MONOTONIC, &start_time);
-  if (rv == -1)
-    {
-      rv = -errno;
-      first_clock_gettime_failed = 1;
-      goto select_done;
+    rv = clock_gettime (CLOCK_MONOTONIC, &start_time);
+    if (rv == -1) {
+        rv = -errno;
+        first_clock_gettime_failed = 1;
+        goto select_done;
     }
 
-  /* init end_time */
-  if (__timeout)
-    {
-      if (timerisset (__timeout))
-	{
-	  end_time = timespec_add (start_time, timeout_ts);
-	}
-      else
-	{
-	  /*
-	   * if both fields of the timeout structure are zero,
-	   * then select returns immediately
-	   * */
-	  end_time = start_time;
-	}
-    }
-  else
-    {
-      /* block indefinitely */
-      no_timeout = 1;
+    /* init end_time */
+    if (__timeout) {
+        if (timerisset (__timeout)) {
+            end_time = timespec_add (start_time, timeout_ts);
+        } else {
+            /*
+             * if both fields of the timeout structure are zero,
+             * then select returns immediately
+             * */
+            end_time = start_time;
+        }
+    } else {
+        /* block indefinitely */
+        no_timeout = 1;
     }
 
 
 
-  if (vcom_init () != 0)
-    {
-      rv = -1;
-      goto select_done;
+    if (vcom_init () != 0) {
+        rv = -1;
+        goto select_done;
     }
 
-  /* validate __nfds */
-  if (__nfds < 0 || __nfds > FD_SETSIZE)
-    {
-      rv = -EINVAL;
-      goto select_done;
+    /* validate __nfds */
+    if (__nfds < 0 || __nfds > FD_SETSIZE) {
+        rv = -EINVAL;
+        goto select_done;
     }
 
 
-  /*
-   * usleep(3) emulation
-   * */
+    /*
+     * usleep(3) emulation
+     * */
 
-  /* call libc_select() with a finite timeout and
-   * no file descriptors or empty fd sets and
-   * zero nfds */
-  if (__nfds == 0 &&
-      (!__readfds || fd_set_iszero (__readfds)) &&
-      (!__writefds || fd_set_iszero (__writefds)) &&
-      (!__exceptfds || fd_set_iszero (__exceptfds)))
-    {
-      if (__timeout)
-	{
-	  rv = libc_select (__nfds,
-			    __readfds, __writefds, __exceptfds, __timeout);
-	  if (rv == -1)
-	    rv = -errno;
-	}
-      else
-	{
-	  /* TBD: block indefinitely or return -EINVAL */
-	  rv = -EINVAL;
-	}
-      goto select_done;
+    /* call libc_select() with a finite timeout and
+     * no file descriptors or empty fd sets and
+     * zero nfds */
+    if (__nfds == 0 &&
+        (!__readfds || fd_set_iszero (__readfds)) &&
+        (!__writefds || fd_set_iszero (__writefds)) &&
+        (!__exceptfds || fd_set_iszero (__exceptfds))) {
+        if (__timeout) {
+            rv = libc_select (__nfds,
+                              __readfds, __writefds, __exceptfds, __timeout);
+            if (rv == -1)
+                rv = -errno;
+        } else {
+            /* TBD: block indefinitely or return -EINVAL */
+            rv = -EINVAL;
+        }
+        goto select_done;
     }
 
-  /* init once before the polling loop */
+    /* init once before the polling loop */
 
-  /* zero vcom and libc fd sets */
-  /*
-   * S select fd set
-   * V vcom fd set
-   * L libc fd set
-   */
+    /* zero vcom and libc fd sets */
+    /*
+     * S select fd set
+     * V vcom fd set
+     * L libc fd set
+     */
 #define _(S,V,L)      \
   if ((S))            \
     {                 \
@@ -1162,106 +1107,100 @@ vcom_select (int __nfds, fd_set * __restrict __readfds,
     }
 
 
-  _(__readfds, &vcom_readfds, &libc_readfds);
-  _(__writefds, &vcom_writefds, &libc_writefds);
-  _(__exceptfds, &vcom_exceptfds, &libc_exceptfds);
+    _(__readfds, &vcom_readfds, &libc_readfds);
+    _(__writefds, &vcom_writefds, &libc_writefds);
+    _(__exceptfds, &vcom_exceptfds, &libc_exceptfds);
 #undef _
-  new_nfds = 0;
-  new_nfd = -1;
+    new_nfds = 0;
+    new_nfd = -1;
 
-  vcom_nfds = 0;
-  vcom_nfd = -1;
-  libc_nfds = 0;
-  libc_nfd = -1;
+    vcom_nfds = 0;
+    vcom_nfd = -1;
+    libc_nfds = 0;
+    libc_nfd = -1;
 
-  vcom_fd_set_split (
-		      /* src, select sets */
-		      __nfds, __readfds, __writefds, __exceptfds,
-		      /* dest1, vcom sets */
-		      __readfds || __writefds || __exceptfds ?
-		      &vcom_nfds : NULL,
-		      __readfds ? &vcom_readfds : NULL,
-		      __writefds ? &vcom_writefds : NULL,
-		      __exceptfds ? &vcom_exceptfds : NULL,
-		      __readfds || __writefds || __exceptfds ?
-		      &vcom_nfd : NULL,
-		      /* dest2, libc sets */
-		      __readfds || __writefds || __exceptfds ?
-		      &libc_nfds : NULL,
-		      __readfds ? &libc_readfds : NULL,
-		      __writefds ? &libc_writefds : NULL,
-		      __exceptfds ? &libc_exceptfds : NULL,
-		      __readfds || __writefds || __exceptfds ?
-		      &libc_nfd : NULL);
+    vcom_fd_set_split (
+        /* src, select sets */
+        __nfds, __readfds, __writefds, __exceptfds,
+        /* dest1, vcom sets */
+        __readfds || __writefds || __exceptfds ?
+        &vcom_nfds : NULL,
+        __readfds ? &vcom_readfds : NULL,
+        __writefds ? &vcom_writefds : NULL,
+        __exceptfds ? &vcom_exceptfds : NULL,
+        __readfds || __writefds || __exceptfds ?
+        &vcom_nfd : NULL,
+        /* dest2, libc sets */
+        __readfds || __writefds || __exceptfds ?
+        &libc_nfds : NULL,
+        __readfds ? &libc_readfds : NULL,
+        __writefds ? &libc_writefds : NULL,
+        __exceptfds ? &libc_exceptfds : NULL,
+        __readfds || __writefds || __exceptfds ?
+        &libc_nfd : NULL);
 
-  /*
-   * polling loop
-   * */
-  do
-    {
-      new_nfd = -1;
-      vcom_nfd = -1;
-      libc_nfd = -1;
+    /*
+     * polling loop
+     * */
+    do {
+        new_nfd = -1;
+        vcom_nfd = -1;
+        libc_nfd = -1;
 
-      /*
-       * if both fields of timeval structure are zero,
-       * vcom_select_impl and libc_select returns immediately.
-       * useful for polling and ensure fairness among
-       * file descriptors watched.
-       */
+        /*
+         * if both fields of timeval structure are zero,
+         * vcom_select_impl and libc_select returns immediately.
+         * useful for polling and ensure fairness among
+         * file descriptors watched.
+         */
 
-      /* for polling */
-      tv.tv_sec = 0;
-      tv.tv_usec = 0;
+        /* for polling */
+        tv.tv_sec = 0;
+        tv.tv_usec = 0;
 
-      /* select on vcom fds */
-      if (vcom_nfds)
-	{
-	  vcom_nfd = vcom_select_impl (vcom_nfds,
-				       __readfds ? &vcom_readfds : NULL,
-				       __writefds ? &vcom_writefds : NULL,
-				       __exceptfds ? &vcom_exceptfds : NULL,
-				       &tv);
-	  if (VCOM_DEBUG > 2)
-	    fprintf (stderr,
-		     "[%d] select vcom: "
-		     "'%04d'='%04d'\n", pid, vcom_nfd, vcom_nfds);
+        /* select on vcom fds */
+        if (vcom_nfds) {
+            vcom_nfd = vcom_select_impl (vcom_nfds,
+                                         __readfds ? &vcom_readfds : NULL,
+                                         __writefds ? &vcom_writefds : NULL,
+                                         __exceptfds ? &vcom_exceptfds : NULL,
+                                         &tv);
+            if (VCOM_DEBUG > 2)
+                fprintf (stderr,
+                         "[%d] select vcom: "
+                         "'%04d'='%04d'\n", pid, vcom_nfd, vcom_nfds);
 
-	  if (vcom_nfd < 0)
-	    {
-	      rv = vcom_nfd;
-	      goto select_done;
-	    }
-	}
-      /* select on libc fds */
-      if (libc_nfds)
-	{
-	  libc_nfd = libc_select (libc_nfds,
-				  __readfds ? &libc_readfds : NULL,
-				  __writefds ? &libc_writefds : NULL,
-				  __exceptfds ? &libc_exceptfds : NULL, &tv);
-	  if (VCOM_DEBUG > 2)
-	    fprintf (stderr,
-		     "[%d] select libc: "
-		     "'%04d'='%04d'\n", pid, libc_nfd, libc_nfds);
+            if (vcom_nfd < 0) {
+                rv = vcom_nfd;
+                goto select_done;
+            }
+        }
+        /* select on libc fds */
+        if (libc_nfds) {
+            libc_nfd = libc_select (libc_nfds,
+                                    __readfds ? &libc_readfds : NULL,
+                                    __writefds ? &libc_writefds : NULL,
+                                    __exceptfds ? &libc_exceptfds : NULL, &tv);
+            if (VCOM_DEBUG > 2)
+                fprintf (stderr,
+                         "[%d] select libc: "
+                         "'%04d'='%04d'\n", pid, libc_nfd, libc_nfds);
 
-	  if (libc_nfd < 0)
-	    {
-	      /* tv becomes undefined */
-	      libc_nfd = errno;
-	      rv = libc_nfd;
-	      goto select_done;
-	    }
-	}
+            if (libc_nfd < 0) {
+                /* tv becomes undefined */
+                libc_nfd = errno;
+                rv = libc_nfd;
+                goto select_done;
+            }
+        }
 
-      /* check if any file descriptors changed status */
-      if ((vcom_nfds && vcom_nfd > 0) || (libc_nfds && libc_nfd > 0))
-	{
-	  /* zero the sets before merge and exit */
+        /* check if any file descriptors changed status */
+        if ((vcom_nfds && vcom_nfd > 0) || (libc_nfds && libc_nfd > 0)) {
+            /* zero the sets before merge and exit */
 
-	  /*
-	   * F fd set
-	   */
+            /*
+             * F fd set
+             */
 #define _(F)                  \
           if ((F))            \
             {                 \
@@ -1269,232 +1208,206 @@ vcom_select (int __nfds, fd_set * __restrict __readfds,
             }
 
 
-	  _(__readfds);
-	  _(__writefds);
-	  _(__exceptfds);
+            _(__readfds);
+            _(__writefds);
+            _(__exceptfds);
 #undef _
-	  new_nfds = 0;
-	  new_nfd = -1;
+            new_nfds = 0;
+            new_nfd = -1;
 
-	  /*
-	   * on exit, sets are modified in place to indicate which
-	   * file descriptors actually changed status
-	   * */
-	  vcom_fd_set_merge (
-			      /* dest, select sets */
-			      &new_nfds,
-			      __readfds, __writefds, __exceptfds, &new_nfd,
-			      /* src1, vcom sets */
-			      vcom_nfds,
-			      __readfds ? &vcom_readfds : NULL,
-			      __writefds ? &vcom_writefds : NULL,
-			      __exceptfds ? &vcom_exceptfds : NULL, vcom_nfd,
-			      /* src2, libc sets */
-			      libc_nfds,
-			      __readfds ? &libc_readfds : NULL,
-			      __writefds ? &libc_writefds : NULL,
-			      __exceptfds ? &libc_exceptfds : NULL, libc_nfd);
-	  /*
-	   * return the number of file descriptors contained in the
-	   * three returned sets
-	   * */
-	  rv = 0;
-	  /*
-	   * for documentation
-	   *
-	   * if(vcom_nfd > 0)
-	   *   rv += vcom_nfd;
-	   * if(libc_nfd > 0)
-	   *   rv += libc_nfd;
-	   */
+            /*
+             * on exit, sets are modified in place to indicate which
+             * file descriptors actually changed status
+             * */
+            vcom_fd_set_merge (
+                /* dest, select sets */
+                &new_nfds,
+                __readfds, __writefds, __exceptfds, &new_nfd,
+                /* src1, vcom sets */
+                vcom_nfds,
+                __readfds ? &vcom_readfds : NULL,
+                __writefds ? &vcom_writefds : NULL,
+                __exceptfds ? &vcom_exceptfds : NULL, vcom_nfd,
+                /* src2, libc sets */
+                libc_nfds,
+                __readfds ? &libc_readfds : NULL,
+                __writefds ? &libc_writefds : NULL,
+                __exceptfds ? &libc_exceptfds : NULL, libc_nfd);
+            /*
+             * return the number of file descriptors contained in the
+             * three returned sets
+             * */
+            rv = 0;
+            /*
+             * for documentation
+             *
+             * if(vcom_nfd > 0)
+             *   rv += vcom_nfd;
+             * if(libc_nfd > 0)
+             *   rv += libc_nfd;
+             */
 
-	  rv = new_nfd == -1 ? 0 : new_nfd;
-	  goto select_done;
-	}
+            rv = new_nfd == -1 ? 0 : new_nfd;
+            goto select_done;
+        }
 
-      rv = clock_gettime (CLOCK_MONOTONIC, &now);
-      if (rv == -1)
-	{
-	  rv = -errno;
-	  goto select_done;
-	}
-    }
-  while (no_timeout || timespec_compare (&now, &end_time) < 0);
+        rv = clock_gettime (CLOCK_MONOTONIC, &now);
+        if (rv == -1) {
+            rv = -errno;
+            goto select_done;
+        }
+    } while (no_timeout || timespec_compare (&now, &end_time) < 0);
 
-  /* timeout expired before anything interesting happened */
-  timedout = 1;
-  rv = 0;
+    /* timeout expired before anything interesting happened */
+    timedout = 1;
+    rv = 0;
 
 select_done:
-  if (VCOM_DEBUG > 2)
-    fprintf (stderr, "[%d] vselect1: " "'%04d'='%04d'\n", pid, rv, __nfds);
-  /*
-   * modify timeout parameter to reflect the amount of time not slept
-   * */
-  if (__timeout)
-    {
-      if (vcom_timerisvalid (__timeout))
-	{
-	  /* timeout expired */
-	  if (timedout)
-	    {
-	      timerclear (__timeout);
-	    }
-	  else if (!first_clock_gettime_failed)
-	    {
-	      rv2 = clock_gettime (CLOCK_MONOTONIC, &now);
-	      if (rv2 == -1)
-		{
-		  rv = -errno;
-		}
-	      else
-		{
-		  struct timespec ts_delta;
-		  ts_delta = timespec_sub (end_time, now);
-		  VCOM_TIMESPEC_TO_TIMEVAL (__timeout, &ts_delta);
-		}
-	    }
-	}
+    if (VCOM_DEBUG > 2)
+        fprintf (stderr, "[%d] vselect1: " "'%04d'='%04d'\n", pid, rv, __nfds);
+    /*
+     * modify timeout parameter to reflect the amount of time not slept
+     * */
+    if (__timeout) {
+        if (vcom_timerisvalid (__timeout)) {
+            /* timeout expired */
+            if (timedout) {
+                timerclear (__timeout);
+            } else if (!first_clock_gettime_failed) {
+                rv2 = clock_gettime (CLOCK_MONOTONIC, &now);
+                if (rv2 == -1) {
+                    rv = -errno;
+                } else {
+                    struct timespec ts_delta;
+                    ts_delta = timespec_sub (end_time, now);
+                    VCOM_TIMESPEC_TO_TIMEVAL (__timeout, &ts_delta);
+                }
+            }
+        }
     }
-  if (VCOM_DEBUG > 2)
-    fprintf (stderr, "[%d] vselect2: " "'%04d',='%04d'\n", pid, rv, __nfds);
+    if (VCOM_DEBUG > 2)
+        fprintf (stderr, "[%d] vselect2: " "'%04d',='%04d'\n", pid, rv, __nfds);
 
-  return rv;
+    return rv;
 }
 
 int
 vcom_select_internal (int __nfds, fd_set * __restrict __readfds,
-		      fd_set * __restrict __writefds,
-		      fd_set * __restrict __exceptfds,
-		      struct timeval *__restrict __timeout)
+                      fd_set * __restrict __writefds,
+                      fd_set * __restrict __exceptfds,
+                      struct timeval *__restrict __timeout)
 {
-  int rv;
-  int new_nfds = 0;
-  int nfd = 0;
-  pid_t pid = getpid ();
+    int rv;
+    int new_nfds = 0;
+    int nfd = 0;
+    pid_t pid = getpid ();
 
-  fd_set saved_readfds;
-  fd_set saved_writefds;
-  fd_set saved_exceptfds;
+    fd_set saved_readfds;
+    fd_set saved_writefds;
+    fd_set saved_exceptfds;
 
-  /* validate __nfds */
-  if (__nfds < 0)
-    {
-      errno = EINVAL;
-      return -1;
+    /* validate __nfds */
+    if (__nfds < 0) {
+        errno = EINVAL;
+        return -1;
     }
 
-  /* validate __timeout */
-  if (__timeout)
-    {
-      /* validate tv_sec */
-      /* bogus */
-      if (__timeout->tv_sec < 0 || __timeout->tv_usec < 0)
-	{
-	  errno = EINVAL;
-	  return -1;
-	}
+    /* validate __timeout */
+    if (__timeout) {
+        /* validate tv_sec */
+        /* bogus */
+        if (__timeout->tv_sec < 0 || __timeout->tv_usec < 0) {
+            errno = EINVAL;
+            return -1;
+        }
 
-      /* validate tv_usec */
-      /* TBD: */
+        /* validate tv_usec */
+        /* TBD: */
     }
 
-  /* init saved_x fds */
-  if (__readfds)
-    {
-      saved_readfds = *__readfds;
-      /*
-         memcpy (&saved_readfds, __readfds, sizeof (*__readfds));
-       */
-    }
-  else
-    {
-      FD_ZERO (&saved_readfds);
+    /* init saved_x fds */
+    if (__readfds) {
+        saved_readfds = *__readfds;
+        /*
+           memcpy (&saved_readfds, __readfds, sizeof (*__readfds));
+         */
+    } else {
+        FD_ZERO (&saved_readfds);
     }
 
-  if (__writefds)
-    {
-      saved_writefds = *__writefds;
-      /*
-         memcpy (&saved_writefds, __writefds, sizeof (*__writefds));
-       */
+    if (__writefds) {
+        saved_writefds = *__writefds;
+        /*
+           memcpy (&saved_writefds, __writefds, sizeof (*__writefds));
+         */
 
-    }
-  else
-    {
-      FD_ZERO (&saved_writefds);
+    } else {
+        FD_ZERO (&saved_writefds);
     }
 
-  if (__exceptfds)
-    {
-      saved_exceptfds = *__exceptfds;
-      /*
-         memcpy (&saved_exceptfds, __exceptfds, sizeof (*__exceptfds));
-       */
+    if (__exceptfds) {
+        saved_exceptfds = *__exceptfds;
+        /*
+           memcpy (&saved_exceptfds, __exceptfds, sizeof (*__exceptfds));
+         */
 
-    }
-  else
-    {
-      FD_ZERO (&saved_exceptfds);
+    } else {
+        FD_ZERO (&saved_exceptfds);
     }
 
-  /* clear vcom fds */
-  nfd = vcom_fd_clear (__nfds, &new_nfds, __readfds, __writefds, __exceptfds);
+    /* clear vcom fds */
+    nfd = vcom_fd_clear (__nfds, &new_nfds, __readfds, __writefds, __exceptfds);
 
-  /* set to an invalid value */
-  rv = -2;
-  /* have kernel fds */
-  if (new_nfds)
-    rv = libc_select (new_nfds, __readfds,
-		      __writefds, __exceptfds, __timeout);
+    /* set to an invalid value */
+    rv = -2;
+    /* have kernel fds */
+    if (new_nfds)
+        rv = libc_select (new_nfds, __readfds,
+                          __writefds, __exceptfds, __timeout);
 
-  if (new_nfds && rv == -1)
-    {
-      /* on error, the file descriptor sets are unmodified */
-      if (__readfds)
-	*__readfds = saved_readfds;
-      if (__writefds)
-	*__writefds = saved_writefds;
-      if (__exceptfds)
-	*__exceptfds = saved_exceptfds;
-      return rv;
-    }
-  else if ((new_nfds && rv != -1) || (rv == -2))
-    {
-      /* restore vcom fds */
-      nfd = vcom_fd_set (__nfds,
-			 &new_nfds,
-			 __readfds,
-			 __writefds,
-			 __exceptfds,
-			 &saved_readfds, &saved_writefds, &saved_exceptfds);
-      rv = nfd;
+    if (new_nfds && rv == -1) {
+        /* on error, the file descriptor sets are unmodified */
+        if (__readfds)
+            *__readfds = saved_readfds;
+        if (__writefds)
+            *__writefds = saved_writefds;
+        if (__exceptfds)
+            *__exceptfds = saved_exceptfds;
+        return rv;
+    } else if ((new_nfds && rv != -1) || (rv == -2)) {
+        /* restore vcom fds */
+        nfd = vcom_fd_set (__nfds,
+                           &new_nfds,
+                           __readfds,
+                           __writefds,
+                           __exceptfds,
+                           &saved_readfds, &saved_writefds, &saved_exceptfds);
+        rv = nfd;
     }
 
-  if (VCOM_DEBUG > 0)
-    fprintf (stderr, "[%d] select: " "'%04d'='%04d'\n", pid, rv, __nfds);
-  return rv;
+    if (VCOM_DEBUG > 0)
+        fprintf (stderr, "[%d] select: " "'%04d'='%04d'\n", pid, rv, __nfds);
+    return rv;
 }
 
 int
 select (int __nfds, fd_set * __restrict __readfds,
-	fd_set * __restrict __writefds,
-	fd_set * __restrict __exceptfds, struct timeval *__restrict __timeout)
+        fd_set * __restrict __writefds,
+        fd_set * __restrict __exceptfds, struct timeval *__restrict __timeout)
 {
-  int rv = 0;
-  pid_t pid = getpid ();
+    int rv = 0;
+    pid_t pid = getpid ();
 
-  if (VCOM_DEBUG > 2)
-    fprintf (stderr, "[%d] select1: " "'%04d'='%04d'\n", pid, rv, __nfds);
-  rv = vcom_select (__nfds, __readfds, __writefds, __exceptfds, __timeout);
-  if (VCOM_DEBUG > 2)
-    fprintf (stderr, "[%d] select2: " "'%04d'='%04d'\n", pid, rv, __nfds);
-  if (rv < 0)
-    {
-      errno = -rv;
-      return -1;
+    if (VCOM_DEBUG > 2)
+        fprintf (stderr, "[%d] select1: " "'%04d'='%04d'\n", pid, rv, __nfds);
+    rv = vcom_select (__nfds, __readfds, __writefds, __exceptfds, __timeout);
+    if (VCOM_DEBUG > 2)
+        fprintf (stderr, "[%d] select2: " "'%04d'='%04d'\n", pid, rv, __nfds);
+    if (rv < 0) {
+        errno = -rv;
+        return -1;
     }
-  return rv;
+    return rv;
 }
 
 #ifdef __USE_XOPEN2K
@@ -1508,155 +1421,133 @@ select (int __nfds, fd_set * __restrict __readfds,
  * */
 int
 vcom_pselect (int __nfds, fd_set * __restrict __readfds,
-	      fd_set * __restrict __writefds,
-	      fd_set * __restrict __exceptfds,
-	      const struct timespec *__restrict __timeout,
-	      const __sigset_t * __restrict __sigmask)
+              fd_set * __restrict __writefds,
+              fd_set * __restrict __exceptfds,
+              const struct timespec *__restrict __timeout,
+              const __sigset_t * __restrict __sigmask)
 {
-  int fd;
-  int vcom_nfds = 0;
+    int fd;
+    int vcom_nfds = 0;
 
-  for (fd = 0; fd < __nfds; fd++)
-    {
-      if (__readfds && FD_ISSET (fd, __readfds))
-	{
-	  if (is_vcom_socket_fd (fd))
-	    {
-	      vcom_nfds++;
-	    }
-	}
+    for (fd = 0; fd < __nfds; fd++) {
+        if (__readfds && FD_ISSET (fd, __readfds)) {
+            if (is_vcom_socket_fd (fd)) {
+                vcom_nfds++;
+            }
+        }
 
-      if (__writefds && FD_ISSET (fd, __writefds))
-	{
-	  if (is_vcom_socket_fd (fd))
-	    {
-	      vcom_nfds++;
-	    }
-	}
-      if (__exceptfds && FD_ISSET (fd, __exceptfds))
-	{
-	  if (is_vcom_socket_fd (fd))
-	    {
-	      FD_CLR (fd, __exceptfds);
-	    }
-	}
+        if (__writefds && FD_ISSET (fd, __writefds)) {
+            if (is_vcom_socket_fd (fd)) {
+                vcom_nfds++;
+            }
+        }
+        if (__exceptfds && FD_ISSET (fd, __exceptfds)) {
+            if (is_vcom_socket_fd (fd)) {
+                FD_CLR (fd, __exceptfds);
+            }
+        }
     }
-  return vcom_nfds;
+    return vcom_nfds;
 }
 
 int
 pselect (int __nfds, fd_set * __restrict __readfds,
-	 fd_set * __restrict __writefds,
-	 fd_set * __restrict __exceptfds,
-	 const struct timespec *__restrict __timeout,
-	 const __sigset_t * __restrict __sigmask)
+         fd_set * __restrict __writefds,
+         fd_set * __restrict __exceptfds,
+         const struct timespec *__restrict __timeout,
+         const __sigset_t * __restrict __sigmask)
 {
-  int rv;
-  int new_nfds = 0;
-  int nfd = 0;
-  pid_t pid = getpid ();
+    int rv;
+    int new_nfds = 0;
+    int nfd = 0;
+    pid_t pid = getpid ();
 
-  fd_set saved_readfds;
-  fd_set saved_writefds;
-  fd_set saved_exceptfds;
+    fd_set saved_readfds;
+    fd_set saved_writefds;
+    fd_set saved_exceptfds;
 
-  /* validate __nfds */
-  if (__nfds < 0)
-    {
-      errno = EINVAL;
-      return -1;
+    /* validate __nfds */
+    if (__nfds < 0) {
+        errno = EINVAL;
+        return -1;
     }
 
-  /* validate __timeout */
-  if (__timeout)
-    {
-      /* validate tv_sec */
-      /* bogus */
-      if (__timeout->tv_sec < 0 || __timeout->tv_nsec < 0)
-	{
-	  errno = EINVAL;
-	  return -1;
-	}
+    /* validate __timeout */
+    if (__timeout) {
+        /* validate tv_sec */
+        /* bogus */
+        if (__timeout->tv_sec < 0 || __timeout->tv_nsec < 0) {
+            errno = EINVAL;
+            return -1;
+        }
 
-      /* validate tv_usec */
-      /* TBD: */
+        /* validate tv_usec */
+        /* TBD: */
     }
 
-  /* init saved fds */
-  if (__readfds)
-    {
-      saved_readfds = *__readfds;
-      /*
-         memcpy (&saved_readfds, __readfds, sizeof (*__readfds));
-       */
-    }
-  else
-    {
-      FD_ZERO (&saved_readfds);
+    /* init saved fds */
+    if (__readfds) {
+        saved_readfds = *__readfds;
+        /*
+           memcpy (&saved_readfds, __readfds, sizeof (*__readfds));
+         */
+    } else {
+        FD_ZERO (&saved_readfds);
     }
 
-  if (__writefds)
-    {
-      saved_writefds = *__writefds;
-      /*
-         memcpy (&saved_writefds, __writefds, sizeof (*__writefds));
-       */
+    if (__writefds) {
+        saved_writefds = *__writefds;
+        /*
+           memcpy (&saved_writefds, __writefds, sizeof (*__writefds));
+         */
 
-    }
-  else
-    {
-      FD_ZERO (&saved_writefds);
+    } else {
+        FD_ZERO (&saved_writefds);
     }
 
-  if (__exceptfds)
-    {
-      saved_exceptfds = *__exceptfds;
-      /*
-         memcpy (&saved_exceptfds, __exceptfds, sizeof (*__exceptfds));
-       */
+    if (__exceptfds) {
+        saved_exceptfds = *__exceptfds;
+        /*
+           memcpy (&saved_exceptfds, __exceptfds, sizeof (*__exceptfds));
+         */
 
-    }
-  else
-    {
-      FD_ZERO (&saved_exceptfds);
+    } else {
+        FD_ZERO (&saved_exceptfds);
     }
 
-  /* clear vcom fds */
-  nfd = vcom_fd_clear (__nfds, &new_nfds, __readfds, __writefds, __exceptfds);
+    /* clear vcom fds */
+    nfd = vcom_fd_clear (__nfds, &new_nfds, __readfds, __writefds, __exceptfds);
 
-  /* set to an invalid value */
-  rv = -2;
-  if (new_nfds)
-    rv = libc_pselect (new_nfds,
-		       __readfds,
-		       __writefds, __exceptfds, __timeout, __sigmask);
+    /* set to an invalid value */
+    rv = -2;
+    if (new_nfds)
+        rv = libc_pselect (new_nfds,
+                           __readfds,
+                           __writefds, __exceptfds, __timeout, __sigmask);
 
-  if (new_nfds && rv == -1)
-    {
-      /* on error, the file descriptor sets are unmodified */
-      if (__readfds)
-	*__readfds = saved_readfds;
-      if (__writefds)
-	*__writefds = saved_writefds;
-      if (__exceptfds)
-	*__exceptfds = saved_exceptfds;
-      return rv;
-    }
-  else if ((new_nfds && rv != -1) || (rv == -2))
-    {
-      /* restore vcom fds */
-      nfd = vcom_fd_set (__nfds,
-			 &new_nfds,
-			 __readfds,
-			 __writefds,
-			 __exceptfds,
-			 &saved_readfds, &saved_writefds, &saved_exceptfds);
-      rv = nfd;
+    if (new_nfds && rv == -1) {
+        /* on error, the file descriptor sets are unmodified */
+        if (__readfds)
+            *__readfds = saved_readfds;
+        if (__writefds)
+            *__writefds = saved_writefds;
+        if (__exceptfds)
+            *__exceptfds = saved_exceptfds;
+        return rv;
+    } else if ((new_nfds && rv != -1) || (rv == -2)) {
+        /* restore vcom fds */
+        nfd = vcom_fd_set (__nfds,
+                           &new_nfds,
+                           __readfds,
+                           __writefds,
+                           __exceptfds,
+                           &saved_readfds, &saved_writefds, &saved_exceptfds);
+        rv = nfd;
     }
 
-  if (VCOM_DEBUG > 2)
-    fprintf (stderr, "[%d] pselect: " "'%04d'='%04d'\n", pid, rv, __nfds);
-  return rv;
+    if (VCOM_DEBUG > 2)
+        fprintf (stderr, "[%d] pselect: " "'%04d'='%04d'\n", pid, rv, __nfds);
+    return rv;
 }
 #endif
 
@@ -1677,64 +1568,60 @@ pselect (int __nfds, fd_set * __restrict __readfds,
 int
 vcom_socket (int __domain, int __type, int __protocol)
 {
-  if (vcom_init () != 0)
-    {
-      return -1;
+    if (vcom_init () != 0) {
+        return -1;
     }
 
-  return vcom_socket_socket (__domain, __type, __protocol);
+    return vcom_socket_socket (__domain, __type, __protocol);
 }
 
 int
 socket (int __domain, int __type, int __protocol)
 {
-  int rv;
-  pid_t pid = getpid ();
-  pthread_t tid = pthread_self ();
+    int rv;
+    pid_t pid = getpid ();
+    pthread_t tid = pthread_self ();
 
-  /* handle domains implemented by vpp */
-  switch (__domain)
-    {
-    case AF_INET:
-    case AF_INET6:
-      /* handle types implemented by vpp */
-      switch (__type & ~(SOCK_CLOEXEC | SOCK_NONBLOCK))
-	{
-	case SOCK_STREAM:
-	case SOCK_DGRAM:
-	  if (VCOM_DEBUG > 0)
-	    vcom_socket_main_show ();
-	  rv = vcom_socket (__domain, __type, __protocol);
-	  if (VCOM_DEBUG > 0)
-	    fprintf (stderr,
-		     "[%d][%lu (0x%lx)] socket: "
-		     "'%04d'= D='%04d', T='%04d', P='%04d'\n",
-		     pid, (unsigned long) tid, (unsigned long) tid,
-		     rv, __domain, __type, __protocol);
-	  if (VCOM_DEBUG > 0)
-	    vcom_socket_main_show ();
-	  if (rv < 0)
-	    {
-	      errno = -rv;
-	      return -1;
-	    }
-	  return rv;
-	  break;
+    /* handle domains implemented by vpp */
+    switch (__domain) {
+        case AF_INET:
+        case AF_INET6:
+            /* handle types implemented by vpp */
+            switch (__type & ~(SOCK_CLOEXEC | SOCK_NONBLOCK)) {
+                case SOCK_STREAM:
+                case SOCK_DGRAM:
+                    if (VCOM_DEBUG > 0)
+                        vcom_socket_main_show ();
+                    rv = vcom_socket (__domain, __type, __protocol);
+                    if (VCOM_DEBUG > 0)
+                        fprintf (stderr,
+                                 "[%d][%lu (0x%lx)] socket: "
+                                 "'%04d'= D='%04d', T='%04d', P='%04d'\n",
+                                 pid, (unsigned long) tid, (unsigned long) tid,
+                                 rv, __domain, __type, __protocol);
+                    if (VCOM_DEBUG > 0)
+                        vcom_socket_main_show ();
+                    if (rv < 0) {
+                        errno = -rv;
+                        return -1;
+                    }
+                    return rv;
+                    break;
 
-	default:
-	  goto CALL_GLIBC_SOCKET_API;
-	  break;
-	}
+                default:
+                    goto CALL_GLIBC_SOCKET_API;
+                    break;
+            }
 
-      break;
+            break;
 
-    default:
-      goto CALL_GLIBC_SOCKET_API;
-      break;
+        default:
+            goto CALL_GLIBC_SOCKET_API;
+            break;
     }
 
 CALL_GLIBC_SOCKET_API:
-  return libc_socket (__domain, __type, __protocol);
+    return libc_socket (__domain, __type, __protocol);
 }
 
 /*
@@ -1747,58 +1634,54 @@ CALL_GLIBC_SOCKET_API:
 int
 vcom_socketpair (int __domain, int __type, int __protocol, int __fds[2])
 {
-  if (vcom_init () != 0)
-    {
-      return -1;
+    if (vcom_init () != 0) {
+        return -1;
     }
 
-  return vcom_socket_socketpair (__domain, __type, __protocol, __fds);
+    return vcom_socket_socketpair (__domain, __type, __protocol, __fds);
 }
 
 int
 socketpair (int __domain, int __type, int __protocol, int __fds[2])
 {
-  int rv;
-  pid_t pid = getpid ();
+    int rv;
+    pid_t pid = getpid ();
 
-  /* handle domains implemented by vpp */
-  switch (__domain)
-    {
-    case AF_INET:
-    case AF_INET6:
-      /* handle types implemented by vpp */
-      switch (__type)
-	{
-	case SOCK_STREAM:
-	case SOCK_DGRAM:
-	  rv = vcom_socketpair (__domain, __type, __protocol, __fds);
-	  if (VCOM_DEBUG > 0)
-	    fprintf (stderr,
-		     "[%d] socketpair: "
-		     "'%04d'= D='%04d', T='%04d', P='%04d'\n",
-		     pid, rv, __domain, __type, __protocol);
-	  if (rv < 0)
-	    {
-	      errno = -rv;
-	      return -1;
-	    }
-	  return 0;
-	  break;
+    /* handle domains implemented by vpp */
+    switch (__domain) {
+        case AF_INET:
+        case AF_INET6:
+            /* handle types implemented by vpp */
+            switch (__type) {
+                case SOCK_STREAM:
+                case SOCK_DGRAM:
+                    rv = vcom_socketpair (__domain, __type, __protocol, __fds);
+                    if (VCOM_DEBUG > 0)
+                        fprintf (stderr,
+                                 "[%d] socketpair: "
+                                 "'%04d'= D='%04d', T='%04d', P='%04d'\n",
+                                 pid, rv, __domain, __type, __protocol);
+                    if (rv < 0) {
+                        errno = -rv;
+                        return -1;
+                    }
+                    return 0;
+                    break;
 
-	default:
-	  goto CALL_GLIBC_SOCKET_API;
-	  break;
-	}
+                default:
+                    goto CALL_GLIBC_SOCKET_API;
+                    break;
+            }
 
-      break;
+            break;
 
-    default:
-      goto CALL_GLIBC_SOCKET_API;
-      break;
+        default:
+            goto CALL_GLIBC_SOCKET_API;
+            break;
     }
 
 CALL_GLIBC_SOCKET_API:
-  return libc_socketpair (__domain, __type, __protocol, __fds);
+    return libc_socketpair (__domain, __type, __protocol, __fds);
 }
 
 /*
@@ -1808,70 +1691,65 @@ CALL_GLIBC_SOCKET_API:
 int
 vcom_bind (int __fd, __CONST_SOCKADDR_ARG __addr, socklen_t __len)
 {
-  int rv;
+    int rv;
 
-  if (vcom_init () != 0)
-    {
-      return -1;
+    if (vcom_init () != 0) {
+        return -1;
     }
 
-  /* validate __len */
-  switch (__addr->sa_family)
-    {
-    case AF_INET:
-      if (__len != sizeof (struct sockaddr_in))
-	return -EINVAL;
-      break;
-    case AF_INET6:
-      if (__len != sizeof (struct sockaddr_in6))
-	return -EINVAL;
-      break;
+    /* validate __len */
+    switch (__addr->sa_family) {
+        case AF_INET:
+            if (__len != sizeof (struct sockaddr_in))
+                return -EINVAL;
+            break;
+        case AF_INET6:
+            if (__len != sizeof (struct sockaddr_in6))
+                return -EINVAL;
+            break;
 
-    default:
-      return -1;
-      break;
+        default:
+            return -1;
+            break;
     }
 
-  /* handle domains implemented by vpp */
-  switch (__addr->sa_family)
-    {
-    case AF_INET:
-    case AF_INET6:
-      rv = vcom_socket_bind (__fd, __addr, __len);
-      return rv;
-      break;
+    /* handle domains implemented by vpp */
+    switch (__addr->sa_family) {
+        case AF_INET:
+        case AF_INET6:
+            rv = vcom_socket_bind (__fd, __addr, __len);
+            return rv;
+            break;
 
-    default:
-      return -1;
-      break;
+        default:
+            return -1;
+            break;
     }
 
-  return -1;
+    return -1;
 }
 
 int
 bind (int __fd, __CONST_SOCKADDR_ARG __addr, socklen_t __len)
 {
-  int rv;
-  pid_t pid = getpid ();
+    int rv;
+    pid_t pid = getpid ();
 
-  if (is_vcom_socket_fd (__fd))
-    {
+    if (is_vcom_socket_fd (__fd)) {
 
-      rv = vcom_bind (__fd, __addr, __len);
-      if (VCOM_DEBUG > 0)
-	fprintf (stderr,
-		 "[%d] bind: "
-		 "'%04d'='%04d', '%p', '%04d'\n",
-		 pid, rv, __fd, __addr, __len);
-      if (rv != 0)
-	{
-	  errno = -rv;
-	  return -1;
-	}
-      return 0;
+        rv = vcom_bind (__fd, __addr, __len);
+        if (VCOM_DEBUG > 0)
+            fprintf (stderr,
+                     "[%d] bind: "
+                     "'%04d'='%04d', '%p', '%04d'\n",
+                     pid, rv, __fd, __addr, __len);
+        if (rv != 0) {
+            errno = -rv;
+            return -1;
+        }
+        return 0;
     }
-  return libc_bind (__fd, __addr, __len);
+    return libc_bind (__fd, __addr, __len);
 }
 
 /*
@@ -1879,37 +1757,34 @@ bind (int __fd, __CONST_SOCKADDR_ARG __addr, socklen_t __len)
  * */
 int
 vcom_getsockname (int __fd, __SOCKADDR_ARG __addr,
-		  socklen_t * __restrict __len)
+                  socklen_t * __restrict __len)
 {
-  if (vcom_init () != 0)
-    {
-      return -1;
+    if (vcom_init () != 0) {
+        return -1;
     }
 
-  return vcom_socket_getsockname (__fd, __addr, __len);
+    return vcom_socket_getsockname (__fd, __addr, __len);
 }
 
 int
 getsockname (int __fd, __SOCKADDR_ARG __addr, socklen_t * __restrict __len)
 {
-  int rv;
-  pid_t pid = getpid ();
+    int rv;
+    pid_t pid = getpid ();
 
-  if (is_vcom_socket_fd (__fd))
-    {
-      rv = vcom_getsockname (__fd, __addr, __len);
-      if (VCOM_DEBUG > 0)
-	fprintf (stderr,
-		 "[%d] getsockname: "
-		 "'%04d'='%04d', '%p', '%p'\n", pid, rv, __fd, __addr, __len);
-      if (rv != 0)
-	{
-	  errno = -rv;
-	  return -1;
-	}
-      return 0;
+    if (is_vcom_socket_fd (__fd)) {
+        rv = vcom_getsockname (__fd, __addr, __len);
+        if (VCOM_DEBUG > 0)
+            fprintf (stderr,
+                     "[%d] getsockname: "
+                     "'%04d'='%04d', '%p', '%p'\n", pid, rv, __fd, __addr, __len);
+        if (rv != 0) {
+            errno = -rv;
+            return -1;
+        }
+        return 0;
     }
-  return libc_getsockname (__fd, __addr, __len);
+    return libc_getsockname (__fd, __addr, __len);
 }
 
 /*
@@ -1923,70 +1798,65 @@ getsockname (int __fd, __SOCKADDR_ARG __addr, socklen_t * __restrict __len)
 int
 vcom_connect (int __fd, __CONST_SOCKADDR_ARG __addr, socklen_t __len)
 {
-  int rv;
+    int rv;
 
-  rv = vcom_init ();
-  if (rv)
-    {
-      return rv;
+    rv = vcom_init ();
+    if (rv) {
+        return rv;
     }
 
-  /* validate __len */
-  switch (__addr->sa_family)
-    {
-    case AF_INET:
-      if (__len != INET_ADDRSTRLEN)
-	return -EINVAL;
-      break;
-    case AF_INET6:
-      if (__len != INET6_ADDRSTRLEN)
-	return -EINVAL;
-      break;
+    /* validate __len */
+    switch (__addr->sa_family) {
+        case AF_INET:
+            if (__len != INET_ADDRSTRLEN)
+                return -EINVAL;
+            break;
+        case AF_INET6:
+            if (__len != INET6_ADDRSTRLEN)
+                return -EINVAL;
+            break;
 
-    default:
-      return -EAFNOSUPPORT;
-      break;
+        default:
+            return -EAFNOSUPPORT;
+            break;
     }
 
-  /* handle domains implemented by vpp */
-  switch (__addr->sa_family)
-    {
-    case AF_INET:
-    case AF_INET6:
-      rv = vcom_socket_connect (__fd, __addr, __len);
-      break;
+    /* handle domains implemented by vpp */
+    switch (__addr->sa_family) {
+        case AF_INET:
+        case AF_INET6:
+            rv = vcom_socket_connect (__fd, __addr, __len);
+            break;
 
-    default:
-      return -EPFNOSUPPORT;
-      break;
+        default:
+            return -EPFNOSUPPORT;
+            break;
     }
 
-  return rv;
+    return rv;
 }
 
 int
 connect (int __fd, __CONST_SOCKADDR_ARG __addr, socklen_t __len)
 {
-  int rv;
-  pid_t pid = getpid ();
+    int rv;
+    pid_t pid = getpid ();
 
-  if (is_vcom_socket_fd (__fd))
-    {
-      rv = vcom_connect (__fd, __addr, __len);
-      if (VCOM_DEBUG > 0)
-	fprintf (stderr,
-		 "[%d] connect: "
-		 "'%04d'='%04d', '%p', '%04d'\n",
-		 pid, rv, __fd, __addr, __len);
-      if (rv)
-	{
-	  errno = -rv;
-	  return -1;
-	}
-      return 0;
+    if (is_vcom_socket_fd (__fd)) {
+        rv = vcom_connect (__fd, __addr, __len);
+        if (VCOM_DEBUG > 0)
+            fprintf (stderr,
+                     "[%d] connect: "
+                     "'%04d'='%04d', '%p', '%04d'\n",
+                     pid, rv, __fd, __addr, __len);
+        if (rv) {
+            errno = -rv;
+            return -1;
+        }
+        return 0;
     }
 
-  return libc_connect (__fd, __addr, __len);
+    return libc_connect (__fd, __addr, __len);
 }
 
 /*
@@ -1995,37 +1865,34 @@ connect (int __fd, __CONST_SOCKADDR_ARG __addr, socklen_t __len)
  * */
 int
 vcom_getpeername (int __fd, __SOCKADDR_ARG __addr,
-		  socklen_t * __restrict __len)
+                  socklen_t * __restrict __len)
 {
-  if (vcom_init () != 0)
-    {
-      return -1;
+    if (vcom_init () != 0) {
+        return -1;
     }
 
-  return vcom_socket_getpeername (__fd, __addr, __len);
+    return vcom_socket_getpeername (__fd, __addr, __len);
 }
 
 int
 getpeername (int __fd, __SOCKADDR_ARG __addr, socklen_t * __restrict __len)
 {
-  int rv;
-  pid_t pid = getpid ();
+    int rv;
+    pid_t pid = getpid ();
 
-  if (is_vcom_socket_fd (__fd))
-    {
-      rv = vcom_getpeername (__fd, __addr, __len);
-      if (VCOM_DEBUG > 0)
-	fprintf (stderr,
-		 "[%d] getpeername: "
-		 "'%04d'='%04d', '%p', '%p'\n", pid, rv, __fd, __addr, __len);
-      if (rv != 0)
-	{
-	  errno = -rv;
-	  return -1;
-	}
-      return 0;
+    if (is_vcom_socket_fd (__fd)) {
+        rv = vcom_getpeername (__fd, __addr, __len);
+        if (VCOM_DEBUG > 0)
+            fprintf (stderr,
+                     "[%d] getpeername: "
+                     "'%04d'='%04d', '%p', '%p'\n", pid, rv, __fd, __addr, __len);
+        if (rv != 0) {
+            errno = -rv;
+            return -1;
+        }
+        return 0;
     }
-  return libc_getpeername (__fd, __addr, __len);
+    return libc_getpeername (__fd, __addr, __len);
 }
 
 /*
@@ -2037,75 +1904,70 @@ ssize_t
 vcom_send (int __fd, const void *__buf, size_t __n, int __flags)
 {
 
-  if (vcom_init () != 0)
-    {
-      return -1;
+    if (vcom_init () != 0) {
+        return -1;
     }
 
-  return vcom_socket_send (__fd, (void *) __buf, (int) __n, __flags);
+    return vcom_socket_send (__fd, (void *) __buf, (int) __n, __flags);
 }
 
 ssize_t
 send (int __fd, const void *__buf, size_t __n, int __flags)
 {
-  ssize_t size;
-  pid_t pid = getpid ();
+    ssize_t size;
+    pid_t pid = getpid ();
 
-  if (is_vcom_socket_fd (__fd))
-    {
-      size = vcom_send (__fd, __buf, __n, __flags);
-      if (VCOM_DEBUG > 0)
-	fprintf (stderr,
-		 "[%d] send: "
-		 "'%04d'='%04d', '%p', '%04d', '%04x'\n",
-		 pid, (int) size, __fd, __buf, (int) __n, __flags);
-      if (size < 0)
-	{
-	  errno = -size;
-	  return -1;
-	}
-      return size;
+    if (is_vcom_socket_fd (__fd)) {
+        size = vcom_send (__fd, __buf, __n, __flags);
+        if (VCOM_DEBUG > 0)
+            fprintf (stderr,
+                     "[%d] send: "
+                     "'%04d'='%04d', '%p', '%04d', '%04x'\n",
+                     pid, (int) size, __fd, __buf, (int) __n, __flags);
+        if (size < 0) {
+            errno = -size;
+            return -1;
+        }
+        return size;
     }
-  return libc_send (__fd, __buf, __n, __flags);
+    return libc_send (__fd, __buf, __n, __flags);
 }
 
 ssize_t
 sendfile (int __out_fd, int __in_fd, off_t * __offset, size_t __len)
 {
-  ssize_t size;
+    ssize_t size;
 
-  if (VCOM_DEBUG > 2)
-    clib_warning ("[%d] __out_fd %d, __in_fd %d, __offset %p, __len %ld",
-		  getpid (), __out_fd, __in_fd, __offset, __len);
+    if (VCOM_DEBUG > 2)
+        clib_warning ("[%d] __out_fd %d, __in_fd %d, __offset %p, __len %ld",
+                      getpid (), __out_fd, __in_fd, __offset, __len);
 
-  if (is_vcom_socket_fd (__out_fd))
-    {
-      /* TBD: refactor this check to be part of is_vcom_socket_fd() */
-      if (vcom_init () != 0)
-	return -1;
+    if (is_vcom_socket_fd (__out_fd)) {
+        /* TBD: refactor this check to be part of is_vcom_socket_fd() */
+        if (vcom_init () != 0)
+            return -1;
 
-      size = vcom_socket_sendfile (__out_fd, __in_fd, __offset, __len);
-      if (VCOM_DEBUG > 2)
-	clib_warning ("[%d] vcom_socket_sendfile (out_fd %d, in_fd %d, "
-		      "offset %p (%ld), len %lu) returned %ld",
-		      getpid (), __out_fd, __in_fd, __offset,
-		      __offset ? *__offset : -1, __len, size);
-      if (size < 0)
-	{
-	  errno = -size;
-	  return -1;
-	}
-      return size;
+        size = vcom_socket_sendfile (__out_fd, __in_fd, __offset, __len);
+        if (VCOM_DEBUG > 2)
+            clib_warning ("[%d] vcom_socket_sendfile (out_fd %d, in_fd %d, "
+                          "offset %p (%ld), len %lu) returned %ld",
+                          getpid (), __out_fd, __in_fd, __offset,
+                          __offset ? *__offset : -1, __len, size);
+        if (size < 0) {
+            errno = -size;
+            return -1;
+        }
+        return size;
     }
-  if (VCOM_DEBUG > 2)
-    clib_warning ("[%d] calling libc_sendfile!", getpid ());
-  return libc_sendfile (__out_fd, __in_fd, __offset, __len);
+    if (VCOM_DEBUG > 2)
+        clib_warning ("[%d] calling libc_sendfile!", getpid ());
+    return libc_sendfile (__out_fd, __in_fd, __offset, __len);
 }
 
 ssize_t
 sendfile64 (int __out_fd, int __in_fd, off_t * __offset, size_t __len)
 {
-  return sendfile (__out_fd, __in_fd, __offset, __len);
+    return sendfile (__out_fd, __in_fd, __offset, __len);
 }
 
 
@@ -2118,36 +1980,33 @@ sendfile64 (int __out_fd, int __in_fd, off_t * __offset, size_t __len)
 ssize_t
 vcom_recv (int __fd, void *__buf, size_t __n, int __flags)
 {
-  if (vcom_init () != 0)
-    {
-      return -1;
+    if (vcom_init () != 0) {
+        return -1;
     }
 
-  return vcom_socket_recv (__fd, __buf, __n, __flags);
+    return vcom_socket_recv (__fd, __buf, __n, __flags);
 }
 
 ssize_t
 recv (int __fd, void *__buf, size_t __n, int __flags)
 {
-  ssize_t size;
-  pid_t pid = getpid ();
+    ssize_t size;
+    pid_t pid = getpid ();
 
-  if (is_vcom_socket_fd (__fd))
-    {
-      size = vcom_recv (__fd, __buf, __n, __flags);
-      if (VCOM_DEBUG > 0)
-	fprintf (stderr,
-		 "[%d] recv: "
-		 "'%04d'='%04d', '%p', '%04d', '%04x'\n",
-		 pid, (int) size, __fd, __buf, (int) __n, __flags);
-      if (size < 0)
-	{
-	  errno = -size;
-	  return -1;
-	}
-      return size;
+    if (is_vcom_socket_fd (__fd)) {
+        size = vcom_recv (__fd, __buf, __n, __flags);
+        if (VCOM_DEBUG > 0)
+            fprintf (stderr,
+                     "[%d] recv: "
+                     "'%04d'='%04d', '%p', '%04d', '%04x'\n",
+                     pid, (int) size, __fd, __buf, (int) __n, __flags);
+        if (size < 0) {
+            errno = -size;
+            return -1;
+        }
+        return size;
     }
-  return libc_recv (__fd, __buf, __n, __flags);
+    return libc_recv (__fd, __buf, __n, __flags);
 }
 
 /*
@@ -2158,41 +2017,38 @@ recv (int __fd, void *__buf, size_t __n, int __flags)
  * */
 ssize_t
 vcom_sendto (int __fd, const void *__buf, size_t __n, int __flags,
-	     __CONST_SOCKADDR_ARG __addr, socklen_t __addr_len)
+             __CONST_SOCKADDR_ARG __addr, socklen_t __addr_len)
 {
-  if (vcom_init () != 0)
-    {
-      return -1;
+    if (vcom_init () != 0) {
+        return -1;
     }
 
-  return vcom_socket_sendto (__fd, __buf, __n, __flags, __addr, __addr_len);
+    return vcom_socket_sendto (__fd, __buf, __n, __flags, __addr, __addr_len);
 }
 
 ssize_t
 sendto (int __fd, const void *__buf, size_t __n, int __flags,
-	__CONST_SOCKADDR_ARG __addr, socklen_t __addr_len)
+        __CONST_SOCKADDR_ARG __addr, socklen_t __addr_len)
 {
-  ssize_t size;
-  pid_t pid = getpid ();
+    ssize_t size;
+    pid_t pid = getpid ();
 
-  if (is_vcom_socket_fd (__fd))
-    {
-      size = vcom_sendto (__fd, __buf, __n, __flags, __addr, __addr_len);
-      if (VCOM_DEBUG > 0)
-	fprintf (stderr,
-		 "[%d] sendto: "
-		 "'%04d'='%04d', '%p', '%04d', '%04x', "
-		 "'%p', '%04d'\n",
-		 pid, (int) size, __fd, __buf, (int) __n, __flags,
-		 __addr, __addr_len);
-      if (size < 0)
-	{
-	  errno = -size;
-	  return -1;
-	}
-      return size;
+    if (is_vcom_socket_fd (__fd)) {
+        size = vcom_sendto (__fd, __buf, __n, __flags, __addr, __addr_len);
+        if (VCOM_DEBUG > 0)
+            fprintf (stderr,
+                     "[%d] sendto: "
+                     "'%04d'='%04d', '%p', '%04d', '%04x', "
+                     "'%p', '%04d'\n",
+                     pid, (int) size, __fd, __buf, (int) __n, __flags,
+                     __addr, __addr_len);
+        if (size < 0) {
+            errno = -size;
+            return -1;
+        }
+        return size;
     }
-  return libc_sendto (__fd, __buf, __n, __flags, __addr, __addr_len);
+    return libc_sendto (__fd, __buf, __n, __flags, __addr, __addr_len);
 }
 
 /*
@@ -2206,43 +2062,40 @@ sendto (int __fd, const void *__buf, size_t __n, int __flags,
  * */
 ssize_t
 vcom_recvfrom (int __fd, void *__restrict __buf, size_t __n,
-	       int __flags,
-	       __SOCKADDR_ARG __addr, socklen_t * __restrict __addr_len)
+               int __flags,
+               __SOCKADDR_ARG __addr, socklen_t * __restrict __addr_len)
 {
-  if (vcom_init () != 0)
-    {
-      return -1;
+    if (vcom_init () != 0) {
+        return -1;
     }
 
-  return vcom_socket_recvfrom (__fd, __buf, __n, __flags, __addr, __addr_len);
+    return vcom_socket_recvfrom (__fd, __buf, __n, __flags, __addr, __addr_len);
 }
 
 ssize_t
 recvfrom (int __fd, void *__restrict __buf, size_t __n,
-	  int __flags,
-	  __SOCKADDR_ARG __addr, socklen_t * __restrict __addr_len)
+          int __flags,
+          __SOCKADDR_ARG __addr, socklen_t * __restrict __addr_len)
 {
-  ssize_t size;
-  pid_t pid = getpid ();
+    ssize_t size;
+    pid_t pid = getpid ();
 
-  if (is_vcom_socket_fd (__fd))
-    {
-      size = vcom_recvfrom (__fd, __buf, __n, __flags, __addr, __addr_len);
-      if (VCOM_DEBUG > 0)
-	fprintf (stderr,
-		 "[%d] recvfrom: "
-		 "'%04d'='%04d', '%p', '%04d', '%04x', "
-		 "'%p', '%p'\n",
-		 pid, (int) size, __fd, __buf, (int) __n, __flags,
-		 __addr, __addr_len);
-      if (size < 0)
-	{
-	  errno = -size;
-	  return -1;
-	}
-      return size;
+    if (is_vcom_socket_fd (__fd)) {
+        size = vcom_recvfrom (__fd, __buf, __n, __flags, __addr, __addr_len);
+        if (VCOM_DEBUG > 0)
+            fprintf (stderr,
+                     "[%d] recvfrom: "
+                     "'%04d'='%04d', '%p', '%04d', '%04x', "
+                     "'%p', '%p'\n",
+                     pid, (int) size, __fd, __buf, (int) __n, __flags,
+                     __addr, __addr_len);
+        if (size < 0) {
+            errno = -size;
+            return -1;
+        }
+        return size;
     }
-  return libc_recvfrom (__fd, __buf, __n, __flags, __addr, __addr_len);
+    return libc_recvfrom (__fd, __buf, __n, __flags, __addr, __addr_len);
 }
 
 /*
@@ -2254,36 +2107,33 @@ recvfrom (int __fd, void *__restrict __buf, size_t __n,
 ssize_t
 vcom_sendmsg (int __fd, const struct msghdr * __message, int __flags)
 {
-  if (vcom_init () != 0)
-    {
-      return -1;
+    if (vcom_init () != 0) {
+        return -1;
     }
 
-  return vcom_socket_sendmsg (__fd, __message, __flags);
+    return vcom_socket_sendmsg (__fd, __message, __flags);
 }
 
 ssize_t
 sendmsg (int __fd, const struct msghdr * __message, int __flags)
 {
-  ssize_t size;
-  pid_t pid = getpid ();
+    ssize_t size;
+    pid_t pid = getpid ();
 
-  if (is_vcom_socket_fd (__fd))
-    {
-      size = vcom_sendmsg (__fd, __message, __flags);
-      if (VCOM_DEBUG > 0)
-	fprintf (stderr,
-		 "[%d] sendmsg: "
-		 "'%04d'='%04d', '%p', '%04x'\n",
-		 pid, (int) size, __fd, __message, __flags);
-      if (size < 0)
-	{
-	  errno = -size;
-	  return -1;
-	}
-      return size;
+    if (is_vcom_socket_fd (__fd)) {
+        size = vcom_sendmsg (__fd, __message, __flags);
+        if (VCOM_DEBUG > 0)
+            fprintf (stderr,
+                     "[%d] sendmsg: "
+                     "'%04d'='%04d', '%p', '%04x'\n",
+                     pid, (int) size, __fd, __message, __flags);
+        if (size < 0) {
+            errno = -size;
+            return -1;
+        }
+        return size;
     }
-  return libc_sendmsg (__fd, __message, __flags);
+    return libc_sendmsg (__fd, __message, __flags);
 }
 
 #ifdef __USE_GNU
@@ -2296,39 +2146,36 @@ sendmsg (int __fd, const struct msghdr * __message, int __flags)
  * */
 int
 vcom_sendmmsg (int __fd, struct mmsghdr *__vmessages,
-	       unsigned int __vlen, int __flags)
+               unsigned int __vlen, int __flags)
 {
-  if (vcom_init () != 0)
-    {
-      return -1;
+    if (vcom_init () != 0) {
+        return -1;
     }
 
-  return vcom_socket_sendmmsg (__fd, __message, __vlen, __flags);
+    return vcom_socket_sendmmsg (__fd, __message, __vlen, __flags);
 }
 
 int
 sendmmsg (int __fd, struct mmsghdr *__vmessages,
-	  unsigned int __vlen, int __flags)
+          unsigned int __vlen, int __flags)
 {
-  ssize_t size;
-  pid_t pid = getpid ();
+    ssize_t size;
+    pid_t pid = getpid ();
 
-  if (is_vcom_socket_fd (__fd))
-    {
-      size = vcom_sendmmsg (__fd, __message, __vlen, __flags);
-      if (VCOM_DEBUG > 0)
-	fprintf (stderr,
-		 "[%d] sendmmsg: "
-		 "'%04d'='%04d', '%p', '%04d', '%04x'\n",
-		 pid, (int) size, __fd, __vmessages, __vlen, __flags);
-      if (size < 0)
-	{
-	  errno = -size;
-	  return -1;
-	}
-      return size;
+    if (is_vcom_socket_fd (__fd)) {
+        size = vcom_sendmmsg (__fd, __message, __vlen, __flags);
+        if (VCOM_DEBUG > 0)
+            fprintf (stderr,
+                     "[%d] sendmmsg: "
+                     "'%04d'='%04d', '%p', '%04d', '%04x'\n",
+                     pid, (int) size, __fd, __vmessages, __vlen, __flags);
+        if (size < 0) {
+            errno = -size;
+            return -1;
+        }
+        return size;
     }
-  return libc_sendmmsg (__fd, __message, __vlen, __flags);
+    return libc_sendmmsg (__fd, __message, __vlen, __flags);
 }
 
 #endif
@@ -2342,36 +2189,33 @@ sendmmsg (int __fd, struct mmsghdr *__vmessages,
 ssize_t
 vcom_recvmsg (int __fd, struct msghdr * __message, int __flags)
 {
-  if (vcom_init () != 0)
-    {
-      return -1;
+    if (vcom_init () != 0) {
+        return -1;
     }
 
-  return vcom_socket_recvmsg (__fd, __message, __flags);
+    return vcom_socket_recvmsg (__fd, __message, __flags);
 }
 
 ssize_t
 recvmsg (int __fd, struct msghdr * __message, int __flags)
 {
-  ssize_t size;
-  pid_t pid = getpid ();
+    ssize_t size;
+    pid_t pid = getpid ();
 
-  if (is_vcom_socket_fd (__fd))
-    {
-      size = vcom_recvmsg (__fd, __message, __flags);
-      if (VCOM_DEBUG > 0)
-	fprintf (stderr,
-		 "[%d] recvmsg: "
-		 "'%04d'='%04d', '%p', '%04x'\n",
-		 pid, (int) size, __fd, __message, __flags);
-      if (size < 0)
-	{
-	  errno = -size;
-	  return -1;
-	}
-      return size;
+    if (is_vcom_socket_fd (__fd)) {
+        size = vcom_recvmsg (__fd, __message, __flags);
+        if (VCOM_DEBUG > 0)
+            fprintf (stderr,
+                     "[%d] recvmsg: "
+                     "'%04d'='%04d', '%p', '%04x'\n",
+                     pid, (int) size, __fd, __message, __flags);
+        if (size < 0) {
+            errno = -size;
+            return -1;
+        }
+        return size;
     }
-  return libc_recvmsg (__fd, __message, __flags);
+    return libc_recvmsg (__fd, __message, __flags);
 }
 
 #ifdef __USE_GNU
@@ -2383,40 +2227,37 @@ recvmsg (int __fd, struct msghdr * __message, int __flags)
  * */
 int
 vcom_recvmmsg (int __fd, struct mmsghdr *__vmessages,
-	       unsigned int __vlen, int __flags, struct timespec *__tmo)
+               unsigned int __vlen, int __flags, struct timespec *__tmo)
 {
-  if (vcom_init () != 0)
-    {
-      return -1;
+    if (vcom_init () != 0) {
+        return -1;
     }
 
-  return vcom_socket_recvmmsg (__fd, __message, __vlen, __flags, __tmo);
+    return vcom_socket_recvmmsg (__fd, __message, __vlen, __flags, __tmo);
 }
 
 int
 recvmmsg (int __fd, struct mmsghdr *__vmessages,
-	  unsigned int __vlen, int __flags, struct timespec *__tmo)
+          unsigned int __vlen, int __flags, struct timespec *__tmo)
 {
-  ssize_t size;
-  pid_t pid = getpid ();
+    ssize_t size;
+    pid_t pid = getpid ();
 
-  if (is_vcom_socket_fd (__fd))
-    {
-      size = vcom_recvmmsg (__fd, __message, __vlen, __flags, __tmo);
-      if (VCOM_DEBUG > 0)
-	fprintf (stderr,
-		 "[%d] recvmmsg: "
-		 "'%04d'='%04d', '%p', "
-		 "'%04d', '%04x', '%p'\n",
-		 pid, (int) size, __fd, __vmessages, __vlen, __flags, __tmo);
-      if (size < 0)
-	{
-	  errno = -size;
-	  return -1;
-	}
-      return size;
+    if (is_vcom_socket_fd (__fd)) {
+        size = vcom_recvmmsg (__fd, __message, __vlen, __flags, __tmo);
+        if (VCOM_DEBUG > 0)
+            fprintf (stderr,
+                     "[%d] recvmmsg: "
+                     "'%04d'='%04d', '%p', "
+                     "'%04d', '%04x', '%p'\n",
+                     pid, (int) size, __fd, __vmessages, __vlen, __flags, __tmo);
+        if (size < 0) {
+            errno = -size;
+            return -1;
+        }
+        return size;
     }
-  return libc_recvmmsg (__fd, __message, __vlen, __flags, __tmo);
+    return libc_recvmmsg (__fd, __message, __vlen, __flags, __tmo);
 }
 
 #endif
@@ -2429,41 +2270,38 @@ recvmmsg (int __fd, struct mmsghdr *__vmessages,
  * */
 int
 vcom_getsockopt (int __fd, int __level, int __optname,
-		 void *__restrict __optval, socklen_t * __restrict __optlen)
+                 void *__restrict __optval, socklen_t * __restrict __optlen)
 {
-  if (vcom_init () != 0)
-    {
-      return -1;
+    if (vcom_init () != 0) {
+        return -1;
     }
 
-  return vcom_socket_getsockopt (__fd, __level, __optname,
-				 __optval, __optlen);
+    return vcom_socket_getsockopt (__fd, __level, __optname,
+                                   __optval, __optlen);
 }
 
 int
 getsockopt (int __fd, int __level, int __optname,
-	    void *__restrict __optval, socklen_t * __restrict __optlen)
+            void *__restrict __optval, socklen_t * __restrict __optlen)
 {
-  int rv;
-  pid_t pid = getpid ();
+    int rv;
+    pid_t pid = getpid ();
 
-  if (is_vcom_socket_fd (__fd))
-    {
-      rv = vcom_getsockopt (__fd, __level, __optname, __optval, __optlen);
-      if (VCOM_DEBUG > 2)
-	fprintf (stderr,
-		 "[%d] getsockopt: "
-		 "'%04d'='%04d', '%04d', '%04d', "
-		 "'%p', '%p'\n",
-		 pid, rv, __fd, __level, __optname, __optval, __optlen);
-      if (rv != 0)
-	{
-	  errno = -rv;
-	  return -1;
-	}
-      return 0;
+    if (is_vcom_socket_fd (__fd)) {
+        rv = vcom_getsockopt (__fd, __level, __optname, __optval, __optlen);
+        if (VCOM_DEBUG > 2)
+            fprintf (stderr,
+                     "[%d] getsockopt: "
+                     "'%04d'='%04d', '%04d', '%04d', "
+                     "'%p', '%p'\n",
+                     pid, rv, __fd, __level, __optname, __optval, __optlen);
+        if (rv != 0) {
+            errno = -rv;
+            return -1;
+        }
+        return 0;
     }
-  return libc_getsockopt (__fd, __level, __optname, __optval, __optlen);
+    return libc_getsockopt (__fd, __level, __optname, __optval, __optlen);
 }
 
 /*
@@ -2473,41 +2311,38 @@ getsockopt (int __fd, int __level, int __optname,
  * */
 int
 vcom_setsockopt (int __fd, int __level, int __optname,
-		 const void *__optval, socklen_t __optlen)
+                 const void *__optval, socklen_t __optlen)
 {
-  if (vcom_init () != 0)
-    {
-      return -1;
+    if (vcom_init () != 0) {
+        return -1;
     }
 
-  return vcom_socket_setsockopt (__fd, __level, __optname,
-				 __optval, __optlen);
+    return vcom_socket_setsockopt (__fd, __level, __optname,
+                                   __optval, __optlen);
 }
 
 int
 setsockopt (int __fd, int __level, int __optname,
-	    const void *__optval, socklen_t __optlen)
+            const void *__optval, socklen_t __optlen)
 {
-  int rv;
-  pid_t pid = getpid ();
+    int rv;
+    pid_t pid = getpid ();
 
-  if (is_vcom_socket_fd (__fd))
-    {
-      rv = vcom_setsockopt (__fd, __level, __optname, __optval, __optlen);
-      if (VCOM_DEBUG > 0)
-	fprintf (stderr,
-		 "[%d] setsockopt: "
-		 "'%04d'='%04d', '%04d', '%04d', "
-		 "'%p', '%04d'\n",
-		 pid, rv, __fd, __level, __optname, __optval, __optlen);
-      if (rv != 0)
-	{
-	  errno = -rv;
-	  return -1;
-	}
-      return 0;
+    if (is_vcom_socket_fd (__fd)) {
+        rv = vcom_setsockopt (__fd, __level, __optname, __optval, __optlen);
+        if (VCOM_DEBUG > 0)
+            fprintf (stderr,
+                     "[%d] setsockopt: "
+                     "'%04d'='%04d', '%04d', '%04d', "
+                     "'%p', '%04d'\n",
+                     pid, rv, __fd, __level, __optname, __optval, __optlen);
+        if (rv != 0) {
+            errno = -rv;
+            return -1;
+        }
+        return 0;
     }
-  return libc_setsockopt (__fd, __level, __optname, __optval, __optlen);
+    return libc_setsockopt (__fd, __level, __optname, __optval, __optlen);
 }
 
 /*
@@ -2519,35 +2354,32 @@ setsockopt (int __fd, int __level, int __optname,
 int
 vcom_listen (int __fd, int __n)
 {
-  if (vcom_init () != 0)
-    {
-      return -1;
+    if (vcom_init () != 0) {
+        return -1;
     }
 
-  return vcom_socket_listen (__fd, __n);
+    return vcom_socket_listen (__fd, __n);
 }
 
 int
 listen (int __fd, int __n)
 {
-  int rv;
-  pid_t pid = getpid ();
+    int rv;
+    pid_t pid = getpid ();
 
-  if (is_vcom_socket_fd (__fd))
-    {
-      rv = vcom_listen (__fd, __n);
-      if (VCOM_DEBUG > 0)
-	fprintf (stderr,
-		 "[%d] listen: "
-		 "'%04d'='%04d', '%04d'\n", pid, rv, __fd, __n);
-      if (rv != 0)
-	{
-	  errno = -rv;
-	  return -1;
-	}
-      return 0;
+    if (is_vcom_socket_fd (__fd)) {
+        rv = vcom_listen (__fd, __n);
+        if (VCOM_DEBUG > 0)
+            fprintf (stderr,
+                     "[%d] listen: "
+                     "'%04d'='%04d', '%04d'\n", pid, rv, __fd, __n);
+        if (rv != 0) {
+            errno = -rv;
+            return -1;
+        }
+        return 0;
     }
-  return libc_listen (__fd, __n);
+    return libc_listen (__fd, __n);
 }
 
 /*
@@ -2561,50 +2393,47 @@ listen (int __fd, int __n)
  * */
 int
 vcom_accept (int __fd, __SOCKADDR_ARG __addr,
-	     socklen_t * __restrict __addr_len)
+             socklen_t * __restrict __addr_len)
 {
 
-  if (vcom_init () != 0)
-    {
-      return -1;
+    if (vcom_init () != 0) {
+        return -1;
     }
-  return vcom_socket_accept (__fd, __addr, __addr_len);
+    return vcom_socket_accept (__fd, __addr, __addr_len);
 }
 
 int
 accept (int __fd, __SOCKADDR_ARG __addr, socklen_t * __restrict __addr_len)
 {
-  int rv = -1;
-  pid_t pid = getpid ();
-  pthread_t tid = pthread_self ();
+    int rv = -1;
+    pid_t pid = getpid ();
+    pthread_t tid = pthread_self ();
 
-  if (is_vcom_socket_fd (__fd))
-    {
-      if (VCOM_DEBUG > 0)
-	vcom_socket_main_show ();
-      if (VCOM_DEBUG > 0)
-	fprintf (stderr,
-		 "[%d][%lu (0x%lx)] accept1: "
-		 "'%04d'='%04d', '%p', '%p'\n",
-		 pid, (unsigned long) tid, (unsigned long) tid,
-		 rv, __fd, __addr, __addr_len);
-      rv = vcom_accept (__fd, __addr, __addr_len);
-      if (VCOM_DEBUG > 0)
-	fprintf (stderr,
-		 "[%d][%lu (0x%lx)] accept2: "
-		 "'%04d'='%04d', '%p', '%p'\n",
-		 pid, (unsigned long) tid, (unsigned long) tid,
-		 rv, __fd, __addr, __addr_len);
-      if (VCOM_DEBUG > 0)
-	vcom_socket_main_show ();
-      if (rv < 0)
-	{
-	  errno = -rv;
-	  return -1;
-	}
-      return rv;
+    if (is_vcom_socket_fd (__fd)) {
+        if (VCOM_DEBUG > 0)
+            vcom_socket_main_show ();
+        if (VCOM_DEBUG > 0)
+            fprintf (stderr,
+                     "[%d][%lu (0x%lx)] accept1: "
+                     "'%04d'='%04d', '%p', '%p'\n",
+                     pid, (unsigned long) tid, (unsigned long) tid,
+                     rv, __fd, __addr, __addr_len);
+        rv = vcom_accept (__fd, __addr, __addr_len);
+        if (VCOM_DEBUG > 0)
+            fprintf (stderr,
+                     "[%d][%lu (0x%lx)] accept2: "
+                     "'%04d'='%04d', '%p', '%p'\n",
+                     pid, (unsigned long) tid, (unsigned long) tid,
+                     rv, __fd, __addr, __addr_len);
+        if (VCOM_DEBUG > 0)
+            vcom_socket_main_show ();
+        if (rv < 0) {
+            errno = -rv;
+            return -1;
+        }
+        return rv;
     }
-  return libc_accept (__fd, __addr, __addr_len);
+    return libc_accept (__fd, __addr, __addr_len);
 }
 
 /*
@@ -2615,54 +2444,51 @@ accept (int __fd, __SOCKADDR_ARG __addr, socklen_t * __restrict __addr_len)
  * */
 int
 vcom_accept4 (int __fd, __SOCKADDR_ARG __addr,
-	      socklen_t * __restrict __addr_len, int __flags)
+              socklen_t * __restrict __addr_len, int __flags)
 {
 
-  if (vcom_init () != 0)
-    {
-      return -1;
+    if (vcom_init () != 0) {
+        return -1;
     }
 
-  return vcom_socket_accept4 (__fd, __addr, __addr_len, __flags);
+    return vcom_socket_accept4 (__fd, __addr, __addr_len, __flags);
 }
 
 int
 accept4 (int __fd, __SOCKADDR_ARG __addr,
-	 socklen_t * __restrict __addr_len, int __flags)
+         socklen_t * __restrict __addr_len, int __flags)
 {
-  int rv = 0;
-  pid_t pid = getpid ();
+    int rv = 0;
+    pid_t pid = getpid ();
 
-  fprintf (stderr,
-	   "[%d] accept4: in the beginning... "
-	   "'%04d'='%04d', '%p', '%p', '%04x'\n",
-	   pid, rv, __fd, __addr, __addr_len, __flags);
+    fprintf (stderr,
+             "[%d] accept4: in the beginning... "
+             "'%04d'='%04d', '%p', '%p', '%04x'\n",
+             pid, rv, __fd, __addr, __addr_len, __flags);
 
-  if (is_vcom_socket_fd (__fd))
-    {
-      if (VCOM_DEBUG > 0)
-	vcom_socket_main_show ();
-      rv = vcom_accept4 (__fd, __addr, __addr_len, __flags);
-      if (VCOM_DEBUG > 0)
-	fprintf (stderr,
-		 "[%d] accept4: VCL "
-		 "'%04d'='%04d', '%p', '%p', '%04x'\n",
-		 pid, rv, __fd, __addr, __addr_len, __flags);
-      if (VCOM_DEBUG > 0)
-	vcom_socket_main_show ();
-      if (rv < 0)
-	{
-	  errno = -rv;
-	  return -1;
-	}
-      return rv;
+    if (is_vcom_socket_fd (__fd)) {
+        if (VCOM_DEBUG > 0)
+            vcom_socket_main_show ();
+        rv = vcom_accept4 (__fd, __addr, __addr_len, __flags);
+        if (VCOM_DEBUG > 0)
+            fprintf (stderr,
+                     "[%d] accept4: VCL "
+                     "'%04d'='%04d', '%p', '%p', '%04x'\n",
+                     pid, rv, __fd, __addr, __addr_len, __flags);
+        if (VCOM_DEBUG > 0)
+            vcom_socket_main_show ();
+        if (rv < 0) {
+            errno = -rv;
+            return -1;
+        }
+        return rv;
     }
-  fprintf (stderr,
-	   "[%d] accept4: libc "
-	   "'%04d'='%04d', '%p', '%p', '%04x'\n",
-	   pid, rv, __fd, __addr, __addr_len, __flags);
+    fprintf (stderr,
+             "[%d] accept4: libc "
+             "'%04d'='%04d', '%p', '%p', '%04x'\n",
+             pid, rv, __fd, __addr, __addr_len, __flags);
 
-  return libc_accept4 (__fd, __addr, __addr_len, __flags);
+    return libc_accept4 (__fd, __addr, __addr_len, __flags);
 }
 
 /*
@@ -2676,52 +2502,47 @@ accept4 (int __fd, __SOCKADDR_ARG __addr,
 int
 vcom_shutdown (int __fd, int __how)
 {
-  if (vcom_init () != 0)
-    {
-      return -1;
+    if (vcom_init () != 0) {
+        return -1;
     }
-  return vcom_socket_shutdown (__fd, __how);
+    return vcom_socket_shutdown (__fd, __how);
 }
 
 int
 shutdown (int __fd, int __how)
 {
-  int rv;
-  pid_t pid = getpid ();
+    int rv;
+    pid_t pid = getpid ();
 
-  if (is_vcom_socket_fd (__fd))
-    {
-      rv = vcom_shutdown (__fd, __how);
-      if (VCOM_DEBUG > 0)
-	fprintf (stderr,
-		 "[%d] shutdown: "
-		 "'%04d'='%04d', '%04d'\n", pid, rv, __fd, __how);
-      if (rv != 0)
-	{
-	  errno = -rv;
-	  return -1;
-	}
-      return 0;
+    if (is_vcom_socket_fd (__fd)) {
+        rv = vcom_shutdown (__fd, __how);
+        if (VCOM_DEBUG > 0)
+            fprintf (stderr,
+                     "[%d] shutdown: "
+                     "'%04d'='%04d', '%04d'\n", pid, rv, __fd, __how);
+        if (rv != 0) {
+            errno = -rv;
+            return -1;
+        }
+        return 0;
     }
-  return libc_shutdown (__fd, __how);
+    return libc_shutdown (__fd, __how);
 }
 
 int
 vcom_epoll_create (int __size)
 {
 
-  if (vcom_init () != 0)
-    {
-      return -1;
+    if (vcom_init () != 0) {
+        return -1;
     }
 
-  if (__size <= 0)
-    {
-      return -EINVAL;
+    if (__size <= 0) {
+        return -EINVAL;
     }
 
-  /* __size argument is ignored "thereafter" */
-  return vcom_epoll_create1 (0);
+    /* __size argument is ignored "thereafter" */
+    return vcom_epoll_create1 (0);
 }
 
 /*
@@ -2730,40 +2551,36 @@ vcom_epoll_create (int __size)
 int
 epoll_create (int __size)
 {
-  int rv = 0;
-  pid_t pid = getpid ();
+    int rv = 0;
+    pid_t pid = getpid ();
 
-  rv = vcom_epoll_create (__size);
-  if (VCOM_DEBUG > 0)
-    fprintf (stderr,
-	     "[%d] epoll_create: " "'%04d'='%04d'\n", pid, rv, __size);
-  if (rv < 0)
-    {
-      errno = -rv;
-      return -1;
+    rv = vcom_epoll_create (__size);
+    if (VCOM_DEBUG > 0)
+        fprintf (stderr,
+                 "[%d] epoll_create: " "'%04d'='%04d'\n", pid, rv, __size);
+    if (rv < 0) {
+        errno = -rv;
+        return -1;
     }
-  return rv;
+    return rv;
 }
 
 int
 vcom_epoll_create1 (int __flags)
 {
-  if (vcom_init () != 0)
-    {
-      return -1;
+    if (vcom_init () != 0) {
+        return -1;
     }
 
-  if (__flags < 0)
-    {
-      return -EINVAL;
+    if (__flags < 0) {
+        return -EINVAL;
     }
-  if (__flags & ~EPOLL_CLOEXEC)
-    {
-      return -EINVAL;
+    if (__flags & ~EPOLL_CLOEXEC) {
+        return -EINVAL;
     }
-  /* __flags can be either zero or EPOLL_CLOEXEC */
-  /* implementation */
-  return vcom_socket_epoll_create1 (__flags);
+    /* __flags can be either zero or EPOLL_CLOEXEC */
+    /* implementation */
+    return vcom_socket_epoll_create1 (__flags);
 }
 
 /*
@@ -2772,59 +2589,54 @@ vcom_epoll_create1 (int __flags)
 int
 epoll_create1 (int __flags)
 {
-  int rv = 0;
-  pid_t pid = getpid ();
+    int rv = 0;
+    pid_t pid = getpid ();
 
-  rv = vcom_epoll_create1 (__flags);
-  if (VCOM_DEBUG > 0)
-    fprintf (stderr,
-	     "[%d] epoll_create: " "'%04d'='%08x'\n", pid, rv, __flags);
-  if (rv < 0)
-    {
-      errno = -rv;
-      return -1;
+    rv = vcom_epoll_create1 (__flags);
+    if (VCOM_DEBUG > 0)
+        fprintf (stderr,
+                 "[%d] epoll_create: " "'%04d'='%08x'\n", pid, rv, __flags);
+    if (rv < 0) {
+        errno = -rv;
+        return -1;
     }
-  return rv;
+    return rv;
 }
 
 static inline int
 ep_op_has_event (int op)
 {
-  return op != EPOLL_CTL_DEL;
+    return op != EPOLL_CTL_DEL;
 }
 
 int
 vcom_epoll_ctl (int __epfd, int __op, int __fd, struct epoll_event *__event)
 {
-  if (vcom_init () != 0)
-    {
-      return -1;
+    if (vcom_init () != 0) {
+        return -1;
     }
 
-  /*
-   * the requested operation __op is not supported
-   * by this interface */
-  if (!((__op == EPOLL_CTL_ADD) ||
-	(__op == EPOLL_CTL_MOD) || (__op == EPOLL_CTL_DEL)))
-    {
-      return -EINVAL;
+    /*
+     * the requested operation __op is not supported
+     * by this interface */
+    if (!((__op == EPOLL_CTL_ADD) ||
+          (__op == EPOLL_CTL_MOD) || (__op == EPOLL_CTL_DEL))) {
+        return -EINVAL;
     }
 
-  /* op is ADD or MOD but event parameter is NULL */
-  if ((ep_op_has_event (__op) && !__event))
-    {
-      return -EFAULT;
+    /* op is ADD or MOD but event parameter is NULL */
+    if ((ep_op_has_event (__op) && !__event)) {
+        return -EFAULT;
     }
 
-  /* fd is same as epfd */
-  /* do not permit adding an epoll file descriptor inside itself */
-  if (__epfd == __fd)
-    {
-      return -EINVAL;
+    /* fd is same as epfd */
+    /* do not permit adding an epoll file descriptor inside itself */
+    if (__epfd == __fd) {
+        return -EINVAL;
     }
 
-  /* implementation */
-  return vcom_socket_epoll_ctl (__epfd, __op, __fd, __event);
+    /* implementation */
+    return vcom_socket_epoll_ctl (__epfd, __op, __fd, __event);
 }
 
 /*
@@ -2835,93 +2647,85 @@ vcom_epoll_ctl (int __epfd, int __op, int __fd, struct epoll_event *__event)
 int
 epoll_ctl (int __epfd, int __op, int __fd, struct epoll_event *__event)
 {
-  int rv;
-  pid_t pid = getpid ();
+    int rv;
+    pid_t pid = getpid ();
 
-  rv = vcom_epoll_ctl (__epfd, __op, __fd, __event);
-  if (VCOM_DEBUG > 0)
-    fprintf (stderr,
-	     "[%d] epoll_ctl: "
-	     "'%04d'='%04d', '%04d', '%04d'\n", pid, rv, __epfd, __op, __fd);
-  if (rv != 0)
-    {
-      errno = -rv;
-      return -1;
+    rv = vcom_epoll_ctl (__epfd, __op, __fd, __event);
+    if (VCOM_DEBUG > 0)
+        fprintf (stderr,
+                 "[%d] epoll_ctl: "
+                 "'%04d'='%04d', '%04d', '%04d'\n", pid, rv, __epfd, __op, __fd);
+    if (rv != 0) {
+        errno = -rv;
+        return -1;
     }
-  return 0;
+    return 0;
 }
 
 int
 epoll_wait (int __epfd, struct epoll_event *__events,
-	    int __maxevents, int __timeout)
+            int __maxevents, int __timeout)
 {
-  int rv;
-  pid_t pid = getpid ();
+    int rv;
+    pid_t pid = getpid ();
 
-  if (__maxevents <= 0 || __maxevents > EP_MAX_EVENTS)
-    {
-      fprintf (stderr, "[%d] ERROR: epoll_wait() invalid maxevents %d\n",
-	       pid, __maxevents);
-      errno = EINVAL;
-      return -1;
+    if (__maxevents <= 0 || __maxevents > EP_MAX_EVENTS) {
+        fprintf (stderr, "[%d] ERROR: epoll_wait() invalid maxevents %d\n",
+                 pid, __maxevents);
+        errno = EINVAL;
+        return -1;
     }
 
-  rv =
-    vcom_socket_epoll_pwait (__epfd, __events, __maxevents, __timeout, NULL);
-  if (VCOM_DEBUG > 2)
-    fprintf (stderr,
-	     "[%d] epoll_wait: "
-	     "'%04d'='%04d', '%p', "
-	     "'%04d', '%04d'\n",
-	     pid, rv, __epfd, __events, __maxevents, __timeout);
-  if (rv < 0)
-    {
-      errno = -rv;
-      return -1;
+    rv =
+        vcom_socket_epoll_pwait (__epfd, __events, __maxevents, __timeout, NULL);
+    if (VCOM_DEBUG > 2)
+        fprintf (stderr,
+                 "[%d] epoll_wait: "
+                 "'%04d'='%04d', '%p', "
+                 "'%04d', '%04d'\n",
+                 pid, rv, __epfd, __events, __maxevents, __timeout);
+    if (rv < 0) {
+        errno = -rv;
+        return -1;
     }
-  return rv;
+    return rv;
 }
 
 
 int
 epoll_pwait (int __epfd, struct epoll_event *__events,
-	     int __maxevents, int __timeout, const __sigset_t * __ss)
+             int __maxevents, int __timeout, const __sigset_t * __ss)
 {
-  int rv;
-  pid_t pid = getpid ();
+    int rv;
+    pid_t pid = getpid ();
 
-  if (__maxevents <= 0 || __maxevents > EP_MAX_EVENTS)
-    {
-      errno = EINVAL;
-      return -1;
+    if (__maxevents <= 0 || __maxevents > EP_MAX_EVENTS) {
+        errno = EINVAL;
+        return -1;
     }
 
-  if (is_vcom_epfd (__epfd))
-    {
-      rv =
-	vcom_socket_epoll_pwait (__epfd, __events, __maxevents, __timeout,
-				 __ss);
-      if (VCOM_DEBUG > 0)
-	fprintf (stderr,
-		 "[%d] epoll_pwait: "
-		 "'%04d'='%04d', '%p', "
-		 "'%04d', '%04d', "
-		 "'%p'\n",
-		 pid, rv, __epfd, __events, __maxevents, __timeout, __ss);
-      if (rv < 0)
-	{
-	  errno = -rv;
-	  return -1;
-	}
-      return rv;
-    }
-  else
-    {
-      errno = EINVAL;
-      return -1;
+    if (is_vcom_epfd (__epfd)) {
+        rv =
+            vcom_socket_epoll_pwait (__epfd, __events, __maxevents, __timeout,
+                                     __ss);
+        if (VCOM_DEBUG > 0)
+            fprintf (stderr,
+                     "[%d] epoll_pwait: "
+                     "'%04d'='%04d', '%p', "
+                     "'%04d', '%04d', "
+                     "'%p'\n",
+                     pid, rv, __epfd, __events, __maxevents, __timeout, __ss);
+        if (rv < 0) {
+            errno = -rv;
+            return -1;
+        }
+        return rv;
+    } else {
+        errno = EINVAL;
+        return -1;
     }
 
-  return 0;
+    return 0;
 }
 
 /* Poll the file descriptors described by the NFDS structures starting at
@@ -2936,278 +2740,249 @@ epoll_pwait (int __epfd, struct epoll_event *__events,
 int
 vcom_poll (struct pollfd *__fds, nfds_t __nfds, int __timeout)
 {
-  int rv = 0;
-  pid_t pid = getpid ();
+    int rv = 0;
+    pid_t pid = getpid ();
 
-  struct rlimit nofile_limit;
-  struct pollfd vcom_fds[MAX_POLL_NFDS_DEFAULT];
-  nfds_t fds_idx = 0;
+    struct rlimit nofile_limit;
+    struct pollfd vcom_fds[MAX_POLL_NFDS_DEFAULT];
+    nfds_t fds_idx = 0;
 
-  /* actual set of file descriptors to be monitored */
-  nfds_t libc_nfds = 0;
-  nfds_t vcom_nfds = 0;
+    /* actual set of file descriptors to be monitored */
+    nfds_t libc_nfds = 0;
+    nfds_t vcom_nfds = 0;
 
-  /* ready file descriptors
-   *
-   * number of structures which have nonzero revents  fields
-   * in other words, descriptors  with events or errors reported.
-   * */
-  /* after call to libc_poll () */
-  int rlibc_nfds = 0;
-  /* after call to vcom_socket_poll () */
-  int rvcom_nfds = 0;
-
-
-  /* timeout value in units of timespec */
-  struct timespec timeout_ts;
-  struct timespec start_time, now, end_time;
+    /* ready file descriptors
+     *
+     * number of structures which have nonzero revents  fields
+     * in other words, descriptors  with events or errors reported.
+     * */
+    /* after call to libc_poll () */
+    int rlibc_nfds = 0;
+    /* after call to vcom_socket_poll () */
+    int rvcom_nfds = 0;
 
 
-  /* get start_time */
-  rv = clock_gettime (CLOCK_MONOTONIC, &start_time);
-  if (rv == -1)
-    {
-      rv = -errno;
-      goto poll_done;
+    /* timeout value in units of timespec */
+    struct timespec timeout_ts;
+    struct timespec start_time, now, end_time;
+
+
+    /* get start_time */
+    rv = clock_gettime (CLOCK_MONOTONIC, &start_time);
+    if (rv == -1) {
+        rv = -errno;
+        goto poll_done;
     }
 
-  /* set timeout_ts & end_time */
-  if (__timeout >= 0)
-    {
-      /* set timeout_ts */
-      timeout_ts.tv_sec = __timeout / MSEC_PER_SEC;
-      timeout_ts.tv_nsec = (__timeout % MSEC_PER_SEC) * NSEC_PER_MSEC;
-      set_normalized_timespec (&timeout_ts,
-			       timeout_ts.tv_sec, timeout_ts.tv_nsec);
-      /* set end_time */
-      if (__timeout)
-	{
-	  end_time = timespec_add (start_time, timeout_ts);
-	}
-      else
-	{
-	  end_time = start_time;
-	}
+    /* set timeout_ts & end_time */
+    if (__timeout >= 0) {
+        /* set timeout_ts */
+        timeout_ts.tv_sec = __timeout / MSEC_PER_SEC;
+        timeout_ts.tv_nsec = (__timeout % MSEC_PER_SEC) * NSEC_PER_MSEC;
+        set_normalized_timespec (&timeout_ts,
+                                 timeout_ts.tv_sec, timeout_ts.tv_nsec);
+        /* set end_time */
+        if (__timeout) {
+            end_time = timespec_add (start_time, timeout_ts);
+        } else {
+            end_time = start_time;
+        }
     }
 
-  if (vcom_init () != 0)
-    {
-      rv = -1;
-      goto poll_done;
+    if (vcom_init () != 0) {
+        rv = -1;
+        goto poll_done;
     }
 
-  /* validate __fds */
-  if (!__fds)
-    {
-      rv = -EFAULT;
-      goto poll_done;
+    /* validate __fds */
+    if (!__fds) {
+        rv = -EFAULT;
+        goto poll_done;
     }
 
-  /* validate __nfds */
-  /*TBD: call getrlimit once when vcl-ldpreload library is init */
-  rv = getrlimit (RLIMIT_NOFILE, &nofile_limit);
-  if (rv != 0)
-    {
-      rv = -errno;
-      goto poll_done;
+    /* validate __nfds */
+    /*TBD: call getrlimit once when vcl-ldpreload library is init */
+    rv = getrlimit (RLIMIT_NOFILE, &nofile_limit);
+    if (rv != 0) {
+        rv = -errno;
+        goto poll_done;
     }
-  if (__nfds >= nofile_limit.rlim_cur)
-    {
-      rv = -EINVAL;
-      goto poll_done;
+    if (__nfds >= nofile_limit.rlim_cur) {
+        rv = -EINVAL;
+        goto poll_done;
     }
 
-  /*
-   * for the POC, it's fair to assume that nfds is less than 1024
-   * */
-  if (__nfds >= MAX_POLL_NFDS_DEFAULT)
-    {
-      rv = -EINVAL;
-      goto poll_done;
+    /*
+     * for the POC, it's fair to assume that nfds is less than 1024
+     * */
+    if (__nfds >= MAX_POLL_NFDS_DEFAULT) {
+        rv = -EINVAL;
+        goto poll_done;
     }
 
-  /* set revents field (output parameter)
-   * to zero
-   * */
-  for (fds_idx = 0; fds_idx < __nfds; fds_idx++)
-    {
-      __fds[fds_idx].revents = 0;
+    /* set revents field (output parameter)
+     * to zero
+     * */
+    for (fds_idx = 0; fds_idx < __nfds; fds_idx++) {
+        __fds[fds_idx].revents = 0;
     }
 
 #if 0
-  /* set revents field (output parameter)
-   * to zero for user ignored fds
-   * */
-  for (fds_idx = 0; fds_idx < __nfds; fds_idx++)
-    {
-      /*
-       * if negative fd, ignore events field
-       * and set output parameter (revents field) to zero */
-      if (__fds[fds_idx].fd < 0)
-	{
-	  __fds[fds_idx].revents = 0;
-	}
+    /* set revents field (output parameter)
+     * to zero for user ignored fds
+     * */
+    for (fds_idx = 0; fds_idx < __nfds; fds_idx++) {
+        /*
+         * if negative fd, ignore events field
+         * and set output parameter (revents field) to zero */
+        if (__fds[fds_idx].fd < 0) {
+            __fds[fds_idx].revents = 0;
+        }
     }
 #endif
 
-  /*
-   * 00. prepare __fds and vcom_fds for polling
-   *     copy __fds to vcom_fds
-   * 01. negate all except libc fds in __fds,
-   *     ignore user negated fds
-   * 02. negate all except vcom_fds in vocm fds,
-   *     ignore user negated fds
-   *     ignore fd 0 by setting it to negative number
-   * */
-  memcpy (vcom_fds, __fds, sizeof (*__fds) * __nfds);
-  libc_nfds = 0;
-  vcom_nfds = 0;
-  for (fds_idx = 0; fds_idx < __nfds; fds_idx++)
-    {
-      /* ignore negative fds */
-      if (__fds[fds_idx].fd < 0)
-	{
-	  continue;
-	}
+    /*
+     * 00. prepare __fds and vcom_fds for polling
+     *     copy __fds to vcom_fds
+     * 01. negate all except libc fds in __fds,
+     *     ignore user negated fds
+     * 02. negate all except vcom_fds in vocm fds,
+     *     ignore user negated fds
+     *     ignore fd 0 by setting it to negative number
+     * */
+    memcpy (vcom_fds, __fds, sizeof (*__fds) * __nfds);
+    libc_nfds = 0;
+    vcom_nfds = 0;
+    for (fds_idx = 0; fds_idx < __nfds; fds_idx++) {
+        /* ignore negative fds */
+        if (__fds[fds_idx].fd < 0) {
+            continue;
+        }
 
-      /*
-       * 00. ignore vcom fds in __fds
-       * 01. ignore libc fds in vcom_fds,
-       *     ignore fd 0 by setting it to negative number.
-       *     as fd 0 cannot be ignored.
-       */
-      if (is_vcom_socket_fd (__fds[fds_idx].fd) ||
-	  is_vcom_epfd (__fds[fds_idx].fd))
-	{
-	  __fds[fds_idx].fd = -__fds[fds_idx].fd;
-	  vcom_nfds++;
-	}
-      else
-	{
-	  libc_nfds++;
-	  /* ignore fd 0 by setting it to negative number */
-	  if (!vcom_fds[fds_idx].fd)
-	    {
-	      vcom_fds[fds_idx].fd = -1;
-	    }
-	  vcom_fds[fds_idx].fd = -vcom_fds[fds_idx].fd;
-	}
+        /*
+         * 00. ignore vcom fds in __fds
+         * 01. ignore libc fds in vcom_fds,
+         *     ignore fd 0 by setting it to negative number.
+         *     as fd 0 cannot be ignored.
+         */
+        if (is_vcom_socket_fd (__fds[fds_idx].fd) ||
+            is_vcom_epfd (__fds[fds_idx].fd)) {
+            __fds[fds_idx].fd = -__fds[fds_idx].fd;
+            vcom_nfds++;
+        } else {
+            libc_nfds++;
+            /* ignore fd 0 by setting it to negative number */
+            if (!vcom_fds[fds_idx].fd) {
+                vcom_fds[fds_idx].fd = -1;
+            }
+            vcom_fds[fds_idx].fd = -vcom_fds[fds_idx].fd;
+        }
     }
 
-  /*
-   * polling loop
-   *
-   * poll on libc fds and vcom fds
-   *
-   * specifying a timeout of zero causes libc_poll() and
-   * vcom_socket_poll() to return immediately, even if no
-   * file descriptors are ready
-   * */
-  do
-    {
-      rlibc_nfds = 0;
-      rvcom_nfds = 0;
+    /*
+     * polling loop
+     *
+     * poll on libc fds and vcom fds
+     *
+     * specifying a timeout of zero causes libc_poll() and
+     * vcom_socket_poll() to return immediately, even if no
+     * file descriptors are ready
+     * */
+    do {
+        rlibc_nfds = 0;
+        rvcom_nfds = 0;
 
-      /*
-       * timeout parameter for libc_poll () set to zero
-       * to poll on libc fds
-       * */
+        /*
+         * timeout parameter for libc_poll () set to zero
+         * to poll on libc fds
+         * */
 
-      /* poll on libc fds */
-      if (libc_nfds)
-	{
-	  /*
-	   * a timeout of zero causes libc_poll()
-	   * to return immediately
-	   * */
-	  rlibc_nfds = libc_poll (__fds, __nfds, 0);
-	  if (VCOM_DEBUG > 2)
-	    fprintf (stderr,
-		     "[%d] poll libc: "
-		     "'%04d'='%08lu'\n", pid, rlibc_nfds, __nfds);
+        /* poll on libc fds */
+        if (libc_nfds) {
+            /*
+             * a timeout of zero causes libc_poll()
+             * to return immediately
+             * */
+            rlibc_nfds = libc_poll (__fds, __nfds, 0);
+            if (VCOM_DEBUG > 2)
+                fprintf (stderr,
+                         "[%d] poll libc: "
+                         "'%04d'='%08lu'\n", pid, rlibc_nfds, __nfds);
 
-	  if (rlibc_nfds < 0)
-	    {
-	      rv = -errno;
-	      goto poll_done_update_nfds;
-	    }
-	}
+            if (rlibc_nfds < 0) {
+                rv = -errno;
+                goto poll_done_update_nfds;
+            }
+        }
 
-      /*
-       * timeout parameter for vcom_socket_poll () set to zero
-       * to poll on vcom fds
-       * */
+        /*
+         * timeout parameter for vcom_socket_poll () set to zero
+         * to poll on vcom fds
+         * */
 
-      /* poll on vcom fds */
-      if (vcom_nfds)
-	{
-	  /*
-	   * a timeout of zero causes vcom_socket_poll()
-	   * to return immediately
-	   * */
-	  rvcom_nfds = vcom_socket_poll (vcom_fds, __nfds, 0);
-	  if (VCOM_DEBUG > 2)
-	    fprintf (stderr,
-		     "[%d] poll vcom: "
-		     "'%04d'='%08lu'\n", pid, rvcom_nfds, __nfds);
-	  if (rvcom_nfds < 0)
-	    {
-	      rv = rvcom_nfds;
-	      goto poll_done_update_nfds;
-	    }
-	}
+        /* poll on vcom fds */
+        if (vcom_nfds) {
+            /*
+             * a timeout of zero causes vcom_socket_poll()
+             * to return immediately
+             * */
+            rvcom_nfds = vcom_socket_poll (vcom_fds, __nfds, 0);
+            if (VCOM_DEBUG > 2)
+                fprintf (stderr,
+                         "[%d] poll vcom: "
+                         "'%04d'='%08lu'\n", pid, rvcom_nfds, __nfds);
+            if (rvcom_nfds < 0) {
+                rv = rvcom_nfds;
+                goto poll_done_update_nfds;
+            }
+        }
 
-      /* check if any file descriptors changed status */
-      if ((libc_nfds && rlibc_nfds > 0) || (vcom_nfds && rvcom_nfds > 0))
-	{
-	  /* something interesting happened */
-	  rv = rlibc_nfds + rvcom_nfds;
-	  goto poll_done_update_nfds;
-	}
+        /* check if any file descriptors changed status */
+        if ((libc_nfds && rlibc_nfds > 0) || (vcom_nfds && rvcom_nfds > 0)) {
+            /* something interesting happened */
+            rv = rlibc_nfds + rvcom_nfds;
+            goto poll_done_update_nfds;
+        }
 
-      rv = clock_gettime (CLOCK_MONOTONIC, &now);
-      if (rv == -1)
-	{
-	  rv = -errno;
-	  goto poll_done_update_nfds;
-	}
+        rv = clock_gettime (CLOCK_MONOTONIC, &now);
+        if (rv == -1) {
+            rv = -errno;
+            goto poll_done_update_nfds;
+        }
     }
 
-  /* block indefinitely || timeout elapsed  */
-  while ((__timeout < 0) || timespec_compare (&now, &end_time) < 0);
+    /* block indefinitely || timeout elapsed  */
+    while ((__timeout < 0) || timespec_compare (&now, &end_time) < 0);
 
-  /* timeout expired before anything interesting happened */
-  rv = 0;
+    /* timeout expired before anything interesting happened */
+    rv = 0;
 
 poll_done_update_nfds:
-  for (fds_idx = 0; fds_idx < __nfds; fds_idx++)
-    {
-      /* ignore negative fds in vcom_fds
-       * 00. user negated fds
-       * 01. libc fds
-       * */
-      if (vcom_fds[fds_idx].fd < 0)
-	{
-	  continue;
-	}
+    for (fds_idx = 0; fds_idx < __nfds; fds_idx++) {
+        /* ignore negative fds in vcom_fds
+         * 00. user negated fds
+         * 01. libc fds
+         * */
+        if (vcom_fds[fds_idx].fd < 0) {
+            continue;
+        }
 
-      /* from here on handle positive vcom fds */
-      /*
-       * restore vcom fds to positive number in __fds
-       * and update revents in __fds with the events
-       * that actually occurred in vcom fds
-       * */
-      __fds[fds_idx].fd = -__fds[fds_idx].fd;
-      if (rvcom_nfds)
-	{
-	  __fds[fds_idx].revents = vcom_fds[fds_idx].revents;
-	}
+        /* from here on handle positive vcom fds */
+        /*
+         * restore vcom fds to positive number in __fds
+         * and update revents in __fds with the events
+         * that actually occurred in vcom fds
+         * */
+        __fds[fds_idx].fd = -__fds[fds_idx].fd;
+        if (rvcom_nfds) {
+            __fds[fds_idx].revents = vcom_fds[fds_idx].revents;
+        }
     }
 
 poll_done:
-  if (VCOM_DEBUG > 2)
-    fprintf (stderr, "[%d] vpoll: " "'%04d'='%08lu'\n", pid, rv, __nfds);
-  return rv;
+    if (VCOM_DEBUG > 2)
+        fprintf (stderr, "[%d] vpoll: " "'%04d'='%08lu'\n", pid, rv, __nfds);
+    return rv;
 }
 
 /*
@@ -3229,23 +3004,22 @@ poll_done:
 int
 poll (struct pollfd *__fds, nfds_t __nfds, int __timeout)
 {
-  int rv = 0;
-  pid_t pid = getpid ();
+    int rv = 0;
+    pid_t pid = getpid ();
 
 
-  if (VCOM_DEBUG > 2)
-    fprintf (stderr, "[%d] poll1: " "'%04d'='%08lu, %d, 0x%x'\n",
-	     pid, rv, __nfds, __fds[0].fd, __fds[0].events);
-  rv = vcom_poll (__fds, __nfds, __timeout);
-  if (VCOM_DEBUG > 2)
-    fprintf (stderr, "[%d] poll2: " "'%04d'='%08lu, %d, 0x%x'\n",
-	     pid, rv, __nfds, __fds[0].fd, __fds[0].revents);
-  if (rv < 0)
-    {
-      errno = -rv;
-      return -1;
+    if (VCOM_DEBUG > 2)
+        fprintf (stderr, "[%d] poll1: " "'%04d'='%08lu, %d, 0x%x'\n",
+                 pid, rv, __nfds, __fds[0].fd, __fds[0].events);
+    rv = vcom_poll (__fds, __nfds, __timeout);
+    if (VCOM_DEBUG > 2)
+        fprintf (stderr, "[%d] poll2: " "'%04d'='%08lu, %d, 0x%x'\n",
+                 pid, rv, __nfds, __fds[0].fd, __fds[0].revents);
+    if (rv < 0) {
+        errno = -rv;
+        return -1;
     }
-  return rv;
+    return rv;
 }
 
 #ifdef __USE_GNU
@@ -3257,25 +3031,24 @@ poll (struct pollfd *__fds, nfds_t __nfds, int __timeout)
    __THROW.  */
 int
 vcom_ppoll (struct pollfd *__fds, nfds_t __nfds,
-	    const struct timespec *__timeout, const __sigset_t * __ss)
+            const struct timespec *__timeout, const __sigset_t * __ss)
 {
-  if (vcom_init () != 0)
-    {
-      return -1;
+    if (vcom_init () != 0) {
+        return -1;
     }
 
-  return -EOPNOTSUPP;
+    return -EOPNOTSUPP;
 }
 
 int
 ppoll (struct pollfd *__fds, nfds_t __nfds,
        const struct timespec *__timeout, const __sigset_t * __ss)
 {
-  int rv = 0;
+    int rv = 0;
 
-  errno = EOPNOTSUPP;
-  rv = -1;
-  return rv;
+    errno = EOPNOTSUPP;
+    rv = -1;
+    return rv;
 }
 #endif
 
@@ -3286,16 +3059,13 @@ void DESTRUCTOR_ATTRIBUTE vcom_destructor (void);
 void
 vcom_constructor (void)
 {
-  pid_t pid = getpid ();
+    pid_t pid = getpid ();
 
-  swrap_constructor ();
-  if (vcom_init () != 0)
-    {
-      printf ("\n[%d] vcom_constructor...failed!\n", pid);
-    }
-  else
-    {
-      printf ("\n[%d] vcom_constructor...done!\n", pid);
+    swrap_constructor ();
+    if (vcom_init () != 0) {
+        printf ("\n[%d] vcom_constructor...failed!\n", pid);
+    } else {
+        printf ("\n[%d] vcom_constructor...done!\n", pid);
     }
 }
 
@@ -3305,11 +3075,11 @@ vcom_constructor (void)
 void
 vcom_destructor (void)
 {
-  pid_t pid = getpid ();
+    pid_t pid = getpid ();
 
-  vcom_destroy ();
-  swrap_destructor ();
-  printf ("\n[%d] vcom_destructor...done!\n", pid);
+    vcom_destroy ();
+    swrap_destructor ();
+    printf ("\n[%d] vcom_destructor...done!\n", pid);
 }
 
 

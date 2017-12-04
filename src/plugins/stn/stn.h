@@ -22,34 +22,34 @@
 #include <vppinfra/bihash_16_8.h>
 
 typedef struct {
-  ip46_address_t address;
-  u32 next_node_index;
-  u32 sw_if_index;
+    ip46_address_t address;
+    u32 next_node_index;
+    u32 sw_if_index;
 } stn_rule_t;
 
 typedef struct {
-  /* pool of stn rules */
-  stn_rule_t *rules;
+    /* pool of stn rules */
+    stn_rule_t *rules;
 
-  /* number of rules */
-  u32 n_rules;
+    /* number of rules */
+    u32 n_rules;
 
-  /* hash table used to retrieve the rule from the ip address */
-  clib_bihash_16_8_t rule_by_address_table;
+    /* hash table used to retrieve the rule from the ip address */
+    clib_bihash_16_8_t rule_by_address_table;
 
-  u32 punt_to_stn_ip4_next_index;
-  u32 punt_to_stn_ip6_next_index;
+    u32 punt_to_stn_ip4_next_index;
+    u32 punt_to_stn_ip6_next_index;
 
-  u16 msg_id_base;
+    u16 msg_id_base;
 } stn_main_t;
 
 typedef struct {
-  /** Destination address of intercepted packets */
-  ip46_address_t address;
-  /** TX interface to send packets to */
-  u32 sw_if_index;
-  /** Whether to delete the rule */
-  u8 del;
+    /** Destination address of intercepted packets */
+    ip46_address_t address;
+    /** TX interface to send packets to */
+    u32 sw_if_index;
+    /** Whether to delete the rule */
+    u8 del;
 } stn_rule_add_del_args_t;
 
 /**

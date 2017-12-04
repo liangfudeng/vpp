@@ -27,8 +27,7 @@
  * @brief
  *   A protocol Independent IP multicast FIB table
  */
-typedef struct bier_disp_table_t_
-{
+typedef struct bier_disp_table_t_ {
     /**
      * number of locks on the table
      */
@@ -53,14 +52,14 @@ typedef struct bier_disp_table_t_
 extern u8* format_bier_disp_table(u8* s, va_list *ap);
 
 extern void bier_disp_table_entry_path_add(u32 table_id,
-                                           bier_bp_t src,
-                                           bier_hdr_proto_id_t payload_proto,
-                                           const fib_route_path_t *rpath);
+        bier_bp_t src,
+        bier_hdr_proto_id_t payload_proto,
+        const fib_route_path_t *rpath);
 
 extern void bier_disp_table_entry_path_remove(u32 table_id,
-                                              bier_bp_t src,
-                                              bier_hdr_proto_id_t payload_proto,
-                                              const fib_route_path_t *paths);
+        bier_bp_t src,
+        bier_hdr_proto_id_t payload_proto,
+        const fib_route_path_t *paths);
 
 extern index_t bier_disp_table_find(u32 table_id);
 
@@ -71,15 +70,15 @@ extern void bier_disp_table_unlock_w_table_id(u32 table_id);
 extern void bier_disp_table_unlock(index_t bdti);
 extern void bier_disp_table_lock(index_t bdti);
 extern void bier_disp_table_contribute_forwarding(index_t bdti,
-                                                  dpo_id_t *dpo);
+        dpo_id_t *dpo);
 
 /**
  * Types and functions to walk all the entries in one BIER Table
  */
 typedef void (*bier_disp_table_walk_fn_t)(const bier_disp_table_t *bdt,
-                                          const bier_disp_entry_t *bde,
-                                          u16 bp,
-                                          void *ctx);
+        const bier_disp_entry_t *bde,
+        u16 bp,
+        void *ctx);
 extern void bier_disp_table_walk(u32 table_id,
                                  bier_disp_table_walk_fn_t fn,
                                  void *ctx);

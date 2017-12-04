@@ -25,9 +25,9 @@
 #include <vlibmemory/api.h>
 
 #if VPPJNI_DEBUG == 1
-  #define DEBUG_LOG(...) clib_warning(__VA_ARGS__)
+#define DEBUG_LOG(...) clib_warning(__VA_ARGS__)
 #else
-  #define DEBUG_LOG(...)
+#define DEBUG_LOG(...)
 #endif
 
 #include <jvpp-common/jvpp_common.h>
@@ -42,36 +42,38 @@
  * Signature: (JI)V
  */
 JNIEXPORT void JNICALL Java_io_fd_vpp_jvpp_ioampot_JVppIoampotImpl_init0
-  (JNIEnv *env, jclass clazz, jobject callback, jlong queue_address, jint my_client_index) {
-  ioampot_main_t * plugin_main = &ioampot_main;
-  clib_warning ("Java_io_fd_vpp_jvpp_ioampot_JVppIoampotImpl_init0");
+(JNIEnv *env, jclass clazz, jobject callback, jlong queue_address, jint my_client_index)
+{
+    ioampot_main_t * plugin_main = &ioampot_main;
+    clib_warning ("Java_io_fd_vpp_jvpp_ioampot_JVppIoampotImpl_init0");
 
-  plugin_main->my_client_index = my_client_index;
-  plugin_main->vl_input_queue = uword_to_pointer (queue_address, unix_shared_memory_queue_t *);
+    plugin_main->my_client_index = my_client_index;
+    plugin_main->vl_input_queue = uword_to_pointer (queue_address, unix_shared_memory_queue_t *);
 
-  plugin_main->callbackObject = (*env)->NewGlobalRef(env, callback);
-  plugin_main->callbackClass = (jclass)(*env)->NewGlobalRef(env, (*env)->GetObjectClass(env, callback));
+    plugin_main->callbackObject = (*env)->NewGlobalRef(env, callback);
+    plugin_main->callbackClass = (jclass)(*env)->NewGlobalRef(env, (*env)->GetObjectClass(env, callback));
 
-  // verify API has not changed since jar generation
-  #define _(N)             \
-	  if (get_message_id(env, #N) == 0) return;
-      foreach_supported_api_message;
-  #undef _
+    // verify API has not changed since jar generation
+#define _(N)             \
+      if (get_message_id(env, #N) == 0) return;
+    foreach_supported_api_message;
+#undef _
 
-  #define _(N,n)                                  \
+#define _(N,n)                                  \
       vl_msg_api_set_handlers(get_message_id(env, #N), #n,     \
               vl_api_##n##_t_handler,             \
               vl_noop_handler,                    \
               vl_noop_handler,                    \
               vl_noop_handler,                    \
               sizeof(vl_api_##n##_t), 1);
-      foreach_api_reply_handler;
-  #undef _
+    foreach_api_reply_handler;
+#undef _
 }
 
 JNIEXPORT void JNICALL Java_io_fd_vpp_jvpp_ioampot_JVppIoampotImpl_close0
-(JNIEnv *env, jclass clazz) {
-  ioampot_main_t * plugin_main = &ioampot_main;
+(JNIEnv *env, jclass clazz)
+{
+    ioampot_main_t * plugin_main = &ioampot_main;
 
     // cleanup:
     (*env)->DeleteGlobalRef(env, plugin_main->callbackClass);
@@ -82,7 +84,8 @@ JNIEXPORT void JNICALL Java_io_fd_vpp_jvpp_ioampot_JVppIoampotImpl_close0
 }
 
 /* Attach thread to JVM and cache class references when initiating JVPP iOAM POT */
-jint JNI_OnLoad(JavaVM *vm, void *reserved) {
+jint JNI_OnLoad(JavaVM *vm, void *reserved)
+{
     JNIEnv* env;
 
     if ((*vm)->GetEnv(vm, (void**) &env, JNI_VERSION_1_8) != JNI_OK) {
@@ -98,7 +101,8 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
 }
 
 /* Clean up cached references when disposing JVPP iOAM POT */
-void JNI_OnUnload(JavaVM *vm, void *reserved) {
+void JNI_OnUnload(JavaVM *vm, void *reserved)
+{
     JNIEnv* env;
     if ((*vm)->GetEnv(vm, (void**) &env, JNI_VERSION_1_8) != JNI_OK) {
         return;

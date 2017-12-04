@@ -26,19 +26,15 @@ adj_delegate_find_i (const ip_adjacency_t *adj,
     int ii;
 
     ii = 0;
-    vec_foreach(delegate, adj->ia_delegates)
-    {
-	if (delegate->ad_type == type)
-	{
+    vec_foreach(delegate, adj->ia_delegates) {
+        if (delegate->ad_type == type) {
             if (NULL != index)
                 *index = ii;
 
-	    return (delegate);
-	}
-	else
-	{
-	    ii++;
-	}
+            return (delegate);
+        } else {
+            ii++;
+        }
     }
 
     return (NULL);
@@ -80,13 +76,13 @@ adj_delegate_init (ip_adjacency_t *adj,
 
 {
     adj_delegate_t delegate = {
-	.ad_adj_index = adj_get_index(adj),
-	.ad_type = type,
+        .ad_adj_index = adj_get_index(adj),
+        .ad_type = type,
     };
 
     vec_add1(adj->ia_delegates, delegate);
     vec_sort_with_function(adj->ia_delegates,
-			   adj_delegate_cmp_for_sort);
+                           adj_delegate_cmp_for_sort);
 }
 
 adj_delegate_t *
@@ -97,9 +93,8 @@ adj_delegate_find_or_add (ip_adjacency_t *adj,
 
     delegate = adj_delegate_get(adj, adt);
 
-    if (NULL == delegate)
-    {
-	adj_delegate_init(adj, adt);
+    if (NULL == delegate) {
+        adj_delegate_init(adj, adt);
     }
 
     return (adj_delegate_get(adj, adt));
@@ -128,8 +123,7 @@ adj_delegate_fmt_bfd (const adj_delegate_t *aed,
 /**
  * A delegate type to formatter map
  */
-static adj_delegate_format_t aed_formatters[] =
-{
+static adj_delegate_format_t aed_formatters[] = {
     [ADJ_DELEGATE_BFD] = adj_delegate_fmt_bfd,
 };
 

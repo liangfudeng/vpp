@@ -1,4 +1,4 @@
-/* 
+/*
  *------------------------------------------------------------------
  * Copyright (c) 2005-2016 Cisco and/or its affiliates.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -87,7 +87,7 @@ int strtab_pass1(cpel_section_header_t *sh, int verbose, FILE *ofp)
 {
     uword *p;
     u8 *strtab_data_area = (u8 *)(sh+1);
-    
+
     /* Multiple string tables with the same name are Bad... */
     p = hash_get_mem(the_strtab_hash, strtab_data_area);
     if (p) {
@@ -95,7 +95,7 @@ int strtab_pass1(cpel_section_header_t *sh, int verbose, FILE *ofp)
     }
     /*
      * Looks funny, but we really do want key = first string in the
-     * table, value = address(first string in the table) 
+     * table, value = address(first string in the table)
      */
     hash_set_mem(the_strtab_hash, strtab_data_area, strtab_data_area);
     if (verbose) {
@@ -116,7 +116,7 @@ int evtdef_pass1(cpel_section_header_t *sh, int verbose, FILE *ofp)
 
     edh = (event_definition_section_header_t *)(sh+1);
     nevents = ntohl(edh->number_of_event_definitions);
-    
+
     if (verbose) {
         fprintf(ofp, "Event Definition Section: %d definitions\n",
                 nevents);
@@ -132,7 +132,7 @@ int evtdef_pass1(cpel_section_header_t *sh, int verbose, FILE *ofp)
     initialize_events();
 
     ep = (event_definition_t *)(edh+1);
-    
+
     for (i = 0; i < nevents; i++) {
         event_code = ntohl(ep->event);
         p = hash_get(the_evtdef_hash, event_code);
@@ -147,7 +147,7 @@ int evtdef_pass1(cpel_section_header_t *sh, int verbose, FILE *ofp)
         bp->datum_str = this_strtab + ntohl(ep->datum_format);
         hash_set(the_evtdef_hash, event_code, bp - bound_events);
 
-        add_event_from_cpel_file(event_code, (char *) bp->event_str, 
+        add_event_from_cpel_file(event_code, (char *) bp->event_str,
                                  (char *)bp->datum_str);
 
         ep++;
@@ -170,7 +170,7 @@ int trackdef_pass1(cpel_section_header_t *sh, int verbose, FILE *ofp)
 
     tdh = (track_definition_section_header_t *)(sh+1);
     nevents = ntohl(tdh->number_of_track_definitions);
-    
+
     if (verbose) {
         fprintf(ofp, "Track Definition Section: %d definitions\n",
                 nevents);
@@ -184,7 +184,7 @@ int trackdef_pass1(cpel_section_header_t *sh, int verbose, FILE *ofp)
     this_strtab = (u8 *)p[0];
 
     tp = (track_definition_t *)(tdh+1);
-    
+
     for (i = 0; i < nevents; i++) {
         track_code = ntohl(tp->track);
         p = hash_get(the_trackdef_hash, track_code);
@@ -248,7 +248,7 @@ int event_pass2(cpel_section_header_t *sh, int verbose, FILE *ofp)
         time1 = ntohl (ep->time[1]);
 
         now = (((u64) time0)<<32) | time1;
-        
+
         /* Convert from bus ticks to usec */
         d = now;
         d /= ticks_per_ns;
@@ -257,7 +257,7 @@ int event_pass2(cpel_section_header_t *sh, int verbose, FILE *ofp)
 
         if (starttime == ~0ULL)
             starttime = now;
-        
+
         delta = now - starttime;
 
         /* Delta = time since first event, in usec */
@@ -278,18 +278,17 @@ char *strtab_ref(unsigned long datum)
     return ((char *)(event_strtab + datum));
 }
 
-/* 
- * Note: If necessary, add passes / columns to this table to 
+/*
+ * Note: If necessary, add passes / columns to this table to
  * handle section order dependencies.
  */
 
-section_processor_t processors[CPEL_NUM_SECTION_TYPES+1] =
-{
-    {bad_section,	noop_pass}, 		/* type 0 -- f**ked */
-    {strtab_pass1, 	noop_pass}, 		/* type 1 -- STRTAB */
-    {unsupported_pass,  noop_pass}, 		/* type 2 -- SYMTAB */
+section_processor_t processors[CPEL_NUM_SECTION_TYPES+1] = {
+    {bad_section,   noop_pass},         /* type 0 -- f**ked */
+    {strtab_pass1,  noop_pass},         /* type 1 -- STRTAB */
+    {unsupported_pass,  noop_pass},         /* type 2 -- SYMTAB */
     {evtdef_pass1,      noop_pass},             /* type 3 -- EVTDEF */
-    {trackdef_pass1,    noop_pass},		/* type 4 -- TRACKDEF */
+    {trackdef_pass1,    noop_pass},     /* type 4 -- TRACKDEF */
     {noop_pass,         event_pass2},           /* type 5 -- EVENTS */
 };
 
@@ -307,17 +306,17 @@ int process_section(cpel_section_header_t *sh, int verbose, FILE *ofp,
         return(1);
     }
     switch(pass) {
-    case PASS1:
-        fp = processors[type].pass1;
-        break;
+        case PASS1:
+            fp = processors[type].pass1;
+            break;
 
-    case PASS2:
-        fp = processors[type].pass2;
-        break;
-        
-    default:
-        fprintf(stderr, "Unknown pass %d\n", pass);
-        return(1);
+        case PASS2:
+            fp = processors[type].pass2;
+            break;
+
+        default:
+            fprintf(stderr, "Unknown pass %d\n", pass);
+            return(1);
     }
 
     rv = (*fp)(sh, verbose, ofp);
@@ -331,8 +330,8 @@ int cpel_dump_file_header(cpel_file_header_t *fh, int verbose, FILE *ofp)
 
     if (verbose) {
         fprintf(ofp, "CPEL file: %s-endian, version %d\n",
-                ((fh->endian_version & CPEL_FILE_LITTLE_ENDIAN) ? 
-                 "little" : "big"), 
+                ((fh->endian_version & CPEL_FILE_LITTLE_ENDIAN) ?
+                 "little" : "big"),
                 fh->endian_version & CPEL_FILE_VERSION_MASK);
 
         file_time = ntohl(fh->file_date);
@@ -359,7 +358,7 @@ int cpel_process(u8 *cpel, int verbose, FILE *ofp)
             fprintf(stderr, "Little endian data format not supported\n");
             return(1);
         }
-        fprintf(stderr, "Unsupported file version 0x%x\n", 
+        fprintf(stderr, "Unsupported file version 0x%x\n",
                 fh->endian_version);
         return(1);
     }
@@ -461,7 +460,7 @@ char *get_track_label(unsigned long track)
     if (p) {
         tp = &bound_tracks[p[0]];
     } else {
-        if (track > 65535) 
+        if (track > 65535)
             tp = &generic_hex_track;
         else
             tp = &generic_decimal_track;

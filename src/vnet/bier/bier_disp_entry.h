@@ -34,8 +34,7 @@ typedef struct bier_disp_entry_t_ {
      * The DPO contirubted from the per-payload protocol parents
      * on cachline 1.
      */
-    struct
-    {
+    struct {
         dpo_id_t bde_dpo;
         u32 bde_rpf_id;
     } bde_fwd[BIER_HDR_N_PROTO];
@@ -68,7 +67,7 @@ extern void bier_disp_entry_lock(index_t bdi);
 extern u8* format_bier_disp_entry(u8* s, va_list *ap);
 
 extern void bier_disp_entry_contribute_forwarding(index_t bdi,
-                                                  dpo_id_t *dpo);
+        dpo_id_t *dpo);
 
 extern bier_disp_entry_t *bier_disp_entry_pool;
 

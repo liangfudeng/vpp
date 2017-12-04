@@ -34,11 +34,11 @@
 
 #include <vnet/vnet_msg_enum.h>
 
-#define vl_typedefs		/* define message structures */
+#define vl_typedefs     /* define message structures */
 #include <vnet/vnet_all_api_h.h>
 #undef vl_typedefs
 
-#define vl_endianfun		/* define message structures */
+#define vl_endianfun        /* define message structures */
 #include <vnet/vnet_all_api_h.h>
 #undef vl_endianfun
 
@@ -81,12 +81,9 @@ vl_api_bier_table_add_del_t_handler (vl_api_bier_table_add_del_t * mp)
         .bti_ecmp = BIER_ECMP_TABLE_ID_MAIN,
     };
 
-    if (mp->bt_is_add)
-    {
+    if (mp->bt_is_add) {
         bier_table_add_or_lock(&bti, ntohl(mp->bt_label));
-    }
-    else
-    {
+    } else {
         bier_table_unlock(&bti);
     }
 
@@ -155,8 +152,7 @@ vl_api_bier_route_add_del_t_handler (vl_api_bier_route_add_del_t * mp)
     bp = ntohs(mp->br_bp);
     brpaths = NULL;
 
-    if (0 == bp || bp > 0xffff)
-    {
+    if (0 == bp || bp > 0xffff) {
         rv = -1;
         goto done;
     }
@@ -171,54 +167,44 @@ vl_api_bier_route_add_del_t_handler (vl_api_bier_route_add_del_t * mp)
 
     vec_validate(brpaths, mp->br_n_paths - 1);
 
-    vec_foreach_index(ii, brpaths)
-    {
+    vec_foreach_index(ii, brpaths) {
         brpath = &brpaths[ii];
         memset(brpath, 0, sizeof(*brpath));
         brpath->frp_flags = FIB_ROUTE_PATH_BIER_FMASK;
 
         vec_validate(brpath->frp_label_stack,
                      mp->br_paths[ii].n_labels - 1);
-        for (jj = 0; jj < mp->br_paths[ii].n_labels; jj++)
-        {
+        for (jj = 0; jj < mp->br_paths[ii].n_labels; jj++) {
             brpath->frp_label_stack[jj] =
                 ntohl(mp->br_paths[ii].label_stack[jj]);
         }
 
-        if (0 == mp->br_paths[ii].afi)
-        {
+        if (0 == mp->br_paths[ii].afi) {
             clib_memcpy (&brpath->frp_addr.ip4,
                          mp->br_paths[ii].next_hop,
                          sizeof (brpath->frp_addr.ip4));
-        }
-        else
-        {
+        } else {
             clib_memcpy (&brpath->frp_addr.ip6,
                          mp->br_paths[ii].next_hop,
                          sizeof (brpath->frp_addr.ip6));
         }
-        if (ip46_address_is_zero(&brpath->frp_addr))
-        {
+        if (ip46_address_is_zero(&brpath->frp_addr)) {
             index_t bdti;
 
             bdti = bier_disp_table_find(ntohl(mp->br_paths[ii].table_id));
 
             if (INDEX_INVALID != bdti)
                 brpath->frp_fib_index = bdti;
-            else
-            {
+            else {
                 rv = VNET_API_ERROR_NO_SUCH_FIB;
                 goto done;
             }
         }
     }
 
-    if (mp->br_is_add)
-    {
+    if (mp->br_is_add) {
         bier_table_route_add(&bti, ntohs(mp->br_bp), brpaths);
-    }
-    else
-    {
+    } else {
         bier_table_route_remove(&bti, ntohs(mp->br_bp), brpaths);
     }
 
@@ -229,8 +215,7 @@ done:
     REPLY_MACRO (VL_API_BIER_ROUTE_ADD_DEL_REPLY);
 }
 
-typedef struct bier_route_details_walk_t_
-{
+typedef struct bier_route_details_walk_t_ {
     unix_shared_memory_queue_t * q;
     u32 context;
 } bier_route_details_walk_t;
@@ -265,8 +250,7 @@ send_bier_route_details (const bier_table_t *bt,
     fib_path_list_walk(be->be_path_list, fib_path_encode, &api_rpaths);
 
     fp = mp->br_paths;
-    vec_foreach (api_rpath, api_rpaths)
-    {
+    vec_foreach (api_rpath, api_rpaths) {
         fp->weight = api_rpath->rpath.frp_weight;
         fp->preference = api_rpath->rpath.frp_preference;
         fp->sw_if_index = htonl (api_rpath->rpath.frp_sw_if_index);

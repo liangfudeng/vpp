@@ -22,42 +22,41 @@
 
 #include <pthread.h>
 
-typedef struct _unix_shared_memory_queue
-{
-  pthread_mutex_t mutex;	/* 8 bytes */
-  pthread_cond_t condvar;	/* 8 bytes */
-  int head;
-  int tail;
-  volatile int cursize;
-  int maxsize;
-  int elsize;
-  int consumer_pid;
-  int signal_when_queue_non_empty;
-  char data[0];
+typedef struct _unix_shared_memory_queue {
+    pthread_mutex_t mutex;    /* 8 bytes */
+    pthread_cond_t condvar;   /* 8 bytes */
+    int head;
+    int tail;
+    volatile int cursize;
+    int maxsize;
+    int elsize;
+    int consumer_pid;
+    int signal_when_queue_non_empty;
+    char data[0];
 } unix_shared_memory_queue_t;
 
 unix_shared_memory_queue_t *unix_shared_memory_queue_init (int nels,
-							   int elsize,
-							   int consumer_pid,
-							   int
-							   signal_when_queue_non_empty);
+        int elsize,
+        int consumer_pid,
+        int
+        signal_when_queue_non_empty);
 void unix_shared_memory_queue_free (unix_shared_memory_queue_t * q);
 int unix_shared_memory_queue_add (unix_shared_memory_queue_t * q, u8 * elem,
-				  int nowait);
+                                  int nowait);
 int unix_shared_memory_queue_add2 (unix_shared_memory_queue_t * q, u8 * elem,
-				   u8 * elem2, int nowait);
+                                   u8 * elem2, int nowait);
 int unix_shared_memory_queue_sub (unix_shared_memory_queue_t * q, u8 * elem,
-				  int nowait);
+                                  int nowait);
 void unix_shared_memory_queue_lock (unix_shared_memory_queue_t * q);
 void unix_shared_memory_queue_unlock (unix_shared_memory_queue_t * q);
 int unix_shared_memory_queue_is_full (unix_shared_memory_queue_t * q);
 int unix_shared_memory_queue_add_nolock (unix_shared_memory_queue_t * q,
-					 u8 * elem);
+        u8 * elem);
 
 int unix_shared_memory_queue_sub_raw (unix_shared_memory_queue_t * q,
-				      u8 * elem);
+                                      u8 * elem);
 int unix_shared_memory_queue_add_raw (unix_shared_memory_queue_t * q,
-				      u8 * elem);
+                                      u8 * elem);
 
 #endif /* included_unix_shared_memory_queue_h */
 

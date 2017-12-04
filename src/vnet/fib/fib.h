@@ -79,7 +79,7 @@
  * Traffic destined for 192.168.1.2 in table 2 will generate an ARP request
  * on GigE0. However, since GigE0 is in table 0, all adj-fibs will be added in
  * FIB 0. Hence all hosts in the sub-net are unreachable from table 2. To resolve
- * this, all adj-fib and local prefixes are exported (i.e. copied) from the 
+ * this, all adj-fib and local prefixes are exported (i.e. copied) from the
  * 'export' table 0, to the 'import' table 2. There can be many import tables
  * for a single export table.
  *
@@ -145,9 +145,9 @@
  * the case where the recursion is looped. A simple method, employed by VPP FIB,
  * is to limit the number of steps. VPP FIB limit is 16. Typical BGP scenarios
  * in the wild do not exceed 3 (BGP Inter-AS option C).
- * 
+ *
  * - Fast Convergence
- * 
+ *
  * After a network topology change, the 'convergence' time, is the time taken
  * for the router to complete a transition to forward traffic using the new
  * topology. The convergence time is therefore a summation of the time to;
@@ -198,7 +198,7 @@
  *
  * LFA is specified as a 1 to 1 redundancy; a primary path has only one LFA
  * (a.k.a. backup) path. To my knowledge this limitation is one of complexity
- * in the calculation of and capacity planning using a 1-n redundancy. 
+ * in the calculation of and capacity planning using a 1-n redundancy.
  *
  * In the event that the link A-B fails, the alternate path via C can be used.
  * In order to provide 'fast' failover in the event of a failure, the control
@@ -210,7 +210,7 @@
  * cutover time still includes the fault detection time, which in a vitalised
  * environment could be the dominant factor. Failure detection can be either a
  * link down, which will affect multiple paths on a multi-access interface, or
- * via a specific path heartbeat (i.e. BFD). 
+ * via a specific path heartbeat (i.e. BFD).
  * At this time VPP does not support LFA, that is it does not support the
  * installation of a primary and backup path[s] for a route. However, it does
  * support ECMP, and VPP FIB is designed to quickly remove failed paths from
@@ -276,7 +276,7 @@
  * 2) iBGP PIC-edge; Traffic from CE3 to Y/16. On PE3 there is are routes;
  *      Y/16  (and hundreds of thousands of others like it)
  *        via PE1
- *        via PE2 
+ *        via PE2
  *  and
  *     PE1/32 (PE1's loopback address)
  *       via 10.0.2.2 Link0 (this is P1)
@@ -385,11 +385,11 @@
  * a FIB maintains two tables per-VRF, per-AF (where a 'table' is indexed by
  * prefix); the forwarding and non-forwarding tables.
  *
- * For DP speed in VPP we want the lookup in the forwarding table to directly 
- * result in the ADJ. So the two tables; one contains all the routes (a 
- * lookup therein yields a fib_entry_t), the other contains only the forwarding 
+ * For DP speed in VPP we want the lookup in the forwarding table to directly
+ * result in the ADJ. So the two tables; one contains all the routes (a
+ * lookup therein yields a fib_entry_t), the other contains only the forwarding
  * routes (a lookup therein yields an ip_adjacency_t). The latter is used by the
- * DP. 
+ * DP.
  * This trades memory for forwarding performance. A good trade-off in VPP's
  * expected operating environments.
  *
@@ -430,19 +430,19 @@
  *     this DB that are never shared, or are not shared by prefixes that are
  *     not subject to PIC, will increase the size of the DB unnecessarily and
  *     may lead to increased search times due to hash collisions.
- *   - the path-list contributes the appropriate adj for the entry in the 
+ *   - the path-list contributes the appropriate adj for the entry in the
  *     forwarding table. The adj can be 'normal', multi-path or recursive,
  *     depending on the number of paths and their types.
- *   - since path-lists are shared there is only one instance of the multi-path 
+ *   - since path-lists are shared there is only one instance of the multi-path
  *     adj that they [may] create. As such multi-path adjacencies do not need a
  *     separate DB.
  * The path-list with recursive paths and the recursive adjacency that it
- * contributes forms the backbone of the fast convergence architecture (as 
- * described previously). 
+ * contributes forms the backbone of the fast convergence architecture (as
+ * described previously).
  *
  * fib_path_t:
  *   - a description of how to forward the traffic (i.e. via {Gig1, K}).
- *   - the path describes the intent on how to forward. This differs from how 
+ *   - the path describes the intent on how to forward. This differs from how
  *     the path resolves. I.e. it might not be resolved at all (since the
  *     interface is deleted or down).
  *   - paths have different types, most notably recursive or non-recursive.
@@ -481,13 +481,13 @@
  *
  * The taxonomy of objects in a FIB graph is as follows, consider;
  *
- *   A -->  
+ *   A -->
  *   B --> D
  *   C -->
  *
- * Where A,B and C are (for example) routes that resolve through D. 
+ * Where A,B and C are (for example) routes that resolve through D.
  *  parent; D is the parent of A, B, and C.
- *  children: A, B, and C are children of D. 
+ *  children: A, B, and C are children of D.
  *  sibling: A, B and C are siblings of one another.
  *
  * All shared objects in the FIB are reference counted. Users of these objects
@@ -501,11 +501,11 @@
  * to entry) to perform updates, i.e. when interface state changes or when
  * recursive route resolution updates occur.
  * A forward walk follows simply by navigating an object's parent pointer to
- * access its parent object. For objects with multiple parents (e.g. a 
+ * access its parent object. For objects with multiple parents (e.g. a
  * path-list), each parent is walked in turn.
  * To support back-walks direct dependencies are maintained between objects,
  * i.e. in the relationship, {A, B, C} --> D, then object D will maintain a list
- * of 'pointers' to its children {A, B, C}. Bare C-language pointers are not 
+ * of 'pointers' to its children {A, B, C}. Bare C-language pointers are not
  * allowed, so a pointer is described in terms of an object type (i.e. entry,
  * path-list, etc) and index - this allows the object to be retrieved from the
  * appropriate pool. A list is maintained to achieve fast convergence at scale.
@@ -526,20 +526,20 @@
  *                            Interface_K
  *                            /
  *    E_l -->                /
- *    E_m --> PL_1 --> P_d -/ 
+ *    E_m --> PL_1 --> P_d -/
  *    ...          --> P_f --> Interface_F
  *    E_z -->
  *
  * E  = fib_entry_t
  * PL = fib_path_list_t
- * P  = fib_path_t 
+ * P  = fib_path_t
  * The subscripts are arbitrary and serve only to distinguish object instances.
  * This CP graph result in the following DP graph:
  *
  *     M-ADJ-2 --> Interface_A
  *             \
  *              -> Interface_K
- *             / 
+ *             /
  *     M-ADJ-1 --> Interface_F
  *
  * M-ADJ = multi-path-adjacency.
@@ -553,7 +553,7 @@
  *    ADJ-3 --> Interface_A
  *
  *    ADJ-4 --> Interface_F
- * 
+ *
  * The eBGP PIC scenarios described above relied on the update of a path-list's
  * recursive-adjacency to provide the shared point of cutover. This is shown
  * below
@@ -566,7 +566,7 @@
  *                           E_1 --> PL_k -> P_k --> Interface_K
  *                            /
  *    E_l -->                /
- *    E_m --> PL_1 --> P_d -/ 
+ *    E_m --> PL_1 --> P_d -/
  *    ...          --> P_f --> E_55 --> PL_e --> P_e --> Interface_E
  *    E_z -->
  *
@@ -608,7 +608,7 @@
  *                                                E_1 --> ...etc..
  *                                                 /
  *                         E_l -->                /
- *                         E_m --> PL_1 --> P_d -/ 
+ *                         E_m --> PL_1 --> P_d -/
  *                         ...          --> P_e --> E_55 --> ...etc..
  *                         E_z -->
  *

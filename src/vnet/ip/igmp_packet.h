@@ -43,105 +43,98 @@
 #include <vnet/ip/ip4_packet.h>
 #include <vnet/ip/ip6_packet.h>
 
-#define foreach_igmp_type			\
-  _ (0x11, membership_query)			\
-  _ (0x12, membership_report_v1)		\
-  _ (0x13, dvmrp)				\
-  _ (0x14, pim_v1)				\
-  _ (0x15, cisco_trace)				\
-  _ (0x16, membership_report_v2)		\
-  _ (0x17, leave_group_v2)			\
-  _ (0x1e, traceroute_response)			\
-  _ (0x1f, traceroute_request)			\
-  _ (0x22, membership_report_v3)		\
-  _ (0x30, router_advertisement)		\
-  _ (0x31, router_solicitation)			\
+#define foreach_igmp_type           \
+  _ (0x11, membership_query)            \
+  _ (0x12, membership_report_v1)        \
+  _ (0x13, dvmrp)               \
+  _ (0x14, pim_v1)              \
+  _ (0x15, cisco_trace)             \
+  _ (0x16, membership_report_v2)        \
+  _ (0x17, leave_group_v2)          \
+  _ (0x1e, traceroute_response)         \
+  _ (0x1f, traceroute_request)          \
+  _ (0x22, membership_report_v3)        \
+  _ (0x30, router_advertisement)        \
+  _ (0x31, router_solicitation)         \
   _ (0x32, router_termination)
 
-typedef enum
-{
+typedef enum {
 #define _(n,f) IGMP_TYPE_##f = n,
-  foreach_igmp_type
+    foreach_igmp_type
 #undef _
 } igmp_type_t;
 
-typedef struct
-{
-  igmp_type_t type:8;
+typedef struct {
+    igmp_type_t type:8;
 
-  u8 code;
+    u8 code;
 
-  u16 checksum;
+    u16 checksum;
 } igmp_header_t;
 
-typedef struct
-{
-  /* membership_query, version <= 2 reports. */
-  igmp_header_t header;
+typedef struct {
+    /* membership_query, version <= 2 reports. */
+    igmp_header_t header;
 
-  /* Multicast destination address. */
-  ip4_address_t dst;
+    /* Multicast destination address. */
+    ip4_address_t dst;
 } igmp_message_t;
 
-#define foreach_igmp_membership_group_v3_type	\
-  _ (1, mode_is_filter_include)			\
-  _ (2, mode_is_filter_exclude)			\
-  _ (3, change_to_filter_include)		\
-  _ (4, change_to_filter_exclude)		\
-  _ (5, allow_new_sources)			\
+#define foreach_igmp_membership_group_v3_type   \
+  _ (1, mode_is_filter_include)         \
+  _ (2, mode_is_filter_exclude)         \
+  _ (3, change_to_filter_include)       \
+  _ (4, change_to_filter_exclude)       \
+  _ (5, allow_new_sources)          \
   _ (6, block_old_sources)
 
-typedef enum
-{
+typedef enum {
 #define _(n,f) IGMP_MEMBERSHIP_GROUP_##f = n,
-  foreach_igmp_membership_group_v3_type
+    foreach_igmp_membership_group_v3_type
 #undef _
 } igmp_membership_group_v3_type_t;
 
-typedef struct
-{
-  igmp_membership_group_v3_type_t type:8;
+typedef struct {
+    igmp_membership_group_v3_type_t type:8;
 
-  /* Number of 32 bit words of aux data after source addresses. */
-  u8 n_aux_u32s;
+    /* Number of 32 bit words of aux data after source addresses. */
+    u8 n_aux_u32s;
 
-  /* Number of source addresses that follow. */
-  u16 n_src_addresses;
+    /* Number of source addresses that follow. */
+    u16 n_src_addresses;
 
-  /* Destination multicast address. */
-  ip4_address_t dst_address;
+    /* Destination multicast address. */
+    ip4_address_t dst_address;
 
-  ip4_address_t src_addresses[0];
+    ip4_address_t src_addresses[0];
 } igmp_membership_group_v3_t;
 
 always_inline igmp_membership_group_v3_t *
 igmp_membership_group_v3_next (igmp_membership_group_v3_t * g)
 {
-  return ((void *) g
-	  + g->n_src_addresses * sizeof (g->src_addresses[0])
-	  + g->n_aux_u32s * sizeof (u32));
+    return ((void *) g
+            + g->n_src_addresses * sizeof (g->src_addresses[0])
+            + g->n_aux_u32s * sizeof (u32));
 }
 
-typedef struct
-{
-  /* Type 0x22. */
-  igmp_header_t header;
+typedef struct {
+    /* Type 0x22. */
+    igmp_header_t header;
 
-  u16 unused;
+    u16 unused;
 
-  /* Number of groups which follow. */
-  u16 n_groups;
+    /* Number of groups which follow. */
+    u16 n_groups;
 
-  igmp_membership_group_v3_t groups[0];
+    igmp_membership_group_v3_t groups[0];
 } igmp_membership_report_v3_t;
 
 /* IP6 flavor of IGMP is called MLD which is embedded in ICMP6. */
-typedef struct
-{
-  /* Preceeded by ICMP v6 header. */
-  u16 max_response_delay_in_milliseconds;
-  u16 reserved;
-  ip6_address_t dst;
+typedef struct {
+    /* Preceeded by ICMP v6 header. */
+    u16 max_response_delay_in_milliseconds;
+    u16 reserved;
+    ip6_address_t dst;
 } mld_header_t;
 
 #endif /* included_vnet_igmp_packet_h */

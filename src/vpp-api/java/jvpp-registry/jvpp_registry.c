@@ -49,7 +49,8 @@ vlib_main_t **vlib_mains;
  * regular vpp libraries.
  */
 void __stack_chk_guard(void) __attribute__((weak));
-void __stack_chk_guard(void) {
+void __stack_chk_guard(void)
+{
 }
 
 #define CONTROL_PING_MESSAGE "control_ping"
@@ -78,7 +79,8 @@ typedef struct {
 
 jvpp_registry_main_t jvpp_registry_main __attribute__((aligned (64)));
 
-void vl_client_add_api_signatures(vl_api_memclnt_create_t *mp) {
+void vl_client_add_api_signatures(vl_api_memclnt_create_t *mp)
+{
     /*
      * Send the main API signature in slot 0. This bit of code must
      * match the checks in ../vpe/api/api.c: vl_msg_api_version_check().
@@ -87,14 +89,15 @@ void vl_client_add_api_signatures(vl_api_memclnt_create_t *mp) {
 }
 
 /* cleanup handler for RX thread */
-static_always_inline void cleanup_rx_thread(void *arg) {
+static_always_inline void cleanup_rx_thread(void *arg)
+{
     jvpp_main_t * jm = &jvpp_main;
     jvpp_registry_main_t * rm = &jvpp_registry_main;
 
     vppjni_lock(jm, 99);
 
     int getEnvStat = (*jm->jvm)->GetEnv(jm->jvm, (void **) &(jm->jenv),
-    JNI_VERSION_1_8);
+                                        JNI_VERSION_1_8);
     if (getEnvStat == JNI_EVERSION) {
         clib_warning("Unsupported JNI version\n");
         rm->control_ping_retval = VNET_API_ERROR_UNSUPPORTED_JNI_VERSION;
@@ -102,24 +105,26 @@ static_always_inline void cleanup_rx_thread(void *arg) {
     } else if (getEnvStat != JNI_EDETACHED) {
         (*jm->jvm)->DetachCurrentThread(jm->jvm);
     }
-    out: vppjni_unlock(jm);
+out:
+    vppjni_unlock(jm);
 }
 
 static void vl_api_control_ping_reply_t_handler(
-        vl_api_control_ping_reply_t * mp) {
+    vl_api_control_ping_reply_t * mp)
+{
     jvpp_main_t * jm = &jvpp_main;
     jvpp_registry_main_t * rm = &jvpp_registry_main;
     char was_thread_connected = 0;
 
     // attach to java thread if not attached
     int getEnvStat = (*jm->jvm)->GetEnv(jm->jvm, (void **) &(jm->jenv),
-            JNI_VERSION_1_8);
+                                        JNI_VERSION_1_8);
     if (getEnvStat == JNI_EDETACHED) {
         if ((*jm->jvm)->AttachCurrentThread(jm->jvm, (void **) &(jm->jenv),
-                NULL) != 0) {
+                                            NULL) != 0) {
             clib_warning("Failed to attach thread\n");
             rm->control_ping_retval =
-                    VNET_API_ERROR_FAILED_TO_ATTACH_TO_JAVA_THREAD;
+                VNET_API_ERROR_FAILED_TO_ATTACH_TO_JAVA_THREAD;
             goto out;
         }
 
@@ -138,44 +143,46 @@ static void vl_api_control_ping_reply_t_handler(
         JNIEnv *env = jm->jenv;
         if (mp->retval < 0) {
             call_on_error("controlPing", mp->context, mp->retval,
-                    rm->registryClass, rm->registryObject,
-                    rm->callbackExceptionClass);
+                          rm->registryClass, rm->registryObject,
+                          rm->callbackExceptionClass);
         } else {
             jmethodID constructor = (*env)->GetMethodID(env,
-                    rm->controlPingReplyClass, "<init>", "()V");
+                                    rm->controlPingReplyClass, "<init>", "()V");
             jmethodID callbackMethod = (*env)->GetMethodID(env,
-                    rm->registryClass, "onControlPingReply",
-                    "(Lio/fd/vpp/jvpp/dto/ControlPingReply;)V");
+                                       rm->registryClass, "onControlPingReply",
+                                       "(Lio/fd/vpp/jvpp/dto/ControlPingReply;)V");
 
             jobject dto = (*env)->NewObject(env, rm->controlPingReplyClass,
-                    constructor);
+                                            constructor);
 
             jfieldID contextFieldId = (*env)->GetFieldID(env,
-                    rm->controlPingReplyClass, "context", "I");
+                                      rm->controlPingReplyClass, "context", "I");
             (*env)->SetIntField(env, dto, contextFieldId,
-                    clib_net_to_host_u32(mp->context));
+                                clib_net_to_host_u32(mp->context));
 
             jfieldID clientIndexFieldId = (*env)->GetFieldID(env,
-                    rm->controlPingReplyClass, "clientIndex", "I");
+                                          rm->controlPingReplyClass, "clientIndex", "I");
             (*env)->SetIntField(env, dto, clientIndexFieldId,
-                    clib_net_to_host_u32(mp->client_index));
+                                clib_net_to_host_u32(mp->client_index));
 
             jfieldID vpePidFieldId = (*env)->GetFieldID(env,
-                    rm->controlPingReplyClass, "vpePid", "I");
+                                     rm->controlPingReplyClass, "vpePid", "I");
             (*env)->SetIntField(env, dto, vpePidFieldId,
-                    clib_net_to_host_u32(mp->vpe_pid));
+                                clib_net_to_host_u32(mp->vpe_pid));
 
             (*env)->CallVoidMethod(env, rm->registryObject, callbackMethod,
-                    dto);
+                                   dto);
             (*env)->DeleteLocalRef(env, dto);
         }
     }
 
-    out: rm->vpe_pid = clib_net_to_host_u32(mp->vpe_pid);
+out:
+    rm->vpe_pid = clib_net_to_host_u32(mp->vpe_pid);
     rm->control_ping_result_ready = 1;
 }
 
-static int find_ping_id() {
+static int find_ping_id()
+{
     int rv = 0;
     jvpp_main_t * jm = &jvpp_main;
     jvpp_registry_main_t * rm = &jvpp_registry_main;
@@ -191,11 +198,13 @@ static int find_ping_id() {
         char *key = (char *)hp->key; // key format: name_crc
         int msg_name_len = strlen(key) - 9; // ignore crc
         if (strlen(CONTROL_PING_MESSAGE) == msg_name_len &&
-                strncmp(CONTROL_PING_MESSAGE, (char *)hp->key, msg_name_len) == 0) {
+            strncmp(CONTROL_PING_MESSAGE, (char *)hp->key, msg_name_len) == 0)
+        {
             rm->control_ping_msg_id = (u32)hp->value[0];
         }
         if (strlen(CONTROL_PING_REPLY_MESSAGE) == msg_name_len &&
-                strncmp(CONTROL_PING_REPLY_MESSAGE, (char *)hp->key, msg_name_len) == 0) {
+            strncmp(CONTROL_PING_REPLY_MESSAGE, (char *)hp->key, msg_name_len) == 0)
+        {
             rm->control_ping_reply_msg_id  = (u32)hp->value[0];
         }
     }));
@@ -210,7 +219,8 @@ static int find_ping_id() {
     return rv;
 }
 
-static int send_initial_control_ping() {
+static int send_initial_control_ping()
+{
     f64 timeout;
     clib_time_t clib_time;
     vl_api_control_ping_t * mp;
@@ -245,7 +255,8 @@ static int send_initial_control_ping() {
     return rv;
 }
 
-static int connect_to_vpe(char *shm_prefix, char *name) {
+static int connect_to_vpe(char *shm_prefix, char *name)
+{
     jvpp_main_t * jm = &jvpp_main;
     api_main_t * am = &api_main;
     jvpp_registry_main_t * rm = &jvpp_registry_main;
@@ -260,16 +271,17 @@ static int connect_to_vpe(char *shm_prefix, char *name) {
         return -1;
 
     vl_msg_api_set_handlers(rm->control_ping_reply_msg_id, CONTROL_PING_REPLY_MESSAGE,
-            vl_api_control_ping_reply_t_handler, vl_noop_handler,
-            vl_api_control_ping_reply_t_endian,
-            vl_api_control_ping_reply_t_print,
-            sizeof(vl_api_control_ping_reply_t), 1);
+                            vl_api_control_ping_reply_t_handler, vl_noop_handler,
+                            vl_api_control_ping_reply_t_endian,
+                            vl_api_control_ping_reply_t_print,
+                            sizeof(vl_api_control_ping_reply_t), 1);
 
     return send_initial_control_ping();
 }
 
 JNIEXPORT jobject JNICALL Java_io_fd_vpp_jvpp_VppJNIConnection_clientConnect(
-        JNIEnv *env, jclass obj, jstring shmPrefix, jstring clientName) {
+    JNIEnv *env, jclass obj, jstring shmPrefix, jstring clientName)
+{
     /*
      * TODO introducing memory prefix as variable can be used in hc2vpp
      * to be able to run without root privileges
@@ -283,14 +295,14 @@ JNIEXPORT jobject JNICALL Java_io_fd_vpp_jvpp_VppJNIConnection_clientConnect(
     jvpp_registry_main_t * rm = &jvpp_registry_main;
 
     jclass connectionInfoClass = (*env)->FindClass(env,
-            "io/fd/vpp/jvpp/VppJNIConnection$ConnectionInfo");
+                                 "io/fd/vpp/jvpp/VppJNIConnection$ConnectionInfo");
     jmethodID connectionInfoConstructor = (*env)->GetMethodID(env,
-            connectionInfoClass, "<init>", "(JIII)V");
+                                          connectionInfoClass, "<init>", "(JIII)V");
 
     if (rm->is_connected) {
         return (*env)->NewObject(env, connectionInfoClass,
-                connectionInfoConstructor, 0, 0,
-                VNET_API_ERROR_ALREADY_CONNECTED, 0);
+                                 connectionInfoConstructor, 0, 0,
+                                 VNET_API_ERROR_ALREADY_CONNECTED, 0);
     }
 
     client_name = (*env)->GetStringUTFChars(env, clientName, 0);
@@ -298,12 +310,12 @@ JNIEXPORT jobject JNICALL Java_io_fd_vpp_jvpp_VppJNIConnection_clientConnect(
 
     if (!client_name) {
         return (*env)->NewObject(env, connectionInfoClass,
-                connectionInfoConstructor, 0, 0, VNET_API_ERROR_INVALID_VALUE, 0, shmPrefix);
+                                 connectionInfoConstructor, 0, 0, VNET_API_ERROR_INVALID_VALUE, 0, shmPrefix);
     }
 
     if (!shm_prefix) {
         return (*env)->NewObject(env, connectionInfoClass,
-                connectionInfoConstructor, 0, 0, VNET_API_ERROR_INVALID_VALUE, 0, shmPrefix);
+                                 connectionInfoConstructor, 0, 0, VNET_API_ERROR_INVALID_VALUE, 0, shmPrefix);
     }
 
     rv = connect_to_vpe((char *) shm_prefix, (char *) client_name);
@@ -315,12 +327,13 @@ JNIEXPORT jobject JNICALL Java_io_fd_vpp_jvpp_VppJNIConnection_clientConnect(
     (*env)->ReleaseStringUTFChars(env, shmPrefix, shm_prefix);
 
     return (*env)->NewObject(env, connectionInfoClass,
-            connectionInfoConstructor, (jlong) pointer_to_uword (jm->vl_input_queue),
-            (jint) jm->my_client_index, (jint) rv, (jint) rm->vpe_pid);
+                             connectionInfoConstructor, (jlong) pointer_to_uword (jm->vl_input_queue),
+                             (jint) jm->my_client_index, (jint) rv, (jint) rm->vpe_pid);
 }
 
 JNIEXPORT jint JNICALL Java_io_fd_vpp_jvpp_JVppRegistryImpl_controlPing0(
-        JNIEnv *env, jobject regstryObject) {
+    JNIEnv *env, jobject regstryObject)
+{
     jvpp_main_t * jm = &jvpp_main;
     vl_api_control_ping_t * mp;
     u32 my_context_id = vppjni_get_context_id(&jvpp_main);
@@ -331,7 +344,7 @@ JNIEXPORT jint JNICALL Java_io_fd_vpp_jvpp_JVppRegistryImpl_controlPing0(
     }
     if (rm->registryClass == 0) {
         rm->registryClass = (jclass) (*env)->NewGlobalRef(env,
-                (*env)->GetObjectClass(env, regstryObject));
+                            (*env)->GetObjectClass(env, regstryObject));
     }
 
     mp = vl_msg_api_alloc(sizeof(*mp));
@@ -346,7 +359,8 @@ JNIEXPORT jint JNICALL Java_io_fd_vpp_jvpp_JVppRegistryImpl_controlPing0(
 }
 
 JNIEXPORT void JNICALL Java_io_fd_vpp_jvpp_VppJNIConnection_clientDisconnect(
-        JNIEnv *env, jclass clazz) {
+    JNIEnv *env, jclass clazz)
+{
     jvpp_registry_main_t * rm = &jvpp_registry_main;
     rm->is_connected = 0; // TODO make thread safe
     vl_client_disconnect_from_vlib();
@@ -362,7 +376,8 @@ JNIEXPORT void JNICALL Java_io_fd_vpp_jvpp_VppJNIConnection_clientDisconnect(
     }
 }
 
-jint JNI_OnLoad(JavaVM *vm, void *reserved) {
+jint JNI_OnLoad(JavaVM *vm, void *reserved)
+{
     jvpp_main_t * jm = &jvpp_main;
     jvpp_registry_main_t * rm = &jvpp_registry_main;
     JNIEnv* env;
@@ -372,7 +387,7 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     }
 
     rm->controlPingReplyClass = (jclass) (*env)->NewGlobalRef(env,
-            (*env)->FindClass(env, "io/fd/vpp/jvpp/dto/ControlPingReply"));
+                                (*env)->FindClass(env, "io/fd/vpp/jvpp/dto/ControlPingReply"));
     if ((*env)->ExceptionCheck(env)) {
         (*env)->ExceptionDescribe(env);
         clib_warning("Failed to cache class references\n");
@@ -380,7 +395,7 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     }
 
     rm->callbackExceptionClass = (jclass) (*env)->NewGlobalRef(env,
-            (*env)->FindClass(env, "io/fd/vpp/jvpp/VppCallbackException"));
+                                 (*env)->FindClass(env, "io/fd/vpp/jvpp/VppCallbackException"));
     if ((*env)->ExceptionCheck(env)) {
         (*env)->ExceptionDescribe(env);
         return JNI_ERR;
@@ -390,7 +405,8 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     return JNI_VERSION_1_8;
 }
 
-void JNI_OnUnload(JavaVM *vm, void *reserved) {
+void JNI_OnUnload(JavaVM *vm, void *reserved)
+{
     jvpp_main_t * jm = &jvpp_main;
     JNIEnv* env;
     if ((*vm)->GetEnv(vm, (void**) &env, JNI_VERSION_1_8) != JNI_OK) {

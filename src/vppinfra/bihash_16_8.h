@@ -29,45 +29,44 @@
 #include <vppinfra/xxhash.h>
 #include <vppinfra/crc32.h>
 
-typedef struct
-{
-  u64 key[2];
-  u64 value;
+typedef struct {
+    u64 key[2];
+    u64 value;
 } clib_bihash_kv_16_8_t;
 
 static inline int
 clib_bihash_is_free_16_8 (clib_bihash_kv_16_8_t * v)
 {
-  /* Free values are memset to 0xff, check a bit... */
-  if (v->key[0] == ~0ULL && v->value == ~0ULL)
-    return 1;
-  return 0;
+    /* Free values are memset to 0xff, check a bit... */
+    if (v->key[0] == ~0ULL && v->value == ~0ULL)
+        return 1;
+    return 0;
 }
 
 static inline u64
 clib_bihash_hash_16_8 (clib_bihash_kv_16_8_t * v)
 {
 #ifdef clib_crc32c_uses_intrinsics
-  return clib_crc32c ((u8 *) v->key, 16);
+    return clib_crc32c ((u8 *) v->key, 16);
 #else
-  u64 tmp = v->key[0] ^ v->key[1];
-  return clib_xxhash (tmp);
+    u64 tmp = v->key[0] ^ v->key[1];
+    return clib_xxhash (tmp);
 #endif
 }
 
 static inline u8 *
 format_bihash_kvp_16_8 (u8 * s, va_list * args)
 {
-  clib_bihash_kv_16_8_t *v = va_arg (*args, clib_bihash_kv_16_8_t *);
+    clib_bihash_kv_16_8_t *v = va_arg (*args, clib_bihash_kv_16_8_t *);
 
-  s = format (s, "key %llu %llu value %llu", v->key[0], v->key[1], v->value);
-  return s;
+    s = format (s, "key %llu %llu value %llu", v->key[0], v->key[1], v->value);
+    return s;
 }
 
 static inline int
 clib_bihash_key_compare_16_8 (u64 * a, u64 * b)
 {
-  return ((a[0] ^ b[0]) | (a[1] ^ b[1])) == 0;
+    return ((a[0] ^ b[0]) | (a[1] ^ b[1])) == 0;
 }
 
 #undef __included_bihash_template_h__

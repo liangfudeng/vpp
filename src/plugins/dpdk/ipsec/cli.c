@@ -20,71 +20,66 @@
 static u8 *
 format_crypto (u8 * s, va_list * args)
 {
-  dpdk_crypto_main_t *dcm = &dpdk_crypto_main;
-  crypto_dev_t *dev = va_arg (*args, crypto_dev_t *);
-  crypto_drv_t *drv = vec_elt_at_index (dcm->drv, dev->drv_id);
-  u64 feat, mask;
-  u32 i;
-  i8 *pre = "  ";
+    dpdk_crypto_main_t *dcm = &dpdk_crypto_main;
+    crypto_dev_t *dev = va_arg (*args, crypto_dev_t *);
+    crypto_drv_t *drv = vec_elt_at_index (dcm->drv, dev->drv_id);
+    u64 feat, mask;
+    u32 i;
+    i8 *pre = "  ";
 
-  s = format (s, "%-25s%-20s%-10s\n", dev->name, drv->name,
-	      rte_cryptodevs[dev->id].data->dev_started ? "up" : "down");
-  s = format (s, "  numa_node %u, max_queues %u\n", dev->numa, dev->max_qp);
-  s = format (s, "  free_resources %u, used_resources %u\n",
-	      vec_len (dev->free_resources), vec_len (dev->used_resources));
+    s = format (s, "%-25s%-20s%-10s\n", dev->name, drv->name,
+                rte_cryptodevs[dev->id].data->dev_started ? "up" : "down");
+    s = format (s, "  numa_node %u, max_queues %u\n", dev->numa, dev->max_qp);
+    s = format (s, "  free_resources %u, used_resources %u\n",
+                vec_len (dev->free_resources), vec_len (dev->used_resources));
 
-  if (dev->features)
-    {
-      for (mask = 1; mask != 0; mask <<= 1)
-	{
-	  feat = dev->features & mask;
-	  if (feat)
-	    {
-	      s =
-		format (s, "%s%s", pre,
-			rte_cryptodev_get_feature_name (feat));
-	      pre = ", ";
-	    }
-	}
-      s = format (s, "\n");
+    if (dev->features) {
+        for (mask = 1; mask != 0; mask <<= 1) {
+            feat = dev->features & mask;
+            if (feat) {
+                s =
+                    format (s, "%s%s", pre,
+                            rte_cryptodev_get_feature_name (feat));
+                pre = ", ";
+            }
+        }
+        s = format (s, "\n");
     }
 
-  s = format (s, "  Cipher:");
-  pre = " ";
-  for (i = 0; i < IPSEC_CRYPTO_N_ALG; i++)
-    if (dev->cipher_support[i])
-      {
-	s = format (s, "%s%s", pre, dcm->cipher_algs[i].name);
-	pre = ", ";
-      }
-  s = format (s, "\n");
+    s = format (s, "  Cipher:");
+    pre = " ";
+    for (i = 0; i < IPSEC_CRYPTO_N_ALG; i++)
+        if (dev->cipher_support[i]) {
+            s = format (s, "%s%s", pre, dcm->cipher_algs[i].name);
+            pre = ", ";
+        }
+    s = format (s, "\n");
 
-  s = format (s, "  Auth:");
-  pre = " ";
-  for (i = 0; i < IPSEC_INTEG_N_ALG; i++)
-    if (dev->auth_support[i])
-      {
-	s = format (s, "%s%s", pre, dcm->auth_algs[i].name);
-	pre = ", ";
-      }
-  s = format (s, "\n\n");
+    s = format (s, "  Auth:");
+    pre = " ";
+    for (i = 0; i < IPSEC_INTEG_N_ALG; i++)
+        if (dev->auth_support[i]) {
+            s = format (s, "%s%s", pre, dcm->auth_algs[i].name);
+            pre = ", ";
+        }
+    s = format (s, "\n\n");
 
-  return s;
+    return s;
 }
 
 static clib_error_t *
 show_dpdk_crypto_fn (vlib_main_t * vm, unformat_input_t * input,
-		     vlib_cli_command_t * cmd)
+                     vlib_cli_command_t * cmd)
 {
-  dpdk_crypto_main_t *dcm = &dpdk_crypto_main;
-  crypto_dev_t *dev;
+    dpdk_crypto_main_t *dcm = &dpdk_crypto_main;
+    crypto_dev_t *dev;
 
   /* *INDENT-OFF* */
   vec_foreach (dev, dcm->dev)
     vlib_cli_output (vm, "%U", format_crypto, dev);
   /* *INDENT-ON* */
 
-  return NULL;
+    return NULL;
 }
 
 /*?
@@ -122,19 +117,19 @@ VLIB_CLI_COMMAND (show_dpdk_crypto, static) = {
 static u8 *
 format_crypto_worker (u8 * s, va_list * args)
 {
-  u32 thread_idx = va_arg (*args, u32);
-  u8 verbose = (u8) va_arg (*args, u32);
-  dpdk_crypto_main_t *dcm = &dpdk_crypto_main;
-  crypto_worker_main_t *cwm;
-  crypto_resource_t *res;
-  u16 *res_idx;
-  i8 *pre, *ind;
-  u32 i;
+    u32 thread_idx = va_arg (*args, u32);
+    u8 verbose = (u8) va_arg (*args, u32);
+    dpdk_crypto_main_t *dcm = &dpdk_crypto_main;
+    crypto_worker_main_t *cwm;
+    crypto_resource_t *res;
+    u16 *res_idx;
+    i8 *pre, *ind;
+    u32 i;
 
-  cwm = vec_elt_at_index (dcm->workers_main, thread_idx);
+    cwm = vec_elt_at_index (dcm->workers_main, thread_idx);
 
-  s = format (s, "Thread %u (%v):\n", thread_idx,
-	      vlib_worker_threads[thread_idx].name);
+    s = format (s, "Thread %u (%v):\n", thread_idx,
+                vlib_worker_threads[thread_idx].name);
 
   /* *INDENT-OFF* */
   vec_foreach (res_idx, cwm->resource_idx)
@@ -171,25 +166,24 @@ format_crypto_worker (u8 * s, va_list * args)
     }
   /* *INDENT-ON* */
 
-  return s;
+    return s;
 }
 
 static clib_error_t *
 common_crypto_placement_fn (vlib_main_t * vm, unformat_input_t * input,
-			    vlib_cli_command_t * cmd, u8 verbose)
+                            vlib_cli_command_t * cmd, u8 verbose)
 {
-  dpdk_crypto_main_t *dcm = &dpdk_crypto_main;
-  clib_error_t *error = NULL;
-  u32 i;
-  u8 skip_master;
+    dpdk_crypto_main_t *dcm = &dpdk_crypto_main;
+    clib_error_t *error = NULL;
+    u32 i;
+    u8 skip_master;
 
-  if (!dcm->enabled)
-    {
-      vlib_cli_output (vm, "\nDPDK Cryptodev support is disabled\n");
-      return error;
+    if (!dcm->enabled) {
+        vlib_cli_output (vm, "\nDPDK Cryptodev support is disabled\n");
+        return error;
     }
 
-  skip_master = vlib_num_workers () > 0;
+    skip_master = vlib_num_workers () > 0;
 
   /* *INDENT-OFF* */
   vec_foreach_index (i, dcm->workers_main)
@@ -201,21 +195,21 @@ common_crypto_placement_fn (vlib_main_t * vm, unformat_input_t * input,
     }
   /* *INDENT-ON* */
 
-  return error;
+    return error;
 }
 
 static clib_error_t *
 show_dpdk_crypto_placement_fn (vlib_main_t * vm, unformat_input_t * input,
-			       vlib_cli_command_t * cmd)
+                               vlib_cli_command_t * cmd)
 {
-  return common_crypto_placement_fn (vm, input, cmd, 0);
+    return common_crypto_placement_fn (vm, input, cmd, 0);
 }
 
 static clib_error_t *
 show_dpdk_crypto_placement_v_fn (vlib_main_t * vm, unformat_input_t * input,
-				 vlib_cli_command_t * cmd)
+                                 vlib_cli_command_t * cmd)
 {
-  return common_crypto_placement_fn (vm, input, cmd, 1);
+    return common_crypto_placement_fn (vm, input, cmd, 1);
 }
 
 /*?
@@ -278,55 +272,52 @@ VLIB_CLI_COMMAND (show_dpdk_crypto_placement_v, static) = {
 
 static clib_error_t *
 set_dpdk_crypto_placement_fn (vlib_main_t * vm,
-			      unformat_input_t * input,
-			      vlib_cli_command_t * cmd)
+                              unformat_input_t * input,
+                              vlib_cli_command_t * cmd)
 {
-  unformat_input_t _line_input, *line_input = &_line_input;
-  dpdk_crypto_main_t *dcm = &dpdk_crypto_main;
-  crypto_worker_main_t *cwm;
-  crypto_dev_t *dev;
-  u32 thread_idx, i;
-  u16 res_idx, *idx;
-  u8 dev_idx, auto_en = 0;
+    unformat_input_t _line_input, *line_input = &_line_input;
+    dpdk_crypto_main_t *dcm = &dpdk_crypto_main;
+    crypto_worker_main_t *cwm;
+    crypto_dev_t *dev;
+    u32 thread_idx, i;
+    u16 res_idx, *idx;
+    u8 dev_idx, auto_en = 0;
 
-  if (!unformat_user (input, unformat_line_input, line_input))
-    return clib_error_return (0, "invalid syntax");
+    if (!unformat_user (input, unformat_line_input, line_input))
+        return clib_error_return (0, "invalid syntax");
 
-  while (unformat_check_input (line_input) != UNFORMAT_END_OF_INPUT)
-    {
-      if (unformat (line_input, "%u %u", &dev_idx, &thread_idx))
-	;
-      else if (unformat (line_input, "auto"))
-	auto_en = 1;
-      else
-	{
-	  unformat_free (line_input);
-	  return clib_error_return (0, "parse error: '%U'",
-				    format_unformat_error, line_input);
-	}
+    while (unformat_check_input (line_input) != UNFORMAT_END_OF_INPUT) {
+        if (unformat (line_input, "%u %u", &dev_idx, &thread_idx))
+            ;
+        else if (unformat (line_input, "auto"))
+            auto_en = 1;
+        else {
+            unformat_free (line_input);
+            return clib_error_return (0, "parse error: '%U'",
+                                      format_unformat_error, line_input);
+        }
     }
 
-  unformat_free (line_input);
+    unformat_free (line_input);
 
-  if (auto_en)
-    {
-      crypto_auto_placement ();
-      return 0;
+    if (auto_en) {
+        crypto_auto_placement ();
+        return 0;
     }
 
-  /* TODO support device name */
+    /* TODO support device name */
 
-  if (!(dev_idx < vec_len (dcm->dev)))
-    return clib_error_return (0, "please specify valid device index");
+    if (!(dev_idx < vec_len (dcm->dev)))
+        return clib_error_return (0, "please specify valid device index");
 
-  if (thread_idx != (u32) ~ 0 && !(thread_idx < vec_len (dcm->workers_main)))
-    return clib_error_return (0, "invalid thread index");
+    if (thread_idx != (u32) ~ 0 && !(thread_idx < vec_len (dcm->workers_main)))
+        return clib_error_return (0, "invalid thread index");
 
-  dev = vec_elt_at_index (dcm->dev, dev_idx);
-  if (!(vec_len (dev->free_resources)))
-    return clib_error_return (0, "all device resources are being used");
+    dev = vec_elt_at_index (dcm->dev, dev_idx);
+    if (!(vec_len (dev->free_resources)))
+        return clib_error_return (0, "all device resources are being used");
 
-  /* Check thread is not already using the device */
+    /* Check thread is not already using the device */
   /* *INDENT-OFF* */
   vec_foreach (idx, dev->used_resources)
     if (dcm->resource[idx[0]].thread_idx == thread_idx)
@@ -334,37 +325,35 @@ set_dpdk_crypto_placement_fn (vlib_main_t * vm,
 				thread_idx, dev_idx);
   /* *INDENT-ON* */
 
-  res_idx = vec_pop (dev->free_resources);
-  vec_add1 (dev->used_resources, res_idx);
+    res_idx = vec_pop (dev->free_resources);
+    vec_add1 (dev->used_resources, res_idx);
 
-  cwm = vec_elt_at_index (dcm->workers_main, thread_idx);
+    cwm = vec_elt_at_index (dcm->workers_main, thread_idx);
 
-  ASSERT (dcm->resource[res_idx].thread_idx == (u16) ~ 0);
-  dcm->resource[res_idx].thread_idx = thread_idx;
+    ASSERT (dcm->resource[res_idx].thread_idx == (u16) ~ 0);
+    dcm->resource[res_idx].thread_idx = thread_idx;
 
-  /* Add device to vector of polling resources */
-  vec_add1 (cwm->resource_idx, res_idx);
+    /* Add device to vector of polling resources */
+    vec_add1 (cwm->resource_idx, res_idx);
 
-  /* Set device as default for all supported algos */
-  for (i = 0; i < IPSEC_CRYPTO_N_ALG; i++)
-    if (dev->cipher_support[i])
-      {
-	if (cwm->cipher_resource_idx[i] == (u16) ~ 0)
-	  dcm->cipher_algs[i].disabled--;
-	cwm->cipher_resource_idx[i] = res_idx;
-      }
+    /* Set device as default for all supported algos */
+    for (i = 0; i < IPSEC_CRYPTO_N_ALG; i++)
+        if (dev->cipher_support[i]) {
+            if (cwm->cipher_resource_idx[i] == (u16) ~ 0)
+                dcm->cipher_algs[i].disabled--;
+            cwm->cipher_resource_idx[i] = res_idx;
+        }
 
-  for (i = 0; i < IPSEC_INTEG_N_ALG; i++)
-    if (dev->auth_support[i])
-      {
-	if (cwm->auth_resource_idx[i] == (u16) ~ 0)
-	  dcm->auth_algs[i].disabled--;
-	cwm->auth_resource_idx[i] = res_idx;
-      }
+    for (i = 0; i < IPSEC_INTEG_N_ALG; i++)
+        if (dev->auth_support[i]) {
+            if (cwm->auth_resource_idx[i] == (u16) ~ 0)
+                dcm->auth_algs[i].disabled--;
+            cwm->auth_resource_idx[i] = res_idx;
+        }
 
-  /* Check if any unused resource */
+    /* Check if any unused resource */
 
-  u8 used = 0;
+    u8 used = 0;
   /* *INDENT-OFF* */
   vec_foreach (idx, cwm->resource_idx)
     {
@@ -381,7 +370,7 @@ set_dpdk_crypto_placement_fn (vlib_main_t * vm,
     }
   /* *INDENT-ON* */
 
-  return 0;
+    return 0;
 }
 
 /* *INDENT-OFF* */
@@ -399,94 +388,89 @@ VLIB_CLI_COMMAND (set_dpdk_crypto_placement, static) = {
 static void
 dpdk_crypto_clear_resource (u16 res_idx)
 {
-  dpdk_crypto_main_t *dcm = &dpdk_crypto_main;
-  crypto_resource_t *res = vec_elt_at_index (dcm->resource, res_idx);
-  crypto_worker_main_t *cwm = &dcm->workers_main[res->thread_idx];
-  u32 i;
+    dpdk_crypto_main_t *dcm = &dpdk_crypto_main;
+    crypto_resource_t *res = vec_elt_at_index (dcm->resource, res_idx);
+    crypto_worker_main_t *cwm = &dcm->workers_main[res->thread_idx];
+    u32 i;
 
-  for (i = 0; i < IPSEC_CRYPTO_N_ALG; i++)
-    if (cwm->cipher_resource_idx[i] == res_idx)
-      {
-	cwm->cipher_resource_idx[i] = (u16) ~ 0;
-	dcm->cipher_algs[i].disabled++;
-      }
+    for (i = 0; i < IPSEC_CRYPTO_N_ALG; i++)
+        if (cwm->cipher_resource_idx[i] == res_idx) {
+            cwm->cipher_resource_idx[i] = (u16) ~ 0;
+            dcm->cipher_algs[i].disabled++;
+        }
 
-  for (i = 0; i < IPSEC_INTEG_N_ALG; i++)
-    if (cwm->auth_resource_idx[i] == res_idx)
-      {
-	cwm->auth_resource_idx[i] = (u16) ~ 0;
-	dcm->auth_algs[i].disabled++;
-      }
+    for (i = 0; i < IPSEC_INTEG_N_ALG; i++)
+        if (cwm->auth_resource_idx[i] == res_idx) {
+            cwm->auth_resource_idx[i] = (u16) ~ 0;
+            dcm->auth_algs[i].disabled++;
+        }
 
-  /* Fully remove device on crypto_node once there are no inflights */
-  res->remove = 1;
+    /* Fully remove device on crypto_node once there are no inflights */
+    res->remove = 1;
 }
 
 static clib_error_t *
 clear_dpdk_crypto_placement_fn (vlib_main_t * vm,
-				unformat_input_t *
-				input, vlib_cli_command_t * cmd)
+                                unformat_input_t *
+                                input, vlib_cli_command_t * cmd)
 {
-  unformat_input_t _line_input, *line_input = &_line_input;
-  dpdk_crypto_main_t *dcm = &dpdk_crypto_main;
-  crypto_dev_t *dev;
-  u32 thread_idx = (u32) ~ 0;
-  u16 *res_idx;
-  u8 dev_idx = (u8) ~ 0;
-  u8 free_all = 0;
+    unformat_input_t _line_input, *line_input = &_line_input;
+    dpdk_crypto_main_t *dcm = &dpdk_crypto_main;
+    crypto_dev_t *dev;
+    u32 thread_idx = (u32) ~ 0;
+    u16 *res_idx;
+    u8 dev_idx = (u8) ~ 0;
+    u8 free_all = 0;
 
-  if (!unformat_user (input, unformat_line_input, line_input))
-    return clib_error_return (0, "invalid syntax");
+    if (!unformat_user (input, unformat_line_input, line_input))
+        return clib_error_return (0, "invalid syntax");
 
-  while (unformat_check_input (line_input) != UNFORMAT_END_OF_INPUT)
-    {
-      if (unformat (line_input, "%u %u", &dev_idx, &thread_idx))
-	;
-      else if (unformat (line_input, "%u", &dev_idx))
-	free_all = 1;
-      else
-	{
-	  unformat_free (line_input);
-	  return clib_error_return (0, "parse error: '%U'",
-				    format_unformat_error, line_input);
-	}
+    while (unformat_check_input (line_input) != UNFORMAT_END_OF_INPUT) {
+        if (unformat (line_input, "%u %u", &dev_idx, &thread_idx))
+            ;
+        else if (unformat (line_input, "%u", &dev_idx))
+            free_all = 1;
+        else {
+            unformat_free (line_input);
+            return clib_error_return (0, "parse error: '%U'",
+                                      format_unformat_error, line_input);
+        }
     }
 
-  unformat_free (line_input);
+    unformat_free (line_input);
 
-  if (!(dev_idx < vec_len (dcm->dev)))
-    return clib_error_return (0, "invalid device index");
+    if (!(dev_idx < vec_len (dcm->dev)))
+        return clib_error_return (0, "invalid device index");
 
-  dev = vec_elt_at_index (dcm->dev, dev_idx);
+    dev = vec_elt_at_index (dcm->dev, dev_idx);
 
-  /* Clear all resources placements */
-  if (free_all)
-    {
+    /* Clear all resources placements */
+    if (free_all) {
     /* *INDENT-OFF* */
     vec_foreach (res_idx, dev->used_resources)
       dpdk_crypto_clear_resource (res_idx[0]);
     /* *INDENT-ON* */
 
-      return 0;
+        return 0;
     }
 
-  if (!(thread_idx < vec_len (dcm->workers_main)))
-    return clib_error_return (0, "invalid thread index");
+    if (!(thread_idx < vec_len (dcm->workers_main)))
+        return clib_error_return (0, "invalid thread index");
 
-  /* Clear placement of device for given thread index */
+    /* Clear placement of device for given thread index */
   /* *INDENT-OFF* */
   vec_foreach (res_idx, dev->used_resources)
     if (dcm->resource[res_idx[0]].thread_idx == thread_idx)
       break;
   /* *INDENT-ON* */
 
-  if (!(res_idx < vec_end (dev->used_resources)))
-    return clib_error_return (0, "thread %u is not using device %u",
-			      thread_idx, dev_idx);
+    if (!(res_idx < vec_end (dev->used_resources)))
+        return clib_error_return (0, "thread %u is not using device %u",
+                                  thread_idx, dev_idx);
 
-  dpdk_crypto_clear_resource (res_idx[0]);
+    dpdk_crypto_clear_resource (res_idx[0]);
 
-  return 0;
+    return 0;
 }
 
 /* *INDENT-OFF* */
@@ -500,32 +484,32 @@ VLIB_CLI_COMMAND (clear_dpdk_crypto_placement, static) = {
 u8 *
 format_dpdk_mempool (u8 * s, va_list * args)
 {
-  struct rte_mempool *mp = va_arg (*args, struct rte_mempool *);
-  u32 indent = format_get_indent (s);
-  u32 count = rte_mempool_avail_count (mp);
+    struct rte_mempool *mp = va_arg (*args, struct rte_mempool *);
+    u32 indent = format_get_indent (s);
+    u32 count = rte_mempool_avail_count (mp);
 
-  s = format (s, "%s\n%Uavailable %7d, allocated %7d total %7d\n",
-	      mp->name, format_white_space, indent + 2,
-	      count, mp->size - count, mp->size);
-  s = format (s, "%Uphys_addr %p, flags %08x, nb_mem_chunks %u\n",
-	      format_white_space, indent + 2,
-	      mp->mz->phys_addr, mp->flags, mp->nb_mem_chunks);
-  s = format (s, "%Uelt_size %4u, header_size %3u, trailer_size %u\n",
-	      format_white_space, indent + 2,
-	      mp->elt_size, mp->header_size, mp->trailer_size);
-  s = format (s, "%Uprivate_data_size %3u, total_elt_size %u\n",
-	      format_white_space, indent + 2,
-	      mp->private_data_size,
-	      mp->elt_size + mp->header_size + mp->trailer_size);
-  return s;
+    s = format (s, "%s\n%Uavailable %7d, allocated %7d total %7d\n",
+                mp->name, format_white_space, indent + 2,
+                count, mp->size - count, mp->size);
+    s = format (s, "%Uphys_addr %p, flags %08x, nb_mem_chunks %u\n",
+                format_white_space, indent + 2,
+                mp->mz->phys_addr, mp->flags, mp->nb_mem_chunks);
+    s = format (s, "%Uelt_size %4u, header_size %3u, trailer_size %u\n",
+                format_white_space, indent + 2,
+                mp->elt_size, mp->header_size, mp->trailer_size);
+    s = format (s, "%Uprivate_data_size %3u, total_elt_size %u\n",
+                format_white_space, indent + 2,
+                mp->private_data_size,
+                mp->elt_size + mp->header_size + mp->trailer_size);
+    return s;
 }
 
 static clib_error_t *
 show_dpdk_crypto_pools_fn (vlib_main_t * vm,
-			   unformat_input_t * input, vlib_cli_command_t * cmd)
+                           unformat_input_t * input, vlib_cli_command_t * cmd)
 {
-  dpdk_crypto_main_t *dcm = &dpdk_crypto_main;
-  crypto_data_t *data;
+    dpdk_crypto_main_t *dcm = &dpdk_crypto_main;
+    crypto_data_t *data;
 
   /* *INDENT-OFF* */
   vec_foreach (data, dcm->data)
@@ -542,7 +526,7 @@ show_dpdk_crypto_pools_fn (vlib_main_t * vm,
   }
   /* *INDENT-ON* */
 
-  return NULL;
+    return NULL;
 }
 
 /*?

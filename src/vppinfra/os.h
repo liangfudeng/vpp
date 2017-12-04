@@ -61,7 +61,7 @@ extern __thread uword __os_thread_index;
 static_always_inline uword
 os_get_thread_index (void)
 {
-  return __os_thread_index;
+    return __os_thread_index;
 }
 
 static_always_inline uword
@@ -70,7 +70,7 @@ os_get_cpu_number (void) __attribute__ ((deprecated));
 static_always_inline uword
 os_get_cpu_number (void)
 {
-  return __os_thread_index;
+    return __os_thread_index;
 }
 
 uword os_get_nthreads (void);

@@ -133,216 +133,216 @@ beware!!
 ** some of the type names are shorten for brevity’s sake.
 
 */
-namespace VOM {
-/**
- * The interface to writing objects into VPP OM.
- */
-class OM
+namespace VOM
 {
-public:
-  /**
-   * A class providing the RAII pattern for mark and sweep
-   */
-  class mark_n_sweep
-  {
-  public:
     /**
-     * Constructor - will call mark on the key
+     * The interface to writing objects into VPP OM.
      */
-    mark_n_sweep(const client_db::key_t& key);
+    class OM
+    {
+    public:
+        /**
+         * A class providing the RAII pattern for mark and sweep
+         */
+        class mark_n_sweep
+        {
+        public:
+            /**
+             * Constructor - will call mark on the key
+             */
+            mark_n_sweep(const client_db::key_t& key);
 
-    /**
-     * Destructor - will call sweep on the key
-     */
-    ~mark_n_sweep();
+            /**
+             * Destructor - will call sweep on the key
+             */
+            ~mark_n_sweep();
 
-  private:
-    /**
-     * no copies
-     */
-    mark_n_sweep(const mark_n_sweep& ms) = delete;
+        private:
+            /**
+             * no copies
+             */
+            mark_n_sweep(const mark_n_sweep& ms) = delete;
 
-    /**
-     * The client whose state we are guarding.
-     */
-    client_db::key_t m_key;
-  };
+            /**
+             * The client whose state we are guarding.
+             */
+            client_db::key_t m_key;
+        };
 
-  /**
-   * Init
-   */
-  static void init();
+        /**
+         * Init
+         */
+        static void init();
 
-  /**
-   * populate the OM with state read from HW.
-   */
-  static void populate(const client_db::key_t& key);
+        /**
+         * populate the OM with state read from HW.
+         */
+        static void populate(const client_db::key_t& key);
 
-  /**
-   * Mark all state owned by this key as stale
-   */
-  static void mark(const client_db::key_t& key);
+        /**
+         * Mark all state owned by this key as stale
+         */
+        static void mark(const client_db::key_t& key);
 
-  /**
-   * Sweep all the key's objects that are stale
-   */
-  static void sweep(const client_db::key_t& key);
+        /**
+         * Sweep all the key's objects that are stale
+         */
+        static void sweep(const client_db::key_t& key);
 
-  /**
-   * Replay all of the objects to HW.
-   */
-  static void replay(void);
+        /**
+         * Replay all of the objects to HW.
+         */
+        static void replay(void);
 
-  /**
-   * Make the State in VPP reflect the expressed desired state.
-   *  But don't call the HW - use this whilst processing dumped
-   *  data from HW
-   */
-  template <typename OBJ>
-  static rc_t commit(const client_db::key_t& key, const OBJ& obj)
-  {
-    rc_t rc = rc_t::OK;
+        /**
+         * Make the State in VPP reflect the expressed desired state.
+         *  But don't call the HW - use this whilst processing dumped
+         *  data from HW
+         */
+        template <typename OBJ>
+        static rc_t commit(const client_db::key_t& key, const OBJ& obj)
+        {
+            rc_t rc = rc_t::OK;
 
-    HW::disable();
-    rc = OM::write(key, obj);
-    HW::enable();
+            HW::disable();
+            rc = OM::write(key, obj);
+            HW::enable();
 
-    return (rc);
-  }
+            return (rc);
+        }
 
-  /**
-   * Make the State in VPP reflect the expressed desired state.
-   *  After processing all the objects in the queue, in FIFO order,
-   *  any remaining state owned by the client_db::key_t is purged.
-   * This is a template function so the object's update() function is
-   * always called with the derived type.
-   */
-  template <typename OBJ>
-  static rc_t write(const client_db::key_t& key, const OBJ& obj)
-  {
-    rc_t rc = rc_t::OK;
+        /**
+         * Make the State in VPP reflect the expressed desired state.
+         *  After processing all the objects in the queue, in FIFO order,
+         *  any remaining state owned by the client_db::key_t is purged.
+         * This is a template function so the object's update() function is
+         * always called with the derived type.
+         */
+        template <typename OBJ>
+        static rc_t write(const client_db::key_t& key, const OBJ& obj)
+        {
+            rc_t rc = rc_t::OK;
 
-    /*
-     * Find the singular instance another owner may have created.
-     * this always returns something.
-     */
-    std::shared_ptr<OBJ> inst = obj.singular();
+            /*
+             * Find the singular instance another owner may have created.
+             * this always returns something.
+             */
+            std::shared_ptr<OBJ> inst = obj.singular();
 
-    /*
-     * Update the existing object with the new desired state
-     */
-    inst->update(obj);
+            /*
+             * Update the existing object with the new desired state
+             */
+            inst->update(obj);
 
-    /*
-     * Find if the object already stored on behalf of this key.
-     * and mark them stale
-     */
-    object_ref_list& objs = m_db->find(key);
+            /*
+             * Find if the object already stored on behalf of this key.
+             * and mark them stale
+             */
+            object_ref_list& objs = m_db->find(key);
 
-    /*
-     * Iterate through this list to find a matchin' object
-     * to the one requested.
-     */
-    auto match_ptr = [inst](const object_ref& oref) {
-      return (inst == oref.obj());
+            /*
+             * Iterate through this list to find a matchin' object
+             * to the one requested.
+             */
+            auto match_ptr = [inst](const object_ref& oref) {
+                return (inst == oref.obj());
+            };
+            auto it = std::find_if(objs.begin(), objs.end(), match_ptr);
+
+            if (it != objs.end()) {
+                /*
+                 * yes, this key already owns this object.
+                 */
+                it->clear();
+            } else {
+                /*
+                 * Add the singular instance to the owners list
+                 */
+                objs.insert(object_ref(inst));
+            }
+
+            return (HW::write());
+        }
+
+        /**
+         * Remove all object in the OM referenced by the key
+         */
+        static void remove(const client_db::key_t& key);
+
+        /**
+         * Print each of the object in the DB into the stream provided
+         */
+        static void dump(const client_db::key_t& key, std::ostream& os);
+
+        /**
+         * Print each of the KEYS
+         */
+        static void dump(std::ostream& os);
+
+        /**
+         * Class definition for listeners to OM events
+         */
+        class listener
+        {
+        public:
+            listener() = default;
+            virtual ~listener() = default;
+
+            /**
+             * Handle a populate event
+             */
+            virtual void handle_populate(const client_db::key_t& key) = 0;
+
+            /**
+             * Handle a replay event
+             */
+            virtual void handle_replay() = 0;
+
+            /**
+             * Get the sortable Id of the listener
+             */
+            virtual dependency_t order() const = 0;
+
+            /**
+             * less than operator for set sorting
+             */
+            bool operator<(const listener& listener) const
+            {
+                return (order() < listener.order());
+            }
+        };
+
+        /**
+         * Register a listener of events
+         */
+        static bool register_listener(listener* listener);
+
+    private:
+        /**
+         * Database of object state created for each key
+         */
+        static client_db* m_db;
+
+        /**
+         * Comparator to keep the pointers to listeners in sorted order
+         */
+        struct listener_comparator_t {
+            bool operator()(const listener* l1, const listener* l2) const
+            {
+                return (l1->order() < l2->order());
+            }
+        };
+
+        /**
+         * convenient typedef for the sorted set of listeners
+         */
+        typedef std::multiset<listener*, listener_comparator_t> listener_list;
+
+        /**
+         * The listeners for events
+         */
+        static std::unique_ptr<listener_list> m_listeners;
     };
-    auto it = std::find_if(objs.begin(), objs.end(), match_ptr);
-
-    if (it != objs.end()) {
-      /*
-       * yes, this key already owns this object.
-       */
-      it->clear();
-    } else {
-      /*
-       * Add the singular instance to the owners list
-       */
-      objs.insert(object_ref(inst));
-    }
-
-    return (HW::write());
-  }
-
-  /**
-   * Remove all object in the OM referenced by the key
-   */
-  static void remove(const client_db::key_t& key);
-
-  /**
-   * Print each of the object in the DB into the stream provided
-   */
-  static void dump(const client_db::key_t& key, std::ostream& os);
-
-  /**
-   * Print each of the KEYS
-   */
-  static void dump(std::ostream& os);
-
-  /**
-   * Class definition for listeners to OM events
-   */
-  class listener
-  {
-  public:
-    listener() = default;
-    virtual ~listener() = default;
-
-    /**
-     * Handle a populate event
-     */
-    virtual void handle_populate(const client_db::key_t& key) = 0;
-
-    /**
-     * Handle a replay event
-     */
-    virtual void handle_replay() = 0;
-
-    /**
-     * Get the sortable Id of the listener
-     */
-    virtual dependency_t order() const = 0;
-
-    /**
-     * less than operator for set sorting
-     */
-    bool operator<(const listener& listener) const
-    {
-      return (order() < listener.order());
-    }
-  };
-
-  /**
-   * Register a listener of events
-   */
-  static bool register_listener(listener* listener);
-
-private:
-  /**
-   * Database of object state created for each key
-   */
-  static client_db* m_db;
-
-  /**
-   * Comparator to keep the pointers to listeners in sorted order
-   */
-  struct listener_comparator_t
-  {
-    bool operator()(const listener* l1, const listener* l2) const
-    {
-      return (l1->order() < l2->order());
-    }
-  };
-
-  /**
-   * convenient typedef for the sorted set of listeners
-   */
-  typedef std::multiset<listener*, listener_comparator_t> listener_list;
-
-  /**
-   * The listeners for events
-   */
-  static std::unique_ptr<listener_list> m_listeners;
-};
 }
 
 /*

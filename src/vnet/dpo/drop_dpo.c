@@ -71,38 +71,31 @@ const static dpo_vft_t drop_vft = {
  * this means that these graph nodes are ones from which a drop is the
  * parent object in the DPO-graph.
  */
-const static char* const drop_ip4_nodes[] =
-{
+const static char* const drop_ip4_nodes[] = {
     "ip4-drop",
     NULL,
 };
-const static char* const drop_ip6_nodes[] =
-{
+const static char* const drop_ip6_nodes[] = {
     "ip6-drop",
     NULL,
 };
-const static char* const drop_mpls_nodes[] =
-{
+const static char* const drop_mpls_nodes[] = {
     "mpls-drop",
     NULL,
 };
-const static char* const drop_ethernet_nodes[] =
-{
+const static char* const drop_ethernet_nodes[] = {
     "error-drop",
     NULL,
 };
-const static char* const drop_nsh_nodes[] =
-{
+const static char* const drop_nsh_nodes[] = {
     "error-drop",
     NULL,
 };
-const static char* const drop_bier_nodes[] =
-{
+const static char* const drop_bier_nodes[] = {
     "bier-drop",
     NULL,
 };
-const static char* const * const drop_nodes[DPO_PROTO_NUM] =
-{
+const static char* const * const drop_nodes[DPO_PROTO_NUM] = {
     [DPO_PROTO_IP4]  = drop_ip4_nodes,
     [DPO_PROTO_IP6]  = drop_ip6_nodes,
     [DPO_PROTO_MPLS] = drop_mpls_nodes,

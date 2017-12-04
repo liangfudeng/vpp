@@ -30,8 +30,7 @@
 /**
  * replicate main
  */
-typedef struct replicate_main_t_
-{
+typedef struct replicate_main_t_ {
     vlib_combined_counter_main_t repm_counters;
 
     /* per-cpu vector of cloned packets */
@@ -57,11 +56,11 @@ typedef struct replicate_t_ {
      */
     u16 rep_n_buckets;
 
-   /**
-     * The protocol of packets that traverse this REP.
-     * need in combination with the flow hash config to determine how to hash.
-     * u8.
-     */
+    /**
+      * The protocol of packets that traverse this REP.
+      * need in combination with the flow hash config to determine how to hash.
+      * u8.
+      */
     dpo_proto_t rep_proto;
 
     /**
@@ -80,14 +79,14 @@ typedef struct replicate_t_ {
     /**
      * The rest of the cache line is used for buckets. In the common case
      * where there there are less than 4 buckets, then the buckets are
-     * on the same cachlie and we save ourselves a pointer dereferance in 
+     * on the same cachlie and we save ourselves a pointer dereferance in
      * the data-path.
      */
     dpo_id_t rep_buckets_inline[REP_NUM_INLINE_BUCKETS];
 } replicate_t;
 
 STATIC_ASSERT(sizeof(replicate_t) <= CLIB_CACHE_LINE_BYTES,
-	      "A replicate object size exceeds one cachline");
+              "A replicate object size exceeds one cachline");
 
 /**
  * Flags controlling load-balance formatting/display
@@ -104,13 +103,13 @@ extern void replicate_multipath_update(
     load_balance_path_t *next_hops);
 
 extern void replicate_set_bucket(index_t repi,
-				    u32 bucket,
-				    const dpo_id_t *next);
+                                 u32 bucket,
+                                 const dpo_id_t *next);
 
 extern u8* format_replicate(u8 * s, va_list * args);
 
 extern const dpo_id_t *replicate_get_bucket(index_t repi,
-					       u32 bucket);
+        u32 bucket);
 extern int replicate_is_drop(const dpo_id_t *dpo);
 
 /**
@@ -124,22 +123,19 @@ replicate_get (index_t repi)
     return (pool_elt_at_index(replicate_pool, repi));
 }
 
-#define REP_HAS_INLINE_BUCKETS(_rep)		\
+#define REP_HAS_INLINE_BUCKETS(_rep)        \
     ((_rep)->rep_n_buckets <= REP_NUM_INLINE_BUCKETS)
 
 static inline const dpo_id_t *
 replicate_get_bucket_i (const replicate_t *rep,
-			   u32 bucket)
+                        u32 bucket)
 {
     ASSERT(bucket < rep->rep_n_buckets);
 
-    if (PREDICT_TRUE(REP_HAS_INLINE_BUCKETS(rep)))
-    {
-	return (&rep->rep_buckets_inline[bucket]);
-    }
-    else
-    {
-	return (&rep->rep_buckets[bucket]);
+    if (PREDICT_TRUE(REP_HAS_INLINE_BUCKETS(rep))) {
+        return (&rep->rep_buckets_inline[bucket]);
+    } else {
+        return (&rep->rep_buckets[bucket]);
     }
 }
 

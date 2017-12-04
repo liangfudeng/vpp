@@ -138,34 +138,34 @@ typedef enum fib_source_t_ {
 } __attribute__ ((packed)) fib_source_t;
 
 STATIC_ASSERT (sizeof(fib_source_t) == 1,
-	       "FIB too many sources");
+               "FIB too many sources");
 
 /**
  * The maximum number of sources
  */
 #define FIB_SOURCE_MAX (FIB_SOURCE_LAST+1)
 
-#define FIB_SOURCES {					\
-    [FIB_SOURCE_INVALID] = "invalid",			\
-    [FIB_SOURCE_SPECIAL] = "special",			\
-    [FIB_SOURCE_INTERFACE] = "interface",		\
+#define FIB_SOURCES {                   \
+    [FIB_SOURCE_INVALID] = "invalid",           \
+    [FIB_SOURCE_SPECIAL] = "special",           \
+    [FIB_SOURCE_INTERFACE] = "interface",       \
     [FIB_SOURCE_PROXY] = "proxy",                       \
-    [FIB_SOURCE_BIER] = "BIER",			        \
-    [FIB_SOURCE_API] = "API",			        \
-    [FIB_SOURCE_CLI] = "CLI",			        \
-    [FIB_SOURCE_ADJ] = "adjacency",			\
-    [FIB_SOURCE_MAP] = "MAP",			        \
-    [FIB_SOURCE_SR] = "SR",			        \
-    [FIB_SOURCE_SIXRD] = "SixRD",			\
-    [FIB_SOURCE_LISP] = "LISP", 			\
-    [FIB_SOURCE_CLASSIFY] = "classify",			\
-    [FIB_SOURCE_DHCP] = "DHCP",   			\
+    [FIB_SOURCE_BIER] = "BIER",                 \
+    [FIB_SOURCE_API] = "API",                   \
+    [FIB_SOURCE_CLI] = "CLI",                   \
+    [FIB_SOURCE_ADJ] = "adjacency",         \
+    [FIB_SOURCE_MAP] = "MAP",                   \
+    [FIB_SOURCE_SR] = "SR",                 \
+    [FIB_SOURCE_SIXRD] = "SixRD",           \
+    [FIB_SOURCE_LISP] = "LISP",             \
+    [FIB_SOURCE_CLASSIFY] = "classify",         \
+    [FIB_SOURCE_DHCP] = "DHCP",             \
     [FIB_SOURCE_IP6_ND_PROXY] = "IPv6-proxy-nd",        \
-    [FIB_SOURCE_RR] = "recursive-resolution",	        \
-    [FIB_SOURCE_AE] = "attached_export",	        \
-    [FIB_SOURCE_MPLS] = "mpls",           	        \
-    [FIB_SOURCE_URPF_EXEMPT] = "urpf-exempt",	        \
-    [FIB_SOURCE_DEFAULT_ROUTE] = "default-route",	\
+    [FIB_SOURCE_RR] = "recursive-resolution",           \
+    [FIB_SOURCE_AE] = "attached_export",            \
+    [FIB_SOURCE_MPLS] = "mpls",                     \
+    [FIB_SOURCE_URPF_EXEMPT] = "urpf-exempt",           \
+    [FIB_SOURCE_DEFAULT_ROUTE] = "default-route",   \
 }
 
 #define FOR_EACH_FIB_SOURCE(_item) \
@@ -223,21 +223,21 @@ typedef enum fib_entry_attribute_t_ {
     FIB_ENTRY_ATTRIBUTE_LAST = FIB_ENTRY_ATTRIBUTE_URPF_EXEMPT,
 } fib_entry_attribute_t;
 
-#define FIB_ENTRY_ATTRIBUTES {		       		\
-    [FIB_ENTRY_ATTRIBUTE_CONNECTED] = "connected",	\
-    [FIB_ENTRY_ATTRIBUTE_ATTACHED]  = "attached",	\
-    [FIB_ENTRY_ATTRIBUTE_IMPORT]    = "import",	        \
-    [FIB_ENTRY_ATTRIBUTE_DROP]      = "drop",		\
+#define FIB_ENTRY_ATTRIBUTES {                  \
+    [FIB_ENTRY_ATTRIBUTE_CONNECTED] = "connected",  \
+    [FIB_ENTRY_ATTRIBUTE_ATTACHED]  = "attached",   \
+    [FIB_ENTRY_ATTRIBUTE_IMPORT]    = "import",         \
+    [FIB_ENTRY_ATTRIBUTE_DROP]      = "drop",       \
     [FIB_ENTRY_ATTRIBUTE_EXCLUSIVE] = "exclusive",      \
-    [FIB_ENTRY_ATTRIBUTE_LOCAL]     = "local",		\
+    [FIB_ENTRY_ATTRIBUTE_LOCAL]     = "local",      \
     [FIB_ENTRY_ATTRIBUTE_URPF_EXEMPT] = "uRPF-exempt",  \
-    [FIB_ENTRY_ATTRIBUTE_MULTICAST] = "multicast",	\
+    [FIB_ENTRY_ATTRIBUTE_MULTICAST] = "multicast",  \
 }
 
-#define FOR_EACH_FIB_ATTRIBUTE(_item)			\
-    for (_item = FIB_ENTRY_ATTRIBUTE_FIRST;		\
-	 _item <= FIB_ENTRY_ATTRIBUTE_LAST;		\
-	 _item++)
+#define FOR_EACH_FIB_ATTRIBUTE(_item)           \
+    for (_item = FIB_ENTRY_ATTRIBUTE_FIRST;     \
+     _item <= FIB_ENTRY_ATTRIBUTE_LAST;     \
+     _item++)
 
 typedef enum fib_entry_flag_t_ {
     FIB_ENTRY_FLAG_NONE      = 0,
@@ -275,8 +275,8 @@ typedef enum fib_entry_src_attribute_t_ {
 
 #define FIB_ENTRY_SRC_ATTRIBUTE_MAX (FIB_ENTRY_SRC_ATTRIBUTE_LAST+1)
 
-#define FIB_ENTRY_SRC_ATTRIBUTES {		 \
-    [FIB_ENTRY_SRC_ATTRIBUTE_ADDED]  = "added",	 \
+#define FIB_ENTRY_SRC_ATTRIBUTES {       \
+    [FIB_ENTRY_SRC_ATTRIBUTE_ADDED]  = "added",  \
     [FIB_ENTRY_SRC_ATTRIBUTE_ACTIVE] = "active", \
 }
 
@@ -291,7 +291,7 @@ typedef enum fib_entry_src_flag_t_ {
  * can be placed next to the 2 bytes reference count
  */
 STATIC_ASSERT (sizeof(fib_entry_src_flag_t) <= 2,
-	       "FIB entry flags field size too big");
+               "FIB entry flags field size too big");
 
 /**
  * Information related to the source of a FIB entry
@@ -326,58 +326,58 @@ typedef struct fib_entry_src_t_ {
      * Flags the source contributes to the entry
      */
     fib_entry_flag_t fes_entry_flags;
-    
+
     /**
      * Source specific info
      */
     union {
-	struct {
-	    /**
-	     * the index of the FIB entry that is the covering entry
-	     */
-	    fib_node_index_t fesr_cover;
-	    /**
-	     * This source's index in the cover's list
-	     */
-	    u32 fesr_sibling;
-	} rr;
-	struct {
-	    /**
-	     * the index of the FIB entry that is the covering entry
-	     */
-	    fib_node_index_t fesa_cover;
-	    /**
-	     * This source's index in the cover's list
-	     */
-	    u32 fesa_sibling;
-	} adj;
-	struct {
-	    /**
-	     * the index of the FIB entry that is the covering entry
-	     */
-	    fib_node_index_t fesi_cover;
-	    /**
-	     * This source's index in the cover's list
-	     */
-	    u32 fesi_sibling;
-	} interface;
-	struct {
-	    /**
-	     * This MPLS local label associated with the prefix.
-	     */
-	    mpls_label_t fesm_label;
+        struct {
+            /**
+             * the index of the FIB entry that is the covering entry
+             */
+            fib_node_index_t fesr_cover;
+            /**
+             * This source's index in the cover's list
+             */
+            u32 fesr_sibling;
+        } rr;
+        struct {
+            /**
+             * the index of the FIB entry that is the covering entry
+             */
+            fib_node_index_t fesa_cover;
+            /**
+             * This source's index in the cover's list
+             */
+            u32 fesa_sibling;
+        } adj;
+        struct {
+            /**
+             * the index of the FIB entry that is the covering entry
+             */
+            fib_node_index_t fesi_cover;
+            /**
+             * This source's index in the cover's list
+             */
+            u32 fesi_sibling;
+        } interface;
+        struct {
+            /**
+             * This MPLS local label associated with the prefix.
+             */
+            mpls_label_t fesm_label;
 
-	    /**
-	     * the indicies of the LFIB entries created
-	     */
-	    fib_node_index_t fesm_lfes[2];
-	} mpls;
-	struct {
-	    /**
-	     * The source FIB index.
-	     */
+            /**
+             * the indicies of the LFIB entries created
+             */
+            fib_node_index_t fesm_lfes[2];
+        } mpls;
+        struct {
+            /**
+             * The source FIB index.
+             */
             fib_node_index_t fesl_fib_index;
-	} lisp;
+        } lisp;
     };
 } fib_entry_src_t;
 
@@ -385,8 +385,7 @@ typedef struct fib_entry_src_t_ {
  * FIB entry flags.
  *  these are stored in the pad space within the fib_node_t
  */
-typedef enum fib_entry_node_attribute_t_
-{
+typedef enum fib_entry_node_attribute_t_ {
     /**
      * FIB entry has multiple sources, so the fe_srcs union
      * uses the vector
@@ -398,8 +397,7 @@ typedef enum fib_entry_node_attribute_t_
     [FIB_ENTRY_NODE_ATTR_MULTIPLE_SRCS] = "multiple-srcs",     \
 }
 
-typedef enum fib_entry_node_flags_t_
-{
+typedef enum fib_entry_node_flags_t_ {
     FIB_ENTRY_NODE_FLAG_MULTIPLE_SRCS = (1 << FIB_ENTRY_NODE_ATTR_MULTIPLE_SRCS),
 } fib_entry_node_flags_t;
 
@@ -442,7 +440,7 @@ typedef struct fib_entry_t_ {
      * Source info.
      * in the majority of cases a FIB entry will have only one source.
      * so to save the extra memory allocation of the source's vector, we
-     * store space for one source inline. When two sources are present, 
+     * store space for one source inline. When two sources are present,
      * we burn extra memory.
      * The union is switched based on the FIB_ENTRY_NODE_FLAG_MULTIPLE_SRCS
      */
@@ -480,44 +478,44 @@ extern u8 *format_fib_entry (u8 * s, va_list * args);
 extern u8 *format_fib_source (u8 * s, va_list * args);
 
 extern fib_node_index_t fib_entry_create_special(u32 fib_index,
-						 const fib_prefix_t *prefix,
-						 fib_source_t source,
-						 fib_entry_flag_t flags,
-						 const dpo_id_t *dpo);
+        const fib_prefix_t *prefix,
+        fib_source_t source,
+        fib_entry_flag_t flags,
+        const dpo_id_t *dpo);
 
 extern fib_node_index_t fib_entry_create (u32 fib_index,
-					  const fib_prefix_t *prefix,
-					  fib_source_t source,
-					  fib_entry_flag_t flags,
-					  const fib_route_path_t *paths);
+        const fib_prefix_t *prefix,
+        fib_source_t source,
+        fib_entry_flag_t flags,
+        const fib_route_path_t *paths);
 extern void fib_entry_update (fib_node_index_t fib_entry_index,
-			      fib_source_t source,
-			      fib_entry_flag_t flags,
-			      const fib_route_path_t *paths);
+                              fib_source_t source,
+                              fib_entry_flag_t flags,
+                              const fib_route_path_t *paths);
 
 extern void fib_entry_path_add(fib_node_index_t fib_entry_index,
-			       fib_source_t source,
-			       fib_entry_flag_t flags,
-			       const fib_route_path_t *rpath);
+                               fib_source_t source,
+                               fib_entry_flag_t flags,
+                               const fib_route_path_t *rpath);
 extern void fib_entry_special_add(fib_node_index_t fib_entry_index,
-				  fib_source_t source,
-				  fib_entry_flag_t flags,
-				  const dpo_id_t *dpo);
+                                  fib_source_t source,
+                                  fib_entry_flag_t flags,
+                                  const dpo_id_t *dpo);
 extern void fib_entry_special_update(fib_node_index_t fib_entry_index,
-				     fib_source_t source,
-				     fib_entry_flag_t flags,
-				     const dpo_id_t *dpo);
+                                     fib_source_t source,
+                                     fib_entry_flag_t flags,
+                                     const dpo_id_t *dpo);
 extern fib_entry_src_flag_t fib_entry_special_remove(fib_node_index_t fib_entry_index,
-						     fib_source_t source);
+        fib_source_t source);
 
 extern fib_entry_src_flag_t fib_entry_path_remove(fib_node_index_t fib_entry_index,
-						  fib_source_t source,
-						  const fib_route_path_t *rpath);
+        fib_source_t source,
+        const fib_route_path_t *rpath);
 extern fib_entry_src_flag_t fib_entry_delete(fib_node_index_t fib_entry_index,
-					     fib_source_t source);
+        fib_source_t source);
 
 extern void fib_entry_contribute_urpf(fib_node_index_t path_index,
-				      index_t urpf);
+                                      index_t urpf);
 extern void fib_entry_contribute_forwarding(
     fib_node_index_t fib_entry_index,
     fib_forward_chain_type_t type,
@@ -539,31 +537,31 @@ extern int fib_entry_cmp_for_sort(void *i1, void *i2);
 extern void fib_entry_cover_changed(fib_node_index_t fib_entry);
 extern void fib_entry_cover_updated(fib_node_index_t fib_entry);
 extern int fib_entry_recursive_loop_detect(fib_node_index_t entry_index,
-					   fib_node_index_t **entry_indicies);
+        fib_node_index_t **entry_indicies);
 
 extern void fib_entry_lock(fib_node_index_t fib_entry_index);
 extern void fib_entry_unlock(fib_node_index_t fib_entry_index);
 
 extern u32 fib_entry_child_add(fib_node_index_t fib_entry_index,
-			       fib_node_type_t type,
-			       fib_node_index_t child_index);
+                               fib_node_type_t type,
+                               fib_node_index_t child_index);
 extern void fib_entry_child_remove(fib_node_index_t fib_entry_index,
-				   u32 sibling_index);
+                                   u32 sibling_index);
 extern u32 fib_entry_get_resolving_interface(fib_node_index_t fib_entry_index);
 extern u32 fib_entry_get_resolving_interface_for_source(
     fib_node_index_t fib_entry_index,
     fib_source_t source);
 
 extern void fib_entry_encode(fib_node_index_t fib_entry_index,
-			     fib_route_path_encode_t **api_rpaths);
+                             fib_route_path_encode_t **api_rpaths);
 extern void fib_entry_get_prefix(fib_node_index_t fib_entry_index,
-				 fib_prefix_t *pfx);
+                                 fib_prefix_t *pfx);
 extern u32 fib_entry_get_fib_index(fib_node_index_t fib_entry_index);
 extern void fib_entry_set_source_data(fib_node_index_t fib_entry_index,
                                       fib_source_t source,
                                       const void *data);
 extern const void* fib_entry_get_source_data(fib_node_index_t fib_entry_index,
-                                             fib_source_t source);
+        fib_source_t source);
 
 extern fib_entry_flag_t fib_entry_get_flags(fib_node_index_t fib_entry_index);
 extern fib_entry_flag_t fib_entry_get_flags_for_source(
@@ -576,7 +574,7 @@ extern int fib_entry_is_sourced(fib_node_index_t fib_entry_index,
 extern fib_node_index_t fib_entry_get_path_list(fib_node_index_t fib_entry_index);
 extern int fib_entry_is_resolved(fib_node_index_t fib_entry_index);
 extern void fib_entry_set_flow_hash_config(fib_node_index_t fib_entry_index,
-                                           flow_hash_config_t hash_config);
+        flow_hash_config_t hash_config);
 
 extern void fib_entry_module_init(void);
 

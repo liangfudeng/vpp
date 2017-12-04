@@ -39,41 +39,39 @@ __thread int thread_id = 0;
 
 #define MAX_THREADS 255
 
-typedef struct
-{
-  void *tm;
-  int thread_idx;
-  u64 nlookups;
+typedef struct {
+    void *tm;
+    int thread_idx;
+    u64 nlookups;
 } thread_data_t;
 
-typedef struct
-{
-  u64 deadline;
-  u64 seed;
-  u32 nbuckets;
-  u32 nitems;
-  u32 runtime;
-  int verbose;
-  int non_random_keys;
-  int nthreads;
-  int search_iter;
-  uword *key_hash;
-  u64 *keys;
+typedef struct {
+    u64 deadline;
+    u64 seed;
+    u32 nbuckets;
+    u32 nitems;
+    u32 runtime;
+    int verbose;
+    int non_random_keys;
+    int nthreads;
+    int search_iter;
+    uword *key_hash;
+    u64 *keys;
     CVT (clib_cuckoo) ch;
     BVT (clib_bihash) bh;
-  clib_time_t clib_time;
-  u64 *key_add_del_sequence;
-  u8 *key_op_sequence;
-  u64 *key_search_sequence[MAX_THREADS];
-  unformat_input_t *input;
-  u64 nadds;
-  u64 ndels;
-  pthread_t bwriter_thread;
-  pthread_t breader_threads[MAX_THREADS];
-  pthread_t cwriter_thread;
-  pthread_t creader_threads[MAX_THREADS];
-  thread_data_t wthread_data;
-  thread_data_t rthread_data[MAX_THREADS];
+    clib_time_t clib_time;
+    u64 *key_add_del_sequence;
+    u8 *key_op_sequence;
+    u64 *key_search_sequence[MAX_THREADS];
+    unformat_input_t *input;
+    u64 nadds;
+    u64 ndels;
+    pthread_t bwriter_thread;
+    pthread_t breader_threads[MAX_THREADS];
+    pthread_t cwriter_thread;
+    pthread_t creader_threads[MAX_THREADS];
+    thread_data_t wthread_data;
+    thread_data_t rthread_data[MAX_THREADS];
 } test_main_t;
 
 test_main_t test_main;
@@ -81,7 +79,7 @@ test_main_t test_main;
 uword
 vl (void *v)
 {
-  return vec_len (v);
+    return vec_len (v);
 }
 
 #define w_thread(x, guts)                                               \
@@ -279,166 +277,158 @@ r_thread (b, {
 static void
 cb (CVT (clib_cuckoo) * h, void *ctx)
 {
-  fformat (stdout, "Garbage callback called...\n");
+    fformat (stdout, "Garbage callback called...\n");
 }
 
 static clib_error_t *
 test_cuckoo_bihash (test_main_t * tm)
 {
-  int i;
-  uword *p;
-  uword total_searches;
-  f64 before, delta;
-  f64 ops = 0, sps = 0;
-  f64 bops = 0, bsps = 0;
-  f64 cops = 0, csps = 0;
-  CVT (clib_cuckoo) * ch;
-  BVT (clib_bihash) * bh;
+    int i;
+    uword *p;
+    uword total_searches;
+    f64 before, delta;
+    f64 ops = 0, sps = 0;
+    f64 bops = 0, bsps = 0;
+    f64 cops = 0, csps = 0;
+    CVT (clib_cuckoo) * ch;
+    BVT (clib_bihash) * bh;
 
-  ch = &tm->ch;
-  bh = &tm->bh;
+    ch = &tm->ch;
+    bh = &tm->bh;
 
-  CV (clib_cuckoo_init) (ch, "test", 1, cb, NULL);
-  BV (clib_bihash_init) (bh, (char *) "test", tm->nbuckets, 256 << 20);
+    CV (clib_cuckoo_init) (ch, "test", 1, cb, NULL);
+    BV (clib_bihash_init) (bh, (char *) "test", tm->nbuckets, 256 << 20);
 
-  fformat (stdout, "Pick %lld unique %s keys...\n", tm->nitems,
-	   tm->non_random_keys ? "non-random" : "random");
+    fformat (stdout, "Pick %lld unique %s keys...\n", tm->nitems,
+             tm->non_random_keys ? "non-random" : "random");
 
-  for (i = 0; i < tm->nitems; i++)
-    {
-      u64 rndkey;
+    for (i = 0; i < tm->nitems; i++) {
+        u64 rndkey;
 
-      if (tm->non_random_keys == 0)
-	{
+        if (tm->non_random_keys == 0) {
 
-	again:
-	  rndkey = random_u64 (&tm->seed);
+        again:
+            rndkey = random_u64 (&tm->seed);
 
-	  p = hash_get (tm->key_hash, rndkey);
-	  if (p)
-	    goto again;
-	}
-      else
-	rndkey = (u64) (i + 1) << 16;
+            p = hash_get (tm->key_hash, rndkey);
+            if (p)
+                goto again;
+        } else
+            rndkey = (u64) (i + 1) << 16;
 
-      hash_set (tm->key_hash, rndkey, i + 1);
-      vec_add1 (tm->keys, rndkey);
+        hash_set (tm->key_hash, rndkey, i + 1);
+        vec_add1 (tm->keys, rndkey);
 
-      int j;
-      for (j = 0; j < tm->nthreads; ++j)
-	{
-	  u64 *x = tm->key_search_sequence[j];
-	  vec_add1 (x, random_u64 (&tm->seed) % tm->nitems);
-	  tm->key_search_sequence[j] = x;
-	}
-      vec_add1 (tm->key_add_del_sequence,
-		random_u64 (&tm->seed) % tm->nitems);
-      vec_add1 (tm->key_op_sequence, (rndkey % 10 < 8) ? 1 : 0);
+        int j;
+        for (j = 0; j < tm->nthreads; ++j) {
+            u64 *x = tm->key_search_sequence[j];
+            vec_add1 (x, random_u64 (&tm->seed) % tm->nitems);
+            tm->key_search_sequence[j] = x;
+        }
+        vec_add1 (tm->key_add_del_sequence,
+                  random_u64 (&tm->seed) % tm->nitems);
+        vec_add1 (tm->key_op_sequence, (rndkey % 10 < 8) ? 1 : 0);
     }
 
-  int thread_counter = 0;
-  tm->wthread_data.tm = tm;
-  tm->wthread_data.thread_idx = thread_counter;
-  for (i = 0; i < tm->nthreads; ++i)
-    {
-      tm->rthread_data[i].tm = tm;
-      tm->rthread_data[i].thread_idx = thread_counter;
-      tm->rthread_data[i].nlookups = 0;
-      ++thread_counter;
+    int thread_counter = 0;
+    tm->wthread_data.tm = tm;
+    tm->wthread_data.thread_idx = thread_counter;
+    for (i = 0; i < tm->nthreads; ++i) {
+        tm->rthread_data[i].tm = tm;
+        tm->rthread_data[i].thread_idx = thread_counter;
+        tm->rthread_data[i].nlookups = 0;
+        ++thread_counter;
     }
 
-  int iter;
-  for (iter = 0; iter < tm->search_iter; ++iter)
-    {
-      fformat (stdout, "Bihash test #%d\n", iter);
-      run_threads (b);
-      bops = ops;
-      bsps = sps;
-      fformat (stdout, "%U", BV (format_bihash), bh, 0);
-      fformat (stdout, "Cuckoo test #%d\n", iter);
-      run_threads (c);
-      cops = ops;
-      csps = sps;
-      fformat (stdout, "%U", CV (format_cuckoo), ch, 0);
-      fformat (stdout,
-	       "Bihash add/del speed is %.2f%% of cuckoo add/del speed\n",
-	       bops / cops * 100);
-      fformat (stdout,
-	       "Bihash search speed is %.2f%% of cuckoo search speed\n",
-	       bsps / csps * 100);
+    int iter;
+    for (iter = 0; iter < tm->search_iter; ++iter) {
+        fformat (stdout, "Bihash test #%d\n", iter);
+        run_threads (b);
+        bops = ops;
+        bsps = sps;
+        fformat (stdout, "%U", BV (format_bihash), bh, 0);
+        fformat (stdout, "Cuckoo test #%d\n", iter);
+        run_threads (c);
+        cops = ops;
+        csps = sps;
+        fformat (stdout, "%U", CV (format_cuckoo), ch, 0);
+        fformat (stdout,
+                 "Bihash add/del speed is %.2f%% of cuckoo add/del speed\n",
+                 bops / cops * 100);
+        fformat (stdout,
+                 "Bihash search speed is %.2f%% of cuckoo search speed\n",
+                 bsps / csps * 100);
     }
-  return 0;
+    return 0;
 }
 
 clib_error_t *
 test_cuckoo_bihash_main (test_main_t * tm)
 {
-  unformat_input_t *i = tm->input;
-  clib_error_t *error;
+    unformat_input_t *i = tm->input;
+    clib_error_t *error;
 
-  while (unformat_check_input (i) != UNFORMAT_END_OF_INPUT)
-    {
-      if (unformat (i, "seed %u", &tm->seed))
-	;
-      else if (unformat (i, "nbuckets %d", &tm->nbuckets))
-	;
-      else if (unformat (i, "non-random-keys"))
-	tm->non_random_keys = 1;
-      else if (unformat (i, "nitems %d", &tm->nitems))
-	;
-      else if (unformat (i, "search_iter %d", &tm->search_iter))
-	;
-      else if (unformat (i, "verbose %d", &tm->verbose))
-	;
-      else if (unformat (i, "runtime %d", &tm->runtime))
-	;
-      else if (unformat (i, "nthreads %d", &tm->nthreads))
-	;
-      else if (unformat (i, "verbose"))
-	tm->verbose = 1;
-      else
-	return clib_error_return (0, "unknown input '%U'",
-				  format_unformat_error, i);
+    while (unformat_check_input (i) != UNFORMAT_END_OF_INPUT) {
+        if (unformat (i, "seed %u", &tm->seed))
+            ;
+        else if (unformat (i, "nbuckets %d", &tm->nbuckets))
+            ;
+        else if (unformat (i, "non-random-keys"))
+            tm->non_random_keys = 1;
+        else if (unformat (i, "nitems %d", &tm->nitems))
+            ;
+        else if (unformat (i, "search_iter %d", &tm->search_iter))
+            ;
+        else if (unformat (i, "verbose %d", &tm->verbose))
+            ;
+        else if (unformat (i, "runtime %d", &tm->runtime))
+            ;
+        else if (unformat (i, "nthreads %d", &tm->nthreads))
+            ;
+        else if (unformat (i, "verbose"))
+            tm->verbose = 1;
+        else
+            return clib_error_return (0, "unknown input '%U'",
+                                      format_unformat_error, i);
     }
 
-  error = test_cuckoo_bihash (tm);
+    error = test_cuckoo_bihash (tm);
 
-  return error;
+    return error;
 }
 
 #ifdef CLIB_UNIX
 int
 main (int argc, char *argv[])
 {
-  unformat_input_t i;
-  clib_error_t *error;
-  test_main_t *tm = &test_main;
-  memset (&test_main, 0, sizeof (test_main));
+    unformat_input_t i;
+    clib_error_t *error;
+    test_main_t *tm = &test_main;
+    memset (&test_main, 0, sizeof (test_main));
 
-  clib_mem_init (0, 3ULL << 30);
+    clib_mem_init (0, 3ULL << 30);
 
-  tm->input = &i;
-  tm->seed = 0xdeaddabe;
+    tm->input = &i;
+    tm->seed = 0xdeaddabe;
 
-  tm->nbuckets = 2;
-  tm->nitems = 5;
-  tm->verbose = 1;
-  tm->nthreads = 1;
-  clib_time_init (&tm->clib_time);
-  tm->runtime = 1;
-  tm->search_iter = 1;
-  tm->key_hash = hash_create (0, sizeof (uword));
+    tm->nbuckets = 2;
+    tm->nitems = 5;
+    tm->verbose = 1;
+    tm->nthreads = 1;
+    clib_time_init (&tm->clib_time);
+    tm->runtime = 1;
+    tm->search_iter = 1;
+    tm->key_hash = hash_create (0, sizeof (uword));
 
-  unformat_init_command_line (&i, argv);
-  error = test_cuckoo_bihash_main (tm);
-  unformat_free (&i);
+    unformat_init_command_line (&i, argv);
+    error = test_cuckoo_bihash_main (tm);
+    unformat_free (&i);
 
-  if (error)
-    {
-      clib_error_report (error);
-      return 1;
+    if (error) {
+        clib_error_report (error);
+        return 1;
     }
-  return 0;
+    return 0;
 }
 #endif /* CLIB_UNIX */
 

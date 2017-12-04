@@ -21,86 +21,88 @@
 
 #include <vapi/ip.api.vapi.hpp>
 
-namespace VOM {
-namespace route_domain_cmds {
-
-/**
- * A command class that creates the IP table
- */
-class create_cmd : public rpc_cmd<HW::item<bool>, rc_t, vapi::Ip_table_add_del>
+namespace VOM
 {
-public:
-  /**
-   * Constructor
-   */
-  create_cmd(HW::item<bool>& item, l3_proto_t proto, route::table_id_t id);
+    namespace route_domain_cmds
+    {
 
-  /**
-   * Issue the command to VPP/HW
-   */
-  rc_t issue(connection& con);
+        /**
+         * A command class that creates the IP table
+         */
+        class create_cmd : public rpc_cmd<HW::item<bool>, rc_t, vapi::Ip_table_add_del>
+        {
+        public:
+            /**
+             * Constructor
+             */
+            create_cmd(HW::item<bool>& item, l3_proto_t proto, route::table_id_t id);
 
-  /**
-   * convert to string format for debug purposes
-   */
-  std::string to_string() const;
+            /**
+             * Issue the command to VPP/HW
+             */
+            rc_t issue(connection& con);
 
-  /**
-   * Comparison operator - only used for UT
-   */
-  bool operator==(const create_cmd& i) const;
+            /**
+             * convert to string format for debug purposes
+             */
+            std::string to_string() const;
 
-private:
-  /**
-   * table-ID to create
-   */
-  route::table_id_t m_id;
+            /**
+             * Comparison operator - only used for UT
+             */
+            bool operator==(const create_cmd& i) const;
 
-  /**
-   * L3 protocol of the table
-   */
-  l3_proto_t m_proto;
-};
+        private:
+            /**
+             * table-ID to create
+             */
+            route::table_id_t m_id;
 
-/**
- * A cmd class that Deletes the IP Table
- */
-class delete_cmd : public rpc_cmd<HW::item<bool>, rc_t, vapi::Ip_table_add_del>
-{
-public:
-  /**
-   * Constructor
-   */
-  delete_cmd(HW::item<bool>& item, l3_proto_t proto, route::table_id_t id);
+            /**
+             * L3 protocol of the table
+             */
+            l3_proto_t m_proto;
+        };
 
-  /**
-   * Issue the command to VPP/HW
-   */
-  rc_t issue(connection& con);
+        /**
+         * A cmd class that Deletes the IP Table
+         */
+        class delete_cmd : public rpc_cmd<HW::item<bool>, rc_t, vapi::Ip_table_add_del>
+        {
+        public:
+            /**
+             * Constructor
+             */
+            delete_cmd(HW::item<bool>& item, l3_proto_t proto, route::table_id_t id);
 
-  /**
-   * convert to string format for debug purposes
-   */
-  std::string to_string() const;
+            /**
+             * Issue the command to VPP/HW
+             */
+            rc_t issue(connection& con);
 
-  /**
-   * Comparison operator - only used for UT
-   */
-  bool operator==(const delete_cmd& i) const;
+            /**
+             * convert to string format for debug purposes
+             */
+            std::string to_string() const;
 
-private:
-  /**
-   * table-ID to create
-   */
-  route::table_id_t m_id;
+            /**
+             * Comparison operator - only used for UT
+             */
+            bool operator==(const delete_cmd& i) const;
 
-  /**
-   * L3 protocol of the table
-   */
-  l3_proto_t m_proto;
-};
+        private:
+            /**
+             * table-ID to create
+             */
+            route::table_id_t m_id;
 
-}; // namespace route_domain_cmds
+            /**
+             * L3 protocol of the table
+             */
+            l3_proto_t m_proto;
+        };
+
+    }; // namespace route_domain_cmds
 }; // namespace VOM
 
 /*

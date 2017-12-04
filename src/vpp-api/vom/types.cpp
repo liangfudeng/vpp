@@ -22,245 +22,247 @@
 
 #include "vom/types.hpp"
 
-namespace VOM {
-
-rc_t::rc_t(int v, const std::string s)
-  : enum_base<rc_t>(v, s)
+namespace VOM
 {
-}
-rc_t::~rc_t()
-{
-}
 
-const rc_t&
-rc_t::from_vpp_retval(int32_t rv)
-{
-  if (0 == rv) {
-    return (rc_t::OK);
-  }
-  if (-68 == rv) {
-    // interface laready exists
-    return (rc_t::OK);
-  }
+    rc_t::rc_t(int v, const std::string s)
+        : enum_base<rc_t>(v, s)
+    {
+    }
+    rc_t::~rc_t()
+    {
+    }
 
-  return (rc_t::INVALID);
-}
+    const rc_t&
+    rc_t::from_vpp_retval(int32_t rv)
+    {
+        if (0 == rv) {
+            return (rc_t::OK);
+        }
+        if (-68 == rv) {
+            // interface laready exists
+            return (rc_t::OK);
+        }
 
-const rc_t rc_t::UNSET(0, "un-set");
-const rc_t rc_t::NOOP(1, "no-op");
-const rc_t rc_t::OK(2, "ok");
-const rc_t rc_t::INVALID(3, "invalid");
-const rc_t rc_t::TIMEOUT(4, "timeout");
+        return (rc_t::INVALID);
+    }
 
-const handle_t handle_t::INVALID(~0);
+    const rc_t rc_t::UNSET(0, "un-set");
+    const rc_t rc_t::NOOP(1, "no-op");
+    const rc_t rc_t::OK(2, "ok");
+    const rc_t rc_t::INVALID(3, "invalid");
+    const rc_t rc_t::TIMEOUT(4, "timeout");
 
-handle_t::handle_t(int value)
-  : m_value(value)
-{
-}
+    const handle_t handle_t::INVALID(~0);
 
-handle_t::handle_t()
-  : m_value(~0)
-{
-}
+    handle_t::handle_t(int value)
+        : m_value(value)
+    {
+    }
 
-std::string
-handle_t::to_string() const
-{
-  return (std::to_string(m_value));
-}
+    handle_t::handle_t()
+        : m_value(~0)
+    {
+    }
 
-bool
-handle_t::operator==(const handle_t& other) const
-{
-  return (m_value == other.m_value);
-}
+    std::string
+    handle_t::to_string() const
+    {
+        return (std::to_string(m_value));
+    }
 
-bool
-handle_t::operator!=(const handle_t& other) const
-{
-  return (!(*this == other));
-}
+    bool
+    handle_t::operator==(const handle_t& other) const
+    {
+        return (m_value == other.m_value);
+    }
 
-bool
-handle_t::operator<(const handle_t& other) const
-{
-  return (m_value < other.m_value);
-}
+    bool
+    handle_t::operator!=(const handle_t& other) const
+    {
+        return (!(*this == other));
+    }
 
-uint32_t
-handle_t::value() const
-{
-  return (m_value);
-}
+    bool
+    handle_t::operator<(const handle_t& other) const
+    {
+        return (m_value < other.m_value);
+    }
 
-std::ostream&
-operator<<(std::ostream& os, const handle_t& h)
-{
-  os << h.value();
+    uint32_t
+    handle_t::value() const
+    {
+        return (m_value);
+    }
 
-  return (os);
-}
+    std::ostream&
+    operator<<(std::ostream& os, const handle_t& h)
+    {
+        os << h.value();
 
-mac_address_t::mac_address_t(uint8_t b[6])
-{
-  std::copy(b, b + 6, std::begin(bytes));
-}
+        return (os);
+    }
 
-mac_address_t::mac_address_t(std::initializer_list<uint8_t> i)
-{
-  std::copy(i.begin(), i.end(), std::begin(bytes));
-}
+    mac_address_t::mac_address_t(uint8_t b[6])
+    {
+        std::copy(b, b + 6, std::begin(bytes));
+    }
 
-mac_address_t::mac_address_t(const std::string& str)
-{
-  std::vector<std::string> parts;
+    mac_address_t::mac_address_t(std::initializer_list<uint8_t> i)
+    {
+        std::copy(i.begin(), i.end(), std::begin(bytes));
+    }
 
-  boost::split(parts, str, boost::is_any_of(":"));
+    mac_address_t::mac_address_t(const std::string& str)
+    {
+        std::vector<std::string> parts;
 
-  size_t n_bytes = std::min(bytes.size(), parts.size());
+        boost::split(parts, str, boost::is_any_of(":"));
 
-  for (uint32_t ii = 0; ii < n_bytes; ii++) {
-    bytes[ii] = std::stoul(parts[ii], nullptr, 16);
-  }
-}
+        size_t n_bytes = std::min(bytes.size(), parts.size());
 
-const mac_address_t mac_address_t::ONE({ 0xff, 0xff, 0xff, 0xff, 0xff, 0xff });
+        for (uint32_t ii = 0; ii < n_bytes; ii++) {
+            bytes[ii] = std::stoul(parts[ii], nullptr, 16);
+        }
+    }
 
-const mac_address_t mac_address_t::ZERO({ 0x0 });
+    const mac_address_t mac_address_t::ONE({ 0xff, 0xff, 0xff, 0xff, 0xff, 0xff });
 
-void
-mac_address_t::to_bytes(uint8_t* array, uint8_t len) const
-{
-  for (int i = 0; i < 6 && i < len; i++) {
-    array[i] = bytes[i];
-  }
-}
+    const mac_address_t mac_address_t::ZERO({ 0x0 });
 
-std::string
-mac_address_t::to_string() const
-{
-  std::ostringstream s;
-  bool first = true;
+    void
+    mac_address_t::to_bytes(uint8_t* array, uint8_t len) const
+    {
+        for (int i = 0; i < 6 && i < len; i++) {
+            array[i] = bytes[i];
+        }
+    }
 
-  s.fill('0');
-  s << std::hex;
-  for (auto byte : bytes) {
-    if (first)
-      first = false;
-    else
-      s << ":";
-    s << std::setw(2) << static_cast<unsigned int>(byte);
-  }
+    std::string
+    mac_address_t::to_string() const
+    {
+        std::ostringstream s;
+        bool first = true;
 
-  return (s.str());
-}
+        s.fill('0');
+        s << std::hex;
+        for (auto byte : bytes) {
+            if (first)
+                first = false;
+            else
+                s << ":";
+            s << std::setw(2) << static_cast<unsigned int>(byte);
+        }
 
-bool
-mac_address_t::operator==(const mac_address_t& mac) const
-{
-  return (bytes == mac.bytes);
-}
-bool
-mac_address_t::operator<(const mac_address_t& m) const
-{
-  return (bytes < m.bytes);
-}
+        return (s.str());
+    }
 
-std::ostream&
-operator<<(std::ostream& os, const mac_address_t& mac)
-{
-  os << mac.to_string();
+    bool
+    mac_address_t::operator==(const mac_address_t& mac) const
+    {
+        return (bytes == mac.bytes);
+    }
+    bool
+    mac_address_t::operator<(const mac_address_t& m) const
+    {
+        return (bytes < m.bytes);
+    }
 
-  return (os);
-}
+    std::ostream&
+    operator<<(std::ostream& os, const mac_address_t& mac)
+    {
+        os << mac.to_string();
 
-l2_address_t::l2_address_t(const uint8_t b[8], uint8_t n_bytes)
-  : bytes(n_bytes)
-{
-  std::copy_n(b, n_bytes, std::begin(bytes));
-}
+        return (os);
+    }
 
-l2_address_t::l2_address_t(std::initializer_list<uint8_t> i)
-  : bytes(i)
-{
-}
+    l2_address_t::l2_address_t(const uint8_t b[8], uint8_t n_bytes)
+        : bytes(n_bytes)
+    {
+        std::copy_n(b, n_bytes, std::begin(bytes));
+    }
 
-l2_address_t::l2_address_t(const mac_address_t& mac)
-  : bytes(6)
-{
-  std::copy(begin(mac.bytes), std::end(mac.bytes), std::begin(bytes));
-}
+    l2_address_t::l2_address_t(std::initializer_list<uint8_t> i)
+        : bytes(i)
+    {
+    }
 
-const l2_address_t l2_address_t::ONE({ 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-                                       0xff });
+    l2_address_t::l2_address_t(const mac_address_t& mac)
+        : bytes(6)
+    {
+        std::copy(begin(mac.bytes), std::end(mac.bytes), std::begin(bytes));
+    }
 
-const l2_address_t l2_address_t::ZERO({ 0x0 });
+    const l2_address_t l2_address_t::ONE({ 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+              0xff
+    });
 
-void
-l2_address_t::to_bytes(uint8_t* array, uint8_t len) const
-{
-  for (uint8_t i = 0; i < bytes.size() && i < len; i++) {
-    array[i] = bytes[i];
-  }
-}
+    const l2_address_t l2_address_t::ZERO({ 0x0 });
 
-mac_address_t
-l2_address_t::to_mac() const
-{
-  mac_address_t mac({});
+    void
+    l2_address_t::to_bytes(uint8_t* array, uint8_t len) const
+    {
+        for (uint8_t i = 0; i < bytes.size() && i < len; i++) {
+            array[i] = bytes[i];
+        }
+    }
 
-  std::copy_n(bytes.begin(), mac.bytes.size(), mac.bytes.begin());
+    mac_address_t
+    l2_address_t::to_mac() const
+    {
+        mac_address_t mac({});
 
-  return (mac);
-}
+        std::copy_n(bytes.begin(), mac.bytes.size(), mac.bytes.begin());
 
-std::string
-l2_address_t::to_string() const
-{
-  std::ostringstream s;
-  bool first = true;
+        return (mac);
+    }
 
-  s.fill('0');
-  s << std::hex;
-  for (auto byte : bytes) {
-    if (first)
-      first = false;
-    else
-      s << ":";
-    s << std::setw(2) << static_cast<unsigned int>(byte);
-  }
+    std::string
+    l2_address_t::to_string() const
+    {
+        std::ostringstream s;
+        bool first = true;
 
-  return (s.str());
-}
+        s.fill('0');
+        s << std::hex;
+        for (auto byte : bytes) {
+            if (first)
+                first = false;
+            else
+                s << ":";
+            s << std::setw(2) << static_cast<unsigned int>(byte);
+        }
 
-bool
-l2_address_t::operator==(const l2_address_t& l2) const
-{
-  return (bytes == l2.bytes);
-}
+        return (s.str());
+    }
 
-bool
-l2_address_t::operator!=(const l2_address_t& l2) const
-{
-  return (bytes != l2.bytes);
-}
+    bool
+    l2_address_t::operator==(const l2_address_t& l2) const
+    {
+        return (bytes == l2.bytes);
+    }
 
-std::ostream&
-operator<<(std::ostream& os, const l2_address_t& l2)
-{
-  os << l2.to_string();
+    bool
+    l2_address_t::operator!=(const l2_address_t& l2) const
+    {
+        return (bytes != l2.bytes);
+    }
 
-  return (os);
-}
+    std::ostream&
+    operator<<(std::ostream& os, const l2_address_t& l2)
+    {
+        os << l2.to_string();
 
-const direction_t direction_t::INPUT(1, "input");
-const direction_t direction_t::OUTPUT(0, "output");
+        return (os);
+    }
 
-direction_t::direction_t(int v, const std::string s)
-  : enum_base(v, s)
-{
-}
+    const direction_t direction_t::INPUT(1, "input");
+    const direction_t direction_t::OUTPUT(0, "output");
+
+    direction_t::direction_t(int v, const std::string s)
+        : enum_base(v, s)
+    {
+    }
 }
 
 /*

@@ -26,28 +26,26 @@
 int
 main (int argc, char *argv[])
 {
-  int i;
-  uword next;
-  u32 *tp = 0;
-  u32 *junk;
+    int i;
+    uword next;
+    u32 *tp = 0;
+    u32 *junk;
 
-  for (i = 0; i < 70; i++)
-    pool_get (tp, junk);
+    for (i = 0; i < 70; i++)
+        pool_get (tp, junk);
 
-  (void) junk;			/* compiler warning */
+    (void) junk;          /* compiler warning */
 
-  pool_put_index (tp, 1);
-  pool_put_index (tp, 65);
+    pool_put_index (tp, 1);
+    pool_put_index (tp, 65);
 
-  next = ~0;
-  do
-    {
-      next = pool_next_index (tp, next);
-      fformat (stdout, "next index %d\n", next);
-    }
-  while (next != ~0);
+    next = ~0;
+    do {
+        next = pool_next_index (tp, next);
+        fformat (stdout, "next index %d\n", next);
+    } while (next != ~0);
 
-  return 0;
+    return 0;
 }
 
 /*

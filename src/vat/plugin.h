@@ -23,25 +23,23 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-typedef struct
-{
-  u8 *name;
-  struct stat file_info;
-  void *handle;
+typedef struct {
+    u8 *name;
+    struct stat file_info;
+    void *handle;
 } plugin_info_t;
 
-typedef struct
-{
-  /* loaded plugin info */
-  plugin_info_t *plugin_info;
-  uword *plugin_by_name_hash;
+typedef struct {
+    /* loaded plugin info */
+    plugin_info_t *plugin_info;
+    uword *plugin_by_name_hash;
 
-  /* path and name filter */
-  u8 *plugin_path;
-  u8 *plugin_name_filter;
+    /* path and name filter */
+    u8 *plugin_path;
+    u8 *plugin_name_filter;
 
-  /* convenience */
-  vat_main_t *vat_main;
+    /* convenience */
+    vat_main_t *vat_main;
 
 } plugin_main_t;
 

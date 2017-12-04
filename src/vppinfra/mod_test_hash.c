@@ -16,7 +16,7 @@
 #include <vppinfra/hash.h>
 
 CLIB_LINUX_KERNEL_MODULE ("test_hash", test_hash_main,
-			  /* kernel-thread flags */ 0 & CLONE_KERNEL);
+                          /* kernel-thread flags */ 0 & CLONE_KERNEL);
 
 /*
  * fd.io coding-style-patch-verification: ON

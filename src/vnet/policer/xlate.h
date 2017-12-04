@@ -26,26 +26,24 @@
  * edt: * enum sse2_qos_policer_type_en
  *  Defines type of policer to be allocated
  */
-typedef enum sse2_qos_policer_type_en_
-{
-  SSE2_QOS_POLICER_TYPE_1R2C = 0,
-  SSE2_QOS_POLICER_TYPE_1R3C_RFC_2697 = 1,
-  SSE2_QOS_POLICER_TYPE_2R3C_RFC_2698 = 2,
-  SSE2_QOS_POLICER_TYPE_2R3C_RFC_4115 = 3,
-  SSE2_QOS_POLICER_TYPE_2R3C_RFC_MEF5CF1 = 4,
-  SSE2_QOS_POLICER_TYPE_MAX
+typedef enum sse2_qos_policer_type_en_ {
+    SSE2_QOS_POLICER_TYPE_1R2C = 0,
+    SSE2_QOS_POLICER_TYPE_1R3C_RFC_2697 = 1,
+    SSE2_QOS_POLICER_TYPE_2R3C_RFC_2698 = 2,
+    SSE2_QOS_POLICER_TYPE_2R3C_RFC_4115 = 3,
+    SSE2_QOS_POLICER_TYPE_2R3C_RFC_MEF5CF1 = 4,
+    SSE2_QOS_POLICER_TYPE_MAX
 } sse2_qos_policer_type_en;
 
 /*
  * edt: * enum
  *  Enum used to define type of rounding used when calculating policer values
  */
-typedef enum
-{
-  SSE2_QOS_ROUND_TO_CLOSEST = 0,
-  SSE2_QOS_ROUND_TO_UP,
-  SSE2_QOS_ROUND_TO_DOWN,
-  SSE2_QOS_ROUND_INVALID
+typedef enum {
+    SSE2_QOS_ROUND_TO_CLOSEST = 0,
+    SSE2_QOS_ROUND_TO_UP,
+    SSE2_QOS_ROUND_TO_DOWN,
+    SSE2_QOS_ROUND_INVALID
 } sse2_qos_round_type_en;
 
 /*
@@ -58,22 +56,20 @@ typedef enum
  *  of units_in_bits field in sse2_static_policer_parameters_st, which is
  *  inline with sse_punt_drop.h.
  */
-typedef enum
-{
-  SSE2_QOS_RATE_KBPS = 0,
-  SSE2_QOS_RATE_PPS,
-  SSE2_QOS_RATE_INVALID
+typedef enum {
+    SSE2_QOS_RATE_KBPS = 0,
+    SSE2_QOS_RATE_PPS,
+    SSE2_QOS_RATE_INVALID
 } sse2_qos_rate_type_en;
 
 /*
  * edt: * enum
  * Defines type of policer actions.
  */
-typedef enum
-{
-  SSE2_QOS_ACTION_DROP = 0,
-  SSE2_QOS_ACTION_TRANSMIT,
-  SSE2_QOS_ACTION_MARK_AND_TRANSMIT
+typedef enum {
+    SSE2_QOS_ACTION_DROP = 0,
+    SSE2_QOS_ACTION_TRANSMIT,
+    SSE2_QOS_ACTION_MARK_AND_TRANSMIT
 } sse2_qos_action_type_en;
 
 /*
@@ -85,10 +81,9 @@ typedef enum
  * elemtnt: dscp
  *      DSCP value to set when action is SSE2_QOS_ACTION_MARK_AND_TRANSMIT.
  */
-typedef struct sse2_qos_pol_action_params_st_
-{
-  u8 action_type;
-  u8 dscp;
+typedef struct sse2_qos_pol_action_params_st_ {
+    u8 action_type;
+    u8 dscp;
 } sse2_qos_pol_action_params_st;
 
 /*
@@ -122,57 +117,52 @@ typedef struct sse2_qos_pol_action_params_st_
  *      Rounding type (see sse_qos_round_type_en). Needed when policer values
  *      need to be rounded. Caller can decide on type of rounding used
  */
-typedef struct sse2_qos_pol_cfg_params_st_
-{
-  union
-  {
-    struct
-    {
-      u32 cir_kbps;
-      u32 eir_kbps;
-      u64 cb_bytes;
-      u64 eb_bytes;
-    } kbps;
-    struct
-    {
-      u32 cir_pps;
-      u32 eir_pps;
-      u64 cb_ms;
-      u64 eb_ms;
-    } pps;
-  } rb;				/* rate burst config */
-  u8 rate_type;			/* sse2_qos_rate_type_en */
-  u8 rnd_type;			/* sse2_qos_round_type_en */
-  u8 rfc;			/* sse2_qos_policer_type_en */
-  u8 color_aware;
-  u8 overwrite_bucket;		/* for debugging purposes */
-  u32 current_bucket;		/* for debugging purposes */
-  u32 extended_bucket;		/* for debugging purposes */
-  sse2_qos_pol_action_params_st conform_action;
-  sse2_qos_pol_action_params_st exceed_action;
-  sse2_qos_pol_action_params_st violate_action;
+typedef struct sse2_qos_pol_cfg_params_st_ {
+    union {
+        struct {
+            u32 cir_kbps;
+            u32 eir_kbps;
+            u64 cb_bytes;
+            u64 eb_bytes;
+        } kbps;
+        struct {
+            u32 cir_pps;
+            u32 eir_pps;
+            u64 cb_ms;
+            u64 eb_ms;
+        } pps;
+    } rb;             /* rate burst config */
+    u8 rate_type;         /* sse2_qos_rate_type_en */
+    u8 rnd_type;          /* sse2_qos_round_type_en */
+    u8 rfc;           /* sse2_qos_policer_type_en */
+    u8 color_aware;
+    u8 overwrite_bucket;      /* for debugging purposes */
+    u32 current_bucket;       /* for debugging purposes */
+    u32 extended_bucket;      /* for debugging purposes */
+    sse2_qos_pol_action_params_st conform_action;
+    sse2_qos_pol_action_params_st exceed_action;
+    sse2_qos_pol_action_params_st violate_action;
 } sse2_qos_pol_cfg_params_st;
 
 
-typedef struct sse2_qos_pol_hw_params_st_
-{
-  u8 rfc;
-  u8 allow_negative;
-  u8 rate_exp;
-  u16 avg_rate_man;
-  u16 peak_rate_man;
-  u8 comm_bkt_limit_exp;
-  u8 comm_bkt_limit_man;
-  u8 extd_bkt_limit_exp;
-  u8 extd_bkt_limit_man;
-  u32 comm_bkt;
-  u32 extd_bkt;
+typedef struct sse2_qos_pol_hw_params_st_ {
+    u8 rfc;
+    u8 allow_negative;
+    u8 rate_exp;
+    u16 avg_rate_man;
+    u16 peak_rate_man;
+    u8 comm_bkt_limit_exp;
+    u8 comm_bkt_limit_man;
+    u8 extd_bkt_limit_exp;
+    u8 extd_bkt_limit_man;
+    u32 comm_bkt;
+    u32 extd_bkt;
 } sse2_qos_pol_hw_params_st;
 
 
 int
 sse2_pol_logical_2_physical (sse2_qos_pol_cfg_params_st * cfg,
-			     policer_read_response_type_st * phys);
+                             policer_read_response_type_st * phys);
 
 
 #endif /* __included_xlate_h__ */

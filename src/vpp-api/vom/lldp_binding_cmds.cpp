@@ -17,92 +17,94 @@
 
 DEFINE_VAPI_MSG_IDS_LLDP_API_JSON;
 
-namespace VOM {
-namespace lldp_binding_cmds {
-
-bind_cmd::bind_cmd(HW::item<bool>& item,
-                   const handle_t& itf,
-                   const std::string& port_desc)
-  : rpc_cmd(item)
-  , m_itf(itf)
-  , m_port_desc(port_desc)
+namespace VOM
 {
-}
+    namespace lldp_binding_cmds
+    {
 
-bool
-bind_cmd::operator==(const bind_cmd& other) const
-{
-  return ((m_itf == other.m_itf) && (m_port_desc == other.m_port_desc));
-}
+        bind_cmd::bind_cmd(HW::item<bool>& item,
+                           const handle_t& itf,
+                           const std::string& port_desc)
+            : rpc_cmd(item)
+            , m_itf(itf)
+            , m_port_desc(port_desc)
+        {
+        }
 
-rc_t
-bind_cmd::issue(connection& con)
-{
-  msg_t req(con.ctx(), std::ref(*this));
+        bool
+        bind_cmd::operator==(const bind_cmd& other) const
+        {
+            return ((m_itf == other.m_itf) && (m_port_desc == other.m_port_desc));
+        }
 
-  auto& payload = req.get_request().get_payload();
-  payload.sw_if_index = m_itf.value();
-  payload.enable = 1;
+        rc_t
+        bind_cmd::issue(connection& con)
+        {
+            msg_t req(con.ctx(), std::ref(*this));
 
-  memcpy(payload.port_desc, m_port_desc.c_str(),
-         std::min(sizeof(payload.port_desc), m_port_desc.length()));
+            auto& payload = req.get_request().get_payload();
+            payload.sw_if_index = m_itf.value();
+            payload.enable = 1;
 
-  VAPI_CALL(req.execute());
+            memcpy(payload.port_desc, m_port_desc.c_str(),
+                   std::min(sizeof(payload.port_desc), m_port_desc.length()));
 
-  m_hw_item.set(wait());
+            VAPI_CALL(req.execute());
 
-  return rc_t::OK;
-}
+            m_hw_item.set(wait());
 
-std::string
-bind_cmd::to_string() const
-{
-  std::ostringstream s;
-  s << "Lldp-bind: " << m_hw_item.to_string() << " itf:" << m_itf.to_string()
-    << " port_desc:" << m_port_desc;
+            return rc_t::OK;
+        }
 
-  return (s.str());
-}
+        std::string
+        bind_cmd::to_string() const
+        {
+            std::ostringstream s;
+            s << "Lldp-bind: " << m_hw_item.to_string() << " itf:" << m_itf.to_string()
+              << " port_desc:" << m_port_desc;
 
-unbind_cmd::unbind_cmd(HW::item<bool>& item, const handle_t& itf)
-  : rpc_cmd(item)
-  , m_itf(itf)
-{
-}
+            return (s.str());
+        }
 
-bool
-unbind_cmd::operator==(const unbind_cmd& other) const
-{
-  return (m_itf == other.m_itf);
-}
+        unbind_cmd::unbind_cmd(HW::item<bool>& item, const handle_t& itf)
+            : rpc_cmd(item)
+            , m_itf(itf)
+        {
+        }
 
-rc_t
-unbind_cmd::issue(connection& con)
-{
-  msg_t req(con.ctx(), std::ref(*this));
+        bool
+        unbind_cmd::operator==(const unbind_cmd& other) const
+        {
+            return (m_itf == other.m_itf);
+        }
 
-  auto& payload = req.get_request().get_payload();
-  payload.sw_if_index = m_itf.value();
-  payload.enable = 0;
+        rc_t
+        unbind_cmd::issue(connection& con)
+        {
+            msg_t req(con.ctx(), std::ref(*this));
 
-  VAPI_CALL(req.execute());
+            auto& payload = req.get_request().get_payload();
+            payload.sw_if_index = m_itf.value();
+            payload.enable = 0;
 
-  wait();
-  m_hw_item.set(rc_t::NOOP);
+            VAPI_CALL(req.execute());
 
-  return rc_t::OK;
-}
+            wait();
+            m_hw_item.set(rc_t::NOOP);
 
-std::string
-unbind_cmd::to_string() const
-{
-  std::ostringstream s;
-  s << "Lldp-unbind: " << m_hw_item.to_string() << " itf:" << m_itf.to_string();
+            return rc_t::OK;
+        }
 
-  return (s.str());
-}
+        std::string
+        unbind_cmd::to_string() const
+        {
+            std::ostringstream s;
+            s << "Lldp-unbind: " << m_hw_item.to_string() << " itf:" << m_itf.to_string();
 
-}; // namespace lldp_binding_cmds
+            return (s.str());
+        }
+
+    }; // namespace lldp_binding_cmds
 }; // namespace VOM
 
 /*

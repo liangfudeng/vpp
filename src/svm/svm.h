@@ -31,69 +31,69 @@
 static inline void *
 svm_mem_alloc (svm_region_t * rp, uword size)
 {
-  u8 *oldheap;
-  ASSERT (rp->flags & SVM_FLAGS_MHEAP);
-  u8 *rv;
+    u8 *oldheap;
+    ASSERT (rp->flags & SVM_FLAGS_MHEAP);
+    u8 *rv;
 
-  pthread_mutex_lock (&rp->mutex);
-  oldheap = clib_mem_set_heap (rp->data_heap);
-  rv = clib_mem_alloc (size);
-  clib_mem_set_heap (oldheap);
-  pthread_mutex_unlock (&rp->mutex);
-  return (rv);
+    pthread_mutex_lock (&rp->mutex);
+    oldheap = clib_mem_set_heap (rp->data_heap);
+    rv = clib_mem_alloc (size);
+    clib_mem_set_heap (oldheap);
+    pthread_mutex_unlock (&rp->mutex);
+    return (rv);
 }
 
 static inline void *
 svm_mem_alloc_aligned_at_offset (svm_region_t * rp,
-				 uword size, uword align, uword offset)
+                                 uword size, uword align, uword offset)
 {
-  u8 *oldheap;
-  ASSERT (rp->flags & SVM_FLAGS_MHEAP);
-  u8 *rv;
+    u8 *oldheap;
+    ASSERT (rp->flags & SVM_FLAGS_MHEAP);
+    u8 *rv;
 
-  pthread_mutex_lock (&rp->mutex);
-  oldheap = clib_mem_set_heap (rp->data_heap);
-  rv = clib_mem_alloc_aligned_at_offset (size, align, offset,
-					 1 /* yes, call os_out_of_memory */ );
-  clib_mem_set_heap (oldheap);
-  pthread_mutex_unlock (&rp->mutex);
-  return (rv);
+    pthread_mutex_lock (&rp->mutex);
+    oldheap = clib_mem_set_heap (rp->data_heap);
+    rv = clib_mem_alloc_aligned_at_offset (size, align, offset,
+                                           1 /* yes, call os_out_of_memory */ );
+    clib_mem_set_heap (oldheap);
+    pthread_mutex_unlock (&rp->mutex);
+    return (rv);
 }
 
 static inline void
 svm_mem_free (svm_region_t * rp, void *ptr)
 {
-  u8 *oldheap;
-  ASSERT (rp->flags & SVM_FLAGS_MHEAP);
+    u8 *oldheap;
+    ASSERT (rp->flags & SVM_FLAGS_MHEAP);
 
-  pthread_mutex_lock (&rp->mutex);
-  oldheap = clib_mem_set_heap (rp->data_heap);
-  clib_mem_free (ptr);
-  clib_mem_set_heap (oldheap);
-  pthread_mutex_unlock (&rp->mutex);
+    pthread_mutex_lock (&rp->mutex);
+    oldheap = clib_mem_set_heap (rp->data_heap);
+    clib_mem_free (ptr);
+    clib_mem_set_heap (oldheap);
+    pthread_mutex_unlock (&rp->mutex);
 
 }
 
 static inline void *
 svm_push_pvt_heap (svm_region_t * rp)
 {
-  u8 *oldheap;
-  oldheap = clib_mem_set_heap (rp->region_heap);
-  return ((void *) oldheap);
+    u8 *oldheap;
+    oldheap = clib_mem_set_heap (rp->region_heap);
+    return ((void *) oldheap);
 }
 
 static inline void *
 svm_push_data_heap (svm_region_t * rp)
 {
-  u8 *oldheap;
-  oldheap = clib_mem_set_heap (rp->data_heap);
-  return ((void *) oldheap);
+    u8 *oldheap;
+    oldheap = clib_mem_set_heap (rp->data_heap);
+    return ((void *) oldheap);
 }
 
 static inline void
 svm_pop_heap (void *oldheap)
 {
-  clib_mem_set_heap (oldheap);
+    clib_mem_set_heap (oldheap);
 }
 
 #endif /* __included_svm_h__ */

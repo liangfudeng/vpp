@@ -22,141 +22,143 @@
 #include <vapi/l2.api.vapi.hpp>
 #include <vapi/vpe.api.vapi.hpp>
 
-namespace VOM {
-namespace l2_binding_cmds {
-
-/**
- * A functor class that binds L2 configuration to an interface
- */
-class bind_cmd
-  : public rpc_cmd<HW::item<bool>, rc_t, vapi::Sw_interface_set_l2_bridge>
+namespace VOM
 {
-public:
-  /**
-   * Constructor
-   */
-  bind_cmd(HW::item<bool>& item, const handle_t& itf, uint32_t bd, bool is_bvi);
+    namespace l2_binding_cmds
+    {
 
-  /**
-   * Issue the command to VPP/HW
-   */
-  rc_t issue(connection& con);
-  /**
-   * convert to string format for debug purposes
-   */
-  std::string to_string() const;
+        /**
+         * A functor class that binds L2 configuration to an interface
+         */
+        class bind_cmd
+            : public rpc_cmd<HW::item<bool>, rc_t, vapi::Sw_interface_set_l2_bridge>
+        {
+        public:
+            /**
+             * Constructor
+             */
+            bind_cmd(HW::item<bool>& item, const handle_t& itf, uint32_t bd, bool is_bvi);
 
-  /**
-   * Comparison operator - only used for UT
-   */
-  bool operator==(const bind_cmd& i) const;
+            /**
+             * Issue the command to VPP/HW
+             */
+            rc_t issue(connection& con);
+            /**
+             * convert to string format for debug purposes
+             */
+            std::string to_string() const;
 
-private:
-  /**
-   * The interface to bind
-   */
-  const handle_t m_itf;
+            /**
+             * Comparison operator - only used for UT
+             */
+            bool operator==(const bind_cmd& i) const;
 
-  /**
-   * The bridge-domain to bind to
-   */
-  uint32_t m_bd;
+        private:
+            /**
+             * The interface to bind
+             */
+            const handle_t m_itf;
 
-  /**
-   * Is it a BVI interface that is being bound
-   */
-  bool m_is_bvi;
-};
+            /**
+             * The bridge-domain to bind to
+             */
+            uint32_t m_bd;
 
-/**
- * A cmd class that Unbinds L2 configuration from an interface
- */
-class unbind_cmd
-  : public rpc_cmd<HW::item<bool>, rc_t, vapi::Sw_interface_set_l2_bridge>
-{
-public:
-  /**
-   * Constructor
-   */
-  unbind_cmd(HW::item<bool>& item,
-             const handle_t& itf,
-             uint32_t bd,
-             bool is_bvi);
+            /**
+             * Is it a BVI interface that is being bound
+             */
+            bool m_is_bvi;
+        };
 
-  /**
-   * Issue the command to VPP/HW
-   */
-  rc_t issue(connection& con);
-  /**
-   * convert to string format for debug purposes
-   */
-  std::string to_string() const;
+        /**
+         * A cmd class that Unbinds L2 configuration from an interface
+         */
+        class unbind_cmd
+            : public rpc_cmd<HW::item<bool>, rc_t, vapi::Sw_interface_set_l2_bridge>
+        {
+        public:
+            /**
+             * Constructor
+             */
+            unbind_cmd(HW::item<bool>& item,
+                       const handle_t& itf,
+                       uint32_t bd,
+                       bool is_bvi);
 
-  /**
-   * Comparison operator - only used for UT
-   */
-  bool operator==(const unbind_cmd& i) const;
+            /**
+             * Issue the command to VPP/HW
+             */
+            rc_t issue(connection& con);
+            /**
+             * convert to string format for debug purposes
+             */
+            std::string to_string() const;
 
-private:
-  /**
-   * The interface to bind
-   */
-  const handle_t m_itf;
+            /**
+             * Comparison operator - only used for UT
+             */
+            bool operator==(const unbind_cmd& i) const;
 
-  /**
-   * The bridge-domain to bind to
-   */
-  uint32_t m_bd;
+        private:
+            /**
+             * The interface to bind
+             */
+            const handle_t m_itf;
 
-  /**
-   * Is it a BVI interface that is being bound
-   */
-  bool m_is_bvi;
-};
+            /**
+             * The bridge-domain to bind to
+             */
+            uint32_t m_bd;
 
-/**
- * A cmd class sets the VTR operation
- */
-class set_vtr_op_cmd : public rpc_cmd<HW::item<l2_binding::l2_vtr_op_t>,
-                                      rc_t,
-                                      vapi::L2_interface_vlan_tag_rewrite>
-{
-public:
-  /**
-   * Constructor
-   */
-  set_vtr_op_cmd(HW::item<l2_binding::l2_vtr_op_t>& item,
-                 const handle_t& itf,
-                 uint16_t tag);
+            /**
+             * Is it a BVI interface that is being bound
+             */
+            bool m_is_bvi;
+        };
 
-  /**
-   * Issue the command to VPP/HW
-   */
-  rc_t issue(connection& con);
+        /**
+         * A cmd class sets the VTR operation
+         */
+        class set_vtr_op_cmd : public rpc_cmd<HW::item<l2_binding::l2_vtr_op_t>,
+            rc_t,
+            vapi::L2_interface_vlan_tag_rewrite>
+        {
+        public:
+            /**
+             * Constructor
+             */
+            set_vtr_op_cmd(HW::item<l2_binding::l2_vtr_op_t>& item,
+                           const handle_t& itf,
+                           uint16_t tag);
 
-  /**
-   * convert to string format for debug purposes
-   */
-  std::string to_string() const;
+            /**
+             * Issue the command to VPP/HW
+             */
+            rc_t issue(connection& con);
 
-  /**
-   * Comparison operator - only used for UT
-   */
-  bool operator==(const set_vtr_op_cmd& i) const;
+            /**
+             * convert to string format for debug purposes
+             */
+            std::string to_string() const;
 
-private:
-  /**
-   * The interface to bind
-   */
-  const handle_t m_itf;
+            /**
+             * Comparison operator - only used for UT
+             */
+            bool operator==(const set_vtr_op_cmd& i) const;
 
-  /**
-   * The tag for the operation
-   */
-  uint16_t m_tag;
-};
+        private:
+            /**
+             * The interface to bind
+             */
+            const handle_t m_itf;
 
-}; // namespace l2_binding_cmds
+            /**
+             * The tag for the operation
+             */
+            uint16_t m_tag;
+        };
+
+    }; // namespace l2_binding_cmds
 }; // namespace VOM
 
 /*

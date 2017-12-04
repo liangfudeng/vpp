@@ -31,8 +31,7 @@ static const char *const lookup_cast_names[] = LOOKUP_CASTS;
 /**
  * @brief Enumeration of the lookup subtypes
  */
-typedef enum lookup_sub_type_t_
-{
+typedef enum lookup_sub_type_t_ {
     LOOKUP_SUB_TYPE_SRC,
     LOOKUP_SUB_TYPE_DST,
     LOOKUP_SUB_TYPE_DST_MCAST,
@@ -92,33 +91,27 @@ lookup_dpo_add_or_lock_i (fib_node_index_t fib_index,
      */
     type = 0;
 
-    switch (input)
-    {
-    case LOOKUP_INPUT_SRC_ADDR:
-        type = lookup_dpo_sub_types[LOOKUP_SUB_TYPE_SRC];
-        break;
-    case LOOKUP_INPUT_DST_ADDR:
-        switch (table_config)
-        {
-        case LOOKUP_TABLE_FROM_INPUT_INTERFACE:
-            type = lookup_dpo_sub_types[LOOKUP_SUB_TYPE_DST_TABLE_FROM_INTERFACE];
+    switch (input) {
+        case LOOKUP_INPUT_SRC_ADDR:
+            type = lookup_dpo_sub_types[LOOKUP_SUB_TYPE_SRC];
             break;
-        case LOOKUP_TABLE_FROM_CONFIG:
-            type = lookup_dpo_sub_types[LOOKUP_SUB_TYPE_DST];
-            break;
-        }
-        if (LOOKUP_MULTICAST == cast)
-        {
-            type = lookup_dpo_sub_types[LOOKUP_SUB_TYPE_DST_MCAST];
-        }
+        case LOOKUP_INPUT_DST_ADDR:
+            switch (table_config) {
+                case LOOKUP_TABLE_FROM_INPUT_INTERFACE:
+                    type = lookup_dpo_sub_types[LOOKUP_SUB_TYPE_DST_TABLE_FROM_INTERFACE];
+                    break;
+                case LOOKUP_TABLE_FROM_CONFIG:
+                    type = lookup_dpo_sub_types[LOOKUP_SUB_TYPE_DST];
+                    break;
+            }
+            if (LOOKUP_MULTICAST == cast) {
+                type = lookup_dpo_sub_types[LOOKUP_SUB_TYPE_DST_MCAST];
+            }
     }
 
-    if (0 == type)
-    {
+    if (0 == type) {
         dpo_reset(dpo);
-    }
-    else
-    {
+    } else {
         dpo_set(dpo, type, proto, lookup_dpo_get_index(lkd));
     }
 }
@@ -131,16 +124,12 @@ lookup_dpo_add_or_lock_w_fib_index (fib_node_index_t fib_index,
                                     lookup_table_t table_config,
                                     dpo_id_t *dpo)
 {
-    if (LOOKUP_TABLE_FROM_CONFIG == table_config)
-    {
-        if (LOOKUP_UNICAST == cast)
-        {
+    if (LOOKUP_TABLE_FROM_CONFIG == table_config) {
+        if (LOOKUP_UNICAST == cast) {
             fib_table_lock(fib_index,
                            dpo_proto_to_fib(proto),
                            FIB_SOURCE_RR);
-        }
-        else
-        {
+        } else {
             mfib_table_lock(fib_index,
                             dpo_proto_to_fib(proto),
                             MFIB_SOURCE_RR);
@@ -159,17 +148,13 @@ lookup_dpo_add_or_lock_w_table_id (u32 table_id,
 {
     fib_node_index_t fib_index = FIB_NODE_INDEX_INVALID;
 
-    if (LOOKUP_TABLE_FROM_CONFIG == table_config)
-    {
-        if (LOOKUP_UNICAST == cast)
-        {
+    if (LOOKUP_TABLE_FROM_CONFIG == table_config) {
+        if (LOOKUP_UNICAST == cast) {
             fib_index =
                 fib_table_find_or_create_and_lock(dpo_proto_to_fib(proto),
                                                   table_id,
                                                   FIB_SOURCE_RR);
-        }
-        else
-        {
+        } else {
             fib_index =
                 mfib_table_find_or_create_and_lock(dpo_proto_to_fib(proto),
                                                    table_id,
@@ -189,25 +174,19 @@ format_lookup_dpo (u8 *s, va_list *args)
 
     lkd = lookup_dpo_get(index);
 
-    if (LOOKUP_TABLE_FROM_INPUT_INTERFACE == lkd->lkd_table)
-    {
+    if (LOOKUP_TABLE_FROM_INPUT_INTERFACE == lkd->lkd_table) {
         s = format(s, "%s,%s lookup in interface's %U table",
                    lookup_input_names[lkd->lkd_input],
                    lookup_cast_names[lkd->lkd_cast],
                    format_dpo_proto, lkd->lkd_proto);
-    }
-    else
-    {
-        if (LOOKUP_UNICAST == lkd->lkd_cast)
-        {
+    } else {
+        if (LOOKUP_UNICAST == lkd->lkd_cast) {
             s = format(s, "%s,%s lookup in %U",
                        lookup_input_names[lkd->lkd_input],
                        lookup_cast_names[lkd->lkd_cast],
                        format_fib_table_name, lkd->lkd_fib_index,
                        dpo_proto_to_fib(lkd->lkd_proto));
-        }
-        else
-        {
+        } else {
             s = format(s, "%s,%s lookup in %U",
                        lookup_input_names[lkd->lkd_input],
                        lookup_cast_names[lkd->lkd_cast],
@@ -237,18 +216,13 @@ lookup_dpo_unlock (dpo_id_t *dpo)
 
     lkd->lkd_locks--;
 
-    if (0 == lkd->lkd_locks)
-    {
-        if (LOOKUP_TABLE_FROM_CONFIG == lkd->lkd_table)
-        {
-            if (LOOKUP_UNICAST == lkd->lkd_cast)
-            {
+    if (0 == lkd->lkd_locks) {
+        if (LOOKUP_TABLE_FROM_CONFIG == lkd->lkd_table) {
+            if (LOOKUP_UNICAST == lkd->lkd_cast) {
                 fib_table_unlock(lkd->lkd_fib_index,
                                  dpo_proto_to_fib(lkd->lkd_proto),
                                  FIB_SOURCE_RR);
-            }
-            else
-            {
+            } else {
                 mfib_table_unlock(lkd->lkd_fib_index,
                                   dpo_proto_to_fib(lkd->lkd_proto),
                                   MFIB_SOURCE_RR);
@@ -305,11 +279,10 @@ ip4_src_fib_lookup_two (u32 src_fib_index0,
 /**
  * @brief Lookup trace  data
  */
-typedef struct lookup_trace_t_
-{
+typedef struct lookup_trace_t_ {
     union {
-	ip46_address_t addr;
-	mpls_unicast_header_t hdr;
+        ip46_address_t addr;
+        mpls_unicast_header_t hdr;
     };
     fib_node_index_t fib_index;
     index_t lbi;
@@ -332,258 +305,237 @@ lookup_dpo_ip4_inline (vlib_main_t * vm,
 
     next_index = node->cached_next_index;
 
-    while (n_left_from > 0)
-    {
+    while (n_left_from > 0) {
         u32 n_left_to_next;
 
         vlib_get_next_frame(vm, node, next_index, to_next, n_left_to_next);
 
-	while (n_left_from >= 4 && n_left_to_next > 2)
-	{
-	    u32 bi0, lkdi0, lbi0, fib_index0, next0, hash_c0;
-	    flow_hash_config_t flow_hash_config0;
-	    const ip4_address_t *input_addr0;
-	    const load_balance_t *lb0;
-	    const lookup_dpo_t * lkd0;
-	    const ip4_header_t * ip0;
-	    const dpo_id_t *dpo0;
-	    vlib_buffer_t * b0;
-	    u32 bi1, lkdi1, lbi1, fib_index1, next1, hash_c1;
-	    flow_hash_config_t flow_hash_config1;
-	    const ip4_address_t *input_addr1;
-	    const load_balance_t *lb1;
-	    const lookup_dpo_t * lkd1;
-	    const ip4_header_t * ip1;
-	    const dpo_id_t *dpo1;
-	    vlib_buffer_t * b1;
+        while (n_left_from >= 4 && n_left_to_next > 2) {
+            u32 bi0, lkdi0, lbi0, fib_index0, next0, hash_c0;
+            flow_hash_config_t flow_hash_config0;
+            const ip4_address_t *input_addr0;
+            const load_balance_t *lb0;
+            const lookup_dpo_t * lkd0;
+            const ip4_header_t * ip0;
+            const dpo_id_t *dpo0;
+            vlib_buffer_t * b0;
+            u32 bi1, lkdi1, lbi1, fib_index1, next1, hash_c1;
+            flow_hash_config_t flow_hash_config1;
+            const ip4_address_t *input_addr1;
+            const load_balance_t *lb1;
+            const lookup_dpo_t * lkd1;
+            const ip4_header_t * ip1;
+            const dpo_id_t *dpo1;
+            vlib_buffer_t * b1;
 
-	    /* Prefetch next iteration. */
-	    {
-		vlib_buffer_t * p2, * p3;
+            /* Prefetch next iteration. */
+            {
+                vlib_buffer_t * p2, * p3;
 
-		p2 = vlib_get_buffer (vm, from[2]);
-		p3 = vlib_get_buffer (vm, from[3]);
+                p2 = vlib_get_buffer (vm, from[2]);
+                p3 = vlib_get_buffer (vm, from[3]);
 
-		vlib_prefetch_buffer_header (p2, LOAD);
-		vlib_prefetch_buffer_header (p3, LOAD);
+                vlib_prefetch_buffer_header (p2, LOAD);
+                vlib_prefetch_buffer_header (p3, LOAD);
 
-		CLIB_PREFETCH (p2->data, CLIB_CACHE_LINE_BYTES, STORE);
-		CLIB_PREFETCH (p3->data, CLIB_CACHE_LINE_BYTES, STORE);
-	    }
+                CLIB_PREFETCH (p2->data, CLIB_CACHE_LINE_BYTES, STORE);
+                CLIB_PREFETCH (p3->data, CLIB_CACHE_LINE_BYTES, STORE);
+            }
 
-	    bi0 = from[0];
-	    to_next[0] = bi0;
-	    bi1 = from[1];
-	    to_next[1] = bi1;
-	    from += 2;
-	    to_next += 2;
-	    n_left_from -= 2;
-	    n_left_to_next -= 2;
+            bi0 = from[0];
+            to_next[0] = bi0;
+            bi1 = from[1];
+            to_next[1] = bi1;
+            from += 2;
+            to_next += 2;
+            n_left_from -= 2;
+            n_left_to_next -= 2;
 
-	    b0 = vlib_get_buffer (vm, bi0);
-	    ip0 = vlib_buffer_get_current (b0);
-	    b1 = vlib_get_buffer (vm, bi1);
-	    ip1 = vlib_buffer_get_current (b1);
+            b0 = vlib_get_buffer (vm, bi0);
+            ip0 = vlib_buffer_get_current (b0);
+            b1 = vlib_get_buffer (vm, bi1);
+            ip1 = vlib_buffer_get_current (b1);
 
-	    /* dst lookup was done by ip4 lookup */
-	    lkdi0 = vnet_buffer(b0)->ip.adj_index[VLIB_TX];
-	    lkdi1 = vnet_buffer(b1)->ip.adj_index[VLIB_TX];
-	    lkd0 = lookup_dpo_get(lkdi0);
-	    lkd1 = lookup_dpo_get(lkdi1);
+            /* dst lookup was done by ip4 lookup */
+            lkdi0 = vnet_buffer(b0)->ip.adj_index[VLIB_TX];
+            lkdi1 = vnet_buffer(b1)->ip.adj_index[VLIB_TX];
+            lkd0 = lookup_dpo_get(lkdi0);
+            lkd1 = lookup_dpo_get(lkdi1);
 
-	    /*
-	     * choose between a lookup using the fib index in the DPO
-	     * or getting the FIB index from the interface.
-	     */
-	    if (table_from_interface)
-	    {
-		fib_index0 =
-		    ip4_fib_table_get_index_for_sw_if_index(
-			vnet_buffer(b0)->sw_if_index[VLIB_RX]);
-		fib_index1 =
-		    ip4_fib_table_get_index_for_sw_if_index(
-			vnet_buffer(b1)->sw_if_index[VLIB_RX]);
-	    }
-	    else
-	    {
-		fib_index0 = lkd0->lkd_fib_index;
-		fib_index1 = lkd1->lkd_fib_index;
-	    }
+            /*
+             * choose between a lookup using the fib index in the DPO
+             * or getting the FIB index from the interface.
+             */
+            if (table_from_interface) {
+                fib_index0 =
+                    ip4_fib_table_get_index_for_sw_if_index(
+                        vnet_buffer(b0)->sw_if_index[VLIB_RX]);
+                fib_index1 =
+                    ip4_fib_table_get_index_for_sw_if_index(
+                        vnet_buffer(b1)->sw_if_index[VLIB_RX]);
+            } else {
+                fib_index0 = lkd0->lkd_fib_index;
+                fib_index1 = lkd1->lkd_fib_index;
+            }
 
-	    /*
-	     * choose between a source or destination address lookup in the table
-	     */
-	    if (input_src_addr)
-	    {
-		input_addr0 = &ip0->src_address;
-		input_addr1 = &ip1->src_address;
-	    }
-	    else
-	    {
-		input_addr0 = &ip0->dst_address;
-		input_addr1 = &ip1->dst_address;
-	    }
+            /*
+             * choose between a source or destination address lookup in the table
+             */
+            if (input_src_addr) {
+                input_addr0 = &ip0->src_address;
+                input_addr1 = &ip1->src_address;
+            } else {
+                input_addr0 = &ip0->dst_address;
+                input_addr1 = &ip1->dst_address;
+            }
 
-	    /* do lookup */
-	    ip4_src_fib_lookup_two (fib_index0, fib_index1,
+            /* do lookup */
+            ip4_src_fib_lookup_two (fib_index0, fib_index1,
                                     input_addr0, input_addr1,
                                     &lbi0, &lbi1);
-	    lb0 = load_balance_get(lbi0);
-	    lb1 = load_balance_get(lbi1);
+            lb0 = load_balance_get(lbi0);
+            lb1 = load_balance_get(lbi1);
 
             vnet_buffer(b0)->sw_if_index[VLIB_TX] = fib_index0;
             vnet_buffer(b1)->sw_if_index[VLIB_TX] = fib_index1;
 
-	    /* Use flow hash to compute multipath adjacency. */
-	    hash_c0 = vnet_buffer (b0)->ip.flow_hash = 0;
-	    hash_c1 = vnet_buffer (b1)->ip.flow_hash = 0;
+            /* Use flow hash to compute multipath adjacency. */
+            hash_c0 = vnet_buffer (b0)->ip.flow_hash = 0;
+            hash_c1 = vnet_buffer (b1)->ip.flow_hash = 0;
 
-	    if (PREDICT_FALSE (lb0->lb_n_buckets > 1))
-	    {
-		flow_hash_config0 = lb0->lb_hash_config;
-		hash_c0 = vnet_buffer (b0)->ip.flow_hash =
-		    ip4_compute_flow_hash (ip0, flow_hash_config0);
-	    }
+            if (PREDICT_FALSE (lb0->lb_n_buckets > 1)) {
+                flow_hash_config0 = lb0->lb_hash_config;
+                hash_c0 = vnet_buffer (b0)->ip.flow_hash =
+                              ip4_compute_flow_hash (ip0, flow_hash_config0);
+            }
 
-	    if (PREDICT_FALSE (lb1->lb_n_buckets > 1))
-	    {
-		flow_hash_config1 = lb1->lb_hash_config;
-		hash_c1 = vnet_buffer (b1)->ip.flow_hash =
-		    ip4_compute_flow_hash (ip1, flow_hash_config1);
-	    }
+            if (PREDICT_FALSE (lb1->lb_n_buckets > 1)) {
+                flow_hash_config1 = lb1->lb_hash_config;
+                hash_c1 = vnet_buffer (b1)->ip.flow_hash =
+                              ip4_compute_flow_hash (ip1, flow_hash_config1);
+            }
 
-	    dpo0 = load_balance_get_bucket_i(lb0,
-					     (hash_c0 &
-					      (lb0->lb_n_buckets_minus_1)));
-	    dpo1 = load_balance_get_bucket_i(lb1,
-					     (hash_c1 &
-					      (lb1->lb_n_buckets_minus_1)));
+            dpo0 = load_balance_get_bucket_i(lb0,
+                                             (hash_c0 &
+                                              (lb0->lb_n_buckets_minus_1)));
+            dpo1 = load_balance_get_bucket_i(lb1,
+                                             (hash_c1 &
+                                              (lb1->lb_n_buckets_minus_1)));
 
-	    next0 = dpo0->dpoi_next_node;
-	    next1 = dpo1->dpoi_next_node;
-	    vnet_buffer(b0)->ip.adj_index[VLIB_TX] = dpo0->dpoi_index;
-	    vnet_buffer(b1)->ip.adj_index[VLIB_TX] = dpo1->dpoi_index;
+            next0 = dpo0->dpoi_next_node;
+            next1 = dpo1->dpoi_next_node;
+            vnet_buffer(b0)->ip.adj_index[VLIB_TX] = dpo0->dpoi_index;
+            vnet_buffer(b1)->ip.adj_index[VLIB_TX] = dpo1->dpoi_index;
 
-	    vlib_increment_combined_counter
-		(cm, thread_index, lbi0, 1,
-		 vlib_buffer_length_in_chain (vm, b0));
-	    vlib_increment_combined_counter
-		(cm, thread_index, lbi1, 1,
-		 vlib_buffer_length_in_chain (vm, b1));
+            vlib_increment_combined_counter
+            (cm, thread_index, lbi0, 1,
+             vlib_buffer_length_in_chain (vm, b0));
+            vlib_increment_combined_counter
+            (cm, thread_index, lbi1, 1,
+             vlib_buffer_length_in_chain (vm, b1));
 
-	    if (PREDICT_FALSE(b0->flags & VLIB_BUFFER_IS_TRACED))
-	    {
-		lookup_trace_t *tr = vlib_add_trace (vm, node,
-						     b0, sizeof (*tr));
-		tr->fib_index = fib_index0;
-		tr->lbi = lbi0;
-		tr->addr.ip4 = *input_addr0;
-	    }
-	    if (PREDICT_FALSE(b1->flags & VLIB_BUFFER_IS_TRACED))
-	    {
-		lookup_trace_t *tr = vlib_add_trace (vm, node,
-						     b1, sizeof (*tr));
-		tr->fib_index = fib_index1;
-		tr->lbi = lbi1;
-		tr->addr.ip4 = *input_addr1;
-	    }
+            if (PREDICT_FALSE(b0->flags & VLIB_BUFFER_IS_TRACED)) {
+                lookup_trace_t *tr = vlib_add_trace (vm, node,
+                                                     b0, sizeof (*tr));
+                tr->fib_index = fib_index0;
+                tr->lbi = lbi0;
+                tr->addr.ip4 = *input_addr0;
+            }
+            if (PREDICT_FALSE(b1->flags & VLIB_BUFFER_IS_TRACED)) {
+                lookup_trace_t *tr = vlib_add_trace (vm, node,
+                                                     b1, sizeof (*tr));
+                tr->fib_index = fib_index1;
+                tr->lbi = lbi1;
+                tr->addr.ip4 = *input_addr1;
+            }
 
-	    vlib_validate_buffer_enqueue_x2 (vm, node, next_index,
-					     to_next, n_left_to_next,
-					     bi0, bi1, next0, next1);
-	}
+            vlib_validate_buffer_enqueue_x2 (vm, node, next_index,
+                                             to_next, n_left_to_next,
+                                             bi0, bi1, next0, next1);
+        }
 
-	while (n_left_from > 0 && n_left_to_next > 0)
-	{
-	    u32 bi0, lkdi0, lbi0, fib_index0, next0, hash_c0;
-	    flow_hash_config_t flow_hash_config0;
-	    const ip4_address_t *input_addr;
-	    const load_balance_t *lb0;
-	    const lookup_dpo_t * lkd0;
-	    const ip4_header_t * ip0;
-	    const dpo_id_t *dpo0;
-	    vlib_buffer_t * b0;
+        while (n_left_from > 0 && n_left_to_next > 0) {
+            u32 bi0, lkdi0, lbi0, fib_index0, next0, hash_c0;
+            flow_hash_config_t flow_hash_config0;
+            const ip4_address_t *input_addr;
+            const load_balance_t *lb0;
+            const lookup_dpo_t * lkd0;
+            const ip4_header_t * ip0;
+            const dpo_id_t *dpo0;
+            vlib_buffer_t * b0;
 
-	    bi0 = from[0];
-	    to_next[0] = bi0;
-	    from += 1;
-	    to_next += 1;
-	    n_left_from -= 1;
-	    n_left_to_next -= 1;
+            bi0 = from[0];
+            to_next[0] = bi0;
+            from += 1;
+            to_next += 1;
+            n_left_from -= 1;
+            n_left_to_next -= 1;
 
-	    b0 = vlib_get_buffer (vm, bi0);
-	    ip0 = vlib_buffer_get_current (b0);
+            b0 = vlib_get_buffer (vm, bi0);
+            ip0 = vlib_buffer_get_current (b0);
 
-	    /* dst lookup was done by ip4 lookup */
-	    lkdi0 = vnet_buffer(b0)->ip.adj_index[VLIB_TX];
-	    lkd0 = lookup_dpo_get(lkdi0);
+            /* dst lookup was done by ip4 lookup */
+            lkdi0 = vnet_buffer(b0)->ip.adj_index[VLIB_TX];
+            lkd0 = lookup_dpo_get(lkdi0);
 
-	    /*
-	     * choose between a lookup using the fib index in the DPO
-	     * or getting the FIB index from the interface.
-	     */
-	    if (table_from_interface)
-	    {
-		fib_index0 =
-		    ip4_fib_table_get_index_for_sw_if_index(
-			vnet_buffer(b0)->sw_if_index[VLIB_RX]);
-	    }
-	    else
-	    {
-		fib_index0 = lkd0->lkd_fib_index;
-	    }
+            /*
+             * choose between a lookup using the fib index in the DPO
+             * or getting the FIB index from the interface.
+             */
+            if (table_from_interface) {
+                fib_index0 =
+                    ip4_fib_table_get_index_for_sw_if_index(
+                        vnet_buffer(b0)->sw_if_index[VLIB_RX]);
+            } else {
+                fib_index0 = lkd0->lkd_fib_index;
+            }
 
-	    /*
-	     * choose between a source or destination address lookup in the table
-	     */
-	    if (input_src_addr)
-	    {
-		input_addr = &ip0->src_address;
-	    }
-	    else
-	    {
-		input_addr = &ip0->dst_address;
-	    }
+            /*
+             * choose between a source or destination address lookup in the table
+             */
+            if (input_src_addr) {
+                input_addr = &ip0->src_address;
+            } else {
+                input_addr = &ip0->dst_address;
+            }
 
-	    /* do lookup */
-	    ip4_src_fib_lookup_one (fib_index0, input_addr, &lbi0);
-	    lb0 = load_balance_get(lbi0);
+            /* do lookup */
+            ip4_src_fib_lookup_one (fib_index0, input_addr, &lbi0);
+            lb0 = load_balance_get(lbi0);
 
             vnet_buffer(b0)->sw_if_index[VLIB_TX] = fib_index0;
 
-	    /* Use flow hash to compute multipath adjacency. */
-	    hash_c0 = vnet_buffer (b0)->ip.flow_hash = 0;
+            /* Use flow hash to compute multipath adjacency. */
+            hash_c0 = vnet_buffer (b0)->ip.flow_hash = 0;
 
-	    if (PREDICT_FALSE (lb0->lb_n_buckets > 1))
-	    {
-		flow_hash_config0 = lb0->lb_hash_config;
-		hash_c0 = vnet_buffer (b0)->ip.flow_hash =
-		    ip4_compute_flow_hash (ip0, flow_hash_config0);
-	    }
+            if (PREDICT_FALSE (lb0->lb_n_buckets > 1)) {
+                flow_hash_config0 = lb0->lb_hash_config;
+                hash_c0 = vnet_buffer (b0)->ip.flow_hash =
+                              ip4_compute_flow_hash (ip0, flow_hash_config0);
+            }
 
-	    dpo0 = load_balance_get_bucket_i(lb0,
-					     (hash_c0 &
-					      (lb0->lb_n_buckets_minus_1)));
+            dpo0 = load_balance_get_bucket_i(lb0,
+                                             (hash_c0 &
+                                              (lb0->lb_n_buckets_minus_1)));
 
-	    next0 = dpo0->dpoi_next_node;
-	    vnet_buffer(b0)->ip.adj_index[VLIB_TX] = dpo0->dpoi_index;
+            next0 = dpo0->dpoi_next_node;
+            vnet_buffer(b0)->ip.adj_index[VLIB_TX] = dpo0->dpoi_index;
 
-	    vlib_increment_combined_counter
-		(cm, thread_index, lbi0, 1,
-		 vlib_buffer_length_in_chain (vm, b0));
+            vlib_increment_combined_counter
+            (cm, thread_index, lbi0, 1,
+             vlib_buffer_length_in_chain (vm, b0));
 
-	    if (PREDICT_FALSE(b0->flags & VLIB_BUFFER_IS_TRACED))
-	    {
-		lookup_trace_t *tr = vlib_add_trace (vm, node,
-						     b0, sizeof (*tr));
-		tr->fib_index = fib_index0;
-		tr->lbi = lbi0;
-		tr->addr.ip4 = *input_addr;
-	    }
+            if (PREDICT_FALSE(b0->flags & VLIB_BUFFER_IS_TRACED)) {
+                lookup_trace_t *tr = vlib_add_trace (vm, node,
+                                                     b0, sizeof (*tr));
+                tr->fib_index = fib_index0;
+                tr->lbi = lbi0;
+                tr->addr.ip4 = *input_addr;
+            }
 
-	    vlib_validate_buffer_enqueue_x1(vm, node, next_index, to_next,
-					    n_left_to_next, bi0, next0);
-	}
+            vlib_validate_buffer_enqueue_x1(vm, node, next_index, to_next,
+                                            n_left_to_next, bi0, next0);
+        }
         vlib_put_next_frame (vm, node, next_index, n_left_to_next);
     }
     return from_frame->n_vectors;
@@ -671,260 +623,239 @@ lookup_dpo_ip6_inline (vlib_main_t * vm,
 
     next_index = node->cached_next_index;
 
-    while (n_left_from > 0)
-    {
+    while (n_left_from > 0) {
         u32 n_left_to_next;
 
         vlib_get_next_frame(vm, node, next_index, to_next, n_left_to_next);
 
-	while (n_left_from >= 4 && n_left_to_next > 2)
-	{
-	    u32 bi0, lkdi0, lbi0, fib_index0, next0, hash_c0;
-	    flow_hash_config_t flow_hash_config0;
-	    const ip6_address_t *input_addr0;
-	    const load_balance_t *lb0;
-	    const lookup_dpo_t * lkd0;
-	    const ip6_header_t * ip0;
-	    const dpo_id_t *dpo0;
-	    vlib_buffer_t * b0;
-	    u32 bi1, lkdi1, lbi1, fib_index1, next1, hash_c1;
-	    flow_hash_config_t flow_hash_config1;
-	    const ip6_address_t *input_addr1;
-	    const load_balance_t *lb1;
-	    const lookup_dpo_t * lkd1;
-	    const ip6_header_t * ip1;
-	    const dpo_id_t *dpo1;
-	    vlib_buffer_t * b1;
+        while (n_left_from >= 4 && n_left_to_next > 2) {
+            u32 bi0, lkdi0, lbi0, fib_index0, next0, hash_c0;
+            flow_hash_config_t flow_hash_config0;
+            const ip6_address_t *input_addr0;
+            const load_balance_t *lb0;
+            const lookup_dpo_t * lkd0;
+            const ip6_header_t * ip0;
+            const dpo_id_t *dpo0;
+            vlib_buffer_t * b0;
+            u32 bi1, lkdi1, lbi1, fib_index1, next1, hash_c1;
+            flow_hash_config_t flow_hash_config1;
+            const ip6_address_t *input_addr1;
+            const load_balance_t *lb1;
+            const lookup_dpo_t * lkd1;
+            const ip6_header_t * ip1;
+            const dpo_id_t *dpo1;
+            vlib_buffer_t * b1;
 
-	    /* Prefetch next iteration. */
-	    {
-		vlib_buffer_t * p2, * p3;
+            /* Prefetch next iteration. */
+            {
+                vlib_buffer_t * p2, * p3;
 
-		p2 = vlib_get_buffer (vm, from[2]);
-		p3 = vlib_get_buffer (vm, from[3]);
+                p2 = vlib_get_buffer (vm, from[2]);
+                p3 = vlib_get_buffer (vm, from[3]);
 
-		vlib_prefetch_buffer_header (p2, LOAD);
-		vlib_prefetch_buffer_header (p3, LOAD);
+                vlib_prefetch_buffer_header (p2, LOAD);
+                vlib_prefetch_buffer_header (p3, LOAD);
 
-		CLIB_PREFETCH (p2->data, CLIB_CACHE_LINE_BYTES, STORE);
-		CLIB_PREFETCH (p3->data, CLIB_CACHE_LINE_BYTES, STORE);
-	    }
+                CLIB_PREFETCH (p2->data, CLIB_CACHE_LINE_BYTES, STORE);
+                CLIB_PREFETCH (p3->data, CLIB_CACHE_LINE_BYTES, STORE);
+            }
 
-	    bi0 = from[0];
-	    to_next[0] = bi0;
-	    bi1 = from[1];
-	    to_next[1] = bi1;
-	    from += 2;
-	    to_next += 2;
-	    n_left_from -= 2;
-	    n_left_to_next -= 2;
+            bi0 = from[0];
+            to_next[0] = bi0;
+            bi1 = from[1];
+            to_next[1] = bi1;
+            from += 2;
+            to_next += 2;
+            n_left_from -= 2;
+            n_left_to_next -= 2;
 
-	    b0 = vlib_get_buffer (vm, bi0);
-	    ip0 = vlib_buffer_get_current (b0);
-	    b1 = vlib_get_buffer (vm, bi1);
-	    ip1 = vlib_buffer_get_current (b1);
+            b0 = vlib_get_buffer (vm, bi0);
+            ip0 = vlib_buffer_get_current (b0);
+            b1 = vlib_get_buffer (vm, bi1);
+            ip1 = vlib_buffer_get_current (b1);
 
-	    /* dst lookup was done by ip6 lookup */
-	    lkdi0 = vnet_buffer(b0)->ip.adj_index[VLIB_TX];
-	    lkdi1 = vnet_buffer(b1)->ip.adj_index[VLIB_TX];
-	    lkd0 = lookup_dpo_get(lkdi0);
-	    lkd1 = lookup_dpo_get(lkdi1);
+            /* dst lookup was done by ip6 lookup */
+            lkdi0 = vnet_buffer(b0)->ip.adj_index[VLIB_TX];
+            lkdi1 = vnet_buffer(b1)->ip.adj_index[VLIB_TX];
+            lkd0 = lookup_dpo_get(lkdi0);
+            lkd1 = lookup_dpo_get(lkdi1);
 
-	    /*
-	     * choose between a lookup using the fib index in the DPO
-	     * or getting the FIB index from the interface.
-	     */
-	    if (table_from_interface)
-	    {
-		fib_index0 =
-		    ip6_fib_table_get_index_for_sw_if_index(
-			vnet_buffer(b0)->sw_if_index[VLIB_RX]);
-		fib_index1 =
-		    ip6_fib_table_get_index_for_sw_if_index(
-			vnet_buffer(b1)->sw_if_index[VLIB_RX]);
-	    }
-	    else
-	    {
-		fib_index0 = lkd0->lkd_fib_index;
-		fib_index1 = lkd1->lkd_fib_index;
-	    }
+            /*
+             * choose between a lookup using the fib index in the DPO
+             * or getting the FIB index from the interface.
+             */
+            if (table_from_interface) {
+                fib_index0 =
+                    ip6_fib_table_get_index_for_sw_if_index(
+                        vnet_buffer(b0)->sw_if_index[VLIB_RX]);
+                fib_index1 =
+                    ip6_fib_table_get_index_for_sw_if_index(
+                        vnet_buffer(b1)->sw_if_index[VLIB_RX]);
+            } else {
+                fib_index0 = lkd0->lkd_fib_index;
+                fib_index1 = lkd1->lkd_fib_index;
+            }
 
-	    /*
-	     * choose between a source or destination address lookup in the table
-	     */
-	    if (input_src_addr)
-	    {
-		input_addr0 = &ip0->src_address;
-		input_addr1 = &ip1->src_address;
-	    }
-	    else
-	    {
-		input_addr0 = &ip0->dst_address;
-		input_addr1 = &ip1->dst_address;
-	    }
+            /*
+             * choose between a source or destination address lookup in the table
+             */
+            if (input_src_addr) {
+                input_addr0 = &ip0->src_address;
+                input_addr1 = &ip1->src_address;
+            } else {
+                input_addr0 = &ip0->dst_address;
+                input_addr1 = &ip1->dst_address;
+            }
 
-	    /* do src lookup */
-	    lbi0 = ip6_fib_table_fwding_lookup(&ip6_main,
-					       fib_index0,
-					       input_addr0);
-	    lbi1 = ip6_fib_table_fwding_lookup(&ip6_main,
-					       fib_index1,
-					       input_addr1);
-	    lb0 = load_balance_get(lbi0);
-	    lb1 = load_balance_get(lbi1);
+            /* do src lookup */
+            lbi0 = ip6_fib_table_fwding_lookup(&ip6_main,
+                                               fib_index0,
+                                               input_addr0);
+            lbi1 = ip6_fib_table_fwding_lookup(&ip6_main,
+                                               fib_index1,
+                                               input_addr1);
+            lb0 = load_balance_get(lbi0);
+            lb1 = load_balance_get(lbi1);
 
             vnet_buffer(b0)->sw_if_index[VLIB_TX] = fib_index0;
             vnet_buffer(b1)->sw_if_index[VLIB_TX] = fib_index1;
 
-	    /* Use flow hash to compute multipath adjacency. */
-	    hash_c0 = vnet_buffer (b0)->ip.flow_hash = 0;
-	    hash_c1 = vnet_buffer (b1)->ip.flow_hash = 0;
+            /* Use flow hash to compute multipath adjacency. */
+            hash_c0 = vnet_buffer (b0)->ip.flow_hash = 0;
+            hash_c1 = vnet_buffer (b1)->ip.flow_hash = 0;
 
-	    if (PREDICT_FALSE (lb0->lb_n_buckets > 1))
-	    {
-		flow_hash_config0 = lb0->lb_hash_config;
-		hash_c0 = vnet_buffer (b0)->ip.flow_hash =
-		    ip6_compute_flow_hash (ip0, flow_hash_config0);
-	    }
+            if (PREDICT_FALSE (lb0->lb_n_buckets > 1)) {
+                flow_hash_config0 = lb0->lb_hash_config;
+                hash_c0 = vnet_buffer (b0)->ip.flow_hash =
+                              ip6_compute_flow_hash (ip0, flow_hash_config0);
+            }
 
-	    if (PREDICT_FALSE (lb1->lb_n_buckets > 1))
-	    {
-		flow_hash_config1 = lb1->lb_hash_config;
-		hash_c1 = vnet_buffer (b1)->ip.flow_hash =
-		    ip6_compute_flow_hash (ip1, flow_hash_config1);
-	    }
+            if (PREDICT_FALSE (lb1->lb_n_buckets > 1)) {
+                flow_hash_config1 = lb1->lb_hash_config;
+                hash_c1 = vnet_buffer (b1)->ip.flow_hash =
+                              ip6_compute_flow_hash (ip1, flow_hash_config1);
+            }
 
-	    dpo0 = load_balance_get_bucket_i(lb0,
-					     (hash_c0 &
-					      (lb0->lb_n_buckets_minus_1)));
-	    dpo1 = load_balance_get_bucket_i(lb1,
-					     (hash_c1 &
-					      (lb1->lb_n_buckets_minus_1)));
+            dpo0 = load_balance_get_bucket_i(lb0,
+                                             (hash_c0 &
+                                              (lb0->lb_n_buckets_minus_1)));
+            dpo1 = load_balance_get_bucket_i(lb1,
+                                             (hash_c1 &
+                                              (lb1->lb_n_buckets_minus_1)));
 
-	    next0 = dpo0->dpoi_next_node;
-	    next1 = dpo1->dpoi_next_node;
-	    vnet_buffer(b0)->ip.adj_index[VLIB_TX] = dpo0->dpoi_index;
-	    vnet_buffer(b1)->ip.adj_index[VLIB_TX] = dpo1->dpoi_index;
+            next0 = dpo0->dpoi_next_node;
+            next1 = dpo1->dpoi_next_node;
+            vnet_buffer(b0)->ip.adj_index[VLIB_TX] = dpo0->dpoi_index;
+            vnet_buffer(b1)->ip.adj_index[VLIB_TX] = dpo1->dpoi_index;
 
-	    vlib_increment_combined_counter
-		(cm, thread_index, lbi0, 1,
-		 vlib_buffer_length_in_chain (vm, b0));
-	    vlib_increment_combined_counter
-		(cm, thread_index, lbi1, 1,
-		 vlib_buffer_length_in_chain (vm, b1));
+            vlib_increment_combined_counter
+            (cm, thread_index, lbi0, 1,
+             vlib_buffer_length_in_chain (vm, b0));
+            vlib_increment_combined_counter
+            (cm, thread_index, lbi1, 1,
+             vlib_buffer_length_in_chain (vm, b1));
 
-	    if (PREDICT_FALSE(b0->flags & VLIB_BUFFER_IS_TRACED))
-	    {
-		lookup_trace_t *tr = vlib_add_trace (vm, node,
-						     b0, sizeof (*tr));
-		tr->fib_index = fib_index0;
-		tr->lbi = lbi0;
-		tr->addr.ip6 = *input_addr0;
-	    }
-	    if (PREDICT_FALSE(b1->flags & VLIB_BUFFER_IS_TRACED))
-	    {
-		lookup_trace_t *tr = vlib_add_trace (vm, node,
-						     b1, sizeof (*tr));
-		tr->fib_index = fib_index1;
-		tr->lbi = lbi1;
-		tr->addr.ip6 = *input_addr1;
-	    }
-	    vlib_validate_buffer_enqueue_x2(vm, node, next_index, to_next,
-					    n_left_to_next, bi0, bi1,
-					    next0, next1);
-	}
-	while (n_left_from > 0 && n_left_to_next > 0)
-	{
-	    u32 bi0, lkdi0, lbi0, fib_index0, next0, hash_c0;
-	    flow_hash_config_t flow_hash_config0;
-	    const ip6_address_t *input_addr0;
-	    const load_balance_t *lb0;
-	    const lookup_dpo_t * lkd0;
-	    const ip6_header_t * ip0;
-	    const dpo_id_t *dpo0;
-	    vlib_buffer_t * b0;
+            if (PREDICT_FALSE(b0->flags & VLIB_BUFFER_IS_TRACED)) {
+                lookup_trace_t *tr = vlib_add_trace (vm, node,
+                                                     b0, sizeof (*tr));
+                tr->fib_index = fib_index0;
+                tr->lbi = lbi0;
+                tr->addr.ip6 = *input_addr0;
+            }
+            if (PREDICT_FALSE(b1->flags & VLIB_BUFFER_IS_TRACED)) {
+                lookup_trace_t *tr = vlib_add_trace (vm, node,
+                                                     b1, sizeof (*tr));
+                tr->fib_index = fib_index1;
+                tr->lbi = lbi1;
+                tr->addr.ip6 = *input_addr1;
+            }
+            vlib_validate_buffer_enqueue_x2(vm, node, next_index, to_next,
+                                            n_left_to_next, bi0, bi1,
+                                            next0, next1);
+        }
+        while (n_left_from > 0 && n_left_to_next > 0) {
+            u32 bi0, lkdi0, lbi0, fib_index0, next0, hash_c0;
+            flow_hash_config_t flow_hash_config0;
+            const ip6_address_t *input_addr0;
+            const load_balance_t *lb0;
+            const lookup_dpo_t * lkd0;
+            const ip6_header_t * ip0;
+            const dpo_id_t *dpo0;
+            vlib_buffer_t * b0;
 
-	    bi0 = from[0];
-	    to_next[0] = bi0;
-	    from += 1;
-	    to_next += 1;
-	    n_left_from -= 1;
-	    n_left_to_next -= 1;
+            bi0 = from[0];
+            to_next[0] = bi0;
+            from += 1;
+            to_next += 1;
+            n_left_from -= 1;
+            n_left_to_next -= 1;
 
-	    b0 = vlib_get_buffer (vm, bi0);
-	    ip0 = vlib_buffer_get_current (b0);
+            b0 = vlib_get_buffer (vm, bi0);
+            ip0 = vlib_buffer_get_current (b0);
 
-	    /* dst lookup was done by ip6 lookup */
-	    lkdi0 = vnet_buffer(b0)->ip.adj_index[VLIB_TX];
-	    lkd0 = lookup_dpo_get(lkdi0);
+            /* dst lookup was done by ip6 lookup */
+            lkdi0 = vnet_buffer(b0)->ip.adj_index[VLIB_TX];
+            lkd0 = lookup_dpo_get(lkdi0);
 
-	    /*
-	     * choose between a lookup using the fib index in the DPO
-	     * or getting the FIB index from the interface.
-	     */
-	    if (table_from_interface)
-	    {
-		fib_index0 =
-		    ip6_fib_table_get_index_for_sw_if_index(
-			vnet_buffer(b0)->sw_if_index[VLIB_RX]);
-	    }
-	    else
-	    {
-		fib_index0 = lkd0->lkd_fib_index;
-	    }
+            /*
+             * choose between a lookup using the fib index in the DPO
+             * or getting the FIB index from the interface.
+             */
+            if (table_from_interface) {
+                fib_index0 =
+                    ip6_fib_table_get_index_for_sw_if_index(
+                        vnet_buffer(b0)->sw_if_index[VLIB_RX]);
+            } else {
+                fib_index0 = lkd0->lkd_fib_index;
+            }
 
-	    /*
-	     * choose between a source or destination address lookup in the table
-	     */
-	    if (input_src_addr)
-	    {
-		input_addr0 = &ip0->src_address;
-	    }
-	    else
-	    {
-		input_addr0 = &ip0->dst_address;
-	    }
+            /*
+             * choose between a source or destination address lookup in the table
+             */
+            if (input_src_addr) {
+                input_addr0 = &ip0->src_address;
+            } else {
+                input_addr0 = &ip0->dst_address;
+            }
 
-	    /* do src lookup */
-	    lbi0 = ip6_fib_table_fwding_lookup(&ip6_main,
-					       fib_index0,
-					       input_addr0);
-	    lb0 = load_balance_get(lbi0);
+            /* do src lookup */
+            lbi0 = ip6_fib_table_fwding_lookup(&ip6_main,
+                                               fib_index0,
+                                               input_addr0);
+            lb0 = load_balance_get(lbi0);
 
             vnet_buffer(b0)->sw_if_index[VLIB_TX] = fib_index0;
 
-	    /* Use flow hash to compute multipath adjacency. */
-	    hash_c0 = vnet_buffer (b0)->ip.flow_hash = 0;
+            /* Use flow hash to compute multipath adjacency. */
+            hash_c0 = vnet_buffer (b0)->ip.flow_hash = 0;
 
-	    if (PREDICT_FALSE (lb0->lb_n_buckets > 1))
-	    {
-		flow_hash_config0 = lb0->lb_hash_config;
-		hash_c0 = vnet_buffer (b0)->ip.flow_hash =
-		    ip6_compute_flow_hash (ip0, flow_hash_config0);
-	    }
+            if (PREDICT_FALSE (lb0->lb_n_buckets > 1)) {
+                flow_hash_config0 = lb0->lb_hash_config;
+                hash_c0 = vnet_buffer (b0)->ip.flow_hash =
+                              ip6_compute_flow_hash (ip0, flow_hash_config0);
+            }
 
-	    dpo0 = load_balance_get_bucket_i(lb0,
-					     (hash_c0 &
-					      (lb0->lb_n_buckets_minus_1)));
+            dpo0 = load_balance_get_bucket_i(lb0,
+                                             (hash_c0 &
+                                              (lb0->lb_n_buckets_minus_1)));
 
-	    next0 = dpo0->dpoi_next_node;
-	    vnet_buffer(b0)->ip.adj_index[VLIB_TX] = dpo0->dpoi_index;
+            next0 = dpo0->dpoi_next_node;
+            vnet_buffer(b0)->ip.adj_index[VLIB_TX] = dpo0->dpoi_index;
 
-	    vlib_increment_combined_counter
-		(cm, thread_index, lbi0, 1,
-		 vlib_buffer_length_in_chain (vm, b0));
+            vlib_increment_combined_counter
+            (cm, thread_index, lbi0, 1,
+             vlib_buffer_length_in_chain (vm, b0));
 
-	    if (PREDICT_FALSE(b0->flags & VLIB_BUFFER_IS_TRACED))
-	    {
-		lookup_trace_t *tr = vlib_add_trace (vm, node,
-						     b0, sizeof (*tr));
-		tr->fib_index = fib_index0;
-		tr->lbi = lbi0;
-		tr->addr.ip6 = *input_addr0;
-	    }
-	    vlib_validate_buffer_enqueue_x1(vm, node, next_index, to_next,
-					    n_left_to_next, bi0, next0);
-	}
+            if (PREDICT_FALSE(b0->flags & VLIB_BUFFER_IS_TRACED)) {
+                lookup_trace_t *tr = vlib_add_trace (vm, node,
+                                                     b0, sizeof (*tr));
+                tr->fib_index = fib_index0;
+                tr->lbi = lbi0;
+                tr->addr.ip6 = *input_addr0;
+            }
+            vlib_validate_buffer_enqueue_x1(vm, node, next_index, to_next,
+                                            n_left_to_next, bi0, next0);
+        }
         vlib_put_next_frame (vm, node, next_index, n_left_to_next);
     }
     return from_frame->n_vectors;
@@ -949,8 +880,8 @@ VLIB_NODE_FUNCTION_MULTIARCH (lookup_ip6_dst_node, lookup_ip6_dst)
 
 always_inline uword
 lookup_ip6_dst_itf (vlib_main_t * vm,
-		    vlib_node_runtime_t * node,
-		    vlib_frame_t * from_frame)
+                    vlib_node_runtime_t * node,
+                    vlib_frame_t * from_frame)
 {
     return (lookup_dpo_ip6_inline(vm, node, from_frame, 0 /*use src*/, 1));
 }
@@ -983,9 +914,9 @@ VLIB_NODE_FUNCTION_MULTIARCH (lookup_ip6_src_node, lookup_ip6_src)
 
 always_inline uword
 lookup_dpo_mpls_inline (vlib_main_t * vm,
-                       vlib_node_runtime_t * node,
-                       vlib_frame_t * from_frame,
-                       int table_from_interface)
+                        vlib_node_runtime_t * node,
+                        vlib_frame_t * from_frame,
+                        int table_from_interface)
 {
     u32 n_left_from, next_index, * from, * to_next;
     u32 thread_index = vlib_get_thread_index();
@@ -996,8 +927,7 @@ lookup_dpo_mpls_inline (vlib_main_t * vm,
 
     next_index = node->cached_next_index;
 
-    while (n_left_from > 0)
-    {
+    while (n_left_from > 0) {
         u32 n_left_to_next;
 
         vlib_get_next_frame(vm, node, next_index, to_next, n_left_to_next);
@@ -1005,8 +935,7 @@ lookup_dpo_mpls_inline (vlib_main_t * vm,
         /* while (n_left_from >= 4 && n_left_to_next >= 2) */
         /*   } */
 
-        while (n_left_from > 0 && n_left_to_next > 0)
-        {
+        while (n_left_from > 0 && n_left_to_next > 0) {
             u32 bi0, lkdi0, lbi0, fib_index0, next0, hash0;
             const mpls_unicast_header_t * hdr0;
             const load_balance_t *lb0;
@@ -1032,14 +961,11 @@ lookup_dpo_mpls_inline (vlib_main_t * vm,
              * choose between a lookup using the fib index in the DPO
              * or getting the FIB index from the interface.
              */
-            if (table_from_interface)
-            {
-                fib_index0 = 
+            if (table_from_interface) {
+                fib_index0 =
                     mpls_fib_table_get_index_for_sw_if_index(
                         vnet_buffer(b0)->sw_if_index[VLIB_RX]);
-            }
-            else
-            {
+            } else {
                 fib_index0 = lkd0->lkd_fib_index;
             }
 
@@ -1052,28 +978,22 @@ lookup_dpo_mpls_inline (vlib_main_t * vm,
             vnet_buffer(b0)->ip.adj_index[VLIB_TX] = dpo0->dpoi_index;
 
 
-            if (MPLS_IS_REPLICATE & lbi0)
-            {
+            if (MPLS_IS_REPLICATE & lbi0) {
                 next0 = mpls_lookup_to_replicate_edge;
                 vnet_buffer (b0)->ip.adj_index[VLIB_TX] =
                     (lbi0 & ~MPLS_IS_REPLICATE);
-            }
-            else
-            {
+            } else {
                 lb0 = load_balance_get(lbi0);
                 ASSERT (lb0->lb_n_buckets > 0);
                 ASSERT (is_pow2 (lb0->lb_n_buckets));
 
-                if (PREDICT_FALSE(lb0->lb_n_buckets > 1))
-                {
+                if (PREDICT_FALSE(lb0->lb_n_buckets > 1)) {
                     hash0 = vnet_buffer (b0)->ip.flow_hash =
-                        mpls_compute_flow_hash(hdr0, lb0->lb_hash_config);
+                                mpls_compute_flow_hash(hdr0, lb0->lb_hash_config);
                     dpo0 = load_balance_get_fwd_bucket
-                        (lb0,
-                         (hash0 & (lb0->lb_n_buckets_minus_1)));
-                }
-                else
-                {
+                           (lb0,
+                            (hash0 & (lb0->lb_n_buckets_minus_1)));
+                } else {
                     dpo0 = load_balance_get_bucket_i (lb0, 0);
                 }
                 next0 = dpo0->dpoi_next_node;
@@ -1081,25 +1001,24 @@ lookup_dpo_mpls_inline (vlib_main_t * vm,
                 vnet_buffer (b0)->ip.adj_index[VLIB_TX] = dpo0->dpoi_index;
 
                 vlib_increment_combined_counter
-                    (cm, thread_index, lbi0, 1,
-                     vlib_buffer_length_in_chain (vm, b0));
+                (cm, thread_index, lbi0, 1,
+                 vlib_buffer_length_in_chain (vm, b0));
             }
 
-          vnet_buffer (b0)->mpls.ttl = ((char*)hdr0)[3];
+            vnet_buffer (b0)->mpls.ttl = ((char*)hdr0)[3];
             vnet_buffer (b0)->mpls.exp = (((char*)hdr0)[2] & 0xe) >> 1;
             vnet_buffer (b0)->mpls.first = 1;
             vlib_buffer_advance(b0, sizeof(*hdr0));
 
-	    if (PREDICT_FALSE(b0->flags & VLIB_BUFFER_IS_TRACED)) 
-            {
-                lookup_trace_t *tr = vlib_add_trace (vm, node, 
+            if (PREDICT_FALSE(b0->flags & VLIB_BUFFER_IS_TRACED)) {
+                lookup_trace_t *tr = vlib_add_trace (vm, node,
                                                      b0, sizeof (*tr));
                 tr->fib_index = fib_index0;
                 tr->lbi = lbi0;
                 tr->hdr = *hdr0;
             }
 
-           vlib_validate_buffer_enqueue_x1(vm, node, next_index, to_next,
+            vlib_validate_buffer_enqueue_x1(vm, node, next_index, to_next,
                                             n_left_to_next, bi0, next0);
         }
         vlib_put_next_frame (vm, node, next_index, n_left_to_next);
@@ -1128,8 +1047,8 @@ format_lookup_mpls_trace (u8 * s, va_list * args)
 
 always_inline uword
 lookup_mpls_dst (vlib_main_t * vm,
-                vlib_node_runtime_t * node,
-                vlib_frame_t * from_frame)
+                 vlib_node_runtime_t * node,
+                 vlib_frame_t * from_frame)
 {
     return (lookup_dpo_mpls_inline(vm, node, from_frame, 0));
 }
@@ -1146,8 +1065,8 @@ VLIB_NODE_FUNCTION_MULTIARCH (lookup_mpls_dst_node, lookup_mpls_dst)
 
 always_inline uword
 lookup_mpls_dst_itf (vlib_main_t * vm,
-                    vlib_node_runtime_t * node,
-                    vlib_frame_t * from_frame)
+                     vlib_node_runtime_t * node,
+                     vlib_frame_t * from_frame)
 {
     return (lookup_dpo_mpls_inline(vm, node, from_frame, 1));
 }
@@ -1180,8 +1099,7 @@ lookup_dpo_ip_dst_mcast_inline (vlib_main_t * vm,
 
     next_index = LOOKUP_IP_DST_MCAST_NEXT_RPF;
 
-    while (n_left_from > 0)
-    {
+    while (n_left_from > 0) {
         u32 n_left_to_next;
 
         vlib_get_next_frame(vm, node, next_index, to_next, n_left_to_next);
@@ -1189,8 +1107,7 @@ lookup_dpo_ip_dst_mcast_inline (vlib_main_t * vm,
         /* while (n_left_from >= 4 && n_left_to_next >= 2) */
         /*   } */
 
-        while (n_left_from > 0 && n_left_to_next > 0)
-        {
+        while (n_left_from > 0 && n_left_to_next > 0) {
             u32 bi0, lkdi0, fib_index0,  next0;
             const lookup_dpo_t * lkd0;
             fib_node_index_t mfei0;
@@ -1211,8 +1128,7 @@ lookup_dpo_ip_dst_mcast_inline (vlib_main_t * vm,
             fib_index0 = lkd0->lkd_fib_index;
             next0 = LOOKUP_IP_DST_MCAST_NEXT_RPF;
 
-            if (is_v4)
-            {
+            if (is_v4) {
                 ip4_header_t * ip0;
 
                 ip0 = vlib_buffer_get_current (b0);
@@ -1220,25 +1136,21 @@ lookup_dpo_ip_dst_mcast_inline (vlib_main_t * vm,
                                               &ip0->src_address,
                                               &ip0->dst_address,
                                               64);
-                if (PREDICT_FALSE(b0->flags & VLIB_BUFFER_IS_TRACED))
-                {
+                if (PREDICT_FALSE(b0->flags & VLIB_BUFFER_IS_TRACED)) {
                     lookup_trace_t *tr = vlib_add_trace (vm, node,
                                                          b0, sizeof (*tr));
                     tr->fib_index = fib_index0;
                     tr->lbi = mfei0;
                     tr->addr.ip4 = ip0->dst_address;
                 }
-            }
-            else
-            {
+            } else {
                 ip6_header_t * ip0;
 
                 ip0 = vlib_buffer_get_current (b0);
                 mfei0 = ip6_mfib_table_lookup2(ip6_mfib_get(fib_index0),
                                                &ip0->src_address,
                                                &ip0->dst_address);
-                if (PREDICT_FALSE(b0->flags & VLIB_BUFFER_IS_TRACED))
-                {
+                if (PREDICT_FALSE(b0->flags & VLIB_BUFFER_IS_TRACED)) {
                     lookup_trace_t *tr = vlib_add_trace (vm, node,
                                                          b0, sizeof (*tr));
                     tr->fib_index = fib_index0;
@@ -1305,9 +1217,9 @@ static void
 lookup_dpo_mem_show (void)
 {
     fib_show_memory_usage("Lookup",
-			  pool_elts(lookup_dpo_pool),
-			  pool_len(lookup_dpo_pool),
-			  sizeof(lookup_dpo_t));
+                          pool_elts(lookup_dpo_pool),
+                          pool_len(lookup_dpo_pool),
+                          sizeof(lookup_dpo_t));
 }
 
 const static dpo_vft_t lkd_vft = {
@@ -1322,78 +1234,64 @@ const static dpo_vft_t lkd_vft_w_mem_show = {
     .dv_mem_show = lookup_dpo_mem_show,
 };
 
-const static char* const lookup_src_ip4_nodes[] =
-{
+const static char* const lookup_src_ip4_nodes[] = {
     "lookup-ip4-src",
     NULL,
 };
-const static char* const lookup_src_ip6_nodes[] =
-{
+const static char* const lookup_src_ip6_nodes[] = {
     "lookup-ip6-src",
     NULL,
 };
-const static char* const * const lookup_src_nodes[DPO_PROTO_NUM] =
-{
+const static char* const * const lookup_src_nodes[DPO_PROTO_NUM] = {
     [DPO_PROTO_IP4]  = lookup_src_ip4_nodes,
     [DPO_PROTO_IP6]  = lookup_src_ip6_nodes,
     [DPO_PROTO_MPLS] = NULL,
 };
 
-const static char* const lookup_dst_ip4_nodes[] =
-{
+const static char* const lookup_dst_ip4_nodes[] = {
     "lookup-ip4-dst",
     NULL,
 };
-const static char* const lookup_dst_ip6_nodes[] =
-{
+const static char* const lookup_dst_ip6_nodes[] = {
     "lookup-ip6-dst",
     NULL,
 };
-const static char* const lookup_dst_mpls_nodes[] =
-{
+const static char* const lookup_dst_mpls_nodes[] = {
     "lookup-mpls-dst",
     NULL,
 };
-const static char* const * const lookup_dst_nodes[DPO_PROTO_NUM] =
-{
+const static char* const * const lookup_dst_nodes[DPO_PROTO_NUM] = {
     [DPO_PROTO_IP4]  = lookup_dst_ip4_nodes,
     [DPO_PROTO_IP6]  = lookup_dst_ip6_nodes,
     [DPO_PROTO_MPLS] = lookup_dst_mpls_nodes,
 };
 
-const static char* const lookup_dst_mcast_ip4_nodes[] =
-{
+const static char* const lookup_dst_mcast_ip4_nodes[] = {
     "lookup-ip4-dst-mcast",
     NULL,
 };
-const static char* const lookup_dst_mcast_ip6_nodes[] =
-{
+const static char* const lookup_dst_mcast_ip6_nodes[] = {
     "lookup-ip6-dst-mcast",
     NULL,
 };
-const static char* const * const lookup_dst_mcast_nodes[DPO_PROTO_NUM] =
-{
+const static char* const * const lookup_dst_mcast_nodes[DPO_PROTO_NUM] = {
     [DPO_PROTO_IP4]  = lookup_dst_mcast_ip4_nodes,
     [DPO_PROTO_IP6]  = lookup_dst_mcast_ip6_nodes,
 };
 
-const static char* const lookup_dst_from_interface_ip4_nodes[] =
-{
+const static char* const lookup_dst_from_interface_ip4_nodes[] = {
     "lookup-ip4-dst-itf",
     NULL,
 };
-const static char* const lookup_dst_from_interface_ip6_nodes[] =
-{
+const static char* const lookup_dst_from_interface_ip6_nodes[] = {
     "lookup-ip6-dst-itf",
     NULL,
 };
-const static char* const lookup_dst_from_interface_mpls_nodes[] =
-{
+const static char* const lookup_dst_from_interface_mpls_nodes[] = {
     "lookup-mpls-dst-itf",
     NULL,
 };
-const static char* const * const lookup_dst_from_interface_nodes[DPO_PROTO_NUM] =
-{
+const static char* const * const lookup_dst_from_interface_nodes[DPO_PROTO_NUM] = {
     [DPO_PROTO_IP4]  = lookup_dst_from_interface_ip4_nodes,
     [DPO_PROTO_IP6]  = lookup_dst_from_interface_ip6_nodes,
     [DPO_PROTO_MPLS] = lookup_dst_from_interface_mpls_nodes,

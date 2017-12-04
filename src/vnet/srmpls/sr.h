@@ -45,30 +45,28 @@
 /**
  * @brief SR Segment List (SID list)
  */
-typedef struct
-{
-  /**
-    * SIDs (key)
-    */
-  mpls_label_t *segments;
+typedef struct {
+    /**
+      * SIDs (key)
+      */
+    mpls_label_t *segments;
 
-  /**
-    * SID list weight (wECMP / UCMP)
-    */
-  u32 weight;
+    /**
+      * SID list weight (wECMP / UCMP)
+      */
+    u32 weight;
 
 } mpls_sr_sl_t;
 
-typedef struct
-{
-  u32 *segments_lists;		/**< Pool of SID lists indexes */
+typedef struct {
+    u32 *segments_lists;      /**< Pool of SID lists indexes */
 
-  mpls_label_t bsid;		/**< BindingSID (key) */
+    mpls_label_t bsid;        /**< BindingSID (key) */
 
-  u8 type;					/**< Type (default is 0) */
-  /* SR Policy specific DPO                                       */
-  /* IF Type = DEFAULT Then Load Balancer DPO among SID lists     */
-  /* IF Type = SPRAY then Spray DPO with all SID lists            */
+    u8 type;                  /**< Type (default is 0) */
+    /* SR Policy specific DPO                                       */
+    /* IF Type = DEFAULT Then Load Balancer DPO among SID lists     */
+    /* IF Type = SPRAY then Spray DPO with all SID lists            */
 
 } mpls_sr_policy_t;
 
@@ -77,67 +75,64 @@ typedef struct
  *
  * L3 is IPv4/IPv6 + mask
  */
-typedef struct
-{
-  ip46_address_t prefix;	/**< IP address of the prefix */
-  u32 mask_width;			/**< Mask width of the prefix */
-  u32 fib_table;			/**< VRF of the prefix */
-  u8 traffic_type;			/**< Traffic type (IPv4, IPv6, L2) */
-  u8 padding[3];
+typedef struct {
+    ip46_address_t prefix;    /**< IP address of the prefix */
+    u32 mask_width;           /**< Mask width of the prefix */
+    u32 fib_table;            /**< VRF of the prefix */
+    u8 traffic_type;          /**< Traffic type (IPv4, IPv6, L2) */
+    u8 padding[3];
 } sr_mpls_steering_key_t;
 
-typedef struct
-{
-  sr_mpls_steering_key_t classify;		/**< Traffic classification */
-  u32 sr_policy;						/**< SR Policy index */
+typedef struct {
+    sr_mpls_steering_key_t classify;      /**< Traffic classification */
+    u32 sr_policy;                        /**< SR Policy index */
 } mpls_sr_steering_policy_t;
 
 /**
  * @brief Segment Routing main datastructure
  */
-typedef struct
-{
-  /**
-    * SR SID lists
-    */
-  mpls_sr_sl_t *sid_lists;
+typedef struct {
+    /**
+      * SR SID lists
+      */
+    mpls_sr_sl_t *sid_lists;
 
-  /**
-    * SR MPLS policies
-    */
-  mpls_sr_policy_t *sr_policies;
+    /**
+      * SR MPLS policies
+      */
+    mpls_sr_policy_t *sr_policies;
 
-  /**
-    * Hash table mapping BindingSID to SR MPLS policy
-    */
-  uword *sr_policies_index_hash;
+    /**
+      * Hash table mapping BindingSID to SR MPLS policy
+      */
+    uword *sr_policies_index_hash;
 
-  /**
-    * Pool of SR steer policies instances
-    */
-  mpls_sr_steering_policy_t *steer_policies;
+    /**
+      * Pool of SR steer policies instances
+      */
+    mpls_sr_steering_policy_t *steer_policies;
 
-  /**
-    * MHash table mapping steering rules to SR steer instance
-    */
-  mhash_t sr_steer_policies_hash;
+    /**
+      * MHash table mapping steering rules to SR steer instance
+      */
+    mhash_t sr_steer_policies_hash;
 
-  /**
-    * convenience
-    */
-  vlib_main_t *vlib_main;
-  vnet_main_t *vnet_main;
+    /**
+      * convenience
+      */
+    vlib_main_t *vlib_main;
+    vnet_main_t *vnet_main;
 } mpls_sr_main_t;
 
 extern mpls_sr_main_t sr_mpls_main;
 
 extern int
 sr_mpls_policy_add (mpls_label_t bsid, mpls_label_t * segments,
-		    u8 behavior, u32 weight);
+                    u8 behavior, u32 weight);
 
 extern int
 sr_mpls_policy_mod (mpls_label_t bsid, u32 index, u8 operation,
-		    mpls_label_t * segments, u32 sl_index, u32 weight);
+                    mpls_label_t * segments, u32 sl_index, u32 weight);
 
 extern int sr_mpls_policy_del (mpls_label_t bsid, u32 index);
 

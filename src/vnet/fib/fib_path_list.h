@@ -39,7 +39,7 @@ typedef enum fib_path_list_attribute_t_ {
      */
     FIB_PATH_LIST_ATTRIBUTE_SHARED = FIB_PATH_LIST_ATTRIBUTE_FIRST,
     /**
-     * explicit drop path-list. Used when the entry source needs to 
+     * explicit drop path-list. Used when the entry source needs to
      * force a drop, despite the fact the path info is present.
      */
     FIB_PATH_LIST_ATTRIBUTE_DROP,
@@ -88,27 +88,27 @@ typedef enum fib_path_list_flags_t_ {
     FIB_PATH_LIST_FLAG_NO_URPF   = (1 << FIB_PATH_LIST_ATTRIBUTE_NO_URPF),
 } fib_path_list_flags_t;
 
-#define FIB_PATH_LIST_ATTRIBUTES {       		 \
-    [FIB_PATH_LIST_ATTRIBUTE_SHARED]    = "shared",	 \
-    [FIB_PATH_LIST_ATTRIBUTE_RESOLVED]  = "resolved",	 \
-    [FIB_PATH_LIST_ATTRIBUTE_DROP]      = "drop",	 \
+#define FIB_PATH_LIST_ATTRIBUTES {               \
+    [FIB_PATH_LIST_ATTRIBUTE_SHARED]    = "shared",  \
+    [FIB_PATH_LIST_ATTRIBUTE_RESOLVED]  = "resolved",    \
+    [FIB_PATH_LIST_ATTRIBUTE_DROP]      = "drop",    \
     [FIB_PATH_LIST_ATTRIBUTE_EXCLUSIVE] = "exclusive",   \
     [FIB_PATH_LIST_ATTRIBUTE_LOCAL]     = "local",       \
-    [FIB_PATH_LIST_ATTRIBUTE_LOOPED]    = "looped",	 \
-    [FIB_PATH_LIST_ATTRIBUTE_POPULAR]   = "popular",	 \
-    [FIB_PATH_LIST_ATTRIBUTE_NO_URPF]   = "no-uRPF",	 \
+    [FIB_PATH_LIST_ATTRIBUTE_LOOPED]    = "looped",  \
+    [FIB_PATH_LIST_ATTRIBUTE_POPULAR]   = "popular",     \
+    [FIB_PATH_LIST_ATTRIBUTE_NO_URPF]   = "no-uRPF",     \
 }
 
-#define FOR_EACH_PATH_LIST_ATTRIBUTE(_item)		\
-    for (_item = FIB_PATH_LIST_ATTRIBUTE_FIRST;		\
-	 _item <= FIB_PATH_LIST_ATTRIBUTE_LAST;		\
-	 _item++)
+#define FOR_EACH_PATH_LIST_ATTRIBUTE(_item)     \
+    for (_item = FIB_PATH_LIST_ATTRIBUTE_FIRST;     \
+     _item <= FIB_PATH_LIST_ATTRIBUTE_LAST;     \
+     _item++)
 
 extern fib_node_index_t fib_path_list_create(fib_path_list_flags_t flags,
-					     const fib_route_path_t *paths);
+        const fib_route_path_t *paths);
 extern fib_node_index_t fib_path_list_create_special(dpo_proto_t nh_proto,
-						     fib_path_list_flags_t flags,
-						     const dpo_id_t *dpo);
+        fib_path_list_flags_t flags,
+        const dpo_id_t *dpo);
 
 extern fib_node_index_t fib_path_list_copy_and_path_add(
     fib_node_index_t pl_index,
@@ -128,33 +128,33 @@ extern fib_node_index_t fib_path_list_path_remove (
 extern u32 fib_path_list_get_n_paths(fib_node_index_t pl_index);
 
 extern void fib_path_list_contribute_forwarding(fib_node_index_t path_list_index,
-						fib_forward_chain_type_t type,
-						dpo_id_t *dpo);
+        fib_forward_chain_type_t type,
+        dpo_id_t *dpo);
 extern void fib_path_list_contribute_urpf(fib_node_index_t path_index,
-					  index_t urpf);
+        index_t urpf);
 extern index_t fib_path_list_get_urpf(fib_node_index_t path_list_index);
 extern index_t fib_path_list_get_adj(fib_node_index_t path_list_index,
-				     fib_forward_chain_type_t type);
+                                     fib_forward_chain_type_t type);
 
 extern u32 fib_path_list_child_add(fib_node_index_t pl_index,
-				   fib_node_type_t type,
-				   fib_node_index_t child_index);
+                                   fib_node_type_t type,
+                                   fib_node_index_t child_index);
 extern void fib_path_list_child_remove(fib_node_index_t pl_index,
-				       fib_node_index_t sibling_index);
+                                       fib_node_index_t sibling_index);
 extern void fib_path_list_back_walk(fib_node_index_t pl_index,
-				    fib_node_back_walk_ctx_t *ctx);
+                                    fib_node_back_walk_ctx_t *ctx);
 extern void fib_path_list_lock(fib_node_index_t pl_index);
 extern void fib_path_list_unlock(fib_node_index_t pl_index);
 extern int fib_path_list_recursive_loop_detect(fib_node_index_t path_list_index,
-					       fib_node_index_t **entry_indicies);
+        fib_node_index_t **entry_indicies);
 extern u32 fib_path_list_get_resolving_interface(fib_node_index_t path_list_index);
 extern int fib_path_list_is_looped(fib_node_index_t path_list_index);
 extern int fib_path_list_is_popular(fib_node_index_t path_list_index);
 extern dpo_proto_t fib_path_list_get_proto(fib_node_index_t path_list_index);
 extern u8 * fib_path_list_format(fib_node_index_t pl_index,
-				 u8 * s);
+                                 u8 * s);
 extern index_t fib_path_list_lb_map_add_or_lock(fib_node_index_t pl_index,
-                                                const fib_node_index_t *pis);
+        const fib_node_index_t *pis);
 extern u32 fib_path_list_find_rpath (fib_node_index_t path_list_index,
                                      const fib_route_path_t *rpath);
 
@@ -167,8 +167,8 @@ typedef fib_path_list_walk_rc_t (*fib_path_list_walk_fn_t)(
     void *ctx);
 
 extern void fib_path_list_walk(fib_node_index_t pl_index,
-			       fib_path_list_walk_fn_t func,
-			       void *ctx);
+                               fib_path_list_walk_fn_t func,
+                               void *ctx);
 
 extern void fib_path_list_module_init(void);
 

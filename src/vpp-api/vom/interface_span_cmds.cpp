@@ -17,133 +17,135 @@
 
 DEFINE_VAPI_MSG_IDS_SPAN_API_JSON;
 
-namespace VOM {
-namespace interface_span_cmds {
-
-config_cmd::config_cmd(HW::item<bool>& item,
-                       const handle_t& itf_from,
-                       const handle_t& itf_to,
-                       const interface_span::state_t& state)
-  : rpc_cmd(item)
-  , m_itf_from(itf_from)
-  , m_itf_to(itf_to)
-  , m_state(state)
+namespace VOM
 {
-}
+    namespace interface_span_cmds
+    {
 
-bool
-config_cmd::operator==(const config_cmd& o) const
-{
-  return ((m_itf_from == o.m_itf_from) && (m_itf_to == o.m_itf_to) &&
-          (m_state == o.m_state));
-}
+        config_cmd::config_cmd(HW::item<bool>& item,
+                               const handle_t& itf_from,
+                               const handle_t& itf_to,
+                               const interface_span::state_t& state)
+            : rpc_cmd(item)
+            , m_itf_from(itf_from)
+            , m_itf_to(itf_to)
+            , m_state(state)
+        {
+        }
 
-rc_t
-config_cmd::issue(connection& con)
-{
-  msg_t req(con.ctx(), std::ref(*this));
+        bool
+        config_cmd::operator==(const config_cmd& o) const
+        {
+            return ((m_itf_from == o.m_itf_from) && (m_itf_to == o.m_itf_to) &&
+                    (m_state == o.m_state));
+        }
 
-  auto& payload = req.get_request().get_payload();
-  payload.is_l2 = 0;
-  payload.sw_if_index_from = m_itf_from.value();
-  payload.sw_if_index_to = m_itf_to.value();
-  payload.state = m_state.value();
+        rc_t
+        config_cmd::issue(connection& con)
+        {
+            msg_t req(con.ctx(), std::ref(*this));
 
-  VAPI_CALL(req.execute());
+            auto& payload = req.get_request().get_payload();
+            payload.is_l2 = 0;
+            payload.sw_if_index_from = m_itf_from.value();
+            payload.sw_if_index_to = m_itf_to.value();
+            payload.state = m_state.value();
 
-  m_hw_item.set(wait());
+            VAPI_CALL(req.execute());
 
-  return rc_t::OK;
-}
+            m_hw_item.set(wait());
 
-std::string
-config_cmd::to_string() const
-{
-  std::ostringstream s;
-  s << "itf-span-config: " << m_hw_item.to_string()
-    << " itf-from:" << m_itf_from.to_string()
-    << " itf-to:" << m_itf_to.to_string() << " state:" << m_state.to_string();
+            return rc_t::OK;
+        }
 
-  return (s.str());
-}
+        std::string
+        config_cmd::to_string() const
+        {
+            std::ostringstream s;
+            s << "itf-span-config: " << m_hw_item.to_string()
+              << " itf-from:" << m_itf_from.to_string()
+              << " itf-to:" << m_itf_to.to_string() << " state:" << m_state.to_string();
 
-unconfig_cmd::unconfig_cmd(HW::item<bool>& item,
-                           const handle_t& itf_from,
-                           const handle_t& itf_to)
-  : rpc_cmd(item)
-  , m_itf_from(itf_from)
-  , m_itf_to(itf_to)
-{
-}
+            return (s.str());
+        }
 
-bool
-unconfig_cmd::operator==(const unconfig_cmd& o) const
-{
-  return ((m_itf_from == o.m_itf_from) && (m_itf_to == o.m_itf_to));
-}
+        unconfig_cmd::unconfig_cmd(HW::item<bool>& item,
+                                   const handle_t& itf_from,
+                                   const handle_t& itf_to)
+            : rpc_cmd(item)
+            , m_itf_from(itf_from)
+            , m_itf_to(itf_to)
+        {
+        }
 
-rc_t
-unconfig_cmd::issue(connection& con)
-{
-  msg_t req(con.ctx(), std::ref(*this));
+        bool
+        unconfig_cmd::operator==(const unconfig_cmd& o) const
+        {
+            return ((m_itf_from == o.m_itf_from) && (m_itf_to == o.m_itf_to));
+        }
 
-  auto& payload = req.get_request().get_payload();
-  payload.is_l2 = 0;
-  payload.sw_if_index_from = m_itf_from.value();
-  payload.sw_if_index_to = m_itf_to.value();
-  payload.state = 0;
+        rc_t
+        unconfig_cmd::issue(connection& con)
+        {
+            msg_t req(con.ctx(), std::ref(*this));
 
-  VAPI_CALL(req.execute());
+            auto& payload = req.get_request().get_payload();
+            payload.is_l2 = 0;
+            payload.sw_if_index_from = m_itf_from.value();
+            payload.sw_if_index_to = m_itf_to.value();
+            payload.state = 0;
 
-  wait();
-  m_hw_item.set(rc_t::NOOP);
+            VAPI_CALL(req.execute());
 
-  return rc_t::OK;
-}
+            wait();
+            m_hw_item.set(rc_t::NOOP);
 
-std::string
-unconfig_cmd::to_string() const
-{
-  std::ostringstream s;
-  s << "itf-span-unconfig: " << m_hw_item.to_string()
-    << " itf-from:" << m_itf_from.to_string()
-    << " itf-to:" << m_itf_to.to_string();
+            return rc_t::OK;
+        }
 
-  return (s.str());
-}
+        std::string
+        unconfig_cmd::to_string() const
+        {
+            std::ostringstream s;
+            s << "itf-span-unconfig: " << m_hw_item.to_string()
+              << " itf-from:" << m_itf_from.to_string()
+              << " itf-to:" << m_itf_to.to_string();
 
-dump_cmd::dump_cmd()
-{
-}
+            return (s.str());
+        }
 
-bool
-dump_cmd::operator==(const dump_cmd& other) const
-{
-  return (true);
-}
+        dump_cmd::dump_cmd()
+        {
+        }
 
-rc_t
-dump_cmd::issue(connection& con)
-{
-  m_dump.reset(new msg_t(con.ctx(), std::ref(*this)));
+        bool
+        dump_cmd::operator==(const dump_cmd& other) const
+        {
+            return (true);
+        }
 
-  auto& payload = m_dump->get_request().get_payload();
-  payload.is_l2 = 0;
+        rc_t
+        dump_cmd::issue(connection& con)
+        {
+            m_dump.reset(new msg_t(con.ctx(), std::ref(*this)));
 
-  VAPI_CALL(m_dump->execute());
+            auto& payload = m_dump->get_request().get_payload();
+            payload.is_l2 = 0;
 
-  wait();
+            VAPI_CALL(m_dump->execute());
 
-  return rc_t::OK;
-}
+            wait();
 
-std::string
-dump_cmd::to_string() const
-{
-  return ("interface-span-dump");
-}
+            return rc_t::OK;
+        }
 
-}; // namespace interface_span_cmds
+        std::string
+        dump_cmd::to_string() const
+        {
+            return ("interface-span-dump");
+        }
+
+    }; // namespace interface_span_cmds
 }; // namespace VOM
 
 /*

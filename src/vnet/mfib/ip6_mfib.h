@@ -31,13 +31,13 @@
 #include <vnet/mfib/mfib_table.h>
 
 extern fib_node_index_t ip6_mfib_table_lookup(const ip6_mfib_t *fib,
-                                              const ip6_address_t *src,
-                                              const ip6_address_t *grp,
-                                              u32 len);
+        const ip6_address_t *src,
+        const ip6_address_t *grp,
+        u32 len);
 extern fib_node_index_t ip6_mfib_table_lookup_exact_match(const ip6_mfib_t *fib,
-                                                          const ip6_address_t *grp,
-                                                          const ip6_address_t *src,
-                                                          u32 len);
+        const ip6_address_t *grp,
+        const ip6_address_t *src,
+        u32 len);
 
 extern void ip6_mfib_table_entry_remove(ip6_mfib_t *fib,
                                         const ip6_address_t *grp,
@@ -56,7 +56,7 @@ extern void ip6_mfib_table_destroy(ip6_mfib_t *fib);
  *  Add/remove the interface from the accepting list of the special MFIB entries
  */
 extern void ip6_mfib_interface_enable_disable(u32 sw_if_index,
-                                              int is_enable);
+        int is_enable);
 
 /**
  * @brief Get the FIB at the given index
@@ -80,21 +80,21 @@ ip6_mfib_get (u32 index)
  *
  */
 extern u32 ip6_mfib_table_find_or_create_and_lock(u32 table_id,
-                                                  mfib_source_t src);
+        mfib_source_t src);
 extern u32 ip6_mfib_table_create_and_lock(mfib_source_t src);
 
 
 static inline
 u32 ip6_mfib_index_from_table_id (u32 table_id)
 {
-  ip6_main_t * im = &ip6_main;
-  uword * p;
+    ip6_main_t * im = &ip6_main;
+    uword * p;
 
-  p = hash_get (im->mfib_index_by_table_id, table_id);
-  if (!p)
-    return ~0;
+    p = hash_get (im->mfib_index_by_table_id, table_id);
+    if (!p)
+        return ~0;
 
-  return p[0];
+    return p[0];
 }
 
 extern u32 ip6_mfib_table_get_index_for_sw_if_index(u32 sw_if_index);
@@ -103,8 +103,8 @@ extern u32 ip6_mfib_table_get_index_for_sw_if_index(u32 sw_if_index);
  * @brief Data-plane lookup function
  */
 extern fib_node_index_t ip6_mfib_table_lookup2(const ip6_mfib_t *mfib,
-                                               const ip6_address_t *src,
-                                               const ip6_address_t *grp);
+        const ip6_address_t *src,
+        const ip6_address_t *grp);
 
 /**
  * @brief Walk the IP6 mfib table.

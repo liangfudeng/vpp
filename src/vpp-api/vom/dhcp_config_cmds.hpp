@@ -22,137 +22,139 @@
 #include <vapi/dhcp.api.vapi.hpp>
 #include <vapi/vpe.api.vapi.hpp>
 
-namespace VOM {
-namespace dhcp_config_cmds {
-
-/**
-  * A command class that binds the DHCP config to the interface
-  */
-class bind_cmd : public rpc_cmd<HW::item<bool>, rc_t, vapi::Dhcp_client_config>
+namespace VOM
 {
-public:
-  /**
-   * Constructor
-   */
-  bind_cmd(HW::item<bool>& item,
-           const handle_t& itf,
-           const std::string& hostname,
-           const l2_address_t& client_id);
+    namespace dhcp_config_cmds
+    {
 
-  /**
-   * Issue the command to VPP/HW
-   */
-  rc_t issue(connection& con);
-  /**
-   * convert to string format for debug purposes
-   */
-  std::string to_string() const;
+        /**
+          * A command class that binds the DHCP config to the interface
+          */
+        class bind_cmd : public rpc_cmd<HW::item<bool>, rc_t, vapi::Dhcp_client_config>
+        {
+        public:
+            /**
+             * Constructor
+             */
+            bind_cmd(HW::item<bool>& item,
+                     const handle_t& itf,
+                     const std::string& hostname,
+                     const l2_address_t& client_id);
 
-  /**
-   * Comparison operator - only used for UT
-   */
-  bool operator==(const bind_cmd& i) const;
+            /**
+             * Issue the command to VPP/HW
+             */
+            rc_t issue(connection& con);
+            /**
+             * convert to string format for debug purposes
+             */
+            std::string to_string() const;
 
-private:
-  /**
-   * Reference to the HW::item of the interface to bind
-   */
-  const handle_t& m_itf;
+            /**
+             * Comparison operator - only used for UT
+             */
+            bool operator==(const bind_cmd& i) const;
 
-  /**
-   * The DHCP client's hostname
-   */
-  const std::string m_hostname;
+        private:
+            /**
+             * Reference to the HW::item of the interface to bind
+             */
+            const handle_t& m_itf;
 
-  /**
-   * The DHCP client's ID
-   */
-  const l2_address_t m_client_id;
-};
+            /**
+             * The DHCP client's hostname
+             */
+            const std::string m_hostname;
 
-/**
- * A cmd class that Unbinds Dhcp Config from an interface
- */
-class unbind_cmd
-  : public rpc_cmd<HW::item<bool>, rc_t, vapi::Dhcp_client_config>
-{
-public:
-  /**
-   * Constructor
-   */
-  unbind_cmd(HW::item<bool>& item,
-             const handle_t& itf,
-             const std::string& hostname);
+            /**
+             * The DHCP client's ID
+             */
+            const l2_address_t m_client_id;
+        };
 
-  /**
-   * Issue the command to VPP/HW
-   */
-  rc_t issue(connection& con);
-  /**
-   * convert to string format for debug purposes
-   */
-  std::string to_string() const;
+        /**
+         * A cmd class that Unbinds Dhcp Config from an interface
+         */
+        class unbind_cmd
+            : public rpc_cmd<HW::item<bool>, rc_t, vapi::Dhcp_client_config>
+        {
+        public:
+            /**
+             * Constructor
+             */
+            unbind_cmd(HW::item<bool>& item,
+                       const handle_t& itf,
+                       const std::string& hostname);
 
-  /**
-   * Comparison operator - only used for UT
-   */
-  bool operator==(const unbind_cmd& i) const;
+            /**
+             * Issue the command to VPP/HW
+             */
+            rc_t issue(connection& con);
+            /**
+             * convert to string format for debug purposes
+             */
+            std::string to_string() const;
 
-private:
-  /**
-   * Reference to the HW::item of the interface to unbind
-   */
-  const handle_t& m_itf;
+            /**
+             * Comparison operator - only used for UT
+             */
+            bool operator==(const unbind_cmd& i) const;
 
-  /**
-   * The DHCP client's hostname
-   */
-  const std::string m_hostname;
-};
+        private:
+            /**
+             * Reference to the HW::item of the interface to unbind
+             */
+            const handle_t& m_itf;
 
-/**
- * A functor class represents our desire to recieve interface events
- */
-class events_cmd : public event_cmd<vapi::Control_ping, vapi::Dhcp_compl_event>
-{
-public:
-  /**
-   * Constructor
-   */
-  events_cmd(dhcp_config::event_listener& el);
+            /**
+             * The DHCP client's hostname
+             */
+            const std::string m_hostname;
+        };
 
-  /**
-   * Issue the command to VPP/HW - subscribe to DHCP events
-   */
-  rc_t issue(connection& con);
+        /**
+         * A functor class represents our desire to recieve interface events
+         */
+        class events_cmd : public event_cmd<vapi::Control_ping, vapi::Dhcp_compl_event>
+        {
+        public:
+            /**
+             * Constructor
+             */
+            events_cmd(dhcp_config::event_listener& el);
 
-  /**
-   * Retire the command - unsubscribe
-   */
-  void retire(connection& con);
-  /**
-   * convert to string format for debug purposes
-   */
-  std::string to_string() const;
+            /**
+             * Issue the command to VPP/HW - subscribe to DHCP events
+             */
+            rc_t issue(connection& con);
 
-  /**
-   * Comparison operator - only used for UT
-   */
-  bool operator==(const events_cmd& i) const;
+            /**
+             * Retire the command - unsubscribe
+             */
+            void retire(connection& con);
+            /**
+             * convert to string format for debug purposes
+             */
+            std::string to_string() const;
 
-  /**
-   * called in the VAPI RX thread when data is available.
-   */
-  void notify();
+            /**
+             * Comparison operator - only used for UT
+             */
+            bool operator==(const events_cmd& i) const;
 
-private:
-  void succeeded() {}
-  /**
-   * The listner of this command
-   */
-  dhcp_config::event_listener& m_listener;
-};
-};
+            /**
+             * called in the VAPI RX thread when data is available.
+             */
+            void notify();
+
+        private:
+            void succeeded() {}
+            /**
+             * The listner of this command
+             */
+            dhcp_config::event_listener& m_listener;
+        };
+    };
 };
 
 /*

@@ -15,36 +15,38 @@
 
 #include "vom/hw_cmds.hpp"
 
-namespace VOM {
-namespace hw_cmds {
-
-poll::poll(HW::item<bool>& item)
-  : rpc_cmd(item)
+namespace VOM
 {
-}
+    namespace hw_cmds
+    {
 
-rc_t
-poll::issue(connection& con)
-{
-  msg_t req(con.ctx(), std::ref(*this));
+        poll::poll(HW::item<bool>& item)
+            : rpc_cmd(item)
+        {
+        }
 
-  VAPI_CALL(req.execute());
+        rc_t
+        poll::issue(connection& con)
+        {
+            msg_t req(con.ctx(), std::ref(*this));
 
-  m_hw_item.set(wait());
+            VAPI_CALL(req.execute());
 
-  return (rc_t::OK);
-}
+            m_hw_item.set(wait());
 
-std::string
-poll::to_string() const
-{
-  std::ostringstream s;
+            return (rc_t::OK);
+        }
 
-  s << "poll: " << m_hw_item.to_string();
+        std::string
+        poll::to_string() const
+        {
+            std::ostringstream s;
 
-  return (s.str());
-}
-}
+            s << "poll: " << m_hw_item.to_string();
+
+            return (s.str());
+        }
+    }
 };
 
 /*

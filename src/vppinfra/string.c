@@ -42,46 +42,45 @@
 void
 clib_memswap (void *_a, void *_b, uword bytes)
 {
-  uword pa = pointer_to_uword (_a);
-  uword pb = pointer_to_uword (_b);
+    uword pa = pointer_to_uword (_a);
+    uword pb = pointer_to_uword (_b);
 
-#define _(TYPE)					\
-  if (0 == ((pa | pb) & (sizeof (TYPE) - 1)))	\
-    {						\
-      TYPE * a = uword_to_pointer (pa, TYPE *);	\
-      TYPE * b = uword_to_pointer (pb, TYPE *);	\
-						\
-      while (bytes >= 2*sizeof (TYPE))		\
-	{					\
-	  TYPE a0, a1, b0, b1;			\
-	  bytes -= 2*sizeof (TYPE);		\
-	  a += 2;				\
-	  b += 2;				\
-	  a0 = a[-2]; a1 = a[-1];		\
-	  b0 = b[-2]; b1 = b[-1];		\
-	  a[-2] = b0; a[-1] = b1;		\
-	  b[-2] = a0; b[-1] = a1;		\
-	}					\
-      pa = pointer_to_uword (a);		\
-      pb = pointer_to_uword (b);		\
+#define _(TYPE)                 \
+  if (0 == ((pa | pb) & (sizeof (TYPE) - 1)))   \
+    {                       \
+      TYPE * a = uword_to_pointer (pa, TYPE *); \
+      TYPE * b = uword_to_pointer (pb, TYPE *); \
+                        \
+      while (bytes >= 2*sizeof (TYPE))      \
+    {                   \
+      TYPE a0, a1, b0, b1;          \
+      bytes -= 2*sizeof (TYPE);     \
+      a += 2;               \
+      b += 2;               \
+      a0 = a[-2]; a1 = a[-1];       \
+      b0 = b[-2]; b1 = b[-1];       \
+      a[-2] = b0; a[-1] = b1;       \
+      b[-2] = a0; b[-1] = a1;       \
+    }                   \
+      pa = pointer_to_uword (a);        \
+      pb = pointer_to_uword (b);        \
     }
 
-  if (BITS (uword) == BITS (u64))
-    _(u64);
-  _(u32);
-  _(u16);
-  _(u8);
+    if (BITS (uword) == BITS (u64))
+        _(u64);
+    _(u32);
+    _(u16);
+    _(u8);
 
 #undef _
 
-  ASSERT (bytes < 2);
-  if (bytes)
-    {
-      u8 *a = uword_to_pointer (pa, u8 *);
-      u8 *b = uword_to_pointer (pb, u8 *);
-      u8 a0 = a[0], b0 = b[0];
-      a[0] = b0;
-      b[0] = a0;
+    ASSERT (bytes < 2);
+    if (bytes) {
+        u8 *a = uword_to_pointer (pa, u8 *);
+        u8 *b = uword_to_pointer (pb, u8 *);
+        u8 a0 = a[0], b0 = b[0];
+        a[0] = b0;
+        b[0] = a0;
     }
 }
 

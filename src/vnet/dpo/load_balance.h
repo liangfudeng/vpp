@@ -41,8 +41,7 @@
 /**
  * Load-balance main
  */
-typedef struct load_balance_main_t_
-{
+typedef struct load_balance_main_t_ {
     vlib_combined_counter_main_t lbm_to_counters;
     vlib_combined_counter_main_t lbm_via_counters;
 } load_balance_main_t;
@@ -92,11 +91,11 @@ typedef struct load_balance_t_ {
      */
     u16 lb_n_buckets_minus_1;
 
-   /**
-     * The protocol of packets that traverse this LB.
-     * need in combination with the flow hash config to determine how to hash.
-     * u8.
-     */
+    /**
+      * The protocol of packets that traverse this LB.
+      * need in combination with the flow hash config to determine how to hash.
+      * u8.
+      */
     dpo_proto_t lb_proto;
 
     /**
@@ -135,14 +134,14 @@ typedef struct load_balance_t_ {
     /**
      * The rest of the cache line is used for buckets. In the common case
      * where there there are less than 4 buckets, then the buckets are
-     * on the same cachlie and we save ourselves a pointer dereferance in 
+     * on the same cachlie and we save ourselves a pointer dereferance in
      * the data-path.
      */
     dpo_id_t lb_buckets_inline[LB_NUM_INLINE_BUCKETS];
 } load_balance_t;
 
 STATIC_ASSERT(sizeof(load_balance_t) <= CLIB_CACHE_LINE_BYTES,
-	      "A load_balance object size exceeds one cachline");
+              "A load_balance object size exceeds one cachline");
 
 /**
  * Flags controlling load-balance formatting/display
@@ -161,26 +160,26 @@ typedef enum load_balance_flags_t_ {
 } load_balance_flags_t;
 
 extern index_t load_balance_create(u32 num_buckets,
-				   dpo_proto_t lb_proto,
-				   flow_hash_config_t fhc);
+                                   dpo_proto_t lb_proto,
+                                   flow_hash_config_t fhc);
 extern void load_balance_multipath_update(
     const dpo_id_t *dpo,
     const load_balance_path_t * raw_next_hops,
     load_balance_flags_t flags);
 
 extern void load_balance_set_bucket(index_t lbi,
-				    u32 bucket,
-				    const dpo_id_t *next);
+                                    u32 bucket,
+                                    const dpo_id_t *next);
 extern void load_balance_set_urpf(index_t lbi,
-				  index_t urpf);
+                                  index_t urpf);
 extern void load_balance_set_fib_entry_flags(index_t lbi,
-                                             fib_entry_flag_t flags);
+        fib_entry_flag_t flags);
 extern index_t load_balance_get_urpf(index_t lbi);
 
 extern u8* format_load_balance(u8 * s, va_list * args);
 
 extern const dpo_id_t *load_balance_get_bucket(index_t lbi,
-					       u32 bucket);
+        u32 bucket);
 extern int load_balance_is_drop(const dpo_id_t *dpo);
 
 extern f64 load_balance_get_multipath_tolerance(void);
@@ -195,22 +194,19 @@ load_balance_get (index_t lbi)
     return (pool_elt_at_index(load_balance_pool, lbi));
 }
 
-#define LB_HAS_INLINE_BUCKETS(_lb)		\
+#define LB_HAS_INLINE_BUCKETS(_lb)      \
     ((_lb)->lb_n_buckets <= LB_NUM_INLINE_BUCKETS)
 
 static inline const dpo_id_t *
 load_balance_get_bucket_i (const load_balance_t *lb,
-			   u32 bucket)
+                           u32 bucket)
 {
     ASSERT(bucket < lb->lb_n_buckets);
 
-    if (PREDICT_TRUE(LB_HAS_INLINE_BUCKETS(lb)))
-    {
-	return (&lb->lb_buckets_inline[bucket]);
-    }
-    else
-    {
-	return (&lb->lb_buckets[bucket]);
+    if (PREDICT_TRUE(LB_HAS_INLINE_BUCKETS(lb))) {
+        return (&lb->lb_buckets_inline[bucket]);
+    } else {
+        return (&lb->lb_buckets[bucket]);
     }
 }
 

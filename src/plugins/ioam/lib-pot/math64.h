@@ -1,13 +1,13 @@
-/* 
+/*
  * math64.h provides the 64 bit unsigned integer add, multiply followed by  modulo operation
  * The linux/math64.h provides divide and multiply 64 bit integers but:
  * 1. multiply: mul_u64_u64_shr - only returns 64 bits of the result and has to be called
  *                     twice to get the complete 128 bits of the result.
- * 2. Modulo operation of the result of  addition and multiplication of u64 that may result 
+ * 2. Modulo operation of the result of  addition and multiplication of u64 that may result
  *                        in integers > 64 bits is not supported
  * Hence this header to combine add/multiply followed by modulo of u64 integrers
  * always resulting in u64.
- * 
+ *
  * Copyright (c) 2016 Cisco and/or its affiliates.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,8 @@
 #define include_vnet_math64_h
 #include <stdint.h>
 
-/* 
- * multiplies and returns result in hi and lo 
+/*
+ * multiplies and returns result in hi and lo
  */
 static inline void mul64by64(u64 a, u64 b, u64 * hi, u64 * lo)
 {
@@ -67,8 +67,7 @@ static inline u64 mod128by64(u64 x, u64 y, u64 m, double di)
     mul64by64(q1, m, &p1, &p0);
 
     /* Adjust quotient. is it > actual result: */
-    if (x < p1 || (x == p1 && y < p0))
-    {
+    if (x < p1 || (x == p1 && y < p0)) {
         /* q1 > quotient.  calculate abs remainder */
         x = p1 - (x + (p0 < y));
         y = p0 - y;
@@ -78,19 +77,14 @@ static inline u64 mod128by64(u64 x, u64 y, u64 m, double di)
         mul64by64(q2, m, &p1, &p0);
 
         q = q1 - q2;
-        if (x < p1 || (x == p1 && y <= p0))
-        {
+        if (x < p1 || (x == p1 && y <= p0)) {
             y = p0 - y;
-        }
-        else
-        {
+        } else {
             y = p0 - y;
             y += m;
             q--;
         }
-    }
-    else
-    {
+    } else {
         x = x - (p1 + (y < p0));
         y = y - p0;
 
@@ -98,17 +92,13 @@ static inline u64 mod128by64(u64 x, u64 y, u64 m, double di)
         mul64by64(q2, m, &p1, &p0);
 
         q = q1 + q2;
-        if (x < p1 || (x == p1 && y < p0))
-        {
+        if (x < p1 || (x == p1 && y < p0)) {
             y = y - p0;
             y += m;
             q--;
-        }
-        else
-        {
+        } else {
             y = y - p0;
-            if (y >= m)
-            {
+            if (y >= m) {
                 y -= m;
                 q++;
             }
@@ -118,7 +108,7 @@ static inline u64 mod128by64(u64 x, u64 y, u64 m, double di)
     return y;
 }
 
-/* 
+/*
  * returns a % p
  */
 static inline u64 mod64by64(u64 a, u64 p, u64 primeinv)
@@ -134,7 +124,7 @@ static inline void add64(u64 a, u64 b, u64 * whi, u64 * wlo)
 
 }
 
-/* 
+/*
  * returns (a + b)%p
  */
 static inline u64 add64_mod(u64 a, u64 b, u64 p, double pi)
@@ -145,7 +135,7 @@ static inline u64 add64_mod(u64 a, u64 b, u64 p, double pi)
     return (mod128by64(shi, slo, p, pi));
 }
 
-/* 
+/*
  * returns (ab) % p
  */
 static inline u64 mul64_mod(u64 a, u64 b, u64 p, double pi)

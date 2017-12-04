@@ -42,73 +42,72 @@
    vec_add1() when we need to allocate memory. */
 void *
 vec_resize_allocate_memory (void *v,
-			    word length_increment,
-			    uword data_bytes,
-			    uword header_bytes, uword data_align)
+                            word length_increment,
+                            uword data_bytes,
+                            uword header_bytes, uword data_align)
 {
-  vec_header_t *vh = _vec_find (v);
-  uword old_alloc_bytes, new_alloc_bytes;
-  void *old, *new;
+    vec_header_t *vh = _vec_find (v);
+    uword old_alloc_bytes, new_alloc_bytes;
+    void *old, *new;
 
-  header_bytes = vec_header_bytes (header_bytes);
+    header_bytes = vec_header_bytes (header_bytes);
 
-  data_bytes += header_bytes;
+    data_bytes += header_bytes;
 
-  if (!v)
-    {
-      new = clib_mem_alloc_aligned_at_offset (data_bytes, data_align, header_bytes, 1	/* yes, call os_out_of_memory */
-	);
-      data_bytes = clib_mem_size (new);
-      memset (new, 0, data_bytes);
-      v = new + header_bytes;
-      _vec_len (v) = length_increment;
-      return v;
+    if (!v) {
+        new = clib_mem_alloc_aligned_at_offset (data_bytes, data_align, header_bytes, 1   /* yes, call os_out_of_memory */
+                                               );
+        data_bytes = clib_mem_size (new);
+        memset (new, 0, data_bytes);
+        v = new + header_bytes;
+        _vec_len (v) = length_increment;
+        return v;
     }
 
-  vh->len += length_increment;
-  old = v - header_bytes;
+    vh->len += length_increment;
+    old = v - header_bytes;
 
-  /* Vector header must start heap object. */
-  ASSERT (clib_mem_is_heap_object (old));
+    /* Vector header must start heap object. */
+    ASSERT (clib_mem_is_heap_object (old));
 
-  old_alloc_bytes = clib_mem_size (old);
+    old_alloc_bytes = clib_mem_size (old);
 
-  /* Need to resize? */
-  if (data_bytes <= old_alloc_bytes)
-    return v;
+    /* Need to resize? */
+    if (data_bytes <= old_alloc_bytes)
+        return v;
 
-  new_alloc_bytes = (old_alloc_bytes * 3) / 2;
-  if (new_alloc_bytes < data_bytes)
-    new_alloc_bytes = data_bytes;
+    new_alloc_bytes = (old_alloc_bytes * 3) / 2;
+    if (new_alloc_bytes < data_bytes)
+        new_alloc_bytes = data_bytes;
 
-  new =
-    clib_mem_alloc_aligned_at_offset (new_alloc_bytes, data_align,
-				      header_bytes,
-				      1 /* yes, call os_out_of_memory */ );
+    new =
+        clib_mem_alloc_aligned_at_offset (new_alloc_bytes, data_align,
+                                          header_bytes,
+                                          1 /* yes, call os_out_of_memory */ );
 
-  /* FIXME fail gracefully. */
-  if (!new)
-    clib_panic
-      ("vec_resize fails, length increment %d, data bytes %d, alignment %d",
-       length_increment, data_bytes, data_align);
+    /* FIXME fail gracefully. */
+    if (!new)
+        clib_panic
+        ("vec_resize fails, length increment %d, data bytes %d, alignment %d",
+         length_increment, data_bytes, data_align);
 
-  clib_memcpy (new, old, old_alloc_bytes);
-  clib_mem_free (old);
-  v = new;
+    clib_memcpy (new, old, old_alloc_bytes);
+    clib_mem_free (old);
+    v = new;
 
-  /* Allocator may give a bit of extra room. */
-  new_alloc_bytes = clib_mem_size (v);
+    /* Allocator may give a bit of extra room. */
+    new_alloc_bytes = clib_mem_size (v);
 
-  /* Zero new memory. */
-  memset (v + old_alloc_bytes, 0, new_alloc_bytes - old_alloc_bytes);
+    /* Zero new memory. */
+    memset (v + old_alloc_bytes, 0, new_alloc_bytes - old_alloc_bytes);
 
-  return v + header_bytes;
+    return v + header_bytes;
 }
 
 uword
 clib_mem_is_vec_h (void *v, uword header_bytes)
 {
-  return clib_mem_is_heap_object (vec_header (v, header_bytes));
+    return clib_mem_is_heap_object (vec_header (v, header_bytes));
 }
 
 /** \cond */
@@ -120,44 +119,42 @@ clib_mem_is_vec_h (void *v, uword header_bytes)
 void
 main (int argc, char *argv[])
 {
-  word n = atoi (argv[1]);
-  word i, *x = 0;
+    word n = atoi (argv[1]);
+    word i, *x = 0;
 
-  typedef struct
-  {
-    word x, y, z;
-  } FOO;
+    typedef struct {
+        word x, y, z;
+    } FOO;
 
-  FOO *foos = vec_init (FOO, 10), *f;
+    FOO *foos = vec_init (FOO, 10), *f;
 
-  vec_validate (foos, 100);
-  foos[100].x = 99;
+    vec_validate (foos, 100);
+    foos[100].x = 99;
 
-  _vec_len (foos) = 0;
-  for (i = 0; i < n; i++)
-    {
-      vec_add1 (x, i);
-      vec_add2 (foos, f, 1);
-      f->x = 2 * i;
-      f->y = 3 * i;
-      f->z = 4 * i;
+    _vec_len (foos) = 0;
+    for (i = 0; i < n; i++) {
+        vec_add1 (x, i);
+        vec_add2 (foos, f, 1);
+        f->x = 2 * i;
+        f->y = 3 * i;
+        f->z = 4 * i;
     }
 
-  {
-    word n = 2;
-    word m = 42;
-    vec_delete (foos, n, m);
-  }
+    {
+        word n = 2;
+        word m = 42;
+        vec_delete (foos, n, m);
+    }
 
-  {
-    word n = 2;
-    word m = 42;
-    vec_insert (foos, n, m);
-  }
+    {
+        word n = 2;
+        word m = 42;
+        vec_insert (foos, n, m);
+    }
 
-  vec_free (x);
-  vec_free (foos);
-  exit (0);
+    vec_free (x);
+    vec_free (foos);
+    exit (0);
 }
 #endif
 /** \endcond */

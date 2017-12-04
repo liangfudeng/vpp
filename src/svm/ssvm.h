@@ -44,122 +44,117 @@
 
 #define SSVM_N_OPAQUE 7
 
-typedef struct
-{
-  /* Spin-lock */
-  volatile u32 lock;
-  volatile u32 owner_pid;
-  int recursion_count;
-  u32 tag;			/* for debugging */
+typedef struct {
+    /* Spin-lock */
+    volatile u32 lock;
+    volatile u32 owner_pid;
+    int recursion_count;
+    u32 tag;          /* for debugging */
 
-  /* The allocation arena */
-  void *heap;
+    /* The allocation arena */
+    void *heap;
 
-  /* Segment must be mapped at this address, or no supper */
-  u64 ssvm_va;
-  /* The actual mmap size */
-  u64 ssvm_size;
-  u32 master_pid;
-  u32 slave_pid;
-  u8 *name;
-  void *opaque[SSVM_N_OPAQUE];
+    /* Segment must be mapped at this address, or no supper */
+    u64 ssvm_va;
+    /* The actual mmap size */
+    u64 ssvm_size;
+    u32 master_pid;
+    u32 slave_pid;
+    u8 *name;
+    void *opaque[SSVM_N_OPAQUE];
 
-  /* Set when the master application thinks it's time to make the donuts */
-  volatile u32 ready;
+    /* Set when the master application thinks it's time to make the donuts */
+    volatile u32 ready;
 
-  /* Needed to make unique MAC addresses, etc. */
-  u32 master_index;
+    /* Needed to make unique MAC addresses, etc. */
+    u32 master_index;
 } ssvm_shared_header_t;
 
-typedef struct
-{
-  ssvm_shared_header_t *sh;
-  u64 ssvm_size;
-  u32 my_pid;
-  u32 vlib_hw_if_index;
-  u8 *name;
-  uword requested_va;
-  int i_am_master;
-  u32 per_interface_next_index;
-  u32 *rx_queue;
+typedef struct {
+    ssvm_shared_header_t *sh;
+    u64 ssvm_size;
+    u32 my_pid;
+    u32 vlib_hw_if_index;
+    u8 *name;
+    uword requested_va;
+    int i_am_master;
+    u32 per_interface_next_index;
+    u32 *rx_queue;
 } ssvm_private_t;
 
 always_inline void
 ssvm_lock (ssvm_shared_header_t * h, u32 my_pid, u32 tag)
 {
-  if (h->owner_pid == my_pid)
-    {
-      h->recursion_count++;
-      return;
+    if (h->owner_pid == my_pid) {
+        h->recursion_count++;
+        return;
     }
 
-  while (__sync_lock_test_and_set (&h->lock, 1))
-    ;
+    while (__sync_lock_test_and_set (&h->lock, 1))
+        ;
 
-  h->owner_pid = my_pid;
-  h->recursion_count = 1;
-  h->tag = tag;
+    h->owner_pid = my_pid;
+    h->recursion_count = 1;
+    h->tag = tag;
 }
 
 always_inline void
 ssvm_lock_non_recursive (ssvm_shared_header_t * h, u32 tag)
 {
-  while (__sync_lock_test_and_set (&h->lock, 1))
-    ;
+    while (__sync_lock_test_and_set (&h->lock, 1))
+        ;
 
-  h->tag = tag;
+    h->tag = tag;
 }
 
 always_inline void
 ssvm_unlock (ssvm_shared_header_t * h)
 {
-  if (--h->recursion_count == 0)
-    {
-      h->owner_pid = 0;
-      h->tag = 0;
-      CLIB_MEMORY_BARRIER ();
-      h->lock = 0;
+    if (--h->recursion_count == 0) {
+        h->owner_pid = 0;
+        h->tag = 0;
+        CLIB_MEMORY_BARRIER ();
+        h->lock = 0;
     }
 }
 
 always_inline void
 ssvm_unlock_non_recursive (ssvm_shared_header_t * h)
 {
-  h->tag = 0;
-  CLIB_MEMORY_BARRIER ();
-  h->lock = 0;
+    h->tag = 0;
+    CLIB_MEMORY_BARRIER ();
+    h->lock = 0;
 }
 
 static inline void *
 ssvm_push_heap (ssvm_shared_header_t * sh)
 {
-  u8 *oldheap;
-  oldheap = clib_mem_set_heap (sh->heap);
-  return ((void *) oldheap);
+    u8 *oldheap;
+    oldheap = clib_mem_set_heap (sh->heap);
+    return ((void *) oldheap);
 }
 
 static inline void
 ssvm_pop_heap (void *oldheap)
 {
-  clib_mem_set_heap (oldheap);
+    clib_mem_set_heap (oldheap);
 }
 
 #define foreach_ssvm_api_error                  \
 _(NO_NAME, "No shared segment name", -100)      \
 _(NO_SIZE, "Size not set (master)", -101)       \
 _(CREATE_FAILURE, "Create failed", -102)        \
-_(SET_SIZE, "Set size failed", -103)		\
-_(MMAP, "mmap failed", -104)			\
+_(SET_SIZE, "Set size failed", -103)        \
+_(MMAP, "mmap failed", -104)            \
 _(SLAVE_TIMEOUT, "Slave map timeout", -105)
 
-typedef enum
-{
+typedef enum {
 #define _(n,s,c) SSVM_API_ERROR_##n = c,
-  foreach_ssvm_api_error
+    foreach_ssvm_api_error
 #undef _
 } ssvm_api_error_enum_t;
 
-#define SSVM_API_ERROR_NO_NAME	(-10)
+#define SSVM_API_ERROR_NO_NAME  (-10)
 
 int ssvm_master_init (ssvm_private_t * ssvm, u32 master_index);
 int ssvm_slave_init (ssvm_private_t * ssvm, int timeout_in_seconds);

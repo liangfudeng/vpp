@@ -22,7 +22,7 @@
 #include "fib_attached_export.h"
 
 /**
- * Source initialisation Function 
+ * Source initialisation Function
  */
 static void
 fib_entry_src_interface_init (fib_entry_src_t *src)
@@ -52,9 +52,9 @@ fib_entry_src_interface_remove (fib_entry_src_t *src)
 
 static void
 fib_entry_src_interface_path_swap (fib_entry_src_t *src,
-				   const fib_entry_t *entry,
-				   fib_path_list_flags_t pl_flags,
-				   const fib_route_path_t *paths)
+                                   const fib_entry_t *entry,
+                                   fib_path_list_flags_t pl_flags,
+                                   const fib_route_path_t *paths)
 {
     ip_adjacency_t *adj;
 
@@ -64,14 +64,12 @@ fib_entry_src_interface_path_swap (fib_entry_src_t *src,
      * this is a hack to get the entry's prefix into the glean adjacnecy
      * so that it is available for fast retreival in the switch path.
      */
-    if (!(FIB_ENTRY_FLAG_LOCAL & src->fes_entry_flags))
-    {
+    if (!(FIB_ENTRY_FLAG_LOCAL & src->fes_entry_flags)) {
         adj = adj_get(fib_path_list_get_adj(
-			  src->fes_pl,
-			  fib_entry_get_default_chain_type(entry)));
+                          src->fes_pl,
+                          fib_entry_get_default_chain_type(entry)));
 
-	if (IP_LOOKUP_NEXT_GLEAN == adj->lookup_next_index)
-        {
+        if (IP_LOOKUP_NEXT_GLEAN == adj->lookup_next_index) {
             /*
              * the connected prefix will link to a glean on a non-p2p
              * interface.
@@ -82,32 +80,31 @@ fib_entry_src_interface_path_swap (fib_entry_src_t *src,
 }
 
 /*
- * Source activate. 
+ * Source activate.
  * Called when the source is teh new longer best source on the entry
  */
 static int
 fib_entry_src_interface_activate (fib_entry_src_t *src,
-				  const fib_entry_t *fib_entry)
+                                  const fib_entry_t *fib_entry)
 {
     fib_entry_t *cover;
 
-    if (FIB_ENTRY_FLAG_LOCAL & src->fes_entry_flags)
-    {
-	/*
-	 * Track the covering attached/connected cover. This is so that
-	 * during an attached export of the cover, this local prefix is
-	 * also exported
-	 */
-	src->interface.fesi_cover =
-	    fib_table_get_less_specific(fib_entry->fe_fib_index,
-					&fib_entry->fe_prefix);
+    if (FIB_ENTRY_FLAG_LOCAL & src->fes_entry_flags) {
+        /*
+         * Track the covering attached/connected cover. This is so that
+         * during an attached export of the cover, this local prefix is
+         * also exported
+         */
+        src->interface.fesi_cover =
+            fib_table_get_less_specific(fib_entry->fe_fib_index,
+                                        &fib_entry->fe_prefix);
 
-	ASSERT(FIB_NODE_INDEX_INVALID != src->interface.fesi_cover);
+        ASSERT(FIB_NODE_INDEX_INVALID != src->interface.fesi_cover);
 
-	cover = fib_entry_get(src->interface.fesi_cover);
+        cover = fib_entry_get(src->interface.fesi_cover);
 
-	src->interface.fesi_sibling =
-	    fib_entry_cover_track(cover, fib_entry_get_index(fib_entry));
+        src->interface.fesi_sibling =
+            fib_entry_cover_track(cover, fib_entry_get_index(fib_entry));
     }
 
     return (!0);
@@ -115,43 +112,41 @@ fib_entry_src_interface_activate (fib_entry_src_t *src,
 
 
 /*
- * Source Deactivate. 
+ * Source Deactivate.
  * Called when the source is no longer best source on the entry
  */
 static void
 fib_entry_src_interface_deactivate (fib_entry_src_t *src,
-				    const fib_entry_t *fib_entry)
+                                    const fib_entry_t *fib_entry)
 {
     fib_entry_t *cover;
 
     /*
      * remove the depednecy on the covering entry
      */
-    if (FIB_NODE_INDEX_INVALID != src->interface.fesi_cover)
-    {
-	cover = fib_entry_get(src->interface.fesi_cover);
+    if (FIB_NODE_INDEX_INVALID != src->interface.fesi_cover) {
+        cover = fib_entry_get(src->interface.fesi_cover);
 
-	fib_entry_cover_untrack(cover, src->interface.fesi_sibling);
+        fib_entry_cover_untrack(cover, src->interface.fesi_sibling);
 
-	src->interface.fesi_cover = FIB_NODE_INDEX_INVALID;
+        src->interface.fesi_cover = FIB_NODE_INDEX_INVALID;
     }
 }
 
 static fib_entry_src_cover_res_t
 fib_entry_src_interface_cover_change (fib_entry_src_t *src,
-				      const fib_entry_t *fib_entry)
+                                      const fib_entry_t *fib_entry)
 {
     fib_entry_src_cover_res_t res = {
-	.install = !0,
-	.bw_reason = FIB_NODE_BW_REASON_FLAG_NONE,
+        .install = !0,
+        .bw_reason = FIB_NODE_BW_REASON_FLAG_NONE,
     };
 
-    if (FIB_NODE_INDEX_INVALID == src->interface.fesi_cover)
-    {
-	/*
-	 * not tracking the cover. surprised we got poked?
-	 */
-	return (res);
+    if (FIB_NODE_INDEX_INVALID == src->interface.fesi_cover) {
+        /*
+         * not tracking the cover. surprised we got poked?
+         */
+        return (res);
     }
 
     /*
@@ -160,35 +155,33 @@ fib_entry_src_interface_cover_change (fib_entry_src_t *src,
      * entry is covered by the new prefix. check that
      */
     if (src->rr.fesr_cover != fib_table_get_less_specific(fib_entry->fe_fib_index,
-							  &fib_entry->fe_prefix))
-    {
-	fib_entry_src_interface_deactivate(src, fib_entry);
-	fib_entry_src_interface_activate(src, fib_entry);
+            &fib_entry->fe_prefix)) {
+        fib_entry_src_interface_deactivate(src, fib_entry);
+        fib_entry_src_interface_activate(src, fib_entry);
     }
     return (res);
 }
 
 static void
 fib_entry_src_interface_installed (fib_entry_src_t *src,
-				   const fib_entry_t *fib_entry)
+                                   const fib_entry_t *fib_entry)
 {
     /*
      * The interface source now rules! poke our cover to get exported
      */
     fib_entry_t *cover;
 
-    if (FIB_NODE_INDEX_INVALID != src->interface.fesi_cover)
-    {
-	cover = fib_entry_get(src->interface.fesi_cover);
+    if (FIB_NODE_INDEX_INVALID != src->interface.fesi_cover) {
+        cover = fib_entry_get(src->interface.fesi_cover);
 
-	fib_attached_export_covered_added(cover,
-					  fib_entry_get_index(fib_entry));
+        fib_attached_export_covered_added(cover,
+                                          fib_entry_get_index(fib_entry));
     }
 }
 
 static u8*
 fib_entry_src_interface_format (fib_entry_src_t *src,
-				u8* s)
+                                u8* s)
 {
     return (format(s, "cover:%d", src->interface.fesi_cover));
 }
@@ -212,5 +205,5 @@ const static fib_entry_src_vft_t interface_src_vft = {
 void
 fib_entry_src_interface_register (void)
 {
-    fib_entry_src_register(FIB_SOURCE_INTERFACE, &interface_src_vft);    
+    fib_entry_src_register(FIB_SOURCE_INTERFACE, &interface_src_vft);
 }

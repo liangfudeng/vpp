@@ -24,133 +24,134 @@
 #include "vom/om.hpp"
 #include "vom/singular_db.hpp"
 
-namespace VOM {
-/**
- * A representation of LLDP client configuration on an interface
- */
-class arp_proxy_binding : public object_base
+namespace VOM
 {
-public:
-  /**
-   * Construct a new object matching the desried state
-   */
-  arp_proxy_binding(const interface& itf, const arp_proxy_config& proxy_cfg);
-
-  /**
-   * Copy Constructor
-   */
-  arp_proxy_binding(const arp_proxy_binding& o);
-
-  /**
-   * Destructor
-   */
-  ~arp_proxy_binding();
-
-  /**
-   * Return the 'singular' of the LLDP binding that matches this object
-   */
-  std::shared_ptr<arp_proxy_binding> singular() const;
-
-  /**
-   * convert to string format for debug purposes
-   */
-  std::string to_string() const;
-
-  /**
-   * Dump all LLDP bindings into the stream provided
-   */
-  static void dump(std::ostream& os);
-
-private:
-  /**
-   * Class definition for listeners to OM events
-   */
-  class event_handler : public OM::listener, public inspect::command_handler
-  {
-  public:
-    event_handler();
-    virtual ~event_handler() = default;
-
     /**
-     * Handle a populate event
+     * A representation of LLDP client configuration on an interface
      */
-    void handle_populate(const client_db::key_t& key);
+    class arp_proxy_binding : public object_base
+    {
+    public:
+        /**
+         * Construct a new object matching the desried state
+         */
+        arp_proxy_binding(const interface& itf, const arp_proxy_config& proxy_cfg);
 
-    /**
-     * Handle a replay event
-     */
-    void handle_replay();
+        /**
+         * Copy Constructor
+         */
+        arp_proxy_binding(const arp_proxy_binding& o);
 
-    /**
-     * Show the object in the Singular DB
-     */
-    void show(std::ostream& os);
+        /**
+         * Destructor
+         */
+        ~arp_proxy_binding();
 
-    /**
-     * Get the sortable Id of the listener
-     */
-    dependency_t order() const;
-  };
+        /**
+         * Return the 'singular' of the LLDP binding that matches this object
+         */
+        std::shared_ptr<arp_proxy_binding> singular() const;
 
-  /**
-   * event_handler to register with OM
-   */
-  static event_handler m_evh;
+        /**
+         * convert to string format for debug purposes
+         */
+        std::string to_string() const;
 
-  /**
-   * Enquue commonds to the VPP command Q for the update
-   */
-  void update(const arp_proxy_binding& obj);
+        /**
+         * Dump all LLDP bindings into the stream provided
+         */
+        static void dump(std::ostream& os);
 
-  /**
-   * Find or add LLDP binding to the OM
-   */
-  static std::shared_ptr<arp_proxy_binding> find_or_add(
-    const arp_proxy_binding& temp);
+    private:
+        /**
+         * Class definition for listeners to OM events
+         */
+        class event_handler : public OM::listener, public inspect::command_handler
+        {
+        public:
+            event_handler();
+            virtual ~event_handler() = default;
 
-  /*
-   * It's the OM class that calls singular()
-   */
-  friend class OM;
+            /**
+             * Handle a populate event
+             */
+            void handle_populate(const client_db::key_t& key);
 
-  /**
-   * It's the singular_db class that calls replay()
-   */
-  friend class singular_db<interface::key_t, arp_proxy_binding>;
+            /**
+             * Handle a replay event
+             */
+            void handle_replay();
 
-  /**
-   * Sweep/reap the object if still stale
-   */
-  void sweep(void);
+            /**
+             * Show the object in the Singular DB
+             */
+            void show(std::ostream& os);
 
-  /**
-   * replay the object to create it in hardware
-   */
-  void replay(void);
+            /**
+             * Get the sortable Id of the listener
+             */
+            dependency_t order() const;
+        };
 
-  /**
-   * A reference counting pointer to the interface on which LLDP config
-   * resides. By holding the reference here, we can guarantee that
-   * this object will outlive the interface
-   */
-  const std::shared_ptr<interface> m_itf;
+        /**
+         * event_handler to register with OM
+         */
+        static event_handler m_evh;
 
-  /**
-   * A reference counting pointer to the prxy config.
-   */
-  const std::shared_ptr<arp_proxy_config> m_arp_proxy_cfg;
+        /**
+         * Enquue commonds to the VPP command Q for the update
+         */
+        void update(const arp_proxy_binding& obj);
 
-  /**
-   * HW configuration for the binding. The bool representing the
-   * do/don't bind.
-   */
-  HW::item<bool> m_binding;
+        /**
+         * Find or add LLDP binding to the OM
+         */
+        static std::shared_ptr<arp_proxy_binding> find_or_add(
+            const arp_proxy_binding& temp);
 
-  /**
-   * A map of all ArpProxy bindings keyed against the interface.
-   */
-  static singular_db<interface::key_t, arp_proxy_binding> m_db;
-};
+        /*
+         * It's the OM class that calls singular()
+         */
+        friend class OM;
+
+        /**
+         * It's the singular_db class that calls replay()
+         */
+        friend class singular_db<interface::key_t, arp_proxy_binding>;
+
+        /**
+         * Sweep/reap the object if still stale
+         */
+        void sweep(void);
+
+        /**
+         * replay the object to create it in hardware
+         */
+        void replay(void);
+
+        /**
+         * A reference counting pointer to the interface on which LLDP config
+         * resides. By holding the reference here, we can guarantee that
+         * this object will outlive the interface
+         */
+        const std::shared_ptr<interface> m_itf;
+
+        /**
+         * A reference counting pointer to the prxy config.
+         */
+        const std::shared_ptr<arp_proxy_config> m_arp_proxy_cfg;
+
+        /**
+         * HW configuration for the binding. The bool representing the
+         * do/don't bind.
+         */
+        HW::item<bool> m_binding;
+
+        /**
+         * A map of all ArpProxy bindings keyed against the interface.
+         */
+        static singular_db<interface::key_t, arp_proxy_binding> m_db;
+    };
 };
 
 /*

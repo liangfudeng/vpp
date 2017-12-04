@@ -48,16 +48,15 @@
 #include <vnet/interface.h>
 #include <vnet/api_errno.h>
 
-typedef struct vnet_main_t
-{
-  u32 local_interface_hw_if_index;
-  u32 local_interface_sw_if_index;
+typedef struct vnet_main_t {
+    u32 local_interface_hw_if_index;
+    u32 local_interface_sw_if_index;
 
-  vnet_interface_main_t interface_main;
+    vnet_interface_main_t interface_main;
 
-  /* set up by constructors */
-  vnet_device_class_t *device_class_registrations;
-  vnet_hw_interface_class_t *hw_interface_class_registrations;
+    /* set up by constructors */
+    vnet_device_class_t *device_class_registrations;
+    vnet_hw_interface_class_t *hw_interface_class_registrations;
     _vnet_interface_function_list_elt_t
     * hw_interface_add_del_functions[VNET_ITF_FUNC_N_PRIO];
     _vnet_interface_function_list_elt_t
@@ -67,15 +66,15 @@ typedef struct vnet_main_t
     _vnet_interface_function_list_elt_t
     * sw_interface_admin_up_down_functions[VNET_ITF_FUNC_N_PRIO];
 
-  uword *interface_tag_by_sw_if_index;
+    uword *interface_tag_by_sw_if_index;
 
-  /*
-   * Last "api" error, preserved so we can issue reasonable diagnostics
-   * at or near the top of the food chain
-   */
-  vnet_api_error_t api_errno;
+    /*
+     * Last "api" error, preserved so we can issue reasonable diagnostics
+     * at or near the top of the food chain
+     */
+    vnet_api_error_t api_errno;
 
-  vlib_main_t *vlib_main;
+    vlib_main_t *vlib_main;
 } vnet_main_t;
 
 extern vnet_main_t vnet_main;

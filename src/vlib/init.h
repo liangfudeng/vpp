@@ -50,45 +50,43 @@
 
 typedef clib_error_t *(vlib_init_function_t) (struct vlib_main_t * vm);
 
-typedef struct _vlib_init_function_list_elt
-{
-  struct _vlib_init_function_list_elt *next_init_function;
-  vlib_init_function_t *f;
+typedef struct _vlib_init_function_list_elt {
+    struct _vlib_init_function_list_elt *next_init_function;
+    vlib_init_function_t *f;
 } _vlib_init_function_list_elt_t;
 
 /* Configuration functions: called with configuration input just before
    main polling loop starts. */
 typedef clib_error_t *(vlib_config_function_t) (struct vlib_main_t * vm,
-						unformat_input_t * input);
+        unformat_input_t * input);
 
-typedef struct vlib_config_function_runtime_t
-{
-  /* Function to call.  Set to null once function has already been called. */
-  vlib_config_function_t *function;
+typedef struct vlib_config_function_runtime_t {
+    /* Function to call.  Set to null once function has already been called. */
+    vlib_config_function_t *function;
 
-  /* Input for function. */
-  unformat_input_t input;
+    /* Input for function. */
+    unformat_input_t input;
 
-  /* next config function registration */
-  struct vlib_config_function_runtime_t *next_registration;
+    /* next config function registration */
+    struct vlib_config_function_runtime_t *next_registration;
 
-  /* To be invoked as soon as the clib heap is available */
-  u8 is_early;
+    /* To be invoked as soon as the clib heap is available */
+    u8 is_early;
 
-  /* Name used to distinguish input on command line. */
-  char name[32];
+    /* Name used to distinguish input on command line. */
+    char name[32];
 } vlib_config_function_runtime_t;
 
-#define _VLIB_INIT_FUNCTION_SYMBOL(x, type)	\
+#define _VLIB_INIT_FUNCTION_SYMBOL(x, type) \
   _vlib_##type##_function_##x
 
-#define VLIB_INIT_FUNCTION_SYMBOL(x)		\
+#define VLIB_INIT_FUNCTION_SYMBOL(x)        \
   _VLIB_INIT_FUNCTION_SYMBOL(x, init)
-#define VLIB_MAIN_LOOP_ENTER_FUNCTION_SYMBOL(x)		\
+#define VLIB_MAIN_LOOP_ENTER_FUNCTION_SYMBOL(x)     \
   _VLIB_INIT_FUNCTION_SYMBOL(x, main_loop_enter)
-#define VLIB_MAIN_LOOP_EXIT_FUNCTION_SYMBOL(x)	\
+#define VLIB_MAIN_LOOP_EXIT_FUNCTION_SYMBOL(x)  \
   _VLIB_INIT_FUNCTION_SYMBOL(x, main_loop_exit)
-#define VLIB_CONFIG_FUNCTION_SYMBOL(x)		\
+#define VLIB_CONFIG_FUNCTION_SYMBOL(x)      \
   _VLIB_INIT_FUNCTION_SYMBOL(x, config)
 
 /* Declaration is global (e.g. not static) so that init functions can
@@ -134,7 +132,7 @@ static void __vlib_add_config_function_##x (void)               \
   = {                                                           \
     .name = n,                                                  \
     .function = x,                                              \
-    .is_early = 0,						\
+    .is_early = 0,                      \
   }
 
 #define VLIB_EARLY_CONFIG_FUNCTION(x,n,...)                     \
@@ -155,74 +153,74 @@ static void __vlib_add_config_function_##x (void)               \
   = {                                                           \
     .name = n,                                                  \
     .function = x,                                              \
-    .is_early = 1,						\
+    .is_early = 1,                      \
   }
 
 /* Call given init function: used for init function dependencies. */
-#define vlib_call_init_function(vm, x)					\
-  ({									\
-    extern vlib_init_function_t * VLIB_INIT_FUNCTION_SYMBOL (x);	\
-    vlib_init_function_t * _f = VLIB_INIT_FUNCTION_SYMBOL (x);		\
-    clib_error_t * _error = 0;						\
-    if (! hash_get (vm->init_functions_called, _f))			\
-      {									\
-	hash_set1 (vm->init_functions_called, _f);			\
-	_error = _f (vm);						\
-      }									\
-    _error;								\
+#define vlib_call_init_function(vm, x)                  \
+  ({                                    \
+    extern vlib_init_function_t * VLIB_INIT_FUNCTION_SYMBOL (x);    \
+    vlib_init_function_t * _f = VLIB_INIT_FUNCTION_SYMBOL (x);      \
+    clib_error_t * _error = 0;                      \
+    if (! hash_get (vm->init_functions_called, _f))         \
+      {                                 \
+    hash_set1 (vm->init_functions_called, _f);          \
+    _error = _f (vm);                       \
+      }                                 \
+    _error;                             \
   })
 
 /* Don't call given init function: used to suppress parts of the netstack */
-#define vlib_mark_init_function_complete(vm, x)				\
-  ({									\
-    extern vlib_init_function_t * VLIB_INIT_FUNCTION_SYMBOL (x);	\
-    vlib_init_function_t * _f = VLIB_INIT_FUNCTION_SYMBOL (x);		\
-    hash_set1 (vm->init_functions_called, _f);				\
+#define vlib_mark_init_function_complete(vm, x)             \
+  ({                                    \
+    extern vlib_init_function_t * VLIB_INIT_FUNCTION_SYMBOL (x);    \
+    vlib_init_function_t * _f = VLIB_INIT_FUNCTION_SYMBOL (x);      \
+    hash_set1 (vm->init_functions_called, _f);              \
   })
 
-#define vlib_call_post_graph_init_function(vm, x)			\
-  ({									\
+#define vlib_call_post_graph_init_function(vm, x)           \
+  ({                                    \
     extern vlib_init_function_t * VLIB_POST_GRAPH_INIT_FUNCTION_SYMBOL (x); \
     vlib_init_function_t * _f = VLIB_POST_GRAPH_INIT_FUNCTION_SYMBOL (x); \
-    clib_error_t * _error = 0;						\
-    if (! hash_get (vm->init_functions_called, _f))			\
-      {									\
-	hash_set1 (vm->init_functions_called, _f);			\
-	_error = _f (vm);						\
-      }									\
-    _error;								\
+    clib_error_t * _error = 0;                      \
+    if (! hash_get (vm->init_functions_called, _f))         \
+      {                                 \
+    hash_set1 (vm->init_functions_called, _f);          \
+    _error = _f (vm);                       \
+      }                                 \
+    _error;                             \
   })
 
-#define vlib_call_config_function(vm, x)			\
-  ({								\
-    vlib_config_function_runtime_t * _r;			\
-    clib_error_t * _error = 0;					\
-    extern vlib_config_function_runtime_t			\
-      VLIB_CONFIG_FUNCTION_SYMBOL (x);				\
-								\
-    _r = &VLIB_CONFIG_FUNCTION_SYMBOL (x);			\
-    if (! hash_get (vm->init_functions_called, _r->function))	\
-      {								\
-        hash_set1 (vm->init_functions_called, _r->function);	\
-	_error = _r->function (vm, &_r->input);			\
-      }								\
-    _error;							\
+#define vlib_call_config_function(vm, x)            \
+  ({                                \
+    vlib_config_function_runtime_t * _r;            \
+    clib_error_t * _error = 0;                  \
+    extern vlib_config_function_runtime_t           \
+      VLIB_CONFIG_FUNCTION_SYMBOL (x);              \
+                                \
+    _r = &VLIB_CONFIG_FUNCTION_SYMBOL (x);          \
+    if (! hash_get (vm->init_functions_called, _r->function))   \
+      {                             \
+        hash_set1 (vm->init_functions_called, _r->function);    \
+    _error = _r->function (vm, &_r->input);         \
+      }                             \
+    _error;                         \
   })
 
 /* External functions. */
 clib_error_t *vlib_call_all_init_functions (struct vlib_main_t *vm);
 clib_error_t *vlib_call_all_config_functions (struct vlib_main_t *vm,
-					      unformat_input_t * input,
-					      int is_early);
+        unformat_input_t * input,
+        int is_early);
 clib_error_t *vlib_call_all_main_loop_enter_functions (struct vlib_main_t
-						       *vm);
+        *vm);
 clib_error_t *vlib_call_all_main_loop_exit_functions (struct vlib_main_t *vm);
 clib_error_t *vlib_call_init_exit_functions (struct vlib_main_t *vm,
-					     _vlib_init_function_list_elt_t *
-					     head, int call_once);
+        _vlib_init_function_list_elt_t *
+        head, int call_once);
 
-#define foreach_vlib_module_reference		\
-  _ (node_cli)					\
+#define foreach_vlib_module_reference       \
+  _ (node_cli)                  \
   _ (trace_cli)
 
 /* Dummy function to get node_cli.c linked in. */

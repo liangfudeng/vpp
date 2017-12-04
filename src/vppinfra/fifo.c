@@ -79,53 +79,50 @@
 void *
 _clib_fifo_resize (void *v_old, uword n_new_elts, uword elt_bytes)
 {
-  void *v_new, *end, *head;
-  uword n_old_elts, header_bytes;
-  uword n_copy_bytes, n_zero_bytes;
-  clib_fifo_header_t *f_new, *f_old;
+    void *v_new, *end, *head;
+    uword n_old_elts, header_bytes;
+    uword n_copy_bytes, n_zero_bytes;
+    clib_fifo_header_t *f_new, *f_old;
 
-  n_old_elts = clib_fifo_elts (v_old);
-  n_new_elts += n_old_elts;
-  if (n_new_elts < 32)
-    n_new_elts = 32;
-  else
-    n_new_elts = max_pow2 (n_new_elts);
+    n_old_elts = clib_fifo_elts (v_old);
+    n_new_elts += n_old_elts;
+    if (n_new_elts < 32)
+        n_new_elts = 32;
+    else
+        n_new_elts = max_pow2 (n_new_elts);
 
-  header_bytes = vec_header_bytes (sizeof (clib_fifo_header_t));
+    header_bytes = vec_header_bytes (sizeof (clib_fifo_header_t));
 
-  v_new = clib_mem_alloc_no_fail (n_new_elts * elt_bytes + header_bytes);
-  v_new += header_bytes;
+    v_new = clib_mem_alloc_no_fail (n_new_elts * elt_bytes + header_bytes);
+    v_new += header_bytes;
 
-  f_new = clib_fifo_header (v_new);
-  f_new->head_index = 0;
-  f_new->tail_index = n_old_elts;
-  _vec_len (v_new) = n_new_elts;
+    f_new = clib_fifo_header (v_new);
+    f_new->head_index = 0;
+    f_new->tail_index = n_old_elts;
+    _vec_len (v_new) = n_new_elts;
 
-  /* Copy old -> new. */
-  n_copy_bytes = n_old_elts * elt_bytes;
-  if (n_copy_bytes > 0)
-    {
-      f_old = clib_fifo_header (v_old);
-      end = v_old + _vec_len (v_old) * elt_bytes;
-      head = v_old + f_old->head_index * elt_bytes;
+    /* Copy old -> new. */
+    n_copy_bytes = n_old_elts * elt_bytes;
+    if (n_copy_bytes > 0) {
+        f_old = clib_fifo_header (v_old);
+        end = v_old + _vec_len (v_old) * elt_bytes;
+        head = v_old + f_old->head_index * elt_bytes;
 
-      if (head + n_copy_bytes >= end)
-	{
-	  uword n = end - head;
-	  clib_memcpy (v_new, head, n);
-	  clib_memcpy (v_new + n, v_old, n_copy_bytes - n);
-	}
-      else
-	clib_memcpy (v_new, head, n_copy_bytes);
+        if (head + n_copy_bytes >= end) {
+            uword n = end - head;
+            clib_memcpy (v_new, head, n);
+            clib_memcpy (v_new + n, v_old, n_copy_bytes - n);
+        } else
+            clib_memcpy (v_new, head, n_copy_bytes);
     }
 
-  /* Zero empty space. */
-  n_zero_bytes = (n_new_elts - n_old_elts) * elt_bytes;
-  memset (v_new + n_copy_bytes, 0, n_zero_bytes);
+    /* Zero empty space. */
+    n_zero_bytes = (n_new_elts - n_old_elts) * elt_bytes;
+    memset (v_new + n_copy_bytes, 0, n_zero_bytes);
 
-  clib_fifo_free (v_old);
+    clib_fifo_free (v_old);
 
-  return v_new;
+    return v_new;
 }
 
 /*

@@ -41,122 +41,115 @@
 
 clib_error_t *
 vlib_call_init_exit_functions (vlib_main_t * vm,
-			       _vlib_init_function_list_elt_t * head,
-			       int call_once)
+                               _vlib_init_function_list_elt_t * head,
+                               int call_once)
 {
-  clib_error_t *error = 0;
-  _vlib_init_function_list_elt_t *i;
+    clib_error_t *error = 0;
+    _vlib_init_function_list_elt_t *i;
 
-  i = head;
-  while (i)
-    {
-      if (call_once && !hash_get (vm->init_functions_called, i->f))
-	{
-	  if (call_once)
-	    hash_set1 (vm->init_functions_called, i->f);
-	  error = i->f (vm);
-	  if (error)
-	    return error;
-	}
-      i = i->next_init_function;
+    i = head;
+    while (i) {
+        if (call_once && !hash_get (vm->init_functions_called, i->f)) {
+            if (call_once)
+                hash_set1 (vm->init_functions_called, i->f);
+            error = i->f (vm);
+            if (error)
+                return error;
+        }
+        i = i->next_init_function;
     }
-  return error;
+    return error;
 }
 
 clib_error_t *
 vlib_call_all_init_functions (vlib_main_t * vm)
 {
-  /* Call dummy functions to make sure purely static modules are
-     linked in. */
+    /* Call dummy functions to make sure purely static modules are
+       linked in. */
 #define _(f) vlib_##f##_reference ();
-  foreach_vlib_module_reference;
+    foreach_vlib_module_reference;
 #undef _
 
-  return vlib_call_init_exit_functions
-    (vm, vm->init_function_registrations, 1 /* call_once */ );
+    return vlib_call_init_exit_functions
+           (vm, vm->init_function_registrations, 1 /* call_once */ );
 }
 
 clib_error_t *
 vlib_call_all_main_loop_enter_functions (vlib_main_t * vm)
 {
-  return vlib_call_init_exit_functions
-    (vm, vm->main_loop_enter_function_registrations, 1 /* call_once */ );
+    return vlib_call_init_exit_functions
+           (vm, vm->main_loop_enter_function_registrations, 1 /* call_once */ );
 }
 
 clib_error_t *
 vlib_call_all_main_loop_exit_functions (vlib_main_t * vm)
 {
-  return vlib_call_init_exit_functions
-    (vm, vm->main_loop_exit_function_registrations, 1 /* call_once */ );
+    return vlib_call_init_exit_functions
+           (vm, vm->main_loop_exit_function_registrations, 1 /* call_once */ );
 }
 
 clib_error_t *
 vlib_call_all_config_functions (vlib_main_t * vm,
-				unformat_input_t * input, int is_early)
+                                unformat_input_t * input, int is_early)
 {
-  clib_error_t *error = 0;
-  vlib_config_function_runtime_t *c, **all;
-  uword *hash = 0, *p;
-  uword i;
+    clib_error_t *error = 0;
+    vlib_config_function_runtime_t *c, **all;
+    uword *hash = 0, *p;
+    uword i;
 
-  hash = hash_create_string (0, sizeof (uword));
-  all = 0;
+    hash = hash_create_string (0, sizeof (uword));
+    all = 0;
 
-  c = vm->config_function_registrations;
+    c = vm->config_function_registrations;
 
-  while (c)
-    {
-      hash_set_mem (hash, c->name, vec_len (all));
-      vec_add1 (all, c);
-      unformat_init (&c->input, 0, 0);
-      c = c->next_registration;
+    while (c) {
+        hash_set_mem (hash, c->name, vec_len (all));
+        vec_add1 (all, c);
+        unformat_init (&c->input, 0, 0);
+        c = c->next_registration;
     }
 
-  while (unformat_check_input (input) != UNFORMAT_END_OF_INPUT)
-    {
-      u8 *s, *v;
+    while (unformat_check_input (input) != UNFORMAT_END_OF_INPUT) {
+        u8 *s, *v;
 
-      if (!unformat (input, "%s %v", &s, &v) || !(p = hash_get_mem (hash, s)))
-	{
-	  error = clib_error_create ("unknown input `%s %v'", s, v);
-	  goto done;
-	}
+        if (!unformat (input, "%s %v", &s, &v) || !(p = hash_get_mem (hash, s))) {
+            error = clib_error_create ("unknown input `%s %v'", s, v);
+            goto done;
+        }
 
-      c = all[p[0]];
-      if (vec_len (c->input.buffer) > 0)
-	vec_add1 (c->input.buffer, ' ');
-      vec_add (c->input.buffer, v, vec_len (v));
-      vec_free (v);
-      vec_free (s);
+        c = all[p[0]];
+        if (vec_len (c->input.buffer) > 0)
+            vec_add1 (c->input.buffer, ' ');
+        vec_add (c->input.buffer, v, vec_len (v));
+        vec_free (v);
+        vec_free (s);
     }
 
-  for (i = 0; i < vec_len (all); i++)
-    {
-      c = all[i];
+    for (i = 0; i < vec_len (all); i++) {
+        c = all[i];
 
-      /* Is this an early config? Are we doing early configs? */
-      if (is_early ^ c->is_early)
-	continue;
+        /* Is this an early config? Are we doing early configs? */
+        if (is_early ^ c->is_early)
+            continue;
 
-      /* Already called? */
-      if (hash_get (vm->init_functions_called, c->function))
-	continue;
-      hash_set1 (vm->init_functions_called, c->function);
+        /* Already called? */
+        if (hash_get (vm->init_functions_called, c->function))
+            continue;
+        hash_set1 (vm->init_functions_called, c->function);
 
-      error = c->function (vm, &c->input);
-      if (error)
-	goto done;
+        error = c->function (vm, &c->input);
+        if (error)
+            goto done;
     }
 
 done:
-  for (i = 0; i < vec_len (all); i++)
-    {
-      c = all[i];
-      unformat_free (&c->input);
+    for (i = 0; i < vec_len (all); i++) {
+        c = all[i];
+        unformat_free (&c->input);
     }
-  vec_free (all);
-  hash_free (hash);
-  return error;
+    vec_free (all);
+    hash_free (hash);
+    return error;
 }
 
 /*

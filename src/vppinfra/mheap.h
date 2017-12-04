@@ -39,16 +39,16 @@
 #define included_mheap_h
 
 #include <vppinfra/vec.h>
-#include <vppinfra/error.h>	/* clib_error_t */
-#include <vppinfra/mem.h>	/* clib_mem_usage_t */
-#include <vppinfra/format.h>	/* for unformat_input_t */
+#include <vppinfra/error.h> /* clib_error_t */
+#include <vppinfra/mem.h>   /* clib_mem_usage_t */
+#include <vppinfra/format.h>    /* for unformat_input_t */
 
 /* Allocate size bytes.  New heap and offset are returned.
    offset == ~0 means allocation failed. */
 always_inline void *
 mheap_get (void *v, uword size, uword * offset_return)
 {
-  return mheap_get_aligned (v, size, 0, 0, offset_return);
+    return mheap_get_aligned (v, size, 0, 0, offset_return);
 }
 
 /* Create allocation heap of given size.
@@ -63,8 +63,8 @@ void *mheap_alloc_with_flags (void *memory, uword memory_bytes, uword flags);
 void *_mheap_free (void *v);
 
 void mheap_foreach (void *v,
-		    uword (*func) (void *arg, void *v, void *elt_data,
-				   uword elt_size), void *arg);
+                    uword (*func) (void *arg, void *v, void *elt_data,
+                                   uword elt_size), void *arg);
 
 /* Format mheap data structures as string. */
 u8 *format_mheap (u8 * s, va_list * va);

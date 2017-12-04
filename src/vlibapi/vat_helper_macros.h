@@ -22,7 +22,7 @@
 /* M: construct, but don't yet send a message */
 #define M(T, mp)                                                \
 do {                                                            \
-    socket_client_main_t *scm = &vam->socket_client_main;	\
+    socket_client_main_t *scm = &vam->socket_client_main;   \
     vam->result_ready = 0;                                      \
     if (scm->socket_enable)                                     \
       {                                                         \
@@ -39,7 +39,7 @@ do {                                                            \
 /* MPING: construct a control-ping message, don't send it yet */
 #define MPING(T, mp)                                            \
 do {                                                            \
-    socket_client_main_t *scm = &vam->socket_client_main;	\
+    socket_client_main_t *scm = &vam->socket_client_main;   \
     vam->result_ready = 0;                                      \
     if (scm->socket_enable)                                     \
       {                                                         \
@@ -56,7 +56,7 @@ do {                                                            \
 
 #define M2(T, mp, n)                                            \
 do {                                                            \
-    socket_client_main_t *scm = &vam->socket_client_main;	\
+    socket_client_main_t *scm = &vam->socket_client_main;   \
     vam->result_ready = 0;                                      \
     if (scm->socket_enable)                                     \
       {                                                         \
@@ -102,7 +102,7 @@ do {                                                            \
 #define W(ret)                                                  \
 do {                                                            \
     f64 timeout = vat_time_now (vam) + 1.0;                     \
-    socket_client_main_t *scm = &vam->socket_client_main;	\
+    socket_client_main_t *scm = &vam->socket_client_main;   \
     ret = -99;                                                  \
                                                                 \
     vl_socket_client_read_reply (scm);                          \
@@ -119,14 +119,14 @@ do {                                                            \
 #define W2(ret, body)                                           \
 do {                                                            \
     f64 timeout = vat_time_now (vam) + 1.0;                     \
-    socket_client_main_t *scm = &vam->socket_client_main;	\
+    socket_client_main_t *scm = &vam->socket_client_main;   \
     ret = -99;                                                  \
                                                                 \
     vl_socket_client_read_reply (scm);                          \
     while (vat_time_now (vam) < timeout) {                      \
         if (vam->result_ready == 1) {                           \
-	  (body);                                               \
-	  ret = vam->retval;                                    \
+      (body);                                               \
+      ret = vam->retval;                                    \
           break;                                                \
         }                                                       \
         vat_suspend (vam->vlib_main, 1e-5);                     \

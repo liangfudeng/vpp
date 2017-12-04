@@ -23,12 +23,11 @@
 #include <vnet/fib/fib_node.h>
 #include <vnet/adj/adj.h>
 
-typedef enum
-{
+typedef enum {
 #define mpls_error(n,s) MPLS_ERROR_##n,
 #include <vnet/mpls/error.def>
 #undef mpls_error
-  MPLS_N_ERROR,
+    MPLS_N_ERROR,
 } mpls_error_t;
 
 /**
@@ -36,28 +35,27 @@ typedef enum
  * notifications
  */
 typedef void (*mpls_interface_state_change_callback_t) (u32 sw_if_index,
-							u32 is_enable);
+        u32 is_enable);
 
-typedef struct
-{
-  /* MPLS FIB index for each software interface */
-  u32 *fib_index_by_sw_if_index;
+typedef struct {
+    /* MPLS FIB index for each software interface */
+    u32 *fib_index_by_sw_if_index;
 
-  /**  A pool of all the MPLS FIBs */
-  struct fib_table_t_ *fibs;
+    /**  A pool of all the MPLS FIBs */
+    struct fib_table_t_ *fibs;
 
-  /**  A pool of all the MPLS FIBs */
-  struct mpls_fib_t_ *mpls_fibs;
+    /**  A pool of all the MPLS FIBs */
+    struct mpls_fib_t_ *mpls_fibs;
 
-  /** A hash table to lookup the mpls_fib by table ID */
-  uword *fib_index_by_table_id;
+    /** A hash table to lookup the mpls_fib by table ID */
+    uword *fib_index_by_table_id;
 
-  /* Feature arc indices */
-  u8 input_feature_arc_index;
-  u8 output_feature_arc_index;
+    /* Feature arc indices */
+    u8 input_feature_arc_index;
+    u8 output_feature_arc_index;
 
-  /* IP4 enabled count by software interface */
-  u8 *mpls_enabled_by_sw_if_index;
+    /* IP4 enabled count by software interface */
+    u8 *mpls_enabled_by_sw_if_index;
 } mpls_main_t;
 
 extern mpls_main_t mpls_main;
@@ -83,8 +81,8 @@ unformat_function_t unformat_mpls_header;
 unformat_function_t unformat_pg_mpls_header;
 
 int mpls_sw_interface_enable_disable (mpls_main_t * mm,
-				      u32 sw_if_index,
-				      u8 is_enable, u8 is_api);
+                                      u32 sw_if_index,
+                                      u8 is_enable, u8 is_api);
 
 u8 mpls_sw_interface_is_enabled (u32 sw_if_index);
 

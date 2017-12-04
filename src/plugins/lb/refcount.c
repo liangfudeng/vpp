@@ -17,25 +17,25 @@
 
 void __vlib_refcount_resize(vlib_refcount_per_cpu_t *per_cpu, u32 size)
 {
-  u32 *new_counter = 0, *old_counter;
-  vec_validate(new_counter, size);
-  memcpy(new_counter, per_cpu->counters, per_cpu->length);
-  old_counter = per_cpu->counters;
-  per_cpu->counters = new_counter;
-  CLIB_MEMORY_BARRIER();
-  per_cpu->length = vec_len(new_counter);
-  vec_free(old_counter);
+    u32 *new_counter = 0, *old_counter;
+    vec_validate(new_counter, size);
+    memcpy(new_counter, per_cpu->counters, per_cpu->length);
+    old_counter = per_cpu->counters;
+    per_cpu->counters = new_counter;
+    CLIB_MEMORY_BARRIER();
+    per_cpu->length = vec_len(new_counter);
+    vec_free(old_counter);
 }
 
 u64 vlib_refcount_get(vlib_refcount_t *r, u32 index)
 {
-  u64 count = 0;
-  vlib_thread_main_t *tm = vlib_get_thread_main ();
-  u32 thread_index;
-  for (thread_index = 0; thread_index < tm->n_vlib_mains; thread_index++) {
-    if (r->per_cpu[thread_index].length > index)
-      count += r->per_cpu[thread_index].counters[index];
-  }
-  return count;
+    u64 count = 0;
+    vlib_thread_main_t *tm = vlib_get_thread_main ();
+    u32 thread_index;
+    for (thread_index = 0; thread_index < tm->n_vlib_mains; thread_index++) {
+        if (r->per_cpu[thread_index].length > index)
+            count += r->per_cpu[thread_index].counters[index];
+    }
+    return count;
 }
 

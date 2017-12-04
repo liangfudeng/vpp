@@ -22,17 +22,18 @@
 
 #include <vapi/interface.api.vapi.hpp>
 
-namespace VOM {
-
-class interface_factory
+namespace VOM
 {
-public:
-  /**
-   * Factory method to construct a new interface from the VPP record
-   */
-  static std::shared_ptr<interface> new_interface(
-    const vapi_payload_sw_interface_details& vd);
-};
+
+    class interface_factory
+    {
+    public:
+        /**
+         * Factory method to construct a new interface from the VPP record
+         */
+        static std::shared_ptr<interface> new_interface(
+                const vapi_payload_sw_interface_details& vd);
+    };
 };
 
 /*

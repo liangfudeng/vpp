@@ -1,4 +1,4 @@
-/* 
+/*
  * pot_util.h -- Proof Of Transit Utility Header
  *
  * Copyright (c) 2016 Cisco and/or its affiliates.
@@ -29,7 +29,7 @@
 
 /**
  * Usage:
- * 
+ *
  * On any node that participates in Proof of Transit:
  *
  * Step 1: Initialize this library by calling pot_init()
@@ -48,11 +48,10 @@
  *          pot_update_cumulative
  * Step 4: At the verifier:
  *         pot_validate
- * 
+ *
  */
 
-typedef struct pot_profile_
-{
+typedef struct pot_profile_ {
     u8 id : 1;
     u8 valid : 1;
     u8 in_use : 1;
@@ -86,22 +85,21 @@ typedef struct {
 
 extern pot_main_t pot_main;
 
-/* 
+/*
  * Initialize proof of transit
  */
 int pot_util_init(void);
 void pot_profile_list_init(u8 * name);
 
 
-/* 
+/*
  * Find a pot profile by ID
  */
 pot_profile *pot_profile_find(u8 id);
 
 static inline u16 pot_profile_get_id(pot_profile * profile)
 {
-    if (profile)
-    {
+    if (profile) {
         return (profile->id);
     }
     return (0);
@@ -109,29 +107,29 @@ static inline u16 pot_profile_get_id(pot_profile * profile)
 
 /* setup and clean up profile */
 int pot_profile_create(pot_profile * profile, u64 prime,
-    u64 poly2, u64 lpc, u64 secret_share);
-/* 
+                       u64 poly2, u64 lpc, u64 secret_share);
+/*
  * Setup profile as a validator
  */
 int pot_set_validator(pot_profile * profile, u64 key);
 
-/* 
+/*
  * Setup max bits to be used for random number generation
  */
 #define MAX_BITS 64
 int pot_profile_set_bit_mask(pot_profile * profile, u16 bits);
 
-/* 
+/*
  * Given a random and cumulative compute the new cumulative for a given profile
  */
 u64 pot_update_cumulative(pot_profile * profile, u64 cumulative, u64 random);
 
-/* 
+/*
  * return True if the cumulative matches secret from a profile
  */
 u8 pot_validate(pot_profile * profile, u64 cumulative, u64 random);
 
-/* 
+/*
  * Utility function to get random number per pack
  */
 u64 pot_generate_random(pot_profile * profile);
@@ -155,9 +153,9 @@ static inline int pot_profile_set_active (u8 id)
     profile = pot_profile_find(id);
     if (profile && profile->valid) {
         sm->active_profile_id = id;
-	current_active_prof->in_use = 0;
-	profile->in_use = 1;
-	return(0);
+        current_active_prof->in_use = 0;
+        profile->in_use = 1;
+        return(0);
     }
     return(-1);
 }
@@ -179,16 +177,16 @@ static inline pot_profile * pot_profile_get_active (void)
 
 static inline void pot_profile_reset_usage_stats (pot_profile *pow)
 {
-  if (pow) {
-    pow->total_pkts_using_this_profile = 0;
-  }
+    if (pow) {
+        pow->total_pkts_using_this_profile = 0;
+    }
 }
 
 static inline void pot_profile_incr_usage_stats (pot_profile *pow)
 {
-  if (pow) {
-    pow->total_pkts_using_this_profile++;
-  }
+    if (pow) {
+        pow->total_pkts_using_this_profile++;
+    }
 }
 
 

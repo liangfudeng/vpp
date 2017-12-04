@@ -37,7 +37,7 @@
 
 /* declare message handlers for each api */
 
-#define vl_endianfun		/* define message structures */
+#define vl_endianfun        /* define message structures */
 #include <ioam/export/ioam_export_all_api_h.h>
 #undef vl_endianfun
 
@@ -53,11 +53,10 @@
 #undef vl_api_version
 
 
-typedef struct
-{
-  /* API message ID base */
-  u16 msg_id_base;
-  vat_main_t *vat_main;
+typedef struct {
+    /* API message ID base */
+    u16 msg_id_base;
+    vat_main_t *vat_main;
 } export_test_main_t;
 
 export_test_main_t export_test_main;
@@ -92,30 +91,29 @@ _(IOAM_EXPORT_IP6_ENABLE_DISABLE_REPLY, ioam_export_ip6_enable_disable_reply)
 static int
 api_ioam_export_ip6_enable_disable (vat_main_t * vam)
 {
-  unformat_input_t *i = vam->input;
-  int is_disable = 0;
-  vl_api_ioam_export_ip6_enable_disable_t *mp;
-  int ret;
+    unformat_input_t *i = vam->input;
+    int is_disable = 0;
+    vl_api_ioam_export_ip6_enable_disable_t *mp;
+    int ret;
 
-  /* Parse args required to build the message */
-  while (unformat_check_input (i) != UNFORMAT_END_OF_INPUT)
-    {
-      if (unformat (i, "disable"))
-	is_disable = 1;
-      else
-	break;
+    /* Parse args required to build the message */
+    while (unformat_check_input (i) != UNFORMAT_END_OF_INPUT) {
+        if (unformat (i, "disable"))
+            is_disable = 1;
+        else
+            break;
     }
 
-  /* Construct the API message */
-  M(IOAM_EXPORT_IP6_ENABLE_DISABLE, mp);
-  mp->is_disable = is_disable;
+    /* Construct the API message */
+    M(IOAM_EXPORT_IP6_ENABLE_DISABLE, mp);
+    mp->is_disable = is_disable;
 
-  /* send it... */
-  S(mp);
+    /* send it... */
+    S(mp);
 
-  /* Wait for a reply... */
-  W (ret);
-  return ret;
+    /* Wait for a reply... */
+    W (ret);
+    return ret;
 }
 
 /*
@@ -128,8 +126,8 @@ _(ioam_export_ip6_enable_disable, "<intfc> [disable]")
 static void
 ioam_export_vat_api_hookup (vat_main_t * vam)
 {
-  export_test_main_t *sm = &export_test_main;
-  /* Hook up handlers for replies from the data plane plug-in */
+    export_test_main_t *sm = &export_test_main;
+    /* Hook up handlers for replies from the data plane plug-in */
 #define _(N,n)                                                  \
     vl_msg_api_set_handlers((VL_API_##N + sm->msg_id_base),     \
                            #n,                                  \
@@ -138,35 +136,35 @@ ioam_export_vat_api_hookup (vat_main_t * vam)
                            vl_api_##n##_t_endian,               \
                            vl_api_##n##_t_print,                \
                            sizeof(vl_api_##n##_t), 1);
-  foreach_vpe_api_reply_msg;
+    foreach_vpe_api_reply_msg;
 #undef _
 
-  /* API messages we can send */
+    /* API messages we can send */
 #define _(n,h) hash_set_mem (vam->function_by_name, #n, api_##n);
-  foreach_vpe_api_msg;
+    foreach_vpe_api_msg;
 #undef _
 
-  /* Help strings */
+    /* Help strings */
 #define _(n,h) hash_set_mem (vam->help_by_name, #n, h);
-  foreach_vpe_api_msg;
+    foreach_vpe_api_msg;
 #undef _
 }
 
 clib_error_t *
 vat_plugin_register (vat_main_t * vam)
 {
-  export_test_main_t *sm = &export_test_main;
-  u8 *name;
+    export_test_main_t *sm = &export_test_main;
+    u8 *name;
 
-  sm->vat_main = vam;
+    sm->vat_main = vam;
 
-  name = format (0, "ioam_export_%08x%c", api_version, 0);
-  sm->msg_id_base = vl_client_get_first_plugin_msg_id ((char *) name);
+    name = format (0, "ioam_export_%08x%c", api_version, 0);
+    sm->msg_id_base = vl_client_get_first_plugin_msg_id ((char *) name);
 
-  if (sm->msg_id_base != (u16) ~ 0)
-    ioam_export_vat_api_hookup (vam);
+    if (sm->msg_id_base != (u16) ~ 0)
+        ioam_export_vat_api_hookup (vam);
 
-  vec_free (name);
+    vec_free (name);
 
-  return 0;
+    return 0;
 }

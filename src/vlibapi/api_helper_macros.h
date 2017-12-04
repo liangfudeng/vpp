@@ -111,11 +111,11 @@ do {                                                                    \
 static inline uword
 vnet_sw_if_index_is_api_valid (u32 sw_if_index)
 {
-  return vnet_sw_interface_is_api_valid (vnet_get_main (), sw_if_index);
+    return vnet_sw_interface_is_api_valid (vnet_get_main (), sw_if_index);
 }
 
-#define VALIDATE_SW_IF_INDEX(mp)				\
- do { u32 __sw_if_index = ntohl(mp->sw_if_index);		\
+#define VALIDATE_SW_IF_INDEX(mp)                \
+ do { u32 __sw_if_index = ntohl(mp->sw_if_index);       \
     if (!vnet_sw_if_index_is_api_valid(__sw_if_index)) {        \
         rv = VNET_API_ERROR_INVALID_SW_IF_INDEX;                \
         goto bad_sw_if_index;                                   \
@@ -128,45 +128,45 @@ bad_sw_if_index:                                \
     ;                                           \
 } while (0);
 
-#define VALIDATE_RX_SW_IF_INDEX(mp)				\
- do { u32 __rx_sw_if_index = ntohl(mp->rx_sw_if_index);		\
+#define VALIDATE_RX_SW_IF_INDEX(mp)             \
+ do { u32 __rx_sw_if_index = ntohl(mp->rx_sw_if_index);     \
     if (!vnet_sw_if_index_is_api_valid(__rx_sw_if_index)) {     \
         rv = VNET_API_ERROR_INVALID_SW_IF_INDEX;                \
-        goto bad_rx_sw_if_index;				\
+        goto bad_rx_sw_if_index;                \
     }                                                           \
 } while(0);
 
-#define BAD_RX_SW_IF_INDEX_LABEL		\
+#define BAD_RX_SW_IF_INDEX_LABEL        \
 do {                                            \
-bad_rx_sw_if_index:				\
+bad_rx_sw_if_index:             \
     ;                                           \
 } while (0);
 
-#define VALIDATE_TX_SW_IF_INDEX(mp)				\
- do { u32 __tx_sw_if_index = ntohl(mp->tx_sw_if_index);		\
+#define VALIDATE_TX_SW_IF_INDEX(mp)             \
+ do { u32 __tx_sw_if_index = ntohl(mp->tx_sw_if_index);     \
     if (!vnet_sw_if_index_is_api_valid(__tx_sw_if_index)) {     \
         rv = VNET_API_ERROR_INVALID_SW_IF_INDEX;                \
-        goto bad_tx_sw_if_index;				\
+        goto bad_tx_sw_if_index;                \
     }                                                           \
 } while(0);
 
-#define BAD_TX_SW_IF_INDEX_LABEL		\
+#define BAD_TX_SW_IF_INDEX_LABEL        \
 do {                                            \
-bad_tx_sw_if_index:				\
+bad_tx_sw_if_index:             \
     ;                                           \
 } while (0);
 
-#define VALIDATE_BD_ID(mp)			\
- do { u32 __rx_bd_id = ntohl(mp->bd_id);	\
-    if (__rx_bd_id > L2_BD_ID_MAX) {     	\
-        rv = VNET_API_ERROR_BD_ID_EXCEED_MAX;	\
-        goto bad_bd_id;				\
-    }						\
+#define VALIDATE_BD_ID(mp)          \
+ do { u32 __rx_bd_id = ntohl(mp->bd_id);    \
+    if (__rx_bd_id > L2_BD_ID_MAX) {        \
+        rv = VNET_API_ERROR_BD_ID_EXCEED_MAX;   \
+        goto bad_bd_id;             \
+    }                       \
 } while(0);
 
-#define BAD_BD_ID_LABEL				\
+#define BAD_BD_ID_LABEL             \
 do {                                            \
-bad_bd_id:					\
+bad_bd_id:                  \
     ;                                           \
 } while (0);
 
@@ -220,33 +220,31 @@ _(bfd_events)                                   \
 _(wc_ip6_nd_events)                             \
 _(wc_ip4_arp_events)
 
-typedef struct
-{
-  u32 client_index;		/* in memclnt registration pool */
-  u32 client_pid;
+typedef struct {
+    u32 client_index;     /* in memclnt registration pool */
+    u32 client_pid;
 } vpe_client_registration_t;
 
 struct _vl_api_ip4_arp_event;
 struct _vl_api_ip6_nd_event;
 
-typedef struct
-{
+typedef struct {
 #define _(a) uword *a##_registration_hash;              \
     vpe_client_registration_t * a##_registrations;
-  foreach_registration_hash
+    foreach_registration_hash
 #undef _
     /* notifications happen really early in the game */
-  u8 link_state_process_up;
+    u8 link_state_process_up;
 
-  /* ip4 arp event registration pool */
-  struct _vl_api_ip4_arp_event *arp_events;
+    /* ip4 arp event registration pool */
+    struct _vl_api_ip4_arp_event *arp_events;
 
-  /* ip6 nd event registration pool */
-  struct _vl_api_ip6_nd_event *nd_events;
+    /* ip6 nd event registration pool */
+    struct _vl_api_ip6_nd_event *nd_events;
 
-  /* convenience */
-  vlib_main_t *vlib_main;
-  vnet_main_t *vnet_main;
+    /* convenience */
+    vlib_main_t *vlib_main;
+    vnet_main_t *vnet_main;
 } vpe_api_main_t;
 
 extern vpe_api_main_t vpe_api_main;

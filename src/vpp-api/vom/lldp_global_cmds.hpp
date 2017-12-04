@@ -22,51 +22,53 @@
 
 #include <vapi/lldp.api.vapi.hpp>
 
-namespace VOM {
-namespace lldp_global_cmds {
-
-/**
- * A command class that binds the LLDP global to the interface
- */
-class config_cmd : public rpc_cmd<HW::item<bool>, rc_t, vapi::Lldp_config>
+namespace VOM
 {
-public:
-  /**
-   * Constructor
-   */
-  config_cmd(HW::item<bool>& item,
-             const std::string& system_name,
-             uint32_t tx_hold,
-             uint32_t tx_interval);
+    namespace lldp_global_cmds
+    {
 
-  /**
-   * Issue the command to VPP/HW
-   */
-  rc_t issue(connection& con);
-  /**
-   * convert to string format for debug purposes
-   */
-  std::string to_string() const;
+        /**
+         * A command class that binds the LLDP global to the interface
+         */
+        class config_cmd : public rpc_cmd<HW::item<bool>, rc_t, vapi::Lldp_config>
+        {
+        public:
+            /**
+             * Constructor
+             */
+            config_cmd(HW::item<bool>& item,
+                       const std::string& system_name,
+                       uint32_t tx_hold,
+                       uint32_t tx_interval);
 
-  /**
-   * Comparison operator - only used for UT
-   */
-  bool operator==(const config_cmd& i) const;
+            /**
+             * Issue the command to VPP/HW
+             */
+            rc_t issue(connection& con);
+            /**
+             * convert to string format for debug purposes
+             */
+            std::string to_string() const;
 
-private:
-  /**
-   * The system name
-   */
-  const std::string m_system_name;
+            /**
+             * Comparison operator - only used for UT
+             */
+            bool operator==(const config_cmd& i) const;
 
-  /**
-   * TX timer configs
-   */
-  uint32_t m_tx_hold;
-  uint32_t m_tx_interval;
-};
+        private:
+            /**
+             * The system name
+             */
+            const std::string m_system_name;
 
-}; // namespace lldp_global_cmds
+            /**
+             * TX timer configs
+             */
+            uint32_t m_tx_hold;
+            uint32_t m_tx_interval;
+        };
+
+    }; // namespace lldp_global_cmds
 }; // namespace VOM
 
 /*

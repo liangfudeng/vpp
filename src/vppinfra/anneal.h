@@ -22,57 +22,56 @@
 #include <vppinfra/random.h>
 #include <math.h>
 
-typedef struct
-{
-  /* Initial temperature */
-  f64 initial_temperature;
+typedef struct {
+    /* Initial temperature */
+    f64 initial_temperature;
 
-  /* Temperature fraction at each step, 0.95 is reasonable */
-  f64 temperature_step;
+    /* Temperature fraction at each step, 0.95 is reasonable */
+    f64 temperature_step;
 
-  /* Number of temperatures used */
-  u32 number_of_temperatures;
+    /* Number of temperatures used */
+    u32 number_of_temperatures;
 
-  /* Number of configurations tried at each temperature */
-  u32 number_of_configurations_per_temperature;
+    /* Number of configurations tried at each temperature */
+    u32 number_of_configurations_per_temperature;
 
-  u32 flags;
+    u32 flags;
 #define CLIB_ANNEAL_VERBOSE (1<<0)
-#define CLIB_ANNEAL_MINIMIZE (1<<1)	/* mutually exclusive */
-#define CLIB_ANNEAL_MAXIMIZE (1<<2)	/* mutually exclusive */
+#define CLIB_ANNEAL_MINIMIZE (1<<1) /* mutually exclusive */
+#define CLIB_ANNEAL_MAXIMIZE (1<<2) /* mutually exclusive */
 
-  /* Random number seed, set to ensure repeatable results */
-  u32 random_seed;
+    /* Random number seed, set to ensure repeatable results */
+    u32 random_seed;
 
-  /* Opaque data passed to callbacks */
-  void *opaque;
+    /* Opaque data passed to callbacks */
+    void *opaque;
 
-  /* Final temperature (output) */
-  f64 final_temperature;
+    /* Final temperature (output) */
+    f64 final_temperature;
 
-  /* Final metric (output) */
-  f64 final_metric;
+    /* Final metric (output) */
+    f64 final_metric;
 
-  /* Suggested initial temperature (output) */
-  f64 suggested_initial_temperature;
+    /* Suggested initial temperature (output) */
+    f64 suggested_initial_temperature;
 
 
-  /*--- Callbacks ---*/
+    /*--- Callbacks ---*/
 
-  /* objective function to minimize */
+    /* objective function to minimize */
     f64 (*anneal_metric) (void *opaque);
 
-  /* Generate a new configuration */
-  void (*anneal_new_configuration) (void *opaque);
+    /* Generate a new configuration */
+    void (*anneal_new_configuration) (void *opaque);
 
-  /* Restore the previous configuration */
-  void (*anneal_restore_previous_configuration) (void *opaque);
+    /* Restore the previous configuration */
+    void (*anneal_restore_previous_configuration) (void *opaque);
 
-  /* Save best configuration found e.g at a certain temperature */
-  void (*anneal_save_best_configuration) (void *opaque);
+    /* Save best configuration found e.g at a certain temperature */
+    void (*anneal_save_best_configuration) (void *opaque);
 
-  /* restore best configuration found e.g at a certain temperature */
-  void (*anneal_restore_best_configuration) (void *opaque);
+    /* restore best configuration found e.g at a certain temperature */
+    void (*anneal_restore_best_configuration) (void *opaque);
 
 } clib_anneal_param_t;
 

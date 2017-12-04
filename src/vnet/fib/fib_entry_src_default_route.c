@@ -17,7 +17,7 @@
 #include "fib_entry_src.h"
 
 /**
- * Source initialisation Function 
+ * Source initialisation Function
  */
 static void
 fib_entry_src_default_route_init (fib_entry_src_t *src)
@@ -33,14 +33,14 @@ fib_entry_src_default_route_remove (fib_entry_src_t *src)
 
 static void
 fib_entry_src_default_route_add (fib_entry_src_t *src,
-				 const fib_entry_t *entry,
-				 fib_entry_flag_t flags,
-				 dpo_proto_t proto,
-				 const dpo_id_t *dpo)
+                                 const fib_entry_t *entry,
+                                 fib_entry_flag_t flags,
+                                 dpo_proto_t proto,
+                                 const dpo_id_t *dpo)
 {
     src->fes_pl = fib_path_list_create_special(proto,
-					       FIB_PATH_LIST_FLAG_DROP,
-					       dpo);
+                  FIB_PATH_LIST_FLAG_DROP,
+                  dpo);
 }
 
 const static fib_entry_src_vft_t interface_src_vft = {
@@ -52,7 +52,7 @@ const static fib_entry_src_vft_t interface_src_vft = {
 void
 fib_entry_src_default_route_register (void)
 {
-    fib_entry_src_register(FIB_SOURCE_DEFAULT_ROUTE, &interface_src_vft);    
+    fib_entry_src_register(FIB_SOURCE_DEFAULT_ROUTE, &interface_src_vft);
 }
 
 

@@ -26,19 +26,20 @@
 #define MAP_SKIP_IP6_LOOKUP 1
 
 int map_create_domain (ip4_address_t * ip4_prefix, u8 ip4_prefix_len,
-		       ip6_address_t * ip6_prefix, u8 ip6_prefix_len,
-		       ip6_address_t * ip6_src, u8 ip6_src_len,
-		       u8 ea_bits_len, u8 psid_offset, u8 psid_length,
-		       u32 * map_domain_index, u16 mtu, u8 flags);
+                       ip6_address_t * ip6_prefix, u8 ip6_prefix_len,
+                       ip6_address_t * ip6_src, u8 ip6_src_len,
+                       u8 ea_bits_len, u8 psid_offset, u8 psid_length,
+                       u32 * map_domain_index, u16 mtu, u8 flags);
 int map_delete_domain (u32 map_domain_index);
 int map_add_del_psid (u32 map_domain_index, u16 psid, ip6_address_t * tep,
-		      u8 is_add);
+                      u8 is_add);
 u8 *format_map_trace (u8 * s, va_list * args);
 
 typedef enum __attribute__ ((__packed__))
 {
-  MAP_DOMAIN_PREFIX = 1 << 0, MAP_DOMAIN_TRANSLATION = 1 << 1,	// The domain uses MAP-T
-} map_domain_flags_e;
+    MAP_DOMAIN_PREFIX = 1 << 0, MAP_DOMAIN_TRANSLATION = 1 << 1,  // The domain uses MAP-T
+}
+map_domain_flags_e;
 
 /**
  * IP4 reassembly logic:
@@ -53,16 +54,16 @@ typedef enum __attribute__ ((__packed__))
  * In case no structure can be allocated, the fragment is dropped.
  */
 
-#define MAP_IP4_REASS_LIFETIME_DEFAULT (100)	/* ms */
+#define MAP_IP4_REASS_LIFETIME_DEFAULT (100)    /* ms */
 #define MAP_IP4_REASS_HT_RATIO_DEFAULT (1.0)
-#define MAP_IP4_REASS_POOL_SIZE_DEFAULT 1024	// Number of reassembly structures
+#define MAP_IP4_REASS_POOL_SIZE_DEFAULT 1024    // Number of reassembly structures
 #define MAP_IP4_REASS_BUFFERS_DEFAULT 2048
 
-#define MAP_IP4_REASS_MAX_FRAGMENTS_PER_REASSEMBLY 5	// Number of fragment per reassembly
+#define MAP_IP4_REASS_MAX_FRAGMENTS_PER_REASSEMBLY 5    // Number of fragment per reassembly
 
-#define MAP_IP6_REASS_LIFETIME_DEFAULT (100)	/* ms */
+#define MAP_IP6_REASS_LIFETIME_DEFAULT (100)    /* ms */
 #define MAP_IP6_REASS_HT_RATIO_DEFAULT (1.0)
-#define MAP_IP6_REASS_POOL_SIZE_DEFAULT 1024	// Number of reassembly structures
+#define MAP_IP6_REASS_POOL_SIZE_DEFAULT 1024    // Number of reassembly structures
 #define MAP_IP6_REASS_BUFFERS_DEFAULT 2048
 
 #define MAP_IP6_REASS_MAX_FRAGMENTS_PER_REASSEMBLY 5
@@ -76,33 +77,32 @@ typedef enum __attribute__ ((__packed__))
  * This structure _MUST_ be no larger than a single cache line (64 bytes).
  * If more space is needed make a union of ip6_prefix and *rules, those are mutually exclusive.
  */
-typedef struct
-{
-  ip6_address_t ip6_src;
-  ip6_address_t ip6_prefix;
-  ip6_address_t *rules;
-  u32 suffix_mask;
-  ip4_address_t ip4_prefix;
-  u16 psid_mask;
-  u16 mtu;
-  map_domain_flags_e flags;
-  u8 ip6_prefix_len;
-  u8 ip6_src_len;
-  u8 ea_bits_len;
-  u8 psid_offset;
-  u8 psid_length;
+typedef struct {
+    ip6_address_t ip6_src;
+    ip6_address_t ip6_prefix;
+    ip6_address_t *rules;
+    u32 suffix_mask;
+    ip4_address_t ip4_prefix;
+    u16 psid_mask;
+    u16 mtu;
+    map_domain_flags_e flags;
+    u8 ip6_prefix_len;
+    u8 ip6_src_len;
+    u8 ea_bits_len;
+    u8 psid_offset;
+    u8 psid_length;
 
-  /* helpers */
-  u8 psid_shift;
-  u8 suffix_shift;
-  u8 ea_shift;
+    /* helpers */
+    u8 psid_shift;
+    u8 suffix_shift;
+    u8 ea_shift;
 
-  /* not used by forwarding */
-  u8 ip4_prefix_len;
+    /* not used by forwarding */
+    u8 ip4_prefix_len;
 } map_domain_t;
 
 STATIC_ASSERT ((sizeof (map_domain_t) <= CLIB_CACHE_LINE_BYTES),
-	       "MAP domain fits in one cacheline");
+               "MAP domain fits in one cacheline");
 
 #define MAP_REASS_INDEX_NONE ((u16)0xffff)
 
@@ -122,33 +122,31 @@ typedef union {
 } map_ip4_reass_key_t;
 /* *INDENT-ON* */
 
-typedef struct
-{
-  map_ip4_reass_key_t key;
-  f64 ts;
+typedef struct {
+    map_ip4_reass_key_t key;
+    f64 ts;
 #ifdef MAP_IP4_REASS_COUNT_BYTES
-  u16 expected_total;
-  u16 forwarded;
+    u16 expected_total;
+    u16 forwarded;
 #endif
-  i32 port;
-  u16 bucket;
-  u16 bucket_next;
-  u16 fifo_prev;
-  u16 fifo_next;
-  u32 fragments[MAP_IP4_REASS_MAX_FRAGMENTS_PER_REASSEMBLY];
+    i32 port;
+    u16 bucket;
+    u16 bucket_next;
+    u16 fifo_prev;
+    u16 fifo_next;
+    u32 fragments[MAP_IP4_REASS_MAX_FRAGMENTS_PER_REASSEMBLY];
 } map_ip4_reass_t;
 
 /*
  * MAP domain counters
  */
-typedef enum
-{
-  /* Simple counters */
-  MAP_DOMAIN_IPV4_FRAGMENT = 0,
-  /* Combined counters */
-  MAP_DOMAIN_COUNTER_RX = 0,
-  MAP_DOMAIN_COUNTER_TX,
-  MAP_N_DOMAIN_COUNTER
+typedef enum {
+    /* Simple counters */
+    MAP_DOMAIN_IPV4_FRAGMENT = 0,
+    /* Combined counters */
+    MAP_DOMAIN_COUNTER_RX = 0,
+    MAP_DOMAIN_COUNTER_TX,
+    MAP_N_DOMAIN_COUNTER
 } map_domain_counter_t;
 
 /*

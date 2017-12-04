@@ -30,21 +30,17 @@ format_fib_urpf_list (u8 *s, va_list *args)
 
     ui = va_arg(*args, index_t);
 
-    if (INDEX_INVALID != ui)
-    {
+    if (INDEX_INVALID != ui) {
         urpf = fib_urpf_list_get(ui);
 
         s = format(s, "uPRF-list:%d len:%d itfs:[",
                    ui, vec_len(urpf->furpf_itfs));
 
-        vec_foreach(swi, urpf->furpf_itfs)
-        {
+        vec_foreach(swi, urpf->furpf_itfs) {
             s = format(s, "%d, ", *swi);
         }
         s = format(s, "]");
-    }
-    else
-    {
+    } else {
         s = format(s, "uRPF-list: None");
     }
 
@@ -70,16 +66,15 @@ fib_urpf_list_unlock (index_t ui)
     fib_urpf_list_t *urpf;
 
     if (INDEX_INVALID == ui)
-	return;
+        return;
 
     urpf = fib_urpf_list_get(ui);
 
     urpf->furpf_locks--;
 
-    if (0 == urpf->furpf_locks)
-    {
-	vec_free(urpf->furpf_itfs);
-	pool_put(fib_urpf_list_pool, urpf);
+    if (0 == urpf->furpf_locks) {
+        vec_free(urpf->furpf_itfs);
+        pool_put(fib_urpf_list_pool, urpf);
     }
 }
 
@@ -98,7 +93,7 @@ fib_urpf_list_lock (index_t ui)
  */
 void
 fib_urpf_list_append (index_t ui,
-		      u32 sw_if_index)
+                      u32 sw_if_index)
 {
     fib_urpf_list_t *urpf;
 
@@ -112,7 +107,7 @@ fib_urpf_list_append (index_t ui,
  */
 void
 fib_urpf_list_combine (index_t ui1,
-		       index_t ui2)
+                       index_t ui2)
 {
     fib_urpf_list_t *urpf1, *urpf2;
 
@@ -130,7 +125,7 @@ fib_urpf_list_combine (index_t ui1,
  */
 static int
 fib_urpf_itf_cmp_for_sort (void * v1,
-			   void * v2)
+                           void * v2)
 {
     fib_node_index_t *i1 = v1, *i2 = v2;
 
@@ -150,49 +145,42 @@ fib_urpf_list_bake (index_t ui)
 
     ASSERT(!(urpf->furpf_flags & FIB_URPF_LIST_BAKED));
 
-    if (vec_len(urpf->furpf_itfs) > 1)
-    {
-	u32 i,j;
+    if (vec_len(urpf->furpf_itfs) > 1) {
+        u32 i,j;
 
-	/*
-	 * cat list | sort | uniq > rpf_list
-	 */
-	vec_sort_with_function(urpf->furpf_itfs, fib_urpf_itf_cmp_for_sort);
+        /*
+         * cat list | sort | uniq > rpf_list
+         */
+        vec_sort_with_function(urpf->furpf_itfs, fib_urpf_itf_cmp_for_sort);
 
-	i = 0, j = 1;
-	while (j < vec_len(urpf->furpf_itfs))
-	{
-	    if (urpf->furpf_itfs[i] == urpf->furpf_itfs[j])
-	    {
-		/*
-		 * the itfacenct entries are the same.
-		 * search forward for a unique one
-		 */
-		while (urpf->furpf_itfs[i] == urpf->furpf_itfs[j] &&
-		       j < vec_len(urpf->furpf_itfs))
-		{
-		    j++;
-		}
-		if (j == vec_len(urpf->furpf_itfs))
-		{
-		    /*
-		     * ran off the end without finding a unique index.
-		     * we are done.
-		     */
-		    break;
-		}
-		else
-		{
-		    urpf->furpf_itfs[i+1] = urpf->furpf_itfs[j];
-		}
-	    }
-	    i++, j++;
-	}
+        i = 0, j = 1;
+        while (j < vec_len(urpf->furpf_itfs)) {
+            if (urpf->furpf_itfs[i] == urpf->furpf_itfs[j]) {
+                /*
+                 * the itfacenct entries are the same.
+                 * search forward for a unique one
+                 */
+                while (urpf->furpf_itfs[i] == urpf->furpf_itfs[j] &&
+                       j < vec_len(urpf->furpf_itfs)) {
+                    j++;
+                }
+                if (j == vec_len(urpf->furpf_itfs)) {
+                    /*
+                     * ran off the end without finding a unique index.
+                     * we are done.
+                     */
+                    break;
+                } else {
+                    urpf->furpf_itfs[i+1] = urpf->furpf_itfs[j];
+                }
+            }
+            i++, j++;
+        }
 
-	/*
-	 * set the length of the vector to the number of unique itfs
-	 */
-	_vec_len(urpf->furpf_itfs) = i+1;
+        /*
+         * set the length of the vector to the number of unique itfs
+         */
+        _vec_len(urpf->furpf_itfs) = i+1;
     }
 
     urpf->furpf_flags |= FIB_URPF_LIST_BAKED;
@@ -202,46 +190,40 @@ void
 fib_urpf_list_show_mem (void)
 {
     fib_show_memory_usage("uRPF-list",
-			  pool_elts(fib_urpf_list_pool),
-			  pool_len(fib_urpf_list_pool),
-			  sizeof(fib_urpf_list_t));
+                          pool_elts(fib_urpf_list_pool),
+                          pool_len(fib_urpf_list_pool),
+                          sizeof(fib_urpf_list_t));
 }
 
 static clib_error_t *
 show_fib_urpf_list_command (vlib_main_t * vm,
-			    unformat_input_t * input,
-			    vlib_cli_command_t * cmd)
+                            unformat_input_t * input,
+                            vlib_cli_command_t * cmd)
 {
     index_t ui;
 
-    if (unformat (input, "%d", &ui))
-    {
-	/*
-	 * show one in detail
-	 */
-	if (!pool_is_free_index(fib_urpf_list_pool, ui))
-	{
-	    vlib_cli_output (vm, "%d@%U",
-			     ui,
-			     format_fib_urpf_list, ui);
-	}
-	else
-	{
-	    vlib_cli_output (vm, "uRPF %d invalid", ui);
-	}
-    }
-    else
-    {
-	/*
-	 * show all
-	 */
-	vlib_cli_output (vm, "FIB uRPF Entries:");
-	pool_foreach_index(ui, fib_urpf_list_pool,
+    if (unformat (input, "%d", &ui)) {
+        /*
+         * show one in detail
+         */
+        if (!pool_is_free_index(fib_urpf_list_pool, ui)) {
+            vlib_cli_output (vm, "%d@%U",
+                             ui,
+                             format_fib_urpf_list, ui);
+        } else {
+            vlib_cli_output (vm, "uRPF %d invalid", ui);
+        }
+    } else {
+        /*
+         * show all
+         */
+        vlib_cli_output (vm, "FIB uRPF Entries:");
+        pool_foreach_index(ui, fib_urpf_list_pool,
         ({
-	    vlib_cli_output (vm, "%d@%U",
-			     ui,
-			     format_fib_urpf_list, ui);
-	}));
+            vlib_cli_output (vm, "%d@%U",
+                             ui,
+                             format_fib_urpf_list, ui);
+        }));
     }
 
     return (NULL);

@@ -92,10 +92,10 @@ extern u8 *format_mfib_entry(u8 * s, va_list * args);
 
 
 extern fib_node_index_t mfib_entry_create(u32 fib_index,
-                                          mfib_source_t source,
-                                          const mfib_prefix_t *prefix,
-                                          fib_rpf_id_t rpf_id,
-                                          mfib_entry_flags_t entry_flags);
+        mfib_source_t source,
+        const mfib_prefix_t *prefix,
+        fib_rpf_id_t rpf_id,
+        mfib_entry_flags_t entry_flags);
 
 extern int mfib_entry_update(fib_node_index_t fib_entry_index,
                              mfib_source_t source,
@@ -166,8 +166,7 @@ mfib_entry_itf_find (mfib_itf_t *itfs,
 
     p = hash_get(itfs, sw_if_index);
 
-    if (NULL != p)
-    {
+    if (NULL != p) {
         return (mfib_itf_get(p[0]));
     }
 

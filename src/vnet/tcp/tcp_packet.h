@@ -29,49 +29,43 @@
   _ (ECE) /**< ECN-echo. Receiver got CE packet */      \
   _ (CWR) /**< Sender reduced congestion window */
 
-enum
-{
+enum {
 #define _(f) TCP_FLAG_BIT_##f,
-  foreach_tcp_flag
+    foreach_tcp_flag
 #undef _
     TCP_N_FLAG_BITS,
 };
 
-enum
-{
+enum {
 #define _(f) TCP_FLAG_##f = 1 << TCP_FLAG_BIT_##f,
-  foreach_tcp_flag
+    foreach_tcp_flag
 #undef _
 };
 
-typedef struct _tcp_header
-{
-  union
-  {
-    struct
-    {
-      u16 src_port; /**< Source port. */
-      u16 dst_port; /**< Destination port. */
+typedef struct _tcp_header {
+    union {
+        struct {
+            u16 src_port; /**< Source port. */
+            u16 dst_port; /**< Destination port. */
+        };
+        struct {
+            u16 src, dst;
+        };
     };
-    struct
-    {
-      u16 src, dst;
-    };
-  };
 
-  u32 seq_number;	/**< Sequence number of the first data octet in this
+    u32 seq_number;   /**< Sequence number of the first data octet in this
                          *   segment, except when SYN is present. If SYN
                          *   is present the seq number is is the ISN and the
                          *   first data octet is ISN+1 */
-  u32 ack_number;	/**< Acknowledgement number if ACK is set. It contains
+    u32 ack_number;   /**< Acknowledgement number if ACK is set. It contains
                          *   the value of the next sequence number the sender
                          *   of the segment is expecting to receive. */
-  u8 data_offset_and_reserved;
-  u8 flags;		/**< Flags: see the macro above */
-  u16 window;		/**< Number of bytes sender is willing to receive. */
+    u8 data_offset_and_reserved;
+    u8 flags;     /**< Flags: see the macro above */
+    u16 window;       /**< Number of bytes sender is willing to receive. */
 
-  u16 checksum;		/**< Checksum of TCP pseudo header and data. */
-  u16 urgent_pointer;	/**< Seq number of the byte after the urgent data. */
+    u16 checksum;     /**< Checksum of TCP pseudo header and data. */
+    u16 urgent_pointer;   /**< Seq number of the byte after the urgent data. */
 } __attribute__ ((packed)) tcp_header_t;
 
 /* Flag tests that return 0 or !0 */
@@ -92,24 +86,23 @@ typedef struct _tcp_header
 always_inline int
 tcp_header_bytes (tcp_header_t * t)
 {
-  return tcp_doff (t) * sizeof (u32);
+    return tcp_doff (t) * sizeof (u32);
 }
 
 /*
  * TCP options.
  */
 
-typedef enum tcp_option_type
-{
-  TCP_OPTION_EOL = 0,			/**< End of options. */
-  TCP_OPTION_NOOP = 1,			/**< No operation. */
-  TCP_OPTION_MSS = 2,			/**< Limit MSS. */
-  TCP_OPTION_WINDOW_SCALE = 3,		/**< Window scale. */
-  TCP_OPTION_SACK_PERMITTED = 4,	/**< Selective Ack permitted. */
-  TCP_OPTION_SACK_BLOCK = 5,		/**< Selective Ack block. */
-  TCP_OPTION_TIMESTAMP = 8,		/**< Timestamps. */
-  TCP_OPTION_UTO = 28,			/**< User timeout. */
-  TCP_OPTION_AO = 29,			/**< Authentication Option. */
+typedef enum tcp_option_type {
+    TCP_OPTION_EOL = 0,           /**< End of options. */
+    TCP_OPTION_NOOP = 1,          /**< No operation. */
+    TCP_OPTION_MSS = 2,           /**< Limit MSS. */
+    TCP_OPTION_WINDOW_SCALE = 3,      /**< Window scale. */
+    TCP_OPTION_SACK_PERMITTED = 4,    /**< Selective Ack permitted. */
+    TCP_OPTION_SACK_BLOCK = 5,        /**< Selective Ack block. */
+    TCP_OPTION_TIMESTAMP = 8,     /**< Timestamps. */
+    TCP_OPTION_UTO = 28,          /**< User timeout. */
+    TCP_OPTION_AO = 29,           /**< Authentication Option. */
 } tcp_option_type_t;
 
 #define foreach_tcp_options_flag                                        \
@@ -117,39 +110,35 @@ typedef enum tcp_option_type
   _ (TSTAMP)            /**< Timestamp capability advertised in SYN */  \
   _ (WSCALE)            /**< Wnd scale capability advertised in SYN */  \
   _ (SACK_PERMITTED)    /**< SACK capability advertised in SYN */       \
-  _ (SACK)		/**< SACK present */
+  _ (SACK)      /**< SACK present */
 
-enum
-{
+enum {
 #define _(f) TCP_OPTS_FLAG_BIT_##f,
-  foreach_tcp_options_flag
+    foreach_tcp_options_flag
 #undef _
     TCP_OPTIONS_N_FLAG_BITS,
 };
 
-enum
-{
+enum {
 #define _(f) TCP_OPTS_FLAG_##f = 1 << TCP_OPTS_FLAG_BIT_##f,
-  foreach_tcp_options_flag
+    foreach_tcp_options_flag
 #undef _
 };
 
-typedef struct _sack_block
-{
-  u32 start;		/**< Start sequence number */
-  u32 end;		/**< End sequence number (first outside) */
+typedef struct _sack_block {
+    u32 start;        /**< Start sequence number */
+    u32 end;      /**< End sequence number (first outside) */
 } sack_block_t;
 
-typedef struct
-{
-  u8 flags;		/** Option flags, see above */
+typedef struct {
+    u8 flags;     /** Option flags, see above */
 
-  u16 mss;		/**< Maximum segment size advertised */
-  u8 wscale;		/**< Window scale advertised */
-  u32 tsval;		/**< Timestamp value */
-  u32 tsecr;		/**< Echoed/reflected time stamp */
-  sack_block_t *sacks;	/**< SACK blocks */
-  u8 n_sack_blocks;	/**< Number of SACKs blocks */
+    u16 mss;      /**< Maximum segment size advertised */
+    u8 wscale;        /**< Window scale advertised */
+    u32 tsval;        /**< Timestamp value */
+    u32 tsecr;        /**< Echoed/reflected time stamp */
+    sack_block_t *sacks;  /**< SACK blocks */
+    u8 n_sack_blocks; /**< Number of SACKs blocks */
 } tcp_options_t;
 
 /* Flag tests that return 0 or !0 */
@@ -168,9 +157,9 @@ typedef struct
 #define TCP_OPTION_LEN_TIMESTAMP        10
 #define TCP_OPTION_LEN_SACK_BLOCK        8
 
-#define TCP_HDR_LEN_MAX			60
+#define TCP_HDR_LEN_MAX         60
 #define TCP_WND_MAX                     65535U
-#define TCP_MAX_WND_SCALE               14	/* See RFC 1323 */
+#define TCP_MAX_WND_SCALE               14  /* See RFC 1323 */
 #define TCP_OPTS_ALIGN                  4
 #define TCP_OPTS_MAX_SACK_BLOCKS        3
 #endif /* included_tcp_packet_h */

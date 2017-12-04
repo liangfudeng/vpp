@@ -23,11 +23,10 @@
 
 /* define message IDs */
 #define vl_msg_id(n,h) n,
-typedef enum
-{
+typedef enum {
 #include <stn/stn.api.h>
-  /* We'll want to know how many messages IDs we need... */
-  VL_MSG_FIRST_AVAILABLE,
+    /* We'll want to know how many messages IDs we need... */
+    VL_MSG_FIRST_AVAILABLE,
 } vl_msg_id_t;
 #undef vl_msg_id
 
@@ -69,81 +68,76 @@ typedef enum
  * @returns u8 * output string
  */
 static void *vl_api_stn_add_del_rule_t_print
-  (vl_api_stn_add_del_rule_t * mp, void *handle)
+(vl_api_stn_add_del_rule_t * mp, void *handle)
 {
-  u8 *s;
+    u8 *s;
 
-  s = format (0, "SCRIPT: stn_add_del_rule ");
-  if (mp->is_ip4)
-    s = format (s, "address %U ", format_ip4_address, mp->ip_address);
-  else
-    s = format (s, "address %U ", format_ip6_address, mp->ip_address);
-  s = format (s, "sw_if_index %d is_add %d", mp->sw_if_index, mp->is_add);
+    s = format (0, "SCRIPT: stn_add_del_rule ");
+    if (mp->is_ip4)
+        s = format (s, "address %U ", format_ip4_address, mp->ip_address);
+    else
+        s = format (s, "address %U ", format_ip6_address, mp->ip_address);
+    s = format (s, "sw_if_index %d is_add %d", mp->sw_if_index, mp->is_add);
 
-  FINISH;
+    FINISH;
 }
 
 static void
 vl_api_stn_add_del_rule_t_handler (vl_api_stn_add_del_rule_t * mp)
 {
-  stn_rule_add_del_args_t args;
-  vl_api_stn_add_del_rule_reply_t *rmp;
-  int rv = 0;
+    stn_rule_add_del_args_t args;
+    vl_api_stn_add_del_rule_reply_t *rmp;
+    int rv = 0;
 
-  if (mp->is_ip4)
-    {
-      ip4_address_t a;
-      memcpy(&a, mp->ip_address, sizeof(a));
-      ip46_address_set_ip4(&args.address, &a);
-    }
-  else
-    memcpy(&args.address.ip6, mp->ip_address, sizeof(ip6_address_t));
+    if (mp->is_ip4) {
+        ip4_address_t a;
+        memcpy(&a, mp->ip_address, sizeof(a));
+        ip46_address_set_ip4(&args.address, &a);
+    } else
+        memcpy(&args.address.ip6, mp->ip_address, sizeof(ip6_address_t));
 
-  args.sw_if_index = clib_net_to_host_u32(mp->sw_if_index);
-  args.del = !mp->is_add;
+    args.sw_if_index = clib_net_to_host_u32(mp->sw_if_index);
+    args.del = !mp->is_add;
 
-  rv = stn_rule_add_del(&args);
+    rv = stn_rule_add_del(&args);
 
-  REPLY_MACRO (VL_API_STN_ADD_DEL_RULE_REPLY);
+    REPLY_MACRO (VL_API_STN_ADD_DEL_RULE_REPLY);
 }
 
 static void
 send_stn_rule (stn_rule_t *r, unix_shared_memory_queue_t *q, u32 context)
 {
-  vl_api_stn_rule_details_t *rmp;
+    vl_api_stn_rule_details_t *rmp;
 
-  rmp =
-      vl_msg_api_alloc (sizeof (*rmp));
-  memset (rmp, 0, sizeof (*rmp));
-  rmp->_vl_msg_id =
-      clib_host_to_net_u32 (VL_API_STN_RULES_DUMP + stn_main.msg_id_base);
+    rmp =
+        vl_msg_api_alloc (sizeof (*rmp));
+    memset (rmp, 0, sizeof (*rmp));
+    rmp->_vl_msg_id =
+        clib_host_to_net_u32 (VL_API_STN_RULES_DUMP + stn_main.msg_id_base);
 
-  if (ip46_address_is_ip4(&r->address))
-    {
-      clib_memcpy(rmp->ip_address, &r->address.ip4, sizeof(ip4_address_t));
-      rmp->is_ip4 = 1;
-    }
-  else
-    {
-      clib_memcpy(rmp->ip_address, &r->address.ip6, sizeof(ip6_address_t));
+    if (ip46_address_is_ip4(&r->address)) {
+        clib_memcpy(rmp->ip_address, &r->address.ip4, sizeof(ip4_address_t));
+        rmp->is_ip4 = 1;
+    } else {
+        clib_memcpy(rmp->ip_address, &r->address.ip6, sizeof(ip6_address_t));
     }
 
-  rmp->context = context;
-  rmp->sw_if_index = clib_host_to_net_u32(r->sw_if_index);
+    rmp->context = context;
+    rmp->sw_if_index = clib_host_to_net_u32(r->sw_if_index);
 
-  vl_msg_api_send_shmem (q, (u8 *) & rmp);
+    vl_msg_api_send_shmem (q, (u8 *) & rmp);
 }
 
 static void
 vl_api_stn_rules_dump_t_handler (vl_api_stn_rules_dump_t *mp)
 {
-  unix_shared_memory_queue_t *q;
-  stn_main_t *stn = &stn_main;
-  stn_rule_t *r;
+    unix_shared_memory_queue_t *q;
+    stn_main_t *stn = &stn_main;
+    stn_rule_t *r;
 
-  q = vl_api_client_index_to_input_queue (mp->client_index);
-  if (q == 0)
-    return;
+    q = vl_api_client_index_to_input_queue (mp->client_index);
+    if (q == 0)
+        return;
 
   /* *INDENT-OFF* */
   pool_foreach (r, stn->rules,
@@ -156,8 +150,8 @@ vl_api_stn_rules_dump_t_handler (vl_api_stn_rules_dump_t *mp)
 
 
 /* List of message types that this plugin understands */
-#define foreach_stn_plugin_api_msg			\
-_(STN_ADD_DEL_RULE, stn_add_del_rule)	\
+#define foreach_stn_plugin_api_msg          \
+_(STN_ADD_DEL_RULE, stn_add_del_rule)   \
 _(STN_RULES_DUMP, stn_rules_dump)
 
 /**
@@ -168,19 +162,19 @@ _(STN_RULES_DUMP, stn_rules_dump)
 static clib_error_t *
 stn_plugin_api_hookup (vlib_main_t * vm)
 {
-  stn_main_t *stn = &stn_main;
+    stn_main_t *stn = &stn_main;
 #define _(N,n)                                                  \
     vl_msg_api_set_handlers((VL_API_##N + stn->msg_id_base),     \
-                           #n,					\
+                           #n,                  \
                            vl_api_##n##_t_handler,              \
                            vl_noop_handler,                     \
                            vl_api_##n##_t_endian,               \
                            vl_api_##n##_t_print,                \
                            sizeof(vl_api_##n##_t), 1);
-  foreach_stn_plugin_api_msg;
+    foreach_stn_plugin_api_msg;
 #undef _
 
-  return 0;
+    return 0;
 }
 
 #define vl_msg_name_crc_list
@@ -192,7 +186,7 @@ setup_message_id_table (stn_main_t * stn, api_main_t * am)
 {
 #define _(id,n,crc) \
   vl_msg_api_add_msg_name_crc (am, #n "_" #crc, id + stn->msg_id_base);
-  foreach_vl_msg_name_crc_stn;
+    foreach_vl_msg_name_crc_stn;
 #undef _
 }
 
@@ -202,30 +196,30 @@ plugin_custom_dump_configure (stn_main_t * stn)
 #define _(n,f) api_main.msg_print_handlers \
   [VL_API_##n + stn->msg_id_base]                \
     = (void *) vl_api_##f##_t_print;
-  foreach_stn_plugin_api_msg;
+    foreach_stn_plugin_api_msg;
 #undef _
 }
 
 clib_error_t *
 stn_api_init (vlib_main_t * vm, stn_main_t * sm)
 {
-  u8 *name;
-  clib_error_t *error = 0;
+    u8 *name;
+    clib_error_t *error = 0;
 
-  name = format (0, "stn_%08x%c", api_version, 0);
+    name = format (0, "stn_%08x%c", api_version, 0);
 
-  /* Ask for a correctly-sized block of API message decode slots */
-  sm->msg_id_base =
-    vl_msg_api_get_msg_ids ((char *) name, VL_MSG_FIRST_AVAILABLE);
+    /* Ask for a correctly-sized block of API message decode slots */
+    sm->msg_id_base =
+        vl_msg_api_get_msg_ids ((char *) name, VL_MSG_FIRST_AVAILABLE);
 
-  error = stn_plugin_api_hookup (vm);
+    error = stn_plugin_api_hookup (vm);
 
-  /* Add our API messages to the global name_crc hash table */
-  setup_message_id_table (sm, &api_main);
+    /* Add our API messages to the global name_crc hash table */
+    setup_message_id_table (sm, &api_main);
 
-  plugin_custom_dump_configure (sm);
+    plugin_custom_dump_configure (sm);
 
-  vec_free (name);
+    vec_free (name);
 
-  return error;
+    return error;
 }

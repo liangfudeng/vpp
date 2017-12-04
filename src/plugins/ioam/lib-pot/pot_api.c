@@ -14,7 +14,7 @@
  */
 /*
  *------------------------------------------------------------------
- * pot_api.c - Proof of Transit related APIs to create 
+ * pot_api.c - Proof of Transit related APIs to create
  *             and maintain profiles
  *------------------------------------------------------------------
  */
@@ -77,20 +77,20 @@ static void vl_api_pot_profile_add_t_handler
     id = mp->id;
     profile = pot_profile_find(id);
     if (profile) {
-	rv = pot_profile_create(profile,
-				clib_net_to_host_u64(mp->prime),
-				clib_net_to_host_u64(mp->polynomial_public),
-				clib_net_to_host_u64(mp->lpc),
-				clib_net_to_host_u64(mp->secret_share));
-	if (rv != 0)
+        rv = pot_profile_create(profile,
+                                clib_net_to_host_u64(mp->prime),
+                                clib_net_to_host_u64(mp->polynomial_public),
+                                clib_net_to_host_u64(mp->lpc),
+                                clib_net_to_host_u64(mp->secret_share));
+        if (rv != 0)
             goto ERROROUT;
-	if (1 == mp->validator)
-	  (void)pot_set_validator(profile, clib_net_to_host_u64(mp->secret_key));
+        if (1 == mp->validator)
+            (void)pot_set_validator(profile, clib_net_to_host_u64(mp->secret_key));
         (void)pot_profile_set_bit_mask(profile, mp->max_bits);
     } else {
         rv = -3;
-    }  
- ERROROUT:
+    }
+ERROROUT:
     vec_free(name);
     REPLY_MACRO(VL_API_POT_PROFILE_ADD_REPLY);
 }
@@ -101,29 +101,28 @@ static void send_pot_profile_details(vl_api_pot_profile_show_config_dump_t *mp, 
     pot_main_t * sm = &pot_main;
     pot_profile *profile = pot_profile_find(id);
     int rv = 0;
-    if(profile){
+    if(profile) {
         REPLY_MACRO2(VL_API_POT_PROFILE_SHOW_CONFIG_DETAILS,
-			rmp->id=id;
-			rmp->validator=profile->validator;
-			rmp->secret_key=clib_host_to_net_u64(profile->secret_key);
-			rmp->secret_share=clib_host_to_net_u64(profile->secret_share);
-			rmp->prime=clib_host_to_net_u64(profile->prime);
-			rmp->bit_mask=clib_host_to_net_u64(profile->bit_mask);
-			rmp->lpc=clib_host_to_net_u64(profile->lpc);
-			rmp->polynomial_public=clib_host_to_net_u64(profile->poly_pre_eval);
-			);
-    }
-    else{
+                     rmp->id=id;
+                     rmp->validator=profile->validator;
+                     rmp->secret_key=clib_host_to_net_u64(profile->secret_key);
+                     rmp->secret_share=clib_host_to_net_u64(profile->secret_share);
+                     rmp->prime=clib_host_to_net_u64(profile->prime);
+                     rmp->bit_mask=clib_host_to_net_u64(profile->bit_mask);
+                     rmp->lpc=clib_host_to_net_u64(profile->lpc);
+                     rmp->polynomial_public=clib_host_to_net_u64(profile->poly_pre_eval);
+                    );
+    } else {
         REPLY_MACRO2(VL_API_POT_PROFILE_SHOW_CONFIG_DETAILS,
-			rmp->id=id;
-			rmp->validator=0;
-			rmp->secret_key=0;
-			rmp->secret_share=0;
-			rmp->prime=0;
-			rmp->bit_mask=0;
-			rmp->lpc=0;
-			rmp->polynomial_public=0;
-			);
+                     rmp->id=id;
+                     rmp->validator=0;
+                     rmp->secret_key=0;
+                     rmp->secret_share=0;
+                     rmp->prime=0;
+                     rmp->bit_mask=0;
+                     rmp->lpc=0;
+                     rmp->polynomial_public=0;
+                    );
     }
 }
 
@@ -132,11 +131,10 @@ static void vl_api_pot_profile_show_config_dump_t_handler
 {
     u8 id = mp->id;
     u8 dump_call_id = ~0;
-    if(dump_call_id==id){
-        for(id=0;id<MAX_POT_PROFILES;id++)
-	    send_pot_profile_details(mp,id);
-    }
-    else
+    if(dump_call_id==id) {
+        for(id=0; id<MAX_POT_PROFILES; id++)
+            send_pot_profile_details(mp,id);
+    } else
         send_pot_profile_details(mp,id);
 }
 
@@ -155,9 +153,9 @@ static void vl_api_pot_profile_activate_t_handler
         rv = -1;
     } else {
         id = mp->id;
-	rv = pot_profile_set_active(id);
+        rv = pot_profile_set_active(id);
     }
-     
+
     vec_free(name);
     REPLY_MACRO(VL_API_POT_PROFILE_ACTIVATE_REPLY);
 }
@@ -179,15 +177,15 @@ static void vl_api_pot_profile_del_t_handler
 static clib_error_t *
 pot_plugin_api_hookup (vlib_main_t *vm)
 {
-  pot_main_t * sm = &pot_main;
+    pot_main_t * sm = &pot_main;
 #define _(N,n)                                                  \
     vl_msg_api_set_handlers((VL_API_##N + sm->msg_id_base),     \
-                           #n,					\
+                           #n,                  \
                            vl_api_##n##_t_handler,              \
                            vl_noop_handler,                     \
                            vl_api_##n##_t_endian,               \
                            vl_api_##n##_t_print,                \
-                           sizeof(vl_api_##n##_t), 1); 
+                           sizeof(vl_api_##n##_t), 1);
     foreach_pot_plugin_api_msg;
 #undef _
 
@@ -203,36 +201,36 @@ setup_message_id_table (pot_main_t * sm, api_main_t * am)
 {
 #define _(id,n,crc) \
   vl_msg_api_add_msg_name_crc (am, #n "_" #crc, id + sm->msg_id_base);
-  foreach_vl_msg_name_crc_pot;
+    foreach_vl_msg_name_crc_pot;
 #undef _
 }
 
 static clib_error_t * pot_init (vlib_main_t * vm)
 {
-  pot_main_t * sm = &pot_main;
-  clib_error_t * error = 0;
-  u8 * name;
+    pot_main_t * sm = &pot_main;
+    clib_error_t * error = 0;
+    u8 * name;
 
-  bzero(sm, sizeof(pot_main));
-  (void)pot_util_init();
+    bzero(sm, sizeof(pot_main));
+    (void)pot_util_init();
 
-  sm->vlib_main = vm;
-  sm->vnet_main = vnet_get_main();
+    sm->vlib_main = vm;
+    sm->vnet_main = vnet_get_main();
 
-  name = format (0, "ioam_pot_%08x%c", api_version, 0);
+    name = format (0, "ioam_pot_%08x%c", api_version, 0);
 
-  /* Ask for a correctly-sized block of API message decode slots */
-  sm->msg_id_base = vl_msg_api_get_msg_ids 
-      ((char *) name, VL_MSG_FIRST_AVAILABLE);
+    /* Ask for a correctly-sized block of API message decode slots */
+    sm->msg_id_base = vl_msg_api_get_msg_ids
+                      ((char *) name, VL_MSG_FIRST_AVAILABLE);
 
-  error = pot_plugin_api_hookup (vm);
+    error = pot_plugin_api_hookup (vm);
 
-  /* Add our API messages to the global name_crc hash table */
-  setup_message_id_table (sm, &api_main);
+    /* Add our API messages to the global name_crc hash table */
+    setup_message_id_table (sm, &api_main);
 
-  vec_free(name);
+    vec_free(name);
 
-  return error;
+    return error;
 }
 
 VLIB_INIT_FUNCTION (pot_init);

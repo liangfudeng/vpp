@@ -32,14 +32,14 @@
 #include <vnet/vnet.h>
 
 typedef struct {
-  u32 *counters;
-  u32 length;
-  u32 *reader_lengths;
-  CLIB_CACHE_LINE_ALIGN_MARK(o);
+    u32 *counters;
+    u32 length;
+    u32 *reader_lengths;
+    CLIB_CACHE_LINE_ALIGN_MARK(o);
 } vlib_refcount_per_cpu_t;
 
 typedef struct {
-  vlib_refcount_per_cpu_t *per_cpu;
+    vlib_refcount_per_cpu_t *per_cpu;
 } vlib_refcount_t;
 
 void __vlib_refcount_resize(vlib_refcount_per_cpu_t *per_cpu, u32 size);
@@ -47,11 +47,11 @@ void __vlib_refcount_resize(vlib_refcount_per_cpu_t *per_cpu, u32 size);
 static_always_inline
 void vlib_refcount_add(vlib_refcount_t *r, u32 thread_index, u32 counter_index, i32 v)
 {
-  vlib_refcount_per_cpu_t *per_cpu = &r->per_cpu[thread_index];
-  if (PREDICT_FALSE(counter_index >= per_cpu->length))
-    __vlib_refcount_resize(per_cpu, clib_max(counter_index + 16, per_cpu->length * 2));
+    vlib_refcount_per_cpu_t *per_cpu = &r->per_cpu[thread_index];
+    if (PREDICT_FALSE(counter_index >= per_cpu->length))
+        __vlib_refcount_resize(per_cpu, clib_max(counter_index + 16, per_cpu->length * 2));
 
-  per_cpu->counters[counter_index] += v;
+    per_cpu->counters[counter_index] += v;
 }
 
 u64 vlib_refcount_get(vlib_refcount_t *r, u32 index);
@@ -59,9 +59,9 @@ u64 vlib_refcount_get(vlib_refcount_t *r, u32 index);
 static_always_inline
 void vlib_refcount_init(vlib_refcount_t *r)
 {
-  vlib_thread_main_t *tm = vlib_get_thread_main ();
-  r->per_cpu = 0;
-  vec_validate (r->per_cpu, tm->n_vlib_mains - 1);
+    vlib_thread_main_t *tm = vlib_get_thread_main ();
+    r->per_cpu = 0;
+    vec_validate (r->per_cpu, tm->n_vlib_mains - 1);
 }
 
 

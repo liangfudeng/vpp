@@ -37,183 +37,174 @@
 
 #include <vlib/vlib.h>
 
-typedef struct
-{
-  u8 *interface_name;
-  u32 sw_if_index;
-  /*
-   * Subinterface ID. A number 0-N to uniquely identify this
-   * subinterface under the super interface
-   */
-  u32 sub_id;
+typedef struct {
+    u8 *interface_name;
+    u32 sw_if_index;
+    /*
+     * Subinterface ID. A number 0-N to uniquely identify this
+     * subinterface under the super interface
+     */
+    u32 sub_id;
 
-  /* 0 = dot1q, 1=dot1ad */
-  u8 sub_dot1ad;
+    /* 0 = dot1q, 1=dot1ad */
+    u8 sub_dot1ad;
 
-  /* Number of tags 0-2 */
-  u8 sub_number_of_tags;
-  u16 sub_outer_vlan_id;
-  u16 sub_inner_vlan_id;
-  u8 sub_exact_match;
-  u8 sub_default;
-  u8 sub_outer_vlan_id_any;
-  u8 sub_inner_vlan_id_any;
+    /* Number of tags 0-2 */
+    u8 sub_number_of_tags;
+    u16 sub_outer_vlan_id;
+    u16 sub_inner_vlan_id;
+    u8 sub_exact_match;
+    u8 sub_default;
+    u8 sub_outer_vlan_id_any;
+    u8 sub_inner_vlan_id_any;
 
-  /* vlan tag rewrite */
-  u32 vtr_op;
-  u32 vtr_push_dot1q;
-  u32 vtr_tag1;
-  u32 vtr_tag2;
+    /* vlan tag rewrite */
+    u32 vtr_op;
+    u32 vtr_push_dot1q;
+    u32 vtr_tag1;
+    u32 vtr_tag2;
 } sw_interface_subif_t;
 
-typedef struct
-{
-  u8 ip[16];
-  u8 prefix_length;
+typedef struct {
+    u8 ip[16];
+    u8 prefix_length;
 } ip_address_details_t;
 
-typedef struct
-{
-  u8 present;
-  ip_address_details_t *addr;
+typedef struct {
+    u8 present;
+    ip_address_details_t *addr;
 } ip_details_t;
 
-typedef struct
-{
-  u64 packets;
-  u64 bytes;
+typedef struct {
+    u64 packets;
+    u64 bytes;
 } interface_counter_t;
 
-typedef struct
-{
-  struct in_addr address;
-  u8 address_length;
-  u64 packets;
-  u64 bytes;
+typedef struct {
+    struct in_addr address;
+    u8 address_length;
+    u64 packets;
+    u64 bytes;
 } ip4_fib_counter_t;
 
-typedef struct
-{
-  struct in6_addr address;
-  u8 address_length;
-  u64 packets;
-  u64 bytes;
+typedef struct {
+    struct in6_addr address;
+    u8 address_length;
+    u64 packets;
+    u64 bytes;
 } ip6_fib_counter_t;
 
-typedef struct
-{
-  struct in_addr address;
-  vnet_link_t linkt;
-  u64 packets;
-  u64 bytes;
+typedef struct {
+    struct in_addr address;
+    vnet_link_t linkt;
+    u64 packets;
+    u64 bytes;
 } ip4_nbr_counter_t;
 
-typedef struct
-{
-  struct in6_addr address;
-  vnet_link_t linkt;
-  u64 packets;
-  u64 bytes;
+typedef struct {
+    struct in6_addr address;
+    vnet_link_t linkt;
+    u64 packets;
+    u64 bytes;
 } ip6_nbr_counter_t;
 
-typedef struct
-{
-  /* vpe input queue */
-  unix_shared_memory_queue_t *vl_input_queue;
+typedef struct {
+    /* vpe input queue */
+    unix_shared_memory_queue_t *vl_input_queue;
 
-  /* interface name table */
-  uword *sw_if_index_by_interface_name;
+    /* interface name table */
+    uword *sw_if_index_by_interface_name;
 
-  /* subinterface table */
-  sw_interface_subif_t *sw_if_subif_table;
+    /* subinterface table */
+    sw_interface_subif_t *sw_if_subif_table;
 
-  /* Graph node table */
-  uword *graph_node_index_by_name;
-  vlib_node_t **graph_nodes;
+    /* Graph node table */
+    uword *graph_node_index_by_name;
+    vlib_node_t **graph_nodes;
 
-  /* ip tables */
-  ip_details_t *ip_details_by_sw_if_index[2];
+    /* ip tables */
+    ip_details_t *ip_details_by_sw_if_index[2];
 
-  /* sw_if_index of currently processed interface */
-  u32 current_sw_if_index;
+    /* sw_if_index of currently processed interface */
+    u32 current_sw_if_index;
 
-  /* remember that we are dumping ipv6 */
-  u8 is_ipv6;
+    /* remember that we are dumping ipv6 */
+    u8 is_ipv6;
 
-  /* function table */
-  uword *function_by_name;
+    /* function table */
+    uword *function_by_name;
 
-  /* help strings */
-  uword *help_by_name;
+    /* help strings */
+    uword *help_by_name;
 
-  /* macro table */
-  macro_main_t macro_main;
+    /* macro table */
+    macro_main_t macro_main;
 
-  /* Errors by number */
-  uword *error_string_by_error_number;
+    /* Errors by number */
+    uword *error_string_by_error_number;
 
-  /* Main thread can spin (w/ timeout) here if needed */
-  u32 async_mode;
-  u32 async_errors;
-  volatile u32 result_ready;
-  volatile i32 retval;
-  volatile u32 sw_if_index;
-  volatile u8 *shmem_result;
-  u8 *cmd_reply;
+    /* Main thread can spin (w/ timeout) here if needed */
+    u32 async_mode;
+    u32 async_errors;
+    volatile u32 result_ready;
+    volatile i32 retval;
+    volatile u32 sw_if_index;
+    volatile u8 *shmem_result;
+    u8 *cmd_reply;
 
-  /* our client index */
-  u32 my_client_index;
-  int client_index_invalid;
+    /* our client index */
+    u32 my_client_index;
+    int client_index_invalid;
 
-  /* Time is of the essence... */
-  clib_time_t clib_time;
+    /* Time is of the essence... */
+    clib_time_t clib_time;
 
-  /* Unwind (so we can quit) */
-  jmp_buf jump_buf;
-  int jump_buf_set;
-  volatile int do_exit;
+    /* Unwind (so we can quit) */
+    jmp_buf jump_buf;
+    int jump_buf_set;
+    volatile int do_exit;
 
-  /* temporary parse buffer */
-  unformat_input_t *input;
+    /* temporary parse buffer */
+    unformat_input_t *input;
 
-  /* input buffer */
-  u8 *inbuf;
+    /* input buffer */
+    u8 *inbuf;
 
-  /* stdio input / output FILEs */
-  FILE *ifp, *ofp;
-  u8 *current_file;
-  u32 input_line_number;
+    /* stdio input / output FILEs */
+    FILE *ifp, *ofp;
+    u8 *current_file;
+    u32 input_line_number;
 
-  /* exec mode toggle */
-  int exec_mode;
+    /* exec mode toggle */
+    int exec_mode;
 
-  /* Regenerate the interface table */
-  volatile int regenerate_interface_table;
+    /* Regenerate the interface table */
+    volatile int regenerate_interface_table;
 
-  /* flag for JSON output format */
-  u8 json_output;
+    /* flag for JSON output format */
+    u8 json_output;
 
-  /* flag for interface event display */
-  u8 interface_event_display;
+    /* flag for interface event display */
+    u8 interface_event_display;
 
-  /* JSON tree used in composing dump api call results */
-  vat_json_node_t json_tree;
+    /* JSON tree used in composing dump api call results */
+    vat_json_node_t json_tree;
 
-  /* counters */
-  u64 **simple_interface_counters;
-  interface_counter_t **combined_interface_counters;
-  ip4_fib_counter_t **ip4_fib_counters;
-  u32 *ip4_fib_counters_vrf_id_by_index;
-  ip6_fib_counter_t **ip6_fib_counters;
-  u32 *ip6_fib_counters_vrf_id_by_index;
-  ip4_nbr_counter_t **ip4_nbr_counters;
-  ip6_nbr_counter_t **ip6_nbr_counters;
+    /* counters */
+    u64 **simple_interface_counters;
+    interface_counter_t **combined_interface_counters;
+    ip4_fib_counter_t **ip4_fib_counters;
+    u32 *ip4_fib_counters_vrf_id_by_index;
+    ip6_fib_counter_t **ip6_fib_counters;
+    u32 *ip6_fib_counters_vrf_id_by_index;
+    ip4_nbr_counter_t **ip4_nbr_counters;
+    ip6_nbr_counter_t **ip6_nbr_counters;
 
-  socket_client_main_t socket_client_main;
-  u8 *socket_name;
+    socket_client_main_t socket_client_main;
+    u8 *socket_name;
 
-  /* Convenience */
-  vlib_main_t *vlib_main;
+    /* Convenience */
+    vlib_main_t *vlib_main;
 } vat_main_t;
 
 extern vat_main_t vat_main;
@@ -234,7 +225,7 @@ uword unformat_sw_if_index (unformat_input_t * input, va_list * args);
 uword unformat_ip4_address (unformat_input_t * input, va_list * args);
 uword unformat_ethernet_address (unformat_input_t * input, va_list * args);
 uword unformat_ethernet_type_host_byte_order (unformat_input_t * input,
-					      va_list * args);
+        va_list * args);
 uword unformat_ip6_address (unformat_input_t * input, va_list * args);
 u8 *format_ip4_address (u8 * s, va_list * args);
 u8 *format_ip6_address (u8 * s, va_list * args);

@@ -34,51 +34,46 @@
 
 #include <vnet/classify/vnet_classify.h>
 
-typedef enum
-{
-  L2_INPUT_CLASSIFY_NEXT_DROP,
-  L2_INPUT_CLASSIFY_NEXT_ETHERNET_INPUT,
-  L2_INPUT_CLASSIFY_NEXT_IP4_INPUT,
-  L2_INPUT_CLASSIFY_NEXT_IP6_INPUT,
-  L2_INPUT_CLASSIFY_NEXT_LI,
-  L2_INPUT_CLASSIFY_N_NEXT,
+typedef enum {
+    L2_INPUT_CLASSIFY_NEXT_DROP,
+    L2_INPUT_CLASSIFY_NEXT_ETHERNET_INPUT,
+    L2_INPUT_CLASSIFY_NEXT_IP4_INPUT,
+    L2_INPUT_CLASSIFY_NEXT_IP6_INPUT,
+    L2_INPUT_CLASSIFY_NEXT_LI,
+    L2_INPUT_CLASSIFY_N_NEXT,
 } l2_input_classify_next_t;
 
-typedef enum
-{
-  L2_INPUT_CLASSIFY_TABLE_IP4,
-  L2_INPUT_CLASSIFY_TABLE_IP6,
-  L2_INPUT_CLASSIFY_TABLE_OTHER,
-  L2_INPUT_CLASSIFY_N_TABLES,
+typedef enum {
+    L2_INPUT_CLASSIFY_TABLE_IP4,
+    L2_INPUT_CLASSIFY_TABLE_IP6,
+    L2_INPUT_CLASSIFY_TABLE_OTHER,
+    L2_INPUT_CLASSIFY_N_TABLES,
 } l2_input_classify_table_id_t;
 
-typedef enum
-{
-  L2_OUTPUT_CLASSIFY_NEXT_DROP,
-  L2_OUTPUT_CLASSIFY_N_NEXT,
+typedef enum {
+    L2_OUTPUT_CLASSIFY_NEXT_DROP,
+    L2_OUTPUT_CLASSIFY_N_NEXT,
 } l2_output_classify_next_t;
 
-typedef enum
-{
-  L2_OUTPUT_CLASSIFY_TABLE_IP4,
-  L2_OUTPUT_CLASSIFY_TABLE_IP6,
-  L2_OUTPUT_CLASSIFY_TABLE_OTHER,
-  L2_OUTPUT_CLASSIFY_N_TABLES,
+typedef enum {
+    L2_OUTPUT_CLASSIFY_TABLE_IP4,
+    L2_OUTPUT_CLASSIFY_TABLE_IP6,
+    L2_OUTPUT_CLASSIFY_TABLE_OTHER,
+    L2_OUTPUT_CLASSIFY_N_TABLES,
 } l2_output_classify_table_id_t;
 
-typedef struct _l2_classify_main
-{
-  /* Next nodes for L2 input and output features */
-  u32 l2_inp_feat_next[32];
-  u32 l2_out_feat_next[32];
+typedef struct _l2_classify_main {
+    /* Next nodes for L2 input and output features */
+    u32 l2_inp_feat_next[32];
+    u32 l2_out_feat_next[32];
 
-  /* Per-address-family classifier table vectors */
-  u32 *classify_table_index_by_sw_if_index[L2_INPUT_CLASSIFY_N_TABLES];
+    /* Per-address-family classifier table vectors */
+    u32 *classify_table_index_by_sw_if_index[L2_INPUT_CLASSIFY_N_TABLES];
 
-  /* convenience variables */
-  vlib_main_t *vlib_main;
-  vnet_main_t *vnet_main;
-  vnet_classify_main_t *vnet_classify_main;
+    /* convenience variables */
+    vlib_main_t *vlib_main;
+    vnet_main_t *vnet_main;
+    vnet_classify_main_t *vnet_classify_main;
 } l2_input_classify_main_t;
 
 typedef struct _l2_classify_main l2_output_classify_main_t;
@@ -90,18 +85,18 @@ extern l2_output_classify_main_t l2_output_classify_main;
 extern vlib_node_registration_t l2_output_classify_node;
 
 void vnet_l2_input_classify_enable_disable (u32 sw_if_index,
-					    int enable_disable);
+        int enable_disable);
 
 int vnet_l2_input_classify_set_tables (u32 sw_if_index, u32 ip4_table_index,
-				       u32 ip6_table_index,
-				       u32 other_table_index);
+                                       u32 ip6_table_index,
+                                       u32 other_table_index);
 
 void vnet_l2_output_classify_enable_disable (u32 sw_if_index,
-					     int enable_disable);
+        int enable_disable);
 
 int vnet_l2_output_classify_set_tables (u32 sw_if_index, u32 ip4_table_index,
-					u32 ip6_table_index,
-					u32 other_table_index);
+                                        u32 ip6_table_index,
+                                        u32 other_table_index);
 
 #endif /* __included_vnet_l2_input_classify_h__ */
 

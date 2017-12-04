@@ -41,49 +41,41 @@ typedef enum fib_test_lb_bucket_type_t_ {
 typedef struct fib_test_lb_bucket_t_ {
     fib_test_lb_bucket_type_t type;
 
-    union
-    {
-	struct
-	{
-	    mpls_eos_bit_t eos;
-	    mpls_label_t label;
-	    u8 ttl;
-	    adj_index_t adj;
-	} label_o_adj;
-	struct
-	{
-	    mpls_eos_bit_t eos;
-	    mpls_label_t label_stack[8];
-	    u8 label_stack_size;
-	    u8 ttl;
-	    adj_index_t adj;
-	} label_stack_o_adj;
-	struct
-	{
-	    mpls_eos_bit_t eos;
-	    mpls_label_t label;
-	    u8 ttl;
-	    index_t lb;
-	} label_o_lb;
-	struct
-	{
-	    index_t adj;
-	} adj;
-	struct
-	{
-	    index_t lb;
-	} lb;
-	struct
-	{
-	    index_t adj;
-	} special;
-        struct
-        {
+    union {
+        struct {
+            mpls_eos_bit_t eos;
+            mpls_label_t label;
+            u8 ttl;
+            adj_index_t adj;
+        } label_o_adj;
+        struct {
+            mpls_eos_bit_t eos;
+            mpls_label_t label_stack[8];
+            u8 label_stack_size;
+            u8 ttl;
+            adj_index_t adj;
+        } label_stack_o_adj;
+        struct {
+            mpls_eos_bit_t eos;
+            mpls_label_t label;
+            u8 ttl;
+            index_t lb;
+        } label_o_lb;
+        struct {
+            index_t adj;
+        } adj;
+        struct {
+            index_t lb;
+        } lb;
+        struct {
+            index_t adj;
+        } special;
+        struct {
             union {
                 index_t table;
                 index_t fmask;
             };
-	} bier;
+        } bier;
     };
 } fib_test_lb_bucket_t;
 
@@ -96,20 +88,17 @@ typedef enum fib_test_rep_bucket_type_t_ {
 typedef struct fib_test_rep_bucket_t_ {
     fib_test_rep_bucket_type_t type;
 
-    union
-    {
-	struct
-	{
-	    mpls_eos_bit_t eos;
-	    mpls_label_t label;
-	    u8 ttl;
-	    adj_index_t adj;
-	} label_o_adj;
- 	struct
-	{
-	    adj_index_t adj;
-	} adj;
-   };
+    union {
+        struct {
+            mpls_eos_bit_t eos;
+            mpls_label_t label;
+            u8 ttl;
+            adj_index_t adj;
+        } label_o_adj;
+        struct {
+            adj_index_t adj;
+        } adj;
+    };
 } fib_test_rep_bucket_t;
 
 
@@ -122,8 +111,8 @@ extern int fib_test_validate_lb_v(const load_balance_t *lb,
                                   va_list *ap);
 
 extern int fib_test_validate_lb(const dpo_id_t *dpo,
-				u16 n_buckets,
-				...);
+                                u16 n_buckets,
+                                ...);
 
 extern int fib_test_validate_entry(fib_node_index_t fei,
                                    fib_forward_chain_type_t fct,

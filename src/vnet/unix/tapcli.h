@@ -23,7 +23,7 @@
 #define __included_tapcli_h__
 
 /** TAP CLI errors */
-#define foreach_tapcli_error				\
+#define foreach_tapcli_error                \
   /* Must be first. */                                  \
  _(NONE, "no error")                                    \
  _(READ, "read error")                                  \
@@ -32,15 +32,15 @@
 
 typedef enum {
 #define _(sym,str) TAPCLI_ERROR_##sym,
-  foreach_tapcli_error
+    foreach_tapcli_error
 #undef _
-   TAPCLI_N_ERROR,
- } tapcli_error_t;
+    TAPCLI_N_ERROR,
+} tapcli_error_t;
 
 /** TAP CLI interface details struct */
 typedef struct {
-  u32 sw_if_index;
-  u8 dev_name[64];
+    u32 sw_if_index;
+    u8 dev_name[64];
 } tapcli_interface_details_t;
 
 int vnet_tap_dump_ifs (tapcli_interface_details_t **out_tapids);

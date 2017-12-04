@@ -64,8 +64,7 @@ interface_rx_dpo_unlock (dpo_id_t *dpo)
     ido = interface_rx_dpo_get_from_dpo(dpo);
     ido->ido_locks--;
 
-    if (0 == ido->ido_locks)
-    {
+    if (0 == ido->ido_locks) {
         interface_rx_dpo_db[ido->ido_proto][ido->ido_sw_if_index] =
             INDEX_INVALID;
         pool_put(interface_rx_dpo_pool, ido);
@@ -89,8 +88,7 @@ interface_rx_dpo_add_or_lock (dpo_proto_t proto,
                             sw_if_index,
                             INDEX_INVALID);
 
-    if (INDEX_INVALID == interface_rx_dpo_db[proto][sw_if_index])
-    {
+    if (INDEX_INVALID == interface_rx_dpo_db[proto][sw_if_index]) {
         ido = interface_rx_dpo_alloc();
 
         ido->ido_sw_if_index = sw_if_index;
@@ -98,9 +96,7 @@ interface_rx_dpo_add_or_lock (dpo_proto_t proto,
 
         interface_rx_dpo_db[proto][sw_if_index] =
             interface_rx_dpo_get_index(ido);
-    }
-    else
-    {
+    } else {
         ido = interface_rx_dpo_get(interface_rx_dpo_db[proto][sw_if_index]);
     }
 
@@ -110,8 +106,8 @@ interface_rx_dpo_add_or_lock (dpo_proto_t proto,
 
 static clib_error_t *
 interface_rx_dpo_interface_state_change (vnet_main_t * vnm,
-                                         u32 sw_if_index,
-                                         u32 flags)
+        u32 sw_if_index,
+        u32 flags)
 {
     /*
      */
@@ -126,8 +122,8 @@ VNET_SW_INTERFACE_ADMIN_UP_DOWN_FUNCTION(
  */
 static clib_error_t *
 interface_rx_dpo_hw_interface_state_change (vnet_main_t * vnm,
-                                            u32 hw_if_index,
-                                            u32 flags)
+        u32 hw_if_index,
+        u32 flags)
 {
     return (NULL);
 }
@@ -185,24 +181,20 @@ const static dpo_vft_t interface_rx_dpo_vft = {
  * this means that these graph nodes are ones from which a glean is the
  * parent object in the DPO-graph.
  */
-const static char* const interface_rx_dpo_ip4_nodes[] =
-{
+const static char* const interface_rx_dpo_ip4_nodes[] = {
     "interface-rx-dpo-ip4",
     NULL,
 };
-const static char* const interface_rx_dpo_ip6_nodes[] =
-{
+const static char* const interface_rx_dpo_ip6_nodes[] = {
     "interface-rx-dpo-ip6",
     NULL,
 };
-const static char* const interface_rx_dpo_l2_nodes[] =
-{
+const static char* const interface_rx_dpo_l2_nodes[] = {
     "interface-rx-dpo-l2",
     NULL,
 };
 
-const static char* const * const interface_rx_dpo_nodes[DPO_PROTO_NUM] =
-{
+const static char* const * const interface_rx_dpo_nodes[DPO_PROTO_NUM] = {
     [DPO_PROTO_IP4]  = interface_rx_dpo_ip4_nodes,
     [DPO_PROTO_IP6]  = interface_rx_dpo_ip6_nodes,
     [DPO_PROTO_ETHERNET]  = interface_rx_dpo_l2_nodes,
@@ -220,13 +212,11 @@ interface_rx_dpo_module_init (void)
 /**
  * @brief Interface DPO trace data
  */
-typedef struct interface_rx_dpo_trace_t_
-{
+typedef struct interface_rx_dpo_trace_t_ {
     u32 sw_if_index;
 } interface_rx_dpo_trace_t;
 
-typedef enum interface_rx_dpo_next_t_
-{
+typedef enum interface_rx_dpo_next_t_ {
     INTERFACE_RX_DPO_DROP = 0,
     INTERFACE_RX_DPO_INPUT = 1,
 } interface_rx_dpo_next_t;
@@ -246,14 +236,12 @@ interface_rx_dpo_inline (vlib_main_t * vm,
 
     next_index = node->cached_next_index;
 
-    while (n_left_from > 0)
-    {
+    while (n_left_from > 0) {
         u32 n_left_to_next;
 
         vlib_get_next_frame(vm, node, next_index, to_next, n_left_to_next);
 
-        while (n_left_from >= 4 && n_left_to_next > 2)
-        {
+        while (n_left_from >= 4 && n_left_to_next > 2) {
             const interface_rx_dpo_t *ido0, *ido1;
             u32 bi0, idoi0, bi1, idoi1;
             vlib_buffer_t *b0, *b1;
@@ -291,15 +279,13 @@ interface_rx_dpo_inline (vlib_main_t * vm,
                                              1,
                                              vlib_buffer_length_in_chain (vm, b1));
 
-            if (PREDICT_FALSE(b0->flags & VLIB_BUFFER_IS_TRACED))
-            {
+            if (PREDICT_FALSE(b0->flags & VLIB_BUFFER_IS_TRACED)) {
                 interface_rx_dpo_trace_t *tr0;
 
                 tr0 = vlib_add_trace (vm, node, b0, sizeof (*tr0));
                 tr0->sw_if_index = ido0->ido_sw_if_index;
             }
-            if (PREDICT_FALSE(b1->flags & VLIB_BUFFER_IS_TRACED))
-            {
+            if (PREDICT_FALSE(b1->flags & VLIB_BUFFER_IS_TRACED)) {
                 interface_rx_dpo_trace_t *tr1;
 
                 tr1 = vlib_add_trace (vm, node, b1, sizeof (*tr1));
@@ -312,8 +298,7 @@ interface_rx_dpo_inline (vlib_main_t * vm,
                                             INTERFACE_RX_DPO_INPUT);
         }
 
-        while (n_left_from > 0 && n_left_to_next > 0)
-        {
+        while (n_left_from > 0 && n_left_to_next > 0) {
             const interface_rx_dpo_t * ido0;
             vlib_buffer_t * b0;
             u32 bi0, idoi0;
@@ -342,8 +327,7 @@ interface_rx_dpo_inline (vlib_main_t * vm,
                                              1,
                                              vlib_buffer_length_in_chain (vm, b0));
 
-            if (PREDICT_FALSE(b0->flags & VLIB_BUFFER_IS_TRACED))
-            {
+            if (PREDICT_FALSE(b0->flags & VLIB_BUFFER_IS_TRACED)) {
                 interface_rx_dpo_trace_t *tr;
 
                 tr = vlib_add_trace (vm, node, b0, sizeof (*tr));

@@ -20,20 +20,17 @@
 #include <vppinfra/bihash_24_8.h>
 #include <nat/nat.h>
 
-typedef struct
-{
-  union
-  {
-    struct
-    {
-      ip6_address_t softwire_id;
-      ip4_address_t addr;
-      u16 port;
-      u8 proto;
-      u8 pad;
+typedef struct {
+    union {
+        struct {
+            ip6_address_t softwire_id;
+            ip4_address_t addr;
+            u16 port;
+            u8 proto;
+            u8 pad;
+        };
+        u64 as_u64[3];
     };
-    u64 as_u64[3];
-  };
 } dslite_session_key_t;
 
 /* *INDENT-OFF* */
@@ -50,47 +47,43 @@ typedef CLIB_PACKED (struct
 }) dslite_session_t;
 /* *INDENT-ON* */
 
-typedef struct
-{
-  ip6_address_t addr;
-  u32 sessions_per_b4_list_head_index;
-  u32 nsessions;
+typedef struct {
+    ip6_address_t addr;
+    u32 sessions_per_b4_list_head_index;
+    u32 nsessions;
 } dslite_b4_t;
 
-typedef struct
-{
-  /* Main lookup tables */
-  clib_bihash_8_8_t out2in;
-  clib_bihash_24_8_t in2out;
+typedef struct {
+    /* Main lookup tables */
+    clib_bihash_8_8_t out2in;
+    clib_bihash_24_8_t in2out;
 
-  /* Find a B4 */
-  clib_bihash_16_8_t b4_hash;
+    /* Find a B4 */
+    clib_bihash_16_8_t b4_hash;
 
-  /* B4 pool */
-  dslite_b4_t *b4s;
+    /* B4 pool */
+    dslite_b4_t *b4s;
 
-  /* Session pool */
-  dslite_session_t *sessions;
+    /* Session pool */
+    dslite_session_t *sessions;
 
-  /* Pool of doubly-linked list elements */
-  dlist_elt_t *list_pool;
+    /* Pool of doubly-linked list elements */
+    dlist_elt_t *list_pool;
 } dslite_per_thread_data_t;
 
-typedef struct
-{
-  ip6_address_t aftr_ip6_addr;
-  ip4_address_t aftr_ip4_addr;
-  dslite_per_thread_data_t *per_thread_data;
-  snat_address_t *addr_pool;
-  u32 num_workers;
-  u32 first_worker_index;
-  u16 port_per_thread;
+typedef struct {
+    ip6_address_t aftr_ip6_addr;
+    ip4_address_t aftr_ip4_addr;
+    dslite_per_thread_data_t *per_thread_data;
+    snat_address_t *addr_pool;
+    u32 num_workers;
+    u32 first_worker_index;
+    u16 port_per_thread;
 } dslite_main_t;
 
-typedef struct
-{
-  u32 next_index;
-  u32 session_index;
+typedef struct {
+    u32 next_index;
+    u32 session_index;
 } dslite_trace_t;
 
 #define foreach_dslite_error                    \
@@ -103,10 +96,9 @@ _(UNSUPPORTED_PROTOCOL, "unsupported protocol") \
 _(BAD_ICMP_TYPE, "unsupported icmp type")       \
 _(UNKNOWN, "unknown")
 
-typedef enum
-{
+typedef enum {
 #define _(sym,str) DSLITE_ERROR_##sym,
-  foreach_dslite_error
+    foreach_dslite_error
 #undef _
     DSLITE_N_ERROR,
 } dslite_error_t;
@@ -119,7 +111,7 @@ extern vlib_node_registration_t dslite_out2in_node;
 void dslite_init (vlib_main_t * vm);
 int dslite_set_aftr_ip6_addr (dslite_main_t * dm, ip6_address_t * addr);
 int dslite_add_del_pool_addr (dslite_main_t * dm, ip4_address_t * addr,
-			      u8 is_add);
+                              u8 is_add);
 u8 *format_dslite_trace (u8 * s, va_list * args);
 
 #endif /* __included_dslite_h__ */

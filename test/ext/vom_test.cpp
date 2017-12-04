@@ -78,15 +78,15 @@ public:
 };
 
 class MockListener : public interface::event_listener,
-                     public interface::stat_listener
-{
-    void handle_interface_stat(interface_cmds::stats_enable_cmd *cmd)
-    {
-    }
-    void handle_interface_event(interface_cmds::events_cmd *cmd)
-    {
-    }
-};
+        public interface::stat_listener
+        {
+            void handle_interface_stat(interface_cmds::stats_enable_cmd *cmd)
+            {
+            }
+            void handle_interface_event(interface_cmds::events_cmd *cmd)
+            {
+            }
+        };
 
 class MockCmdQ : public HW::cmd_q
 {
@@ -108,8 +108,7 @@ public:
     }
     void enqueue(std::queue<cmd*> &cmds)
     {
-        while (cmds.size())
-        {
+        while (cmds.size()) {
             m_act_queue.push_back(cmds.front());
             cmds.pop();
         }
@@ -143,8 +142,7 @@ public:
         cmd *f_exp, *f_act;
         rc_t rc = rc_t::OK;
 
-        while (m_act_queue.size())
-        {
+        while (m_act_queue.size()) {
             bool matched = false;
             auto it_exp = m_exp_queue.begin();
             auto it_act = m_act_queue.begin();
@@ -152,236 +150,124 @@ public:
             f_act = *it_act;
 
             std::cout << " Act: " << f_act->to_string() << std::endl;
-            while (it_exp != m_exp_queue.end())
-            {
+            while (it_exp != m_exp_queue.end()) {
                 f_exp = *it_exp;
-                try
-                {
+                try {
                     std::cout << "  Exp: " << f_exp->to_string() << std::endl;
 
-                    if (typeid(*f_exp) != typeid(*f_act))
-                    {
+                    if (typeid(*f_exp) != typeid(*f_act)) {
                         throw ExpException(1);
                     }
 
-                    if (typeid(*f_exp) == typeid(interface_cmds::af_packet_create_cmd))
-                    {
+                    if (typeid(*f_exp) == typeid(interface_cmds::af_packet_create_cmd)) {
                         rc = handle_derived<interface_cmds::af_packet_create_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(interface_cmds::loopback_create_cmd))
-                    {
+                    } else if (typeid(*f_exp) == typeid(interface_cmds::loopback_create_cmd)) {
                         rc = handle_derived<interface_cmds::loopback_create_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(interface_cmds::loopback_delete_cmd))
-                    {
+                    } else if (typeid(*f_exp) == typeid(interface_cmds::loopback_delete_cmd)) {
                         rc = handle_derived<interface_cmds::loopback_delete_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(interface_cmds::af_packet_delete_cmd))
-                    {
+                    } else if (typeid(*f_exp) == typeid(interface_cmds::af_packet_delete_cmd)) {
                         rc = handle_derived<interface_cmds::af_packet_delete_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(interface_cmds::state_change_cmd))
-                    {
+                    } else if (typeid(*f_exp) == typeid(interface_cmds::state_change_cmd)) {
                         rc = handle_derived<interface_cmds::state_change_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(interface_cmds::set_table_cmd))
-                    {
+                    } else if (typeid(*f_exp) == typeid(interface_cmds::set_table_cmd)) {
                         rc = handle_derived<interface_cmds::set_table_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(interface_cmds::set_mac_cmd))
-                    {
+                    } else if (typeid(*f_exp) == typeid(interface_cmds::set_mac_cmd)) {
                         rc = handle_derived<interface_cmds::set_mac_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(interface_cmds::set_tag))
-                    {
+                    } else if (typeid(*f_exp) == typeid(interface_cmds::set_tag)) {
                         rc = handle_derived<interface_cmds::set_tag>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(route_domain_cmds::create_cmd))
-                    {
-			rc = handle_derived<route_domain_cmds::create_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(route_domain_cmds::delete_cmd))
-                    {
+                    } else if (typeid(*f_exp) == typeid(route_domain_cmds::create_cmd)) {
+                        rc = handle_derived<route_domain_cmds::create_cmd>(f_exp, f_act);
+                    } else if (typeid(*f_exp) == typeid(route_domain_cmds::delete_cmd)) {
                         rc = handle_derived<route_domain_cmds::delete_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(route::ip_route_cmds::update_cmd))
-                    {
-			rc = handle_derived<route::ip_route_cmds::update_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(route::ip_route_cmds::delete_cmd))
-                    {
+                    } else if (typeid(*f_exp) == typeid(route::ip_route_cmds::update_cmd)) {
+                        rc = handle_derived<route::ip_route_cmds::update_cmd>(f_exp, f_act);
+                    } else if (typeid(*f_exp) == typeid(route::ip_route_cmds::delete_cmd)) {
                         rc = handle_derived<route::ip_route_cmds::delete_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(neighbour_cmds::create_cmd))
-                    {
-			rc = handle_derived<neighbour_cmds::create_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(neighbour_cmds::delete_cmd))
-                    {
+                    } else if (typeid(*f_exp) == typeid(neighbour_cmds::create_cmd)) {
+                        rc = handle_derived<neighbour_cmds::create_cmd>(f_exp, f_act);
+                    } else if (typeid(*f_exp) == typeid(neighbour_cmds::delete_cmd)) {
                         rc = handle_derived<neighbour_cmds::delete_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(l3_binding_cmds::bind_cmd))
-                    {
+                    } else if (typeid(*f_exp) == typeid(l3_binding_cmds::bind_cmd)) {
                         rc = handle_derived<l3_binding_cmds::bind_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(l3_binding_cmds::unbind_cmd))
-                    {
+                    } else if (typeid(*f_exp) == typeid(l3_binding_cmds::unbind_cmd)) {
                         rc = handle_derived<l3_binding_cmds::unbind_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(bridge_domain_cmds::create_cmd))
-                    {
+                    } else if (typeid(*f_exp) == typeid(bridge_domain_cmds::create_cmd)) {
                         rc = handle_derived<bridge_domain_cmds::create_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(bridge_domain_cmds::delete_cmd))
-                    {
+                    } else if (typeid(*f_exp) == typeid(bridge_domain_cmds::delete_cmd)) {
                         rc = handle_derived<bridge_domain_cmds::delete_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(bridge_domain_entry_cmds::create_cmd))
-                    {
+                    } else if (typeid(*f_exp) == typeid(bridge_domain_entry_cmds::create_cmd)) {
                         rc = handle_derived<bridge_domain_entry_cmds::create_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(bridge_domain_entry_cmds::delete_cmd))
-                    {
+                    } else if (typeid(*f_exp) == typeid(bridge_domain_entry_cmds::delete_cmd)) {
                         rc = handle_derived<bridge_domain_entry_cmds::delete_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(bridge_domain_arp_entry_cmds::create_cmd))
-                    {
+                    } else if (typeid(*f_exp) == typeid(bridge_domain_arp_entry_cmds::create_cmd)) {
                         rc = handle_derived<bridge_domain_arp_entry_cmds::create_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(bridge_domain_arp_entry_cmds::delete_cmd))
-                    {
+                    } else if (typeid(*f_exp) == typeid(bridge_domain_arp_entry_cmds::delete_cmd)) {
                         rc = handle_derived<bridge_domain_arp_entry_cmds::delete_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(l2_binding_cmds::bind_cmd))
-                    {
+                    } else if (typeid(*f_exp) == typeid(l2_binding_cmds::bind_cmd)) {
                         rc = handle_derived<l2_binding_cmds::bind_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(l2_binding_cmds::unbind_cmd))
-                    {
+                    } else if (typeid(*f_exp) == typeid(l2_binding_cmds::unbind_cmd)) {
                         rc = handle_derived<l2_binding_cmds::unbind_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(l2_binding_cmds::set_vtr_op_cmd))
-                    {
+                    } else if (typeid(*f_exp) == typeid(l2_binding_cmds::set_vtr_op_cmd)) {
                         rc = handle_derived<l2_binding_cmds::set_vtr_op_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(vxlan_tunnel_cmds::create_cmd))
-                    {
+                    } else if (typeid(*f_exp) == typeid(vxlan_tunnel_cmds::create_cmd)) {
                         rc = handle_derived<vxlan_tunnel_cmds::create_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(vxlan_tunnel_cmds::delete_cmd))
-                    {
+                    } else if (typeid(*f_exp) == typeid(vxlan_tunnel_cmds::delete_cmd)) {
                         rc = handle_derived<vxlan_tunnel_cmds::delete_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(sub_interface_cmds::create_cmd))
-                    {
+                    } else if (typeid(*f_exp) == typeid(sub_interface_cmds::create_cmd)) {
                         rc = handle_derived<sub_interface_cmds::create_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(sub_interface_cmds::delete_cmd))
-                    {
+                    } else if (typeid(*f_exp) == typeid(sub_interface_cmds::delete_cmd)) {
                         rc = handle_derived<sub_interface_cmds::delete_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(ACL::list_cmds::l3_update_cmd))
-                    {
+                    } else if (typeid(*f_exp) == typeid(ACL::list_cmds::l3_update_cmd)) {
                         rc = handle_derived<ACL::list_cmds::l3_update_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(ACL::list_cmds::l3_delete_cmd))
-                    {
+                    } else if (typeid(*f_exp) == typeid(ACL::list_cmds::l3_delete_cmd)) {
                         rc = handle_derived<ACL::list_cmds::l3_delete_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(ACL::binding_cmds::l3_bind_cmd))
-                    {
+                    } else if (typeid(*f_exp) == typeid(ACL::binding_cmds::l3_bind_cmd)) {
                         rc = handle_derived<ACL::binding_cmds::l3_bind_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(ACL::binding_cmds::l3_unbind_cmd))
-                    {
+                    } else if (typeid(*f_exp) == typeid(ACL::binding_cmds::l3_unbind_cmd)) {
                         rc = handle_derived<ACL::binding_cmds::l3_unbind_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(ACL::list_cmds::l2_update_cmd))
-                    {
+                    } else if (typeid(*f_exp) == typeid(ACL::list_cmds::l2_update_cmd)) {
                         rc = handle_derived<ACL::list_cmds::l2_update_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(ACL::list_cmds::l2_delete_cmd))
-                    {
+                    } else if (typeid(*f_exp) == typeid(ACL::list_cmds::l2_delete_cmd)) {
                         rc = handle_derived<ACL::list_cmds::l2_delete_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(ACL::binding_cmds::l2_bind_cmd))
-                    {
+                    } else if (typeid(*f_exp) == typeid(ACL::binding_cmds::l2_bind_cmd)) {
                         rc = handle_derived<ACL::binding_cmds::l2_bind_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(ACL::binding_cmds::l2_unbind_cmd))
-                    {
+                    } else if (typeid(*f_exp) == typeid(ACL::binding_cmds::l2_unbind_cmd)) {
                         rc = handle_derived<ACL::binding_cmds::l2_unbind_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(arp_proxy_binding_cmds::bind_cmd))
-                    {
+                    } else if (typeid(*f_exp) == typeid(arp_proxy_binding_cmds::bind_cmd)) {
                         rc = handle_derived<arp_proxy_binding_cmds::bind_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(arp_proxy_binding_cmds::unbind_cmd))
-                    {
+                    } else if (typeid(*f_exp) == typeid(arp_proxy_binding_cmds::unbind_cmd)) {
                         rc = handle_derived<arp_proxy_binding_cmds::unbind_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(arp_proxy_config_cmds::config_cmd))
-                    {
+                    } else if (typeid(*f_exp) == typeid(arp_proxy_config_cmds::config_cmd)) {
                         rc = handle_derived<arp_proxy_config_cmds::config_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(arp_proxy_config_cmds::unconfig_cmd))
-                    {
+                    } else if (typeid(*f_exp) == typeid(arp_proxy_config_cmds::unconfig_cmd)) {
                         rc = handle_derived<arp_proxy_config_cmds::unconfig_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(ip_unnumbered_cmds::config_cmd))
-                    {
+                    } else if (typeid(*f_exp) == typeid(ip_unnumbered_cmds::config_cmd)) {
                         rc = handle_derived<ip_unnumbered_cmds::config_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(ip_unnumbered_cmds::unconfig_cmd))
-                    {
+                    } else if (typeid(*f_exp) == typeid(ip_unnumbered_cmds::unconfig_cmd)) {
                         rc = handle_derived<ip_unnumbered_cmds::unconfig_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(ip6nd_ra_config::config_cmd))
-                    {
+                    } else if (typeid(*f_exp) == typeid(ip6nd_ra_config::config_cmd)) {
                         rc = handle_derived<ip6nd_ra_config::config_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(ip6nd_ra_config::unconfig_cmd))
-                    {
+                    } else if (typeid(*f_exp) == typeid(ip6nd_ra_config::unconfig_cmd)) {
                         rc = handle_derived<ip6nd_ra_config::unconfig_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(ip6nd_ra_prefix::config_cmd))
-                    {
+                    } else if (typeid(*f_exp) == typeid(ip6nd_ra_prefix::config_cmd)) {
                         rc = handle_derived<ip6nd_ra_prefix::config_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(ip6nd_ra_prefix::unconfig_cmd))
-                    {
+                    } else if (typeid(*f_exp) == typeid(ip6nd_ra_prefix::unconfig_cmd)) {
                         rc = handle_derived<ip6nd_ra_prefix::unconfig_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(interface_span_cmds::config_cmd))
-                    {
+                    } else if (typeid(*f_exp) == typeid(interface_span_cmds::config_cmd)) {
                         rc = handle_derived<interface_span_cmds::config_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(interface_span_cmds::unconfig_cmd))
-                    {
+                    } else if (typeid(*f_exp) == typeid(interface_span_cmds::unconfig_cmd)) {
                         rc = handle_derived<interface_span_cmds::unconfig_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(nat_static_cmds::create_44_cmd))
-                    {
+                    } else if (typeid(*f_exp) == typeid(nat_static_cmds::create_44_cmd)) {
                         rc = handle_derived<nat_static_cmds::create_44_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(nat_static_cmds::delete_44_cmd))
-                    {
+                    } else if (typeid(*f_exp) == typeid(nat_static_cmds::delete_44_cmd)) {
                         rc = handle_derived<nat_static_cmds::delete_44_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(nat_binding_cmds::bind_44_input_cmd))
-                    {
+                    } else if (typeid(*f_exp) == typeid(nat_binding_cmds::bind_44_input_cmd)) {
                         rc = handle_derived<nat_binding_cmds::bind_44_input_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(nat_binding_cmds::unbind_44_input_cmd))
-                    {
+                    } else if (typeid(*f_exp) == typeid(nat_binding_cmds::unbind_44_input_cmd)) {
                         rc = handle_derived<nat_binding_cmds::unbind_44_input_cmd>(f_exp, f_act);
-                    }
-                    else if (typeid(*f_exp) == typeid(interface_cmds::events_cmd))
-                    {
+                    } else if (typeid(*f_exp) == typeid(interface_cmds::events_cmd)) {
                         rc = handle_derived<interface_cmds::events_cmd>(f_exp, f_act);
-                    }
-                    else
-                    {
+                    } else {
                         throw ExpException(2);
                     }
 
@@ -392,24 +278,18 @@ public:
                     delete f_act;
 
                     // return any injected failures to the agent
-                    if (rc_t::OK != rc && rc_t::NOOP != rc)
-                    {
+                    if (rc_t::OK != rc && rc_t::NOOP != rc) {
                         return (rc);
                     }
 
                     matched = true;
                     break;
-                }
-                catch (ExpException &e)
-                {
+                } catch (ExpException &e) {
                     // The expected and actual do not match
-                    if (m_strict_order)
-                    {
+                    if (m_strict_order) {
                         // in strict ordering mode this is fatal, so rethrow
                         throw e;
-                    }
-                    else
-                    {
+                    } else {
                         // move the iterator onto the next in the expected list and
                         // check for a match
                         ++it_exp;
@@ -433,8 +313,7 @@ private:
 
         i_exp = dynamic_cast<const T*>(f_exp);
         i_act = dynamic_cast<T*>(f_act);
-        if (!(*i_exp == *i_act))
-        {
+        if (!(*i_exp == *i_act)) {
             throw ExpException(4);
         }
         // pass the data and return code to the agent
@@ -453,7 +332,8 @@ private:
     bool m_strict_order;
 };
 
-class VppInit {
+class VppInit
+{
 public:
     std::string name;
     MockCmdQ *f;
@@ -467,7 +347,8 @@ public:
         logger().set(log_level_t::DEBUG);
     }
 
-    ~VppInit() {
+    ~VppInit()
+    {
         delete f;
     }
 };
@@ -504,7 +385,8 @@ BOOST_AUTO_TEST_SUITE(VppOM_test)
 #define STRICT_ORDER_OFF()                        \
     vi.f->strict_order(false)
 
-BOOST_AUTO_TEST_CASE(test_interface) {
+BOOST_AUTO_TEST_CASE(test_interface)
+{
     VppInit vi;
     const std::string go = "GeorgeOrwell";
     const std::string js = "JohnSteinbeck";
@@ -515,8 +397,8 @@ BOOST_AUTO_TEST_CASE(test_interface) {
      */
     std::string itf1_name = "afpacket1";
     interface itf1(itf1_name,
-                   interface::type_t::AFPACKET,
-                   interface::admin_state_t::UP);
+                       interface::type_t::AFPACKET,
+                       interface::admin_state_t::UP);
 
     /*
      * set the expectation for a afpacket interface create.
@@ -541,8 +423,8 @@ BOOST_AUTO_TEST_CASE(test_interface) {
      * George's remove is a no-op, sice John also owns the interface
      */
     interface itf1b(itf1_name,
-                    interface::type_t::AFPACKET,
-                    interface::admin_state_t::DOWN);
+                        interface::type_t::AFPACKET,
+                        interface::admin_state_t::DOWN);
 
     ADD_EXPECT(interface_cmds::af_packet_create_cmd(hw_ifh, itf1_name));
     ADD_EXPECT(interface_cmds::state_change_cmd(hw_as_up, hw_ifh));
@@ -600,8 +482,8 @@ BOOST_AUTO_TEST_CASE(test_interface) {
 
     std::string itf2_name = "afpacket2";
     interface itf2(itf2_name,
-                   interface::type_t::AFPACKET,
-                   interface::admin_state_t::UP);
+                       interface::type_t::AFPACKET,
+                       interface::admin_state_t::UP);
     HW::item<handle_t> hw_ifh2(3, rc_t::OK);
 
     ADD_EXPECT(interface_cmds::af_packet_create_cmd(hw_ifh2, itf2_name));
@@ -619,7 +501,8 @@ BOOST_AUTO_TEST_CASE(test_interface) {
     TRY_CHECK(OM::sweep(go));
 }
 
-BOOST_AUTO_TEST_CASE(test_bvi) {
+BOOST_AUTO_TEST_CASE(test_bvi)
+{
     VppInit vi;
     const std::string ernest = "ErnestHemmingway";
     const std::string graham = "GrahamGreene";
@@ -627,9 +510,9 @@ BOOST_AUTO_TEST_CASE(test_bvi) {
     l3_binding *l3;
 
     HW::item<interface::admin_state_t> hw_as_up(interface::admin_state_t::UP,
-                                                rc_t::OK);
+                rc_t::OK);
     HW::item<interface::admin_state_t> hw_as_down(interface::admin_state_t::DOWN,
-                                                  rc_t::OK);
+                rc_t::OK);
 
     /*
      * Enrest creates a BVI with address 10.10.10.10/24
@@ -638,8 +521,8 @@ BOOST_AUTO_TEST_CASE(test_bvi) {
 
     const std::string bvi_name = "bvi1";
     interface itf(bvi_name,
-                  interface::type_t::BVI,
-                  interface::admin_state_t::UP);
+                      interface::type_t::BVI,
+                      interface::admin_state_t::UP);
     HW::item<handle_t> hw_ifh(4, rc_t::OK);
     HW::item<route::prefix_t> hw_pfx_10(pfx_10, rc_t::OK);
 
@@ -656,8 +539,8 @@ BOOST_AUTO_TEST_CASE(test_bvi) {
 
     // change the MAC address on the BVI
     interface itf_new_mac(bvi_name,
-                          interface::type_t::BVI,
-                          interface::admin_state_t::UP);
+                              interface::type_t::BVI,
+                              interface::admin_state_t::UP);
     l2_address_t l2_addr({0,1,2,3,4,5});
     HW::item<l2_address_t> hw_mac(l2_addr, rc_t::OK);
     itf_new_mac.set(l2_addr);
@@ -670,8 +553,8 @@ BOOST_AUTO_TEST_CASE(test_bvi) {
 
     // change the MAC address on the BVI - again
     interface itf_new_mac2(bvi_name,
-                           interface::type_t::BVI,
-                           interface::admin_state_t::UP);
+                               interface::type_t::BVI,
+                               interface::admin_state_t::UP);
     l2_address_t l2_addr2({0,1,2,3,4,6});
     HW::item<l2_address_t> hw_mac2(l2_addr2, rc_t::OK);
     itf_new_mac2.set(l2_addr2);
@@ -702,9 +585,9 @@ BOOST_AUTO_TEST_CASE(test_bvi) {
 
     const std::string bvi2_name = "bvi2";
     interface *itf2 = new interface(bvi2_name,
-                                    interface::type_t::BVI,
-                                    interface::admin_state_t::UP,
-                                    rd);
+                                            interface::type_t::BVI,
+                                            interface::admin_state_t::UP,
+                                            rd);
     HW::item<handle_t> hw_ifh2(5, rc_t::OK);
 
     ADD_EXPECT(interface_cmds::loopback_create_cmd(hw_ifh2, bvi2_name));
@@ -732,7 +615,8 @@ BOOST_AUTO_TEST_CASE(test_bvi) {
     TRY_CHECK(OM::remove(graham));
 }
 
-BOOST_AUTO_TEST_CASE(test_bridge) {
+BOOST_AUTO_TEST_CASE(test_bridge)
+{
     VppInit vi;
     const std::string franz = "FranzKafka";
     const std::string dante = "Dante";
@@ -746,12 +630,12 @@ BOOST_AUTO_TEST_CASE(test_bridge) {
     // interface create
     std::string itf1_name = "afpacket1";
     interface itf1(itf1_name,
-                   interface::type_t::AFPACKET,
-                   interface::admin_state_t::UP);
+                       interface::type_t::AFPACKET,
+                       interface::admin_state_t::UP);
 
     HW::item<handle_t> hw_ifh(3, rc_t::OK);
     HW::item<interface::admin_state_t> hw_as_up(interface::admin_state_t::UP,
-                                                rc_t::OK);
+                rc_t::OK);
     ADD_EXPECT(interface_cmds::af_packet_create_cmd(hw_ifh, itf1_name));
     ADD_EXPECT(interface_cmds::state_change_cmd(hw_as_up, hw_ifh));
 
@@ -779,8 +663,8 @@ BOOST_AUTO_TEST_CASE(test_bridge) {
      */
     std::string itf2_name = "afpacket2";
     interface itf2(itf2_name,
-                   interface::type_t::AFPACKET,
-                   interface::admin_state_t::UP);
+                       interface::type_t::AFPACKET,
+                       interface::admin_state_t::UP);
 
     HW::item<handle_t> hw_ifh2(4, rc_t::OK);
     ADD_EXPECT(interface_cmds::af_packet_create_cmd(hw_ifh2, itf2_name));
@@ -803,7 +687,7 @@ BOOST_AUTO_TEST_CASE(test_bridge) {
     mac_address_t mac1({0,1,2,3,4,5});
     bridge_domain_entry *be1 = new bridge_domain_entry(bd1, mac1, itf2);
     ADD_EXPECT(bridge_domain_entry_cmds::create_cmd(hw_be1, mac1, bd1.id(), hw_ifh2.data(),
-		                                    false));
+               false));
     TRY_CHECK_RC(OM::write(dante, *be1));
 
     // Add some entries to the bridge-domain ARP termination table
@@ -817,7 +701,7 @@ BOOST_AUTO_TEST_CASE(test_bridge) {
     // flush Franz's state
     delete l2itf;
     HW::item<interface::admin_state_t> hw_as_down(interface::admin_state_t::DOWN,
-                                                  rc_t::OK);
+                rc_t::OK);
     ADD_EXPECT(l2_binding_cmds::unbind_cmd(hw_l2_bind, hw_ifh.data(), hw_bd.data(), false));
     ADD_EXPECT(interface_cmds::state_change_cmd(hw_as_down, hw_ifh));
     ADD_EXPECT(interface_cmds::af_packet_delete_cmd(hw_ifh, itf1_name));
@@ -848,8 +732,8 @@ BOOST_AUTO_TEST_CASE(test_bridge) {
 
     std::string itf3_name = "bvi";
     interface itf3(itf3_name,
-                   interface::type_t::BVI,
-                   interface::admin_state_t::UP);
+                       interface::type_t::BVI,
+                       interface::admin_state_t::UP);
 
     HW::item<handle_t> hw_ifh3(5, rc_t::OK);
     ADD_EXPECT(interface_cmds::loopback_create_cmd(hw_ifh3, itf3_name));
@@ -878,7 +762,8 @@ BOOST_AUTO_TEST_CASE(test_bridge) {
     TRY_CHECK(OM::remove(jkr));
 }
 
-BOOST_AUTO_TEST_CASE(test_vxlan) {
+BOOST_AUTO_TEST_CASE(test_vxlan)
+{
     VppInit vi;
     const std::string franz = "FranzKafka";
     rc_t rc = rc_t::OK;
@@ -889,8 +774,8 @@ BOOST_AUTO_TEST_CASE(test_vxlan) {
 
     // VXLAN create
     vxlan_tunnel::endpoint_t ep(boost::asio::ip::address::from_string("10.10.10.10"),
-                               boost::asio::ip::address::from_string("10.10.10.11"),
-                               322);
+                                boost::asio::ip::address::from_string("10.10.10.11"),
+                                322);
 
     vxlan_tunnel vxt(ep.src, ep.dst, ep.vni);
 
@@ -926,15 +811,16 @@ BOOST_AUTO_TEST_CASE(test_vxlan) {
     TRY_CHECK(OM::remove(franz));
 }
 
-BOOST_AUTO_TEST_CASE(test_vlan) {
+BOOST_AUTO_TEST_CASE(test_vlan)
+{
     VppInit vi;
     const std::string noam = "NoamChomsky";
     rc_t rc = rc_t::OK;
 
     std::string itf1_name = "host1";
     interface itf1(itf1_name,
-                   interface::type_t::AFPACKET,
-                   interface::admin_state_t::UP);
+                       interface::type_t::AFPACKET,
+                       interface::admin_state_t::UP);
 
     HW::item<handle_t> hw_ifh(2, rc_t::OK);
     ADD_EXPECT(interface_cmds::af_packet_create_cmd(hw_ifh, itf1_name));
@@ -965,7 +851,8 @@ BOOST_AUTO_TEST_CASE(test_vlan) {
     TRY_CHECK(OM::remove(noam));
 }
 
-BOOST_AUTO_TEST_CASE(test_acl) {
+BOOST_AUTO_TEST_CASE(test_acl)
+{
     VppInit vi;
     const std::string fyodor = "FyodorDostoyevsky";
     const std::string leo = "LeoTolstoy";
@@ -976,8 +863,8 @@ BOOST_AUTO_TEST_CASE(test_acl) {
      */
     std::string itf1_name = "host1";
     interface itf1(itf1_name,
-                   interface::type_t::AFPACKET,
-                   interface::admin_state_t::UP);
+                       interface::type_t::AFPACKET,
+                       interface::admin_state_t::UP);
     HW::item<handle_t> hw_ifh(2, rc_t::OK);
     HW::item<interface::admin_state_t> hw_as_up(interface::admin_state_t::UP, rc_t::OK);
     ADD_EXPECT(interface_cmds::af_packet_create_cmd(hw_ifh, itf1_name));
@@ -1001,7 +888,7 @@ BOOST_AUTO_TEST_CASE(test_acl) {
     ACL::l3_binding *l3b = new ACL::l3_binding(direction_t::INPUT, itf1, acl1);
     HW::item<bool> hw_binding(true, rc_t::OK);
     ADD_EXPECT(ACL::binding_cmds::l3_bind_cmd(hw_binding, direction_t::INPUT,
-                                         hw_ifh.data(), hw_acl.data()));
+               hw_ifh.data(), hw_acl.data()));
     TRY_CHECK_RC(OM::write(fyodor, *l3b));
 
     /**
@@ -1028,21 +915,21 @@ BOOST_AUTO_TEST_CASE(test_acl) {
     ACL::l2_binding *l2b = new ACL::l2_binding(direction_t::OUTPUT, itf1, l2_acl);
     HW::item<bool> l2_hw_binding(true, rc_t::OK);
     ADD_EXPECT(ACL::binding_cmds::l2_bind_cmd(l2_hw_binding, direction_t::OUTPUT,
-                                       hw_ifh.data(), l2_hw_acl.data()));
+               hw_ifh.data(), l2_hw_acl.data()));
     TRY_CHECK_RC(OM::write(leo, *l2b));
 
     delete l2b;
     ADD_EXPECT(ACL::binding_cmds::l2_unbind_cmd(l2_hw_binding, direction_t::OUTPUT,
-                                                hw_ifh.data(), l2_hw_acl.data()));
+               hw_ifh.data(), l2_hw_acl.data()));
     ADD_EXPECT(ACL::list_cmds::l2_delete_cmd(l2_hw_acl));
     TRY_CHECK(OM::remove(leo));
 
     delete l3b;
     HW::item<interface::admin_state_t> hw_as_down(interface::admin_state_t::DOWN,
-                                                  rc_t::OK);
+                rc_t::OK);
     STRICT_ORDER_OFF();
     ADD_EXPECT(ACL::binding_cmds::l3_unbind_cmd(hw_binding, direction_t::INPUT,
-                                         hw_ifh.data(), hw_acl.data()));
+               hw_ifh.data(), hw_acl.data()));
     ADD_EXPECT(ACL::list_cmds::l3_delete_cmd(hw_acl));
     ADD_EXPECT(interface_cmds::state_change_cmd(hw_as_down, hw_ifh));
     ADD_EXPECT(interface_cmds::af_packet_delete_cmd(hw_ifh, itf1_name));
@@ -1050,7 +937,8 @@ BOOST_AUTO_TEST_CASE(test_acl) {
     TRY_CHECK(OM::remove(fyodor));
 }
 
-BOOST_AUTO_TEST_CASE(test_arp_proxy) {
+BOOST_AUTO_TEST_CASE(test_arp_proxy)
+{
     VppInit vi;
     const std::string kurt = "KurtVonnegut";
     rc_t rc = rc_t::OK;
@@ -1065,8 +953,8 @@ BOOST_AUTO_TEST_CASE(test_arp_proxy) {
 
     std::string itf3_name = "host3";
     interface itf3(itf3_name,
-                   interface::type_t::AFPACKET,
-                   interface::admin_state_t::UP);
+                       interface::type_t::AFPACKET,
+                       interface::admin_state_t::UP);
     HW::item<handle_t> hw_ifh(2, rc_t::OK);
     HW::item<interface::admin_state_t> hw_as_up(interface::admin_state_t::UP, rc_t::OK);
     ADD_EXPECT(interface_cmds::af_packet_create_cmd(hw_ifh, itf3_name));
@@ -1081,7 +969,7 @@ BOOST_AUTO_TEST_CASE(test_arp_proxy) {
     delete apb;
 
     HW::item<interface::admin_state_t> hw_as_down(interface::admin_state_t::DOWN,
-                                                  rc_t::OK);
+                rc_t::OK);
     STRICT_ORDER_OFF();
     ADD_EXPECT(arp_proxy_binding_cmds::unbind_cmd(hw_binding, hw_ifh.data()));
     ADD_EXPECT(interface_cmds::state_change_cmd(hw_as_down, hw_ifh));
@@ -1091,7 +979,8 @@ BOOST_AUTO_TEST_CASE(test_arp_proxy) {
     TRY_CHECK(OM::remove(kurt));
 }
 
-BOOST_AUTO_TEST_CASE(test_ip_unnumbered) {
+BOOST_AUTO_TEST_CASE(test_ip_unnumbered)
+{
     VppInit vi;
     const std::string eric = "EricAmbler";
     rc_t rc = rc_t::OK;
@@ -1101,8 +990,8 @@ BOOST_AUTO_TEST_CASE(test_ip_unnumbered) {
      */
     std::string itf1_name = "host1";
     interface itf1(itf1_name,
-                   interface::type_t::AFPACKET,
-                   interface::admin_state_t::UP);
+                       interface::type_t::AFPACKET,
+                       interface::admin_state_t::UP);
     HW::item<handle_t> hw_ifh(2, rc_t::OK);
     HW::item<interface::admin_state_t> hw_as_up(interface::admin_state_t::UP, rc_t::OK);
     ADD_EXPECT(interface_cmds::af_packet_create_cmd(hw_ifh, itf1_name));
@@ -1121,8 +1010,8 @@ BOOST_AUTO_TEST_CASE(test_ip_unnumbered) {
      */
     std::string itf2_name = "host2";
     interface itf2(itf2_name,
-                   interface::type_t::AFPACKET,
-                   interface::admin_state_t::UP);
+                       interface::type_t::AFPACKET,
+                       interface::admin_state_t::UP);
 
     HW::item<handle_t> hw_ifh2(4, rc_t::OK);
     ADD_EXPECT(interface_cmds::af_packet_create_cmd(hw_ifh2, itf2_name));
@@ -1150,7 +1039,8 @@ BOOST_AUTO_TEST_CASE(test_ip_unnumbered) {
     TRY_CHECK(OM::remove(eric));
 }
 
-BOOST_AUTO_TEST_CASE(test_ip6nd) {
+BOOST_AUTO_TEST_CASE(test_ip6nd)
+{
     VppInit vi;
     const std::string paulo = "PauloCoelho";
     rc_t rc = rc_t::OK;
@@ -1160,8 +1050,8 @@ BOOST_AUTO_TEST_CASE(test_ip6nd) {
      */
     std::string itf_name = "host_ip6nd";
     interface itf(itf_name,
-                   interface::type_t::AFPACKET,
-                   interface::admin_state_t::UP);
+                      interface::type_t::AFPACKET,
+                      interface::admin_state_t::UP);
     HW::item<handle_t> hw_ifh(3, rc_t::OK);
     HW::item<interface::admin_state_t> hw_as_up(interface::admin_state_t::UP, rc_t::OK);
     ADD_EXPECT(interface_cmds::af_packet_create_cmd(hw_ifh, itf_name));
@@ -1210,7 +1100,8 @@ BOOST_AUTO_TEST_CASE(test_ip6nd) {
     TRY_CHECK(OM::remove(paulo));
 }
 
-BOOST_AUTO_TEST_CASE(test_interface_span) {
+BOOST_AUTO_TEST_CASE(test_interface_span)
+{
     VppInit vi;
     const std::string elif = "ElifShafak";
     rc_t rc = rc_t::OK;
@@ -1220,8 +1111,8 @@ BOOST_AUTO_TEST_CASE(test_interface_span) {
      */
     std::string itf1_name = "port-from";
     interface itf1(itf1_name,
-                   interface::type_t::AFPACKET,
-                   interface::admin_state_t::UP);
+                       interface::type_t::AFPACKET,
+                       interface::admin_state_t::UP);
     HW::item<handle_t> hw_ifh(2, rc_t::OK);
     HW::item<interface::admin_state_t> hw_as_up(interface::admin_state_t::UP, rc_t::OK);
     ADD_EXPECT(interface_cmds::af_packet_create_cmd(hw_ifh, itf1_name));
@@ -1233,8 +1124,8 @@ BOOST_AUTO_TEST_CASE(test_interface_span) {
      */
     std::string itf2_name = "port-to";
     interface itf2(itf2_name,
-                   interface::type_t::AFPACKET,
-                   interface::admin_state_t::UP);
+                       interface::type_t::AFPACKET,
+                       interface::admin_state_t::UP);
 
     HW::item<handle_t> hw_ifh2(4, rc_t::OK);
     HW::item<interface::admin_state_t> hw_as_up2(interface::admin_state_t::UP, rc_t::OK);
@@ -1263,7 +1154,8 @@ BOOST_AUTO_TEST_CASE(test_interface_span) {
     TRY_CHECK(OM::remove(elif));
 }
 
-BOOST_AUTO_TEST_CASE(test_routing) {
+BOOST_AUTO_TEST_CASE(test_routing)
+{
     VppInit vi;
     const std::string ian = "IanFleming";
     rc_t rc = rc_t::OK;
@@ -1289,8 +1181,8 @@ BOOST_AUTO_TEST_CASE(test_routing) {
      */
     std::string itf1_name = "af1";
     interface itf1(itf1_name,
-                   interface::type_t::AFPACKET,
-                   interface::admin_state_t::UP);
+                       interface::type_t::AFPACKET,
+                       interface::admin_state_t::UP);
     HW::item<handle_t> hw_ifh(2, rc_t::OK);
     HW::item<interface::admin_state_t> hw_as_up(interface::admin_state_t::UP, rc_t::OK);
     HW::item<interface::admin_state_t> hw_as_down(interface::admin_state_t::DOWN, rc_t::OK);
@@ -1300,9 +1192,9 @@ BOOST_AUTO_TEST_CASE(test_routing) {
 
     std::string itf2_name = "af2";
     interface *itf2 = new interface(itf2_name,
-                                    interface::type_t::AFPACKET,
-                                    interface::admin_state_t::UP,
-                                    rd4);
+                                            interface::type_t::AFPACKET,
+                                            interface::admin_state_t::UP,
+                                            rd4);
 
     HW::item<handle_t> hw_ifh2(4, rc_t::OK);
     HW::item<interface::admin_state_t> hw_as_up2(interface::admin_state_t::UP, rc_t::OK);
@@ -1403,7 +1295,8 @@ BOOST_AUTO_TEST_CASE(test_routing) {
     TRY_CHECK(OM::remove(ian));
 }
 
-BOOST_AUTO_TEST_CASE(test_nat) {
+BOOST_AUTO_TEST_CASE(test_nat)
+{
     VppInit vi;
     const std::string gs = "GeorgeSimenon";
     rc_t rc = rc_t::OK;
@@ -1413,8 +1306,8 @@ BOOST_AUTO_TEST_CASE(test_nat) {
      */
     std::string itf_in_name = "inside";
     interface itf_in(itf_in_name,
-                     interface::type_t::AFPACKET,
-                     interface::admin_state_t::UP);
+                         interface::type_t::AFPACKET,
+                         interface::admin_state_t::UP);
     HW::item<handle_t> hw_ifh(2, rc_t::OK);
     HW::item<interface::admin_state_t> hw_as_up(interface::admin_state_t::UP, rc_t::OK);
     HW::item<interface::admin_state_t> hw_as_down(interface::admin_state_t::DOWN, rc_t::OK);
@@ -1427,8 +1320,8 @@ BOOST_AUTO_TEST_CASE(test_nat) {
      */
     std::string itf_out_name = "port-to";
     interface itf_out(itf_out_name,
-                   interface::type_t::AFPACKET,
-                   interface::admin_state_t::UP);
+                          interface::type_t::AFPACKET,
+                          interface::admin_state_t::UP);
 
     HW::item<handle_t> hw_ifh2(4, rc_t::OK);
     HW::item<interface::admin_state_t> hw_as_up2(interface::admin_state_t::UP, rc_t::OK);
@@ -1460,8 +1353,8 @@ BOOST_AUTO_TEST_CASE(test_nat) {
     HW::item<bool> hw_nb_in(true, rc_t::OK);
 
     ADD_EXPECT(nat_binding_cmds::bind_44_input_cmd(hw_nb_in,
-                                                   hw_ifh.data().value(),
-                                                   nat_binding::zone_t::INSIDE));
+               hw_ifh.data().value(),
+               nat_binding::zone_t::INSIDE));
     TRY_CHECK_RC(OM::write(gs, *nb_in));
 
     nat_binding *nb_out = new nat_binding(itf_out,
@@ -1471,8 +1364,8 @@ BOOST_AUTO_TEST_CASE(test_nat) {
     HW::item<bool> hw_nb_out(true, rc_t::OK);
 
     ADD_EXPECT(nat_binding_cmds::bind_44_input_cmd(hw_nb_out,
-                                                   hw_ifh2.data().value(),
-                                                   nat_binding::zone_t::OUTSIDE));
+               hw_ifh2.data().value(),
+               nat_binding::zone_t::OUTSIDE));
     TRY_CHECK_RC(OM::write(gs, *nb_out));
 
 
@@ -1480,11 +1373,11 @@ BOOST_AUTO_TEST_CASE(test_nat) {
     delete nb_in;
     delete nb_out;
     ADD_EXPECT(nat_binding_cmds::unbind_44_input_cmd(hw_nb_in,
-                                                     hw_ifh.data().value(),
-                                                     nat_binding::zone_t::INSIDE));
+               hw_ifh.data().value(),
+               nat_binding::zone_t::INSIDE));
     ADD_EXPECT(nat_binding_cmds::unbind_44_input_cmd(hw_nb_out,
-                                                     hw_ifh2.data().value(),
-                                                     nat_binding::zone_t::OUTSIDE));
+               hw_ifh2.data().value(),
+               nat_binding::zone_t::OUTSIDE));
     ADD_EXPECT(nat_static_cmds::delete_44_cmd(hw_ns, 0, in_addr.to_v4(), out_addr));
     ADD_EXPECT(interface_cmds::state_change_cmd(hw_as_down, hw_ifh));
     ADD_EXPECT(interface_cmds::af_packet_delete_cmd(hw_ifh, itf_in_name));
@@ -1494,7 +1387,8 @@ BOOST_AUTO_TEST_CASE(test_nat) {
     TRY_CHECK(OM::remove(gs));
 }
 
-BOOST_AUTO_TEST_CASE(test_interface_events) {
+BOOST_AUTO_TEST_CASE(test_interface_events)
+{
     VppInit vi;
     MockListener ml;
 
@@ -1507,7 +1401,8 @@ BOOST_AUTO_TEST_CASE(test_interface_events) {
     HW::write();
 }
 
-BOOST_AUTO_TEST_CASE(test_interface_route_domain_change) {
+BOOST_AUTO_TEST_CASE(test_interface_route_domain_change)
+{
     VppInit vi;
     const std::string rene = "ReneGoscinny";
     rc_t rc = rc_t::OK;
@@ -1517,8 +1412,8 @@ BOOST_AUTO_TEST_CASE(test_interface_route_domain_change) {
      */
     std::string itf1_name = "host1";
     interface itf1(itf1_name,
-                   interface::type_t::AFPACKET,
-                   interface::admin_state_t::UP);
+                       interface::type_t::AFPACKET,
+                       interface::admin_state_t::UP);
     HW::item<handle_t> hw_ifh1(2, rc_t::OK);
     HW::item<interface::admin_state_t> hw_as_up(interface::admin_state_t::UP, rc_t::OK);
     HW::item<interface::admin_state_t> hw_as_down(interface::admin_state_t::DOWN, rc_t::OK);
@@ -1554,9 +1449,9 @@ BOOST_AUTO_TEST_CASE(test_interface_route_domain_change) {
      * expect that the l3-bindings are removed and readded.
      */
     interface *itf2 = new interface(itf1_name,
-                                    interface::type_t::AFPACKET,
-                                    interface::admin_state_t::UP,
-                                    rd);
+                                            interface::type_t::AFPACKET,
+                                            interface::admin_state_t::UP,
+                                            rd);
     ADD_EXPECT(l3_binding_cmds::unbind_cmd(hw_l3_unbind1, hw_ifh1.data(), pfx_10));
     ADD_EXPECT(l3_binding_cmds::unbind_cmd(hw_l3_unbind2, hw_ifh1.data(), pfx_11));
     ADD_EXPECT(interface_cmds::set_table_cmd(hw_rd_bind, l3_proto_t::IPV4, hw_ifh1));
@@ -1569,8 +1464,8 @@ BOOST_AUTO_TEST_CASE(test_interface_route_domain_change) {
      * mve the interface back to the default route-domain
      */
     interface itf3(itf1_name,
-                   interface::type_t::AFPACKET,
-                   interface::admin_state_t::UP);
+                       interface::type_t::AFPACKET,
+                       interface::admin_state_t::UP);
     ADD_EXPECT(l3_binding_cmds::unbind_cmd(hw_l3_unbind1, hw_ifh1.data(), pfx_10));
     ADD_EXPECT(l3_binding_cmds::unbind_cmd(hw_l3_unbind2, hw_ifh1.data(), pfx_11));
     ADD_EXPECT(interface_cmds::set_table_cmd(hw_rd_unbind, l3_proto_t::IPV4, hw_ifh1));

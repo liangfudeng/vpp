@@ -48,88 +48,97 @@ static clib_error_t *md5_test_suite (void);
 int
 main (int argc, char *argv[])
 {
-  int i;
+    int i;
 
-  if (argc == 1)
-    {
-      clib_error_t *e;
-      e = md5_test_suite ();
-      if (e)
-	{
-	  clib_error_report (e);
-	  exit (1);
-	}
+    if (argc == 1) {
+        clib_error_t *e;
+        e = md5_test_suite ();
+        if (e) {
+            clib_error_report (e);
+            exit (1);
+        }
     }
 
-  for (i = 1; i < argc; i++)
-    {
-      md5_context_t m;
-      u8 digest[16];
-      u8 buffer[64 * 1024];
-      int fd, n;
+    for (i = 1; i < argc; i++) {
+        md5_context_t m;
+        u8 digest[16];
+        u8 buffer[64 * 1024];
+        int fd, n;
 
-      fd = open (argv[i], 0);
-      if (fd < 0)
-	clib_unix_error ("can't open %s", argv[i]);
+        fd = open (argv[i], 0);
+        if (fd < 0)
+            clib_unix_error ("can't open %s", argv[i]);
 
-      md5_init (&m);
-      while ((n = read (fd, buffer, sizeof (buffer))) > 0)
-	md5_add (&m, buffer, n);
-      close (fd);
-      md5_finish (&m, digest);
-      fformat (stdout, "%U  %s\n",
-	       format_hex_bytes, digest, sizeof (digest), argv[i]);
+        md5_init (&m);
+        while ((n = read (fd, buffer, sizeof (buffer))) > 0)
+            md5_add (&m, buffer, n);
+        close (fd);
+        md5_finish (&m, digest);
+        fformat (stdout, "%U  %s\n",
+                 format_hex_bytes, digest, sizeof (digest), argv[i]);
     }
 
-  return 0;
+    return 0;
 }
 
 static clib_error_t *
 md5_test_suite (void)
 {
-  typedef struct
-  {
-    char *input;
-    char *output;
-  } md5_test_t;
+    typedef struct {
+        char *input;
+        char *output;
+    } md5_test_t;
 
-  static md5_test_t tests[] = {
-    {.input = "",
-     .output = "d41d8cd98f00b204e9800998ecf8427e",},
-    {.input = "a",
-     .output = "0cc175b9c0f1b6a831c399e269772661",},
-    {.input = "abc",
-     .output = "900150983cd24fb0d6963f7d28e17f72",},
-    {.input = "message digest",
-     .output = "f96b697d7cb7938d525a2f31aaf161d0",},
-    {.input = "abcdefghijklmnopqrstuvwxyz",
-     .output = "c3fcd3d76192e4007dfb496cca67e13b",},
-    {.input =
-     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
-     .output = "d174ab98d277d9f5a5611c2c9f419d9f",},
-    {.input =
-     "12345678901234567890123456789012345678901234567890123456789012345678901234567890",
-     .output = "57edf4a22be3c955ac49da2e2107b67a",},
-  };
+    static md5_test_t tests[] = {
+        {
+            .input = "",
+            .output = "d41d8cd98f00b204e9800998ecf8427e",
+        },
+        {
+            .input = "a",
+            .output = "0cc175b9c0f1b6a831c399e269772661",
+        },
+        {
+            .input = "abc",
+            .output = "900150983cd24fb0d6963f7d28e17f72",
+        },
+        {
+            .input = "message digest",
+            .output = "f96b697d7cb7938d525a2f31aaf161d0",
+        },
+        {
+            .input = "abcdefghijklmnopqrstuvwxyz",
+            .output = "c3fcd3d76192e4007dfb496cca67e13b",
+        },
+        {
+            .input =
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
+            .output = "d174ab98d277d9f5a5611c2c9f419d9f",
+        },
+        {
+            .input =
+            "12345678901234567890123456789012345678901234567890123456789012345678901234567890",
+            .output = "57edf4a22be3c955ac49da2e2107b67a",
+        },
+    };
 
-  int i;
-  u8 *s;
-  md5_context_t m;
-  u8 digest[16];
+    int i;
+    u8 *s;
+    md5_context_t m;
+    u8 digest[16];
 
-  for (i = 0; i < ARRAY_LEN (tests); i++)
-    {
-      md5_init (&m);
-      md5_add (&m, tests[i].input, strlen (tests[i].input));
-      md5_finish (&m, digest);
-      s = format (0, "%U", format_hex_bytes, digest, sizeof (digest));
-      if (memcmp (s, tests[i].output, 2 * sizeof (digest)))
-	return clib_error_return
-	  (0, "%s -> %v expected %s", tests[i].input, s, tests[i].output);
-      vec_free (s);
+    for (i = 0; i < ARRAY_LEN (tests); i++) {
+        md5_init (&m);
+        md5_add (&m, tests[i].input, strlen (tests[i].input));
+        md5_finish (&m, digest);
+        s = format (0, "%U", format_hex_bytes, digest, sizeof (digest));
+        if (memcmp (s, tests[i].output, 2 * sizeof (digest)))
+            return clib_error_return
+                   (0, "%s -> %v expected %s", tests[i].input, s, tests[i].output);
+        vec_free (s);
     }
 
-  return 0;
+    return 0;
 }
 
 /*

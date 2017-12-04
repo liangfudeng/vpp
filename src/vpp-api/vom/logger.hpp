@@ -22,161 +22,161 @@
 
 #include "vom/enum_base.hpp"
 
-namespace VOM {
-struct log_level_t : enum_base<log_level_t>
+namespace VOM
 {
-  const static log_level_t CRITICAL;
-  const static log_level_t ERROR;
-  const static log_level_t WARNING;
-  const static log_level_t INFO;
-  const static log_level_t DEBUG;
+    struct log_level_t : enum_base<log_level_t> {
+        const static log_level_t CRITICAL;
+        const static log_level_t ERROR;
+        const static log_level_t WARNING;
+        const static log_level_t INFO;
+        const static log_level_t DEBUG;
 
-private:
-  /**
-   * Private constructor taking the value and the string name
-   */
-  log_level_t(int v, const std::string& s);
+    private:
+        /**
+         * Private constructor taking the value and the string name
+         */
+        log_level_t(int v, const std::string& s);
 
-  /*
-   * not allowed to construct
-   */
-  log_level_t() = delete;
-};
-
-/**
- * Ideally we'd use the boost logger but that is not prevelent
- * in many distros. So something simple here instead.
- */
-class log_t
-{
-public:
-  /**
-   *
-   */
-  class handler
-  {
-  public:
-    /**
-   * Default Constructor
-   */
-    handler() = default;
+        /*
+         * not allowed to construct
+         */
+        log_level_t() = delete;
+    };
 
     /**
-     * Default Destructor
+     * Ideally we'd use the boost logger but that is not prevelent
+     * in many distros. So something simple here instead.
      */
-    virtual ~handler() = default;
+    class log_t
+    {
+    public:
+        /**
+         *
+         */
+        class handler
+        {
+        public:
+            /**
+            * Default Constructor
+            */
+            handler() = default;
+
+            /**
+             * Default Destructor
+             */
+            virtual ~handler() = default;
+
+            /**
+             * Handle a log message
+             */
+            virtual void handle_message(const std::string& file,
+                                        const int line,
+                                        const std::string& function,
+                                        const log_level_t& level,
+                                        const std::string& message) = 0;
+        };
+
+        /**
+         * Construct a logger
+         */
+        log_t(handler* h);
+        log_t();
+
+        /**
+         * The configured level
+         */
+        const log_level_t& level() const;
+
+        /**
+         * set the logging level
+         */
+        void set(const log_level_t& level);
+
+        /**
+         * set a file to receive the logging data
+         */
+        void set(handler* h);
+
+        /**
+         * An entry in the log
+         */
+        class entry
+        {
+        public:
+            entry(const char* file,
+                  const char* function,
+                  int line,
+                  const log_level_t& level);
+            ~entry();
+
+            std::stringstream& stream();
+
+        private:
+            const std::string m_file;
+            const std::string m_function;
+            const log_level_t m_level;
+            const int m_line;
+
+            std::stringstream m_stream;
+        };
+        /**
+         * Register a log handler to receive the log output
+         */
+        void register_handler(handler& h);
+
+    private:
+        void write(const std::string& file,
+                   const int line,
+                   const std::string& function,
+                   const log_level_t& level,
+                   const std::string& message);
+
+        /**
+         * the configured logging level
+         */
+        log_level_t m_level;
+
+        /**
+         * Pointer to a registered handler. Null if no handler registerd
+         */
+        handler* m_handler;
+    };
+
+    class file_handler : public log_t::handler
+    {
+    public:
+        file_handler(const std::string& ofile);
+        ~file_handler();
+
+        virtual void handle_message(const std::string& file,
+                                    const int line,
+                                    const std::string& function,
+                                    const log_level_t& level,
+                                    const std::string& message);
+
+    private:
+        /**
+         * Opened file for debugging
+         */
+        std::ofstream m_file_stream;
+    };
+
+    class cout_handler : public log_t::handler
+    {
+    public:
+        cout_handler() = default;
+        ~cout_handler() = default;
+        virtual void handle_message(const std::string& file,
+                                    const int line,
+                                    const std::string& function,
+                                    const log_level_t& level,
+                                    const std::string& message);
+    };
 
     /**
-     * Handle a log message
+     * Return a log object into which VPP objects can write
      */
-    virtual void handle_message(const std::string& file,
-                                const int line,
-                                const std::string& function,
-                                const log_level_t& level,
-                                const std::string& message) = 0;
-  };
-
-  /**
-   * Construct a logger
-   */
-  log_t(handler* h);
-  log_t();
-
-  /**
-   * The configured level
-   */
-  const log_level_t& level() const;
-
-  /**
-   * set the logging level
-   */
-  void set(const log_level_t& level);
-
-  /**
-   * set a file to receive the logging data
-   */
-  void set(handler* h);
-
-  /**
-   * An entry in the log
-   */
-  class entry
-  {
-  public:
-    entry(const char* file,
-          const char* function,
-          int line,
-          const log_level_t& level);
-    ~entry();
-
-    std::stringstream& stream();
-
-  private:
-    const std::string m_file;
-    const std::string m_function;
-    const log_level_t m_level;
-    const int m_line;
-
-    std::stringstream m_stream;
-  };
-  /**
-   * Register a log handler to receive the log output
-   */
-  void register_handler(handler& h);
-
-private:
-  void write(const std::string& file,
-             const int line,
-             const std::string& function,
-             const log_level_t& level,
-             const std::string& message);
-
-  /**
-   * the configured logging level
-   */
-  log_level_t m_level;
-
-  /**
-   * Pointer to a registered handler. Null if no handler registerd
-   */
-  handler* m_handler;
-};
-
-class file_handler : public log_t::handler
-{
-public:
-  file_handler(const std::string& ofile);
-  ~file_handler();
-
-  virtual void handle_message(const std::string& file,
-                              const int line,
-                              const std::string& function,
-                              const log_level_t& level,
-                              const std::string& message);
-
-private:
-  /**
-   * Opened file for debugging
-   */
-  std::ofstream m_file_stream;
-};
-
-class cout_handler : public log_t::handler
-{
-public:
-  cout_handler() = default;
-  ~cout_handler() = default;
-  virtual void handle_message(const std::string& file,
-                              const int line,
-                              const std::string& function,
-                              const log_level_t& level,
-                              const std::string& message);
-};
-
-/**
- * Return a log object into which VPP objects can write
- */
-log_t& logger();
+    log_t& logger();
 
 #define VOM_LOG(lvl)                                                           \
   if (lvl >= logger().level())                                                 \

@@ -36,58 +36,57 @@
 #include <vnet/fib/fib_table.h>
 #include <vnet/ip/ip4_mtrie.h>
 
-typedef struct ip4_fib_t_
-{
-  /**
-   * Mtrie for fast lookups. Hash is used to maintain overlapping prefixes.
-   * First member so it's in the first cacheline.
-   */
-  ip4_fib_mtrie_t mtrie;
+typedef struct ip4_fib_t_ {
+    /**
+     * Mtrie for fast lookups. Hash is used to maintain overlapping prefixes.
+     * First member so it's in the first cacheline.
+     */
+    ip4_fib_mtrie_t mtrie;
 
-  /* Hash table for each prefix length mapping. */
-  uword *fib_entry_by_dst_address[33];
+    /* Hash table for each prefix length mapping. */
+    uword *fib_entry_by_dst_address[33];
 
-  /* Table ID (hash key) for this FIB. */
-  u32 table_id;
+    /* Table ID (hash key) for this FIB. */
+    u32 table_id;
 
-  /* Index into FIB vector. */
-  u32 index;
+    /* Index into FIB vector. */
+    u32 index;
 
-  /* N-tuple classifier indices */
-  u32 fwd_classify_table_index;
-  u32 rev_classify_table_index;
+    /* N-tuple classifier indices */
+    u32 fwd_classify_table_index;
+    u32 rev_classify_table_index;
 
 } ip4_fib_t;
 
 extern fib_node_index_t ip4_fib_table_lookup(const ip4_fib_t *fib,
-					     const ip4_address_t *addr,
-					     u32 len);
+        const ip4_address_t *addr,
+        u32 len);
 extern fib_node_index_t ip4_fib_table_lookup_exact_match(const ip4_fib_t *fib,
-							 const ip4_address_t *addr,
-							 u32 len);
+        const ip4_address_t *addr,
+        u32 len);
 
 extern void ip4_fib_table_entry_remove(ip4_fib_t *fib,
-				       const ip4_address_t *addr,
-				       u32 len);
+                                       const ip4_address_t *addr,
+                                       u32 len);
 
 extern void ip4_fib_table_entry_insert(ip4_fib_t *fib,
-				       const ip4_address_t *addr,
-				       u32 len,
-				       fib_node_index_t fib_entry_index);
+                                       const ip4_address_t *addr,
+                                       u32 len,
+                                       fib_node_index_t fib_entry_index);
 extern void ip4_fib_table_destroy(u32 fib_index);
 
 extern void ip4_fib_table_fwding_dpo_update(ip4_fib_t *fib,
-					    const ip4_address_t *addr,
-					    u32 len,
-					    const dpo_id_t *dpo);
+        const ip4_address_t *addr,
+        u32 len,
+        const dpo_id_t *dpo);
 
 extern void ip4_fib_table_fwding_dpo_remove(ip4_fib_t *fib,
-					    const ip4_address_t *addr,
-					    u32 len,
-					    const dpo_id_t *dpo,
-                                            fib_node_index_t cover_index);
+        const ip4_address_t *addr,
+        u32 len,
+        const dpo_id_t *dpo,
+        fib_node_index_t cover_index);
 extern u32 ip4_fib_table_lookup_lb (ip4_fib_t *fib,
-				    const ip4_address_t * dst);
+                                    const ip4_address_t * dst);
 
 /**
  * @brief Walk all entries in a FIB table
@@ -111,8 +110,8 @@ always_inline u32
 ip4_fib_lookup (ip4_main_t * im, u32 sw_if_index, ip4_address_t * dst)
 {
     return (ip4_fib_table_lookup_lb(
-		ip4_fib_get(vec_elt (im->fib_index_by_sw_if_index, sw_if_index)),
-		dst));
+                ip4_fib_get(vec_elt (im->fib_index_by_sw_if_index, sw_if_index)),
+                dst));
 }
 
 /**
@@ -128,22 +127,22 @@ ip4_fib_lookup (ip4_main_t * im, u32 sw_if_index, ip4_address_t * dst)
  *
  */
 extern u32 ip4_fib_table_find_or_create_and_lock(u32 table_id,
-                                                 fib_source_t src);
+        fib_source_t src);
 extern u32 ip4_fib_table_create_and_lock(fib_source_t src);
 
 extern u8 *format_ip4_fib_table_memory(u8 * s, va_list * args);
 
-static inline 
+static inline
 u32 ip4_fib_index_from_table_id (u32 table_id)
 {
-  ip4_main_t * im = &ip4_main;
-  uword * p;
+    ip4_main_t * im = &ip4_main;
+    uword * p;
 
-  p = hash_get (im->fib_index_by_table_id, table_id);
-  if (!p)
-    return ~0;
+    p = hash_get (im->fib_index_by_table_id, table_id);
+    if (!p)
+        return ~0;
 
-  return p[0];
+    return p[0];
 }
 
 extern u32 ip4_fib_table_get_index_for_sw_if_index(u32 sw_if_index);

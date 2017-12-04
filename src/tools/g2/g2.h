@@ -1,4 +1,4 @@
-/* 
+/*
  *------------------------------------------------------------------
  * Copyright (c) 2005-2016 Cisco and/or its affiliates.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -71,7 +71,7 @@ gint c_view1_draw_height;
  */
 
 void menu1_init(void);
-void modal_dialog (char *label_text, char *retry_text, char *default_value, 
+void modal_dialog (char *label_text, char *retry_text, char *default_value,
                    boolean (*cb)(char *));
 void infobox(char *label_text, char *text);
 /*
@@ -90,13 +90,13 @@ void set_window_title(const char *filename);
 
 enum view1_tbox_fn {
     TBOX_DRAW_BOXED = 1,        /* note: order counts */
-	TBOX_DRAW_EVENT,
+    TBOX_DRAW_EVENT,
     TBOX_DRAW_PLAIN,
     TBOX_PRINT_BOXED,
-	TBOX_PRINT_EVENT,
+    TBOX_PRINT_EVENT,
     TBOX_PRINT_PLAIN,           /* end restriction */
     TBOX_GETRECT_BOXED,
-	TBOX_GETRECT_EVENT,
+    TBOX_GETRECT_EVENT,
     TBOX_GETRECT_PLAIN,
 };
 
@@ -131,11 +131,11 @@ int find_event_index (ulonglong t);
 int read_cpel_file(char *file);
 int read_clib_file(char *file);
 void cpel_event_init(ulong);
-void add_event_from_cpel_file(ulong, char * , char *);
-void add_event_from_clib_file(unsigned int event, char *name, 
+void add_event_from_cpel_file(ulong, char *, char *);
+void add_event_from_clib_file(unsigned int event, char *name,
                               unsigned int vec_index);
 void add_cpel_event(ulonglong delta, ulong, ulong, ulong);
-void add_clib_event(double delta, unsigned short track, 
+void add_clib_event(double delta, unsigned short track,
                     unsigned short event, unsigned int index);
 void cpel_event_finalize(void);
 void *get_clib_event (unsigned int datum);
@@ -145,8 +145,8 @@ typedef struct pid_data {
     ulong pid_value;            /* The actual pid value */
     ulong pid_index;            /* Index in pid sort order */
 } pid_data_t;
-    
-#define EVENT_FLAG_SELECT 	0x00000001 /* This event is selected */
+
+#define EVENT_FLAG_SELECT   0x00000001 /* This event is selected */
 #define EVENT_FLAG_SEARCHRSLT   0x00000002 /* This event is the search rslt */
 #define EVENT_FLAG_CLIB         0x00000004 /* clib event */
 
@@ -177,7 +177,7 @@ pid_sort_t *g_original_pids;
 int g_npids;
 pid_data_t *g_pid_data_list;
 
-#define PIDHASH_NBUCKETS	20021 /* Should be prime */
+#define PIDHASH_NBUCKETS    20021 /* Should be prime */
 
 boolean ticks_per_ns_set;
 double ticks_per_ns;

@@ -1,4 +1,4 @@
-/* 
+/*
  *------------------------------------------------------------------
  * Copyright (c) 2008-2016 Cisco and/or its affiliates.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -79,7 +79,7 @@ uword *the_trackdef_hash;
 typedef struct instance_ {
     struct instance_ *next;
     ulonglong time;
-}instance_t;
+} instance_t;
 
 typedef struct actor_ {
     struct actor_ *next;
@@ -129,7 +129,7 @@ actor_t *find_or_create_actor (ulong key)
         hash [bucket] = ap;
         return (ap);
     }
-    
+
     while (ap) {
         if (ap->key == key)
             return (ap);
@@ -200,7 +200,7 @@ int actor_compare (const void *arg1, const void *arg2)
 
     ninst1 = ((double)((*a1)->ninst));
     ninst2 = ((double)((*a2)->ninst));
-    
+
     e10k1 = ninst1 * ((*a1)->mean);
     e10k2 = ninst2 * ((*a2)->mean);
 
@@ -245,24 +245,24 @@ void report_actors (void)
             if (ninstance > 1) {
 #if DEBUG > 0
                 int j;
-                
+
                 for (j = 0; j < ninstance; j++) {
                     printf("x[%d] = %10.2f, y[%d] = %10.2f\n",
                            j, x[j], j, y[j]);
                 }
-#endif                    
-                
+#endif
+
                 linreg (x, y, ninstance, &ap->a, &ap->b, &ap->min,
                         &ap->max, &ap->mean, &ap->r);
             } else {
                 ap->a = 0.00;
                 ap->b = 0.00;
             }
-            
+
             ap = ap->next;
         }
     }
-            
+
     actor_vector = (actor_t **)malloc (nactors*sizeof(*actor_vector));
     nactors = 0;
 
@@ -277,7 +277,7 @@ void report_actors (void)
             ap = ap->next;
         }
     }
-        
+
     qsort (actor_vector, nactors, sizeof (actor_t *), actor_compare);
 
     if (summary_stats)
@@ -306,8 +306,7 @@ void report_actors (void)
                 printf ("%6ld %11.2f %11.2f %11.2f %11.2f %11.2f %11.2f %11.2f %11.2f 0x%08lx ",
                         ap->ninst, ap->a, ap->b, e10k, ap->min,
                         ap->max, ap->mean, pcttot, ap->r, ap->key);
-            }
-            else
+            } else
                 printf ("%6ld %11.2f %11.2f %11.2f 0x%08lx ",
                         ap->ninst, ap->a, ap->b, e10k, ap->key);
 
@@ -334,7 +333,7 @@ void scatterplot_data(void)
         if (ap == NULL)
             continue;
         while (ap) {
-            if (ap->key == scatterkey){
+            if (ap->key == scatterkey) {
                 ip = ap->first;
                 while (ip) {
                     time = ((double)ip->time);
@@ -395,14 +394,14 @@ int trackdef_pass(cpel_section_header_t *sh, int verbose, FILE *ofp)
 
     tdh = (track_definition_section_header_t *)(sh+1);
     nevents = ntohl(tdh->number_of_track_definitions);
-    
+
     if (verbose) {
         fprintf(stderr, "Track Definition Section: %d definitions\n",
                 nevents);
     }
 
     tp = (track_definition_t *)(tdh+1);
-    
+
     for (i = 0; i < nevents; i++) {
         track_code = ntohl(tp->track);
         p = hash_get(the_trackdef_hash, track_code);
@@ -455,7 +454,7 @@ int event_pass (cpel_section_header_t *sh, int verbose, FILE *ofp)
 
     time0 = ntohl (ep->time[0]);
     time1 = ntohl (ep->time[1]);
-    
+
     now = (((u64) time0)<<32) | time1;
     d = now;
     d /= ticks_per_us;
@@ -466,7 +465,7 @@ int event_pass (cpel_section_header_t *sh, int verbose, FILE *ofp)
         time1 = ntohl (ep->time[1]);
 
         now = (((u64) time0)<<32) | time1;
-        
+
         /* Convert from bus ticks to usec */
         d = now;
         d /= ticks_per_us;
@@ -500,126 +499,126 @@ int event_pass (cpel_section_header_t *sh, int verbose, FILE *ofp)
             ep++;
             continue;
         }
-        
+
     again:
         switch (tp->state) {
-        case 0:                 /* not in state */
-            /* Another exit event? Stack pop */
-            if (event_code == exit_event) {
-                /* Only if we have something on the stack */
-                if (vec_len(tp->start_datum) > 0) {
-                    tp->state = 1;
-                    goto again;
+            case 0:                 /* not in state */
+                /* Another exit event? Stack pop */
+                if (event_code == exit_event) {
+                    /* Only if we have something on the stack */
+                    if (vec_len(tp->start_datum) > 0) {
+                        tp->state = 1;
+                        goto again;
+                    } else {
+                        fprintf (stderr,
+                                 "End event before start event, key 0x%x.",
+                                 ntohl(ep->event_datum));
+                        fprintf (stderr, " Interpret results carefully...\n");
+                    }
+                }
+
+                tp->state = 1;
+                if (vec_len(tp->start_datum) >= MAXSTACK) {
+                    int j;
+
+                    fprintf (stderr, "stack overflow..\n");
+                    for (j = vec_len(tp->start_datum)-1; j >= 0; j--) {
+                        fprintf(stderr, "stack[%d]: datum 0x%x\n",
+                                j, tp->start_datum[j]);
+                    }
+                    fprintf (stderr,
+                             "Stack overflow... This occurs when "
+                             "(start, datum)...(end, datum) events\n"
+                             "are not properly paired.\n\n"
+                             "A typical scenario looks like this:\n\n"
+                             "    ...\n"
+                             "    ELOG(..., START_EVENT, datum);\n"
+                             "    if (condition)\n"
+                             "       return; /*oops, forgot the end event*/\n"
+                             "    ELOG(..., END_EVENT, datum);\n"
+                             "    ...\n\n"
+                             "The datum stack dump (above) should make it clear\n"
+                             "where to start looking for a sneak path...\n");
+
+                    exit (1);
+                }
+                vec_add1(tp->start_datum, event_datum);
+                vec_add1(tp->start_time, (tp->thread_timestamp + (now - tp->time_thread_on_cpu)));
+#ifdef HAVING_TROUBLE
+                printf ("sp %lld key 0x%x start time %llu\n",
+                        (long long) vec_len(tp->start_time)-1, event_datum,
+                        (unsigned long long)
+                        tp->start_time [vec_len(tp->start_time)-1]);
+                printf ("timestamp %llu, now %llu, thread on cpu %llu\n",
+                        (unsigned long long) tp->thread_timestamp,
+                        (unsigned long long) now,
+                        (unsigned long long) tp->time_thread_on_cpu);
+#endif
+
+
+
+                /*
+                 * Multiple identical enter events? If the user knows that
+                 * gcc is producing bogus events due to inline functions,
+                 * trash the duplicate.
+                 */
+                if (inline_mokus
+                    && vec_len (tp->start_datum) > 1
+                    && tp->start_datum [vec_len(tp->start_datum)-1] ==
+                    tp->start_datum [vec_len(tp->start_datum)-2]) {
+                    vec_add1 (tp->dup_event, 1);
                 } else {
-                    fprintf (stderr, 
-                             "End event before start event, key 0x%x.", 
-                             ntohl(ep->event_datum));
-                    fprintf (stderr, " Interpret results carefully...\n");
+                    vec_add1 (tp->dup_event, 0);
                 }
-            }
 
-            tp->state = 1;
-            if (vec_len(tp->start_datum) >= MAXSTACK) {
-                int j;
 
-                fprintf (stderr, "stack overflow..\n");
-                for (j = vec_len(tp->start_datum)-1; j >= 0; j--) {
-                    fprintf(stderr, "stack[%d]: datum 0x%x\n", 
-                            j, tp->start_datum[j]);
+                ep++;
+                continue;
+
+            case 1:                 /* in state */
+                /* Another entry event? Stack push*/
+                if (event_code == entry_event) {
+                    tp->state = 0;
+                    goto again;
                 }
-                fprintf (stderr, 
-                         "Stack overflow... This occurs when "
-                         "(start, datum)...(end, datum) events\n"
-                         "are not properly paired.\n\n"
-                         "A typical scenario looks like this:\n\n"
-                         "    ...\n"
-                         "    ELOG(..., START_EVENT, datum);\n"
-                         "    if (condition)\n"
-                         "       return; /*oops, forgot the end event*/\n"
-                         "    ELOG(..., END_EVENT, datum);\n"
-                         "    ...\n\n"
-                         "The datum stack dump (above) should make it clear\n"
-                         "where to start looking for a sneak path...\n");
 
-                exit (1);
-            }
-            vec_add1(tp->start_datum, event_datum);
-            vec_add1(tp->start_time, (tp->thread_timestamp + (now - tp->time_thread_on_cpu)));
-#ifdef HAVING_TROUBLE
-            printf ("sp %lld key 0x%x start time %llu\n", 
-                    (long long) vec_len(tp->start_time)-1, event_datum, 
-                    (unsigned long long) 
-                    tp->start_time [vec_len(tp->start_time)-1]);
-            printf ("timestamp %llu, now %llu, thread on cpu %llu\n",
-                    (unsigned long long) tp->thread_timestamp, 
-                    (unsigned long long) now, 
-                    (unsigned long long) tp->time_thread_on_cpu);
-#endif
-            
-
-            
-            /* 
-             * Multiple identical enter events? If the user knows that
-             * gcc is producing bogus events due to inline functions,
-             * trash the duplicate.
-             */
-            if (inline_mokus 
-                && vec_len (tp->start_datum) > 1
-                && tp->start_datum [vec_len(tp->start_datum)-1] ==
-                tp->start_datum [vec_len(tp->start_datum)-2]) {
-                vec_add1 (tp->dup_event, 1);
-            } else {
-                vec_add1 (tp->dup_event, 0);
-            }
-
-
-            ep++;
-            continue;
-
-        case 1:                 /* in state */
-            /* Another entry event? Stack push*/
-            if (event_code == entry_event) {
-                tp->state = 0;
-                goto again;
-            }
-            
-            if (vec_len(tp->start_datum) == 0) {
-                fprintf (stderr, "Stack underflow...\n");
-                exit (1);
-            }
-
-            sp = vec_len(tp->start_time)-1;
-
-            end_time = tp->thread_timestamp + (now - tp->time_thread_on_cpu);
-
-            if (!tp->dup_event[sp]) {
-#ifdef HAVING_TROUBLE
-                printf ("sp %d key 0x%x charged %llu\n", sp, 
-                        tp->start_datum[sp], end_time - tp->start_time[sp]);
-                printf ("  start %llu, end %llu\n", (unsigned long long) tp->start_time[sp],
-                        (unsigned long long) end_time);
-#endif
-            
-                record_instance (tp->start_datum[sp], (end_time -
-                                                       tp->start_time[sp]));
-            
-                /* Factor out our time from surrounding services, if any */
-                for (ancestor = sp-1; ancestor >= 0; ancestor--) {
-#ifdef HAVING_TROUBLE
-                    printf ("Factor out %lld from key 0x%08x\n",
-                            (end_time - tp->start_time[sp]), tp->start_datum[ancestor]);
-#endif
-                    tp->start_time[ancestor] += (end_time - tp->start_time[sp]);
+                if (vec_len(tp->start_datum) == 0) {
+                    fprintf (stderr, "Stack underflow...\n");
+                    exit (1);
                 }
-                output_count++;
-                total_time += (end_time - tp->start_time[sp]);
-                tp->state = 0;
-            } else {
-                dup_events++;
-            }
-            _vec_len(tp->start_datum) = sp;
-            _vec_len(tp->start_time) = sp;
-            _vec_len(tp->dup_event) = sp;
+
+                sp = vec_len(tp->start_time)-1;
+
+                end_time = tp->thread_timestamp + (now - tp->time_thread_on_cpu);
+
+                if (!tp->dup_event[sp]) {
+#ifdef HAVING_TROUBLE
+                    printf ("sp %d key 0x%x charged %llu\n", sp,
+                            tp->start_datum[sp], end_time - tp->start_time[sp]);
+                    printf ("  start %llu, end %llu\n", (unsigned long long) tp->start_time[sp],
+                            (unsigned long long) end_time);
+#endif
+
+                    record_instance (tp->start_datum[sp], (end_time -
+                                                           tp->start_time[sp]));
+
+                    /* Factor out our time from surrounding services, if any */
+                    for (ancestor = sp-1; ancestor >= 0; ancestor--) {
+#ifdef HAVING_TROUBLE
+                        printf ("Factor out %lld from key 0x%08x\n",
+                                (end_time - tp->start_time[sp]), tp->start_datum[ancestor]);
+#endif
+                        tp->start_time[ancestor] += (end_time - tp->start_time[sp]);
+                    }
+                    output_count++;
+                    total_time += (end_time - tp->start_time[sp]);
+                    tp->state = 0;
+                } else {
+                    dup_events++;
+                }
+                _vec_len(tp->start_datum) = sp;
+                _vec_len(tp->start_time) = sp;
+                _vec_len(tp->dup_event) = sp;
         }
 
         ep++;
@@ -658,18 +657,17 @@ int event_pass (cpel_section_header_t *sh, int verbose, FILE *ofp)
     return(0);
 }
 
-/* 
- * Note: If necessary, add passes / columns to this table to 
+/*
+ * Note: If necessary, add passes / columns to this table to
  * handle section order dependencies.
  */
 
-section_processor_t processors[CPEL_NUM_SECTION_TYPES+1] =
-{
-    {unsupported_pass},		/* type 0 -- f**ked */
-    {noop_pass}, 		/* type 1 -- STRTAB */
-    {noop_pass}, 		/* type 2 -- SYMTAB */
+section_processor_t processors[CPEL_NUM_SECTION_TYPES+1] = {
+    {unsupported_pass},     /* type 0 -- f**ked */
+    {noop_pass},        /* type 1 -- STRTAB */
+    {noop_pass},        /* type 2 -- SYMTAB */
     {noop_pass},                /* type 3 -- EVTDEF */
-    {trackdef_pass},		/* type 4 -- TRACKDEF */
+    {trackdef_pass},        /* type 4 -- TRACKDEF */
     {event_pass},               /* type 5 -- EVENTS */
 };
 
@@ -686,13 +684,13 @@ int process_section(cpel_section_header_t *sh, int verbose, FILE *ofp,
         return(1);
     }
     switch(pass) {
-    case PASS1:
-        fp = processors[type].pass1;
-        break;
+        case PASS1:
+            fp = processors[type].pass1;
+            break;
 
-    default:
-        fprintf(stderr, "Unknown pass %d\n", pass);
-        return(1);
+        default:
+            fprintf(stderr, "Unknown pass %d\n", pass);
+            return(1);
     }
 
     rv = (*fp)(sh, verbose, ofp);
@@ -706,17 +704,15 @@ char *mapfile (char *file)
     char *rv;
     int maphfile;
     size_t mapfsize;
-    
+
     maphfile = open (file, O_RDONLY);
 
-    if (maphfile < 0)
-    {
+    if (maphfile < 0) {
         fprintf (stderr, "Couldn't read %s, skipping it...\n", file);
         return (NULL);
     }
 
-    if (fstat (maphfile, &statb) < 0)
-    {
+    if (fstat (maphfile, &statb) < 0) {
         fprintf (stderr, "Couldn't get size of %s, skipping it...\n", file);
         return (NULL);
     }
@@ -729,8 +725,7 @@ char *mapfile (char *file)
 
     mapfsize = statb.st_size;
 
-    if (mapfsize < 3)
-    {
+    if (mapfsize < 3) {
         fprintf (stderr, "%s zero-length, skipping it...\n", file);
         close (maphfile);
         return (NULL);
@@ -738,8 +733,7 @@ char *mapfile (char *file)
 
     rv = mmap (0, mapfsize, PROT_READ, MAP_SHARED, maphfile, 0);
 
-    if (rv == 0)
-    {
+    if (rv == 0) {
         fprintf (stderr, "%s problem mapping, I quit...\n", file);
         exit (-1);
     }
@@ -763,21 +757,21 @@ int process_file (u8 *cpel, int verbose)
             fprintf(stderr, "Little endian data format not supported\n");
             return(1);
         }
-        fprintf(stderr, "Unsupported file version 0x%x\n", 
+        fprintf(stderr, "Unsupported file version 0x%x\n",
                 fh->endian_version);
         return(1);
     }
     nsections = ntohs(fh->nsections);
 
     /*
-     * Take a passe through the file. 
+     * Take a passe through the file.
      */
     sh = (cpel_section_header_t *)(fh+1);
     for (i = 0; i < nsections; i++) {
         section_size = ntohl(sh->data_length);
 
         if(verbose) {
-            fprintf(ofp, "Section type %d, size %d\n", 
+            fprintf(ofp, "Section type %d, size %d\n",
                     ntohl(sh->section_type),
                     section_size);
         }
@@ -793,7 +787,7 @@ int process_file (u8 *cpel, int verbose)
 }
 
 /****************************************************************************
-* main - 
+* main -
 ****************************************************************************/
 
 int main (int argc, char **argv)
@@ -802,8 +796,7 @@ int main (int argc, char **argv)
     u8 *cpel = 0;
     int verbose = 0;
 
-    if (argc < 6)
-    {
+    if (argc < 6) {
         fprintf (stderr, "usage: cpelinreg -i <file>\n");
         fprintf (stderr, "       -s start-event --e end-event [-nokey]\n");
         fprintf (stderr, "       [-m <ninst-to-model>][-xtra-stats]\n");
@@ -870,11 +863,10 @@ int main (int argc, char **argv)
         fprintf (stderr, "unknown switch '%s'\n", argv[curarg]);
         exit (1);
     }
-                
+
     cpel = (u8 *)mapfile(g_ifile);
 
-    if (cpel == NULL)
-    {
+    if (cpel == NULL) {
         fprintf (stderr, "Couldn't open %s\n", g_ifile);
         exit (1);
     }

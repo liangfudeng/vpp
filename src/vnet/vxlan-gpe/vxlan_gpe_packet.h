@@ -31,13 +31,13 @@
  *   |                VXLAN Network Identifier (VNI) |   Reserved    |
  *   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
  *
- *   I Bit: Flag bit 4 indicates that the VNI is valid. 
+ *   I Bit: Flag bit 4 indicates that the VNI is valid.
  *
  *   P Bit:  Flag bit 5 is defined as the Next Protocol bit.  The P bit
  *      MUST be set to 1 to indicate the presence of the 8 bit next
  *      protocol field.
  *
- *   O Bit: Flag bit 7 is defined as the O bit. When the O bit is set to 1, 
+ *   O Bit: Flag bit 7 is defined as the O bit. When the O bit is set to 1,
  *
  *      the packet is an OAM packet and OAM processing MUST occur.  The OAM
  *      protocol details are out of scope for this document.  As with the
@@ -67,8 +67,8 @@
 #define foreach_vxlan_gpe_protocol \
 _ (0x01, IP4)                         \
 _ (0x02, IP6)                         \
-_ (0x03, ETHERNET)		     \
-_ (0x04, NSH)		     \
+_ (0x03, ETHERNET)           \
+_ (0x04, NSH)            \
 _ (0x05, IOAM)
 
 
@@ -82,24 +82,24 @@ _ (0x05, IOAM)
  */
 typedef enum {
 #define _(n,f) VXLAN_GPE_PROTOCOL_##f = n,
-  foreach_vxlan_gpe_protocol
+    foreach_vxlan_gpe_protocol
 #undef _
-  VXLAN_GPE_PROTOCOL_MAX,
+    VXLAN_GPE_PROTOCOL_MAX,
 } vxlan_gpe_protocol_t;
 
 /**
  * @brief VXLAN GPE Header definition
  */
 typedef struct {
-  u8 flags;
-  /** Version and Reserved */
-  u8 ver_res;
-  /** Reserved */
-  u8 res;
-  /** see vxlan_gpe_protocol_t */
-  u8 protocol;
-  /** VNI and Reserved */
-  u32 vni_res;
+    u8 flags;
+    /** Version and Reserved */
+    u8 ver_res;
+    /** Reserved */
+    u8 res;
+    /** see vxlan_gpe_protocol_t */
+    u8 protocol;
+    /** VNI and Reserved */
+    u32 vni_res;
 } vxlan_gpe_header_t;
 
 #define VXLAN_GPE_FLAGS_I 0x08

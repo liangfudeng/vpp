@@ -48,10 +48,10 @@ extern ssize_t __wur vcom_read (int __fd, void *__buf, size_t __nbytes);
 extern ssize_t __wur vcom_write (int __fd, const void *__buf, size_t __n);
 
 extern ssize_t __wur vcom_readv (int __fd, const struct iovec *__iov,
-				 int __iovcnt);
+                                 int __iovcnt);
 
 extern ssize_t __wur vcom_writev (int __fd, const struct iovec *__iov,
-				  int __iovcnt);
+                                  int __iovcnt);
 
 /*
  * vpp implementation of glibc APIs from <fcntl.h>
@@ -68,17 +68,17 @@ extern int vcom_ioctl (int __fd, unsigned long int __cmd, ...);
  */
 extern int
 vcom_select (int __nfds, fd_set * __restrict __readfds,
-	     fd_set * __restrict __writefds,
-	     fd_set * __restrict __exceptfds,
-	     struct timeval *__restrict __timeout);
+             fd_set * __restrict __writefds,
+             fd_set * __restrict __exceptfds,
+             struct timeval *__restrict __timeout);
 
 #ifdef __USE_XOPEN2K
 extern int
 vcom_pselect (int __nfds, fd_set * __restrict __readfds,
-	      fd_set * __restrict __writefds,
-	      fd_set * __restrict __exceptfds,
-	      const struct timespec *__restrict __timeout,
-	      const __sigset_t * __restrict __sigmask);
+              fd_set * __restrict __writefds,
+              fd_set * __restrict __exceptfds,
+              const struct timespec *__restrict __timeout,
+              const __sigset_t * __restrict __sigmask);
 #endif
 
 /*
@@ -99,14 +99,14 @@ vcom_bind (int __fd, __CONST_SOCKADDR_ARG __addr, socklen_t __len);
 
 extern int __THROW
 vcom_getsockname (int __fd, __SOCKADDR_ARG __addr,
-		  socklen_t * __restrict __len);
+                  socklen_t * __restrict __len);
 
 extern int
 vcom_connect (int __fd, __CONST_SOCKADDR_ARG __addr, socklen_t __len);
 
 extern int __THROW
 vcom_getpeername (int __fd, __SOCKADDR_ARG __addr,
-		  socklen_t * __restrict __len);
+                  socklen_t * __restrict __len);
 
 extern ssize_t
 vcom_sendfile (int __out_fd, int __in_fd, off_t * __offset, int __len);
@@ -115,12 +115,12 @@ extern ssize_t vcom_recv (int __fd, void *__buf, size_t __n, int __flags);
 
 extern ssize_t
 vcom_sendto (int __fd, const void *__buf, size_t __n,
-	     int __flags, __CONST_SOCKADDR_ARG __addr, socklen_t __addr_len);
+             int __flags, __CONST_SOCKADDR_ARG __addr, socklen_t __addr_len);
 
 extern ssize_t
 vcom_recvfrom (int __fd, void *__restrict __buf,
-	       size_t __n, int __flags,
-	       __SOCKADDR_ARG __addr, socklen_t * __restrict __addr_len);
+               size_t __n, int __flags,
+               __SOCKADDR_ARG __addr, socklen_t * __restrict __addr_len);
 
 extern ssize_t
 vcom_sendmsg (int __fd, const struct msghdr *__message, int __flags);
@@ -128,7 +128,7 @@ vcom_sendmsg (int __fd, const struct msghdr *__message, int __flags);
 #ifdef __USE_GNU
 extern int
 sendmmsg (int __fd, struct mmsghdr *__vmessages,
-	  unsigned int __vlen, int __flags);
+          unsigned int __vlen, int __flags);
 #endif
 
 extern ssize_t vcom_recvmsg (int __fd, struct msghdr *__message, int __flags);
@@ -136,22 +136,22 @@ extern ssize_t vcom_recvmsg (int __fd, struct msghdr *__message, int __flags);
 #ifdef __USE_GNU
 extern int
 vcom_recvmmsg (int __fd, struct mmsghdr *__vmessages,
-	       unsigned int __vlen, int __flags, struct timespec *__tmo);
+               unsigned int __vlen, int __flags, struct timespec *__tmo);
 #endif
 
 extern int __THROW
 vcom_getsockopt (int __fd, int __level, int __optname,
-		 void *__restrict __optval, socklen_t * __restrict __optlen);
+                 void *__restrict __optval, socklen_t * __restrict __optlen);
 
 extern int __THROW
 vcom_setsockopt (int __fd, int __level, int __optname,
-		 const void *__optval, socklen_t __optlen);
+                 const void *__optval, socklen_t __optlen);
 
 extern int __THROW vcom_listen (int __fd, int __n);
 
 extern int
 vcom_accept (int __fd, __SOCKADDR_ARG __addr,
-	     socklen_t * __restrict __addr_len);
+             socklen_t * __restrict __addr_len);
 
 #ifdef __USE_GNU
 /*
@@ -161,7 +161,7 @@ vcom_accept (int __fd, __SOCKADDR_ARG __addr,
 /* TBD: implemented later */
 extern int
 vcom_accept4 (int __fd, __SOCKADDR_ARG __addr,
-	      socklen_t * __restrict __addr_len, int __flags);
+              socklen_t * __restrict __addr_len, int __flags);
 #endif
 
 extern int __THROW vcom_shutdown (int __fd, int __how);
@@ -175,11 +175,11 @@ vcom_epoll_ctl (int __epfd, int __op, int __fd, struct epoll_event *__event);
 
 extern int
 vcom_epoll_wait (int __epfd, struct epoll_event *__events,
-		 int __maxevents, int __timeout);
+                 int __maxevents, int __timeout);
 
 extern int
 vcom_epoll_pwait (int __epfd, struct epoll_event *__events,
-		  int __maxevents, int __timeout, const __sigset_t * __ss);
+                  int __maxevents, int __timeout, const __sigset_t * __ss);
 
 /*
  * NOTE: observed __nfds is less than 128 from kubecon strace files
@@ -192,7 +192,7 @@ extern int vcom_poll (struct pollfd *__fds, nfds_t __nfds, int __timeout);
 #ifdef __USE_GNU
 extern int
 vcom_ppoll (struct pollfd *__fds, nfds_t __nfds,
-	    const struct timespec *__timeout, const __sigset_t * __ss);
+            const struct timespec *__timeout, const __sigset_t * __ss);
 #endif
 
 

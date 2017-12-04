@@ -1,4 +1,4 @@
-/* 
+/*
  *------------------------------------------------------------------
  * node.c - the api generator's semantic back-end
  *
@@ -112,35 +112,35 @@ void primtype_recursive_generate(node_t *this, enum passid which, FILE *ofp,
     current_type_cast = (char *)type_cast;
 
     switch(which) {
-    case TYPEDEF_PASS:
-        fputs((char *)type_name, ofp);
-        fputs(" ", ofp);
-        break;
+        case TYPEDEF_PASS:
+            fputs((char *)type_name, ofp);
+            fputs(" ", ofp);
+            break;
 
-    case PRINTFUN_PASS:
-        current_type_fmt = (char *)type_fmt;
-        break;
+        case PRINTFUN_PASS:
+            current_type_fmt = (char *)type_fmt;
+            break;
 
-    case ENDIANFUN_PASS:
-        vftp = the_vft[this->type];
-        current_endianfun = vftp->endian_converter;
-        break;
+        case ENDIANFUN_PASS:
+            vftp = the_vft[this->type];
+            current_endianfun = vftp->endian_converter;
+            break;
 
-    case PYTHON_PASS:
-        fputs("('", pythonfp);
-        fputs((char *)type_name, pythonfp);
-        fputs("', ", pythonfp);
-        break;
+        case PYTHON_PASS:
+            fputs("('", pythonfp);
+            fputs((char *)type_name, pythonfp);
+            fputs("', ", pythonfp);
+            break;
 
-    case JSON_PASS:
-        fputs("[\"", jsonfp);
-        fputs((char *)type_name, jsonfp);
-        fputs("\", ", jsonfp);
-        break;
+        case JSON_PASS:
+            fputs("[\"", jsonfp);
+            fputs((char *)type_name, jsonfp);
+            fputs("\", ", jsonfp);
+            break;
 
-    default:
-        fprintf(stderr, "primtype_recursive_generate: unimp pass %d\n", which);
-        break;
+        default:
+            fprintf(stderr, "primtype_recursive_generate: unimp pass %d\n", which);
+            break;
     }
 
     if (this->deeper) {
@@ -222,7 +222,7 @@ void node_u64_print (node_t *this)
 
 void node_u64_generate (node_t *this, enum passid which, FILE *ofp)
 {
-    primtype_recursive_generate(this, which, ofp, "u64", "%llu", 
+    primtype_recursive_generate(this, which, ofp, "u64", "%llu",
                                 "(long long)");
 }
 
@@ -287,7 +287,7 @@ void node_i64_print (node_t *this)
 
 void node_i64_generate (node_t *this, enum passid which, FILE *ofp)
 {
-    primtype_recursive_generate(this, which, ofp, "i64", "%lld", 
+    primtype_recursive_generate(this, which, ofp, "i64", "%lld",
                                 "(long long)");
 }
 
@@ -304,7 +304,7 @@ void node_f64_print (node_t *this)
 
 void node_f64_generate (node_t *this, enum passid which, FILE *ofp)
 {
-    primtype_recursive_generate(this, which, ofp, "f64", "%.2f", 
+    primtype_recursive_generate(this, which, ofp, "f64", "%.2f",
                                 "(double)");
 }
 
@@ -347,65 +347,65 @@ void node_define_generate (node_t *this, enum passid which, FILE *fp)
     node_t *child;
 
     switch(which) {
-    case TYPEDEF_PASS:
-        fprintf(fp, "typedef VL_API_PACKED(struct _vl_api_%s {\n", CDATA0);
-        child = this->deeper;
-        indent += 4;
-        while (child) {
-            node_vft_t *vftp = the_vft[child->type];
+        case TYPEDEF_PASS:
+            fprintf(fp, "typedef VL_API_PACKED(struct _vl_api_%s {\n", CDATA0);
+            child = this->deeper;
+            indent += 4;
+            while (child) {
+                node_vft_t *vftp = the_vft[child->type];
+                indent_me(fp);
+                vftp->generate(child, which, fp);
+                child = child->peer;
+            }
+            indent -= 4;
+            fprintf(fp, "}) vl_api_%s_t;\n\n", CDATA0);
+            break;
+
+        case ENDIANFUN_PASS:
+        case PRINTFUN_PASS:
+            child = this->deeper;
+            while (child) {
+                node_vft_t *vftp = the_vft[child->type];
+                vftp->generate(child, which, fp);
+                child = child->peer;
+            }
+            break;
+
+        case PYTHON_PASS:
+            fprintf(fp, "('%s',\n", CDATA0);
+            child = this->deeper;
+            indent += 4;
+            while (child) {
+                node_vft_t *vftp = the_vft[child->type];
+                indent_me(fp);
+                vftp->generate(child, which, fp);
+                child = child->peer;
+            }
+            indent -= 4;
+            fprintf(fp, "),\n\n");
+            break;
+
+        case JSON_PASS:
+            fprintf(fp, "[\"%s\",\n", CDATA0);
+            child = this->deeper;
+            indent += 4;
+            while (child) {
+                node_vft_t *vftp = the_vft[child->type];
+                indent_me(fp);
+                vftp->generate(child, which, fp);
+                child = child->peer;
+                fprintf(fp, ",\n");
+            }
             indent_me(fp);
-            vftp->generate(child, which, fp);
-            child = child->peer;
-        }
-        indent -= 4;
-        fprintf(fp, "}) vl_api_%s_t;\n\n", CDATA0);
-        break;
-
-    case ENDIANFUN_PASS:
-    case PRINTFUN_PASS:
-        child = this->deeper;
-        while (child) {
-            node_vft_t *vftp = the_vft[child->type];
-            vftp->generate(child, which, fp);
-            child = child->peer;
-        }
-        break;
-
-    case PYTHON_PASS:
-      fprintf(fp, "('%s',\n", CDATA0);
-        child = this->deeper;
-        indent += 4;
-        while (child) {
-            node_vft_t *vftp = the_vft[child->type];
+            fprintf (fp, "{\"crc\" : \"0x%08x\"}\n", (u32)(uword)CDATA3);
+            indent -= 4;
             indent_me(fp);
-            vftp->generate(child, which, fp);
-            child = child->peer;
-        }
-        indent -= 4;
-        fprintf(fp, "),\n\n");
-        break;
+            fprintf(fp, "]");
+            break;
 
-    case JSON_PASS:
-        fprintf(fp, "[\"%s\",\n", CDATA0);
-        child = this->deeper;
-        indent += 4;
-        while (child) {
-            node_vft_t *vftp = the_vft[child->type];
-            indent_me(fp);
-            vftp->generate(child, which, fp);
-            child = child->peer;
-	    fprintf(fp, ",\n");
-        }
-	indent_me(fp);
-	fprintf (fp, "{\"crc\" : \"0x%08x\"}\n", (u32)(uword)CDATA3);
-        indent -= 4;
-	indent_me(fp);
-        fprintf(fp, "]");
-        break;
-
-    default:
-        fprintf(stderr, "node_define_generate: unimp pass %d\n", which);
-        break;
+        default:
+            fprintf(stderr, "node_define_generate: unimp pass %d\n", which);
+            break;
     }
 }
 
@@ -427,69 +427,69 @@ void node_union_generate (node_t *this, enum passid which, FILE *fp)
     int case_id=1;
 
     switch(which) {
-    case TYPEDEF_PASS:
-        fprintf(fp, "u8 _%s_which;\n", CDATA0);
-        indent_me(fp);
-        fprintf(fp, "union _%s {\n", CDATA0);
-        child = this->deeper;
-        indent += 4;
-    
-        while (child) {
-            node_vft_t *vftp = the_vft[child->type];
+        case TYPEDEF_PASS:
+            fprintf(fp, "u8 _%s_which;\n", CDATA0);
             indent_me(fp);
-            vftp->generate(child, which, fp);
-            child = child->peer;
-        }
-        indent -= 4;
-        indent_me(fp);
-        fprintf(fp, "} %s;\n", CDATA0);
-        break;
+            fprintf(fp, "union _%s {\n", CDATA0);
+            child = this->deeper;
+            indent += 4;
 
-    case PRINTFUN_PASS:
-    case ENDIANFUN_PASS:
-        uelem = this->deeper;
-        
-        indent_me(fp);
-        fprintf(fp, "switch(a->_%s_which) {\n",
-                CDATA0);
-        indent += 4;
-        current_union_name = CDATA0;
-
-        /* Walk the list of objects in this union */
-        while (uelem) {
-            node_vft_t *vftp = the_vft[uelem->type];
+            while (child) {
+                node_vft_t *vftp = the_vft[child->type];
+                indent_me(fp);
+                vftp->generate(child, which, fp);
+                child = child->peer;
+            }
             indent -= 4;
             indent_me(fp);
-            fprintf(fp, "case %d:\n", case_id);
-            case_id++;
+            fprintf(fp, "} %s;\n", CDATA0);
+            break;
+
+        case PRINTFUN_PASS:
+        case ENDIANFUN_PASS:
+            uelem = this->deeper;
+
+            indent_me(fp);
+            fprintf(fp, "switch(a->_%s_which) {\n",
+                    CDATA0);
             indent += 4;
-            /* Drill down on each element */
-            vftp->generate(uelem, which, fp);
+            current_union_name = CDATA0;
+
+            /* Walk the list of objects in this union */
+            while (uelem) {
+                node_vft_t *vftp = the_vft[uelem->type];
+                indent -= 4;
+                indent_me(fp);
+                fprintf(fp, "case %d:\n", case_id);
+                case_id++;
+                indent += 4;
+                /* Drill down on each element */
+                vftp->generate(uelem, which, fp);
+                indent_me(fp);
+                fprintf(fp, "break;\n");
+                uelem = uelem->peer;
+            }
+            current_union_name = 0;
+            indent -= 4;
+            indent_me(fp);
+            fprintf(fp, "default:\n");
+            indent += 4;
+            indent_me(fp);
+            if (which == PRINTFUN_PASS) {
+                fprintf(fp,
+                        "vl_print(handle, \"WARNING: _%s_which not set.\\n\");\n",
+                        CDATA0);
+            }
             indent_me(fp);
             fprintf(fp, "break;\n");
-            uelem = uelem->peer;
-        }
-        current_union_name = 0;
-        indent -= 4;
-        indent_me(fp);
-        fprintf(fp, "default:\n");
-        indent += 4;
-        indent_me(fp);                 
-        if (which == PRINTFUN_PASS) {
-            fprintf(fp, 
-                    "vl_print(handle, \"WARNING: _%s_which not set.\\n\");\n",
-                    CDATA0);
-        }
-        indent_me(fp);
-        fprintf(fp, "break;\n");
-        indent -= 4;
-        indent_me(fp);
-        fprintf(fp, "}\n");
-        break;
+            indent -= 4;
+            indent_me(fp);
+            fprintf(fp, "}\n");
+            break;
 
-    default:
-        fprintf(stderr, "node_union_generate: unimp pass %d\n", which);
-        break;
+        default:
+            fprintf(stderr, "node_union_generate: unimp pass %d\n", which);
+            break;
     }
 }
 
@@ -516,59 +516,59 @@ void node_scalar_generate (node_t *this, enum passid which, FILE *fp)
     }
 
     switch(which) {
-    case TYPEDEF_PASS:
-        fprintf(fp, "%s;\n", CDATA0);
-        break;
+        case TYPEDEF_PASS:
+            fprintf(fp, "%s;\n", CDATA0);
+            break;
 
-    case PRINTFUN_PASS:
-        indent_me(fp);
-        if (current_is_complex) {
-            fprintf(fp, "vl_api_%s_t_print(a->%s%s, handle);\n", 
-                    current_type_name, union_prefix, CDATA0);
-        } else {
-            if (!strcmp(current_type_fmt, "uword")) {
-                fprintf(fp, 
-           "vl_print(handle, \"%s%s: \" _uword_fmt \"\\n\", %s a->%s%s);\n", 
-                        union_prefix, CDATA0, "(_uword_cast)",
-                        union_prefix, CDATA0);
+        case PRINTFUN_PASS:
+            indent_me(fp);
+            if (current_is_complex) {
+                fprintf(fp, "vl_api_%s_t_print(a->%s%s, handle);\n",
+                        current_type_name, union_prefix, CDATA0);
             } else {
-                fprintf(fp, 
-                        "vl_print(handle, \"%s%s: %s\\n\", %s a->%s%s);\n", 
-                        union_prefix, CDATA0, 
-                        current_type_fmt, current_type_cast,
-                        union_prefix, CDATA0);
+                if (!strcmp(current_type_fmt, "uword")) {
+                    fprintf(fp,
+                            "vl_print(handle, \"%s%s: \" _uword_fmt \"\\n\", %s a->%s%s);\n",
+                            union_prefix, CDATA0, "(_uword_cast)",
+                            union_prefix, CDATA0);
+                } else {
+                    fprintf(fp,
+                            "vl_print(handle, \"%s%s: %s\\n\", %s a->%s%s);\n",
+                            union_prefix, CDATA0,
+                            current_type_fmt, current_type_cast,
+                            union_prefix, CDATA0);
+                }
             }
-        }
-        break;
+            break;
 
-    case ENDIANFUN_PASS:
-        indent_me(fp);
-        if (current_is_complex) {
-            fprintf(fp, "vl_api%s_t_endian(a->%s%s);\n", 
-                    current_type_name, union_prefix, CDATA0);
-        } else {
-            /* Current_endianfun == NULL means e.g. it's a u8... */
-            if (current_endianfun) {
-                fprintf(fp, "a->%s%s = %s(a->%s%s);\n", union_prefix,
-                        CDATA0, current_endianfun, 
-                        union_prefix, CDATA0);
+        case ENDIANFUN_PASS:
+            indent_me(fp);
+            if (current_is_complex) {
+                fprintf(fp, "vl_api%s_t_endian(a->%s%s);\n",
+                        current_type_name, union_prefix, CDATA0);
             } else {
-                fprintf(fp, "/* a->%s%s = a->%s%s (no-op) */\n",
-                        union_prefix, CDATA0, 
-                        union_prefix, CDATA0);
+                /* Current_endianfun == NULL means e.g. it's a u8... */
+                if (current_endianfun) {
+                    fprintf(fp, "a->%s%s = %s(a->%s%s);\n", union_prefix,
+                            CDATA0, current_endianfun,
+                            union_prefix, CDATA0);
+                } else {
+                    fprintf(fp, "/* a->%s%s = a->%s%s (no-op) */\n",
+                            union_prefix, CDATA0,
+                            union_prefix, CDATA0);
+                }
             }
-        }
-        break;
-    case PYTHON_PASS:
-        fprintf(fp, "'%s'),\n", CDATA0);
-        break;
+            break;
+        case PYTHON_PASS:
+            fprintf(fp, "'%s'),\n", CDATA0);
+            break;
 
-    case JSON_PASS:
-        fprintf(fp, "\"%s\"]", CDATA0);
-        break;
+        case JSON_PASS:
+            fprintf(fp, "\"%s\"]", CDATA0);
+            break;
 
-    default:
-        fprintf(stderr, "node_scalar_generate: unimp pass %d\n", which);
+        default:
+            fprintf(stderr, "node_scalar_generate: unimp pass %d\n", which);
     }
     if (this->deeper) {
         fprintf(stderr, "broken recursion in node_scalar_generate\n");
@@ -597,107 +597,107 @@ void node_vector_generate (node_t *this, enum passid which, FILE *fp)
     }
 
     switch(which) {
-    case TYPEDEF_PASS:
-        fprintf(fp, "%s[%d];\n", CDATA0, IDATA1);
-        break;
-
-    case PRINTFUN_PASS:
-        /* Don't bother about "u8 data [0];" et al. */
-        if (IDATA1 == 0)
+        case TYPEDEF_PASS:
+            fprintf(fp, "%s[%d];\n", CDATA0, IDATA1);
             break;
 
-        indent_me(fp);
-        fprintf(fp, "{\n");
-        indent += 4;
-        indent_me(fp);
-        fprintf(fp, "int _i;\n");
-        indent_me(fp);
-        fprintf(fp, "for (_i = 0; _i < %d; _i++) {\n", 
-                IDATA1);
-        indent += 4;
-        indent_me(fp);
-        if (current_is_complex) {
-            fprintf(fp, "vl_print(handle, \"%s%s[%%d]: ",
-                    union_prefix, CDATA0);
-            fprintf(fp, 
-                    "vl_print_%s (handle, a->%s%s[_i]);\n", 
-                    CDATA0, union_prefix, CDATA0);
-        } else {
-            fprintf(fp, 
-         "vl_print(handle, \"%s%s[%%d]: %s\\n\", _i, a->%s%s[_i]);\n",
-                    union_prefix, CDATA0, 
-                    current_type_fmt, 
-                    union_prefix, CDATA0);
-        }
-        indent -= 4;
-        indent_me(fp);
-        fprintf(fp, "}\n");
-        indent -= 4;
-        indent_me(fp);
-        fprintf(fp, "}\n");
-        break;
+        case PRINTFUN_PASS:
+            /* Don't bother about "u8 data [0];" et al. */
+            if (IDATA1 == 0)
+                break;
 
-    case ENDIANFUN_PASS:
-        /* Don't bother about "u8 data [0];" et al. */
-        if (IDATA1 == 0)
-            break;
-        /* If this is a simple endian swap, but the endian swap method is a no-op,
-         * then indicate this is a no-op in a comment.
-         */
-	if (!current_is_complex && current_endianfun == NULL) {
             indent_me(fp);
-            fprintf(fp, "/* a->%s%s[0..%d] = a->%s%s[0..%d] (no-op) */\n",
-                    union_prefix, CDATA0, IDATA1 - 1,
-                    union_prefix, CDATA0, IDATA1 - 1);
+            fprintf(fp, "{\n");
+            indent += 4;
+            indent_me(fp);
+            fprintf(fp, "int _i;\n");
+            indent_me(fp);
+            fprintf(fp, "for (_i = 0; _i < %d; _i++) {\n",
+                    IDATA1);
+            indent += 4;
+            indent_me(fp);
+            if (current_is_complex) {
+                fprintf(fp, "vl_print(handle, \"%s%s[%%d]: ",
+                        union_prefix, CDATA0);
+                fprintf(fp,
+                        "vl_print_%s (handle, a->%s%s[_i]);\n",
+                        CDATA0, union_prefix, CDATA0);
+            } else {
+                fprintf(fp,
+                        "vl_print(handle, \"%s%s[%%d]: %s\\n\", _i, a->%s%s[_i]);\n",
+                        union_prefix, CDATA0,
+                        current_type_fmt,
+                        union_prefix, CDATA0);
+            }
+            indent -= 4;
+            indent_me(fp);
+            fprintf(fp, "}\n");
+            indent -= 4;
+            indent_me(fp);
+            fprintf(fp, "}\n");
             break;
-        }
 
-        indent_me(fp);
-        fprintf(fp, "{\n");
-        indent += 4;
-        indent_me(fp);
-        fprintf(fp, "int _i;\n");
-        indent_me(fp);
-        fprintf(fp, "for (_i = 0; _i < %d; _i++) {\n", 
-                IDATA1);
-        indent += 4;
-        indent_me(fp);
-        if (current_is_complex) {
-            fprintf(fp, 
-                    "vl_api_%s_t_endian (a->%s%s[_i]);\n", 
-                    current_type_name, union_prefix, CDATA0);
-        } else {
-            fprintf(fp, 
-                    "a->%s%s[_i] = %s(a->%s%s[_i]);\n", 
-                    union_prefix, CDATA0, 
-                    current_endianfun, 
-                    union_prefix, CDATA0);
-        }
-        indent -= 4;
-        indent_me(fp);
-        fprintf(fp, "}\n");
-        indent -= 4;
-        indent_me(fp);
-        fprintf(fp, "}\n");
-        break;
-    case PYTHON_PASS:
-        if (CDATA2 != 0) { // variable length vector
-            fprintf(fp, "'%s', '%d', '%s'),\n", CDATA0, IDATA1, CDATA2);
-        } else {
-            fprintf(fp, "'%s', '%d'),\n", CDATA0, IDATA1);
-        }
-        break;
+        case ENDIANFUN_PASS:
+            /* Don't bother about "u8 data [0];" et al. */
+            if (IDATA1 == 0)
+                break;
+            /* If this is a simple endian swap, but the endian swap method is a no-op,
+             * then indicate this is a no-op in a comment.
+             */
+            if (!current_is_complex && current_endianfun == NULL) {
+                indent_me(fp);
+                fprintf(fp, "/* a->%s%s[0..%d] = a->%s%s[0..%d] (no-op) */\n",
+                        union_prefix, CDATA0, IDATA1 - 1,
+                        union_prefix, CDATA0, IDATA1 - 1);
+                break;
+            }
 
-    case JSON_PASS:
-      if (CDATA2 != 0) { /* variable length vector */
-            fprintf(fp, "\"%s\", %d, \"%s\"]", CDATA0, IDATA1, CDATA2);
-        } else {
-            fprintf(fp, "\"%s\", %d]", CDATA0, IDATA1);
-        }
-        break;
+            indent_me(fp);
+            fprintf(fp, "{\n");
+            indent += 4;
+            indent_me(fp);
+            fprintf(fp, "int _i;\n");
+            indent_me(fp);
+            fprintf(fp, "for (_i = 0; _i < %d; _i++) {\n",
+                    IDATA1);
+            indent += 4;
+            indent_me(fp);
+            if (current_is_complex) {
+                fprintf(fp,
+                        "vl_api_%s_t_endian (a->%s%s[_i]);\n",
+                        current_type_name, union_prefix, CDATA0);
+            } else {
+                fprintf(fp,
+                        "a->%s%s[_i] = %s(a->%s%s[_i]);\n",
+                        union_prefix, CDATA0,
+                        current_endianfun,
+                        union_prefix, CDATA0);
+            }
+            indent -= 4;
+            indent_me(fp);
+            fprintf(fp, "}\n");
+            indent -= 4;
+            indent_me(fp);
+            fprintf(fp, "}\n");
+            break;
+        case PYTHON_PASS:
+            if (CDATA2 != 0) { // variable length vector
+                fprintf(fp, "'%s', '%d', '%s'),\n", CDATA0, IDATA1, CDATA2);
+            } else {
+                fprintf(fp, "'%s', '%d'),\n", CDATA0, IDATA1);
+            }
+            break;
 
-    default:
-        fprintf(stderr, "node_vector_generate: unimp pass %d\n", which);
+        case JSON_PASS:
+            if (CDATA2 != 0) { /* variable length vector */
+                fprintf(fp, "\"%s\", %d, \"%s\"]", CDATA0, IDATA1, CDATA2);
+            } else {
+                fprintf(fp, "\"%s\", %d]", CDATA0, IDATA1);
+            }
+            break;
+
+        default:
+            fprintf(stderr, "node_vector_generate: unimp pass %d\n", which);
     }
     if (this->deeper) {
         fprintf(stderr, "broken recursion in node_vector_generate\n");
@@ -728,84 +728,84 @@ void node_complex_generate (node_t *this, enum passid which, FILE *fp)
     }
 
     current_is_complex++;
-    
+
     switch(which) {
-    case TYPEDEF_PASS:
-        fprintf(fp, "%s ", CDATA0);
-        deeper = this->deeper;
-        if (deeper) {
-            vftp = the_vft[deeper->type];
-            vftp->generate(deeper, which, fp);
-        }
-        break;
-
-    case PRINTFUN_PASS:
-        deeper = this->deeper;
-        while (deeper) {
-            if (deeper->type == NODE_SCALAR ||
-                deeper->type == NODE_VECTOR) {
-                member_name = deeper->data[0];
-                break;
+        case TYPEDEF_PASS:
+            fprintf(fp, "%s ", CDATA0);
+            deeper = this->deeper;
+            if (deeper) {
+                vftp = the_vft[deeper->type];
+                vftp->generate(deeper, which, fp);
             }
-            deeper = deeper->deeper;
-        }
-        indent_me(fp);
-        fprintf(fp, "vl_print(handle, \"%s%s ----- \\n\");\n", 
-                union_prefix, member_name);
-        indent_me(fp);
+            break;
 
-        if (deeper && deeper->type == NODE_VECTOR)
-            fprintf(fp, "%s_print(a->%s%s, handle);\n", 
-                    CDATA0, union_prefix, member_name);
-        else
-            fprintf(fp, "%s_print(&a->%s%s, handle);\n", 
-                    CDATA0, union_prefix, member_name);
-
-        indent_me(fp);
-        fprintf(fp, "vl_print(handle, \"%s%s ----- END \\n\");\n", 
-                union_prefix, member_name);
-        break;
-
-    case ENDIANFUN_PASS:
-        deeper = this->deeper;
-        while (deeper) {
-            if (deeper->type == NODE_SCALAR ||
-                deeper->type == NODE_VECTOR) {
-                member_name = deeper->data[0];
-                break;
+        case PRINTFUN_PASS:
+            deeper = this->deeper;
+            while (deeper) {
+                if (deeper->type == NODE_SCALAR ||
+                    deeper->type == NODE_VECTOR) {
+                    member_name = deeper->data[0];
+                    break;
+                }
+                deeper = deeper->deeper;
             }
-            deeper = deeper->deeper;
-        }
+            indent_me(fp);
+            fprintf(fp, "vl_print(handle, \"%s%s ----- \\n\");\n",
+                    union_prefix, member_name);
+            indent_me(fp);
 
-        indent_me(fp);
-        if (deeper && deeper->type == NODE_VECTOR)
-            fprintf(fp, "%s_endian(a->%s%s);\n", 
-                    CDATA0, union_prefix, member_name);
-        else
-            fprintf(fp, "%s_endian(&a->%s%s);\n", 
-                    CDATA0, union_prefix, member_name);
-        break;
-    case PYTHON_PASS:
-        fprintf(fp, "('%s',", CDATA0);
-        deeper = this->deeper;
-        if (deeper) {
-            vftp = the_vft[deeper->type];
-            vftp->generate(deeper, which, fp);
-        }
-        break;
+            if (deeper && deeper->type == NODE_VECTOR)
+                fprintf(fp, "%s_print(a->%s%s, handle);\n",
+                        CDATA0, union_prefix, member_name);
+            else
+                fprintf(fp, "%s_print(&a->%s%s, handle);\n",
+                        CDATA0, union_prefix, member_name);
 
-    case JSON_PASS:
-        fprintf(fp, "[\"%s\", ", CDATA0);
-        deeper = this->deeper;
-        if (deeper) {
-            vftp = the_vft[deeper->type];
-            vftp->generate(deeper, which, fp);
-        }
-        break;
+            indent_me(fp);
+            fprintf(fp, "vl_print(handle, \"%s%s ----- END \\n\");\n",
+                    union_prefix, member_name);
+            break;
 
-    default:
-        fprintf(stderr, "node_complex_generate unimp pass %d...\n", which);
-        break;
+        case ENDIANFUN_PASS:
+            deeper = this->deeper;
+            while (deeper) {
+                if (deeper->type == NODE_SCALAR ||
+                    deeper->type == NODE_VECTOR) {
+                    member_name = deeper->data[0];
+                    break;
+                }
+                deeper = deeper->deeper;
+            }
+
+            indent_me(fp);
+            if (deeper && deeper->type == NODE_VECTOR)
+                fprintf(fp, "%s_endian(a->%s%s);\n",
+                        CDATA0, union_prefix, member_name);
+            else
+                fprintf(fp, "%s_endian(&a->%s%s);\n",
+                        CDATA0, union_prefix, member_name);
+            break;
+        case PYTHON_PASS:
+            fprintf(fp, "('%s',", CDATA0);
+            deeper = this->deeper;
+            if (deeper) {
+                vftp = the_vft[deeper->type];
+                vftp->generate(deeper, which, fp);
+            }
+            break;
+
+        case JSON_PASS:
+            fprintf(fp, "[\"%s\", ", CDATA0);
+            deeper = this->deeper;
+            if (deeper) {
+                vftp = the_vft[deeper->type];
+                vftp->generate(deeper, which, fp);
+            }
+            break;
+
+        default:
+            fprintf(stderr, "node_complex_generate unimp pass %d...\n", which);
+            break;
     }
     current_is_complex--;
 }
@@ -905,7 +905,7 @@ YYSTYPE deeper (YYSTYPE arg1, YYSTYPE arg2)
     node_t *np1 = (node_t *) arg1;
     node_t *np2 = (node_t *) arg2;
     node_t *hook_point;
-    
+
     hook_point = np1;
 
     while (hook_point->deeper)
@@ -920,7 +920,7 @@ YYSTYPE addpeer (YYSTYPE arg1, YYSTYPE arg2)
     node_t *np1 = (node_t *) arg1;
     node_t *np2 = (node_t *) arg2;
     node_t *hook_point;
-    
+
     hook_point = np1;
 
     while (hook_point->peer)
@@ -940,7 +940,7 @@ YYSTYPE add_slist (YYSTYPE a1, YYSTYPE a2)
         return (addpeer(a1, a2));
     else if(a1)
         return(a1);
-    else 
+    else
         return(a2);
 }
 
@@ -968,7 +968,7 @@ YYSTYPE add_defbody (YYSTYPE a1, YYSTYPE a2)
 
 /*
  * add_primtype ([packed], primitive type, instance)
- */ 
+ */
 
 YYSTYPE add_primtype (YYSTYPE a1, YYSTYPE a2, YYSTYPE a3)
 {
@@ -1054,7 +1054,7 @@ YYSTYPE add_scalar_vbl (YYSTYPE a1)
 
 /*
  * set_flags (int flags, msg(=0?))
- */ 
+ */
 YYSTYPE set_flags(YYSTYPE a1, YYSTYPE a2)
 {
     node_t *np;
@@ -1069,7 +1069,7 @@ YYSTYPE set_flags(YYSTYPE a1, YYSTYPE a2)
     np->flags |= flags;
 
     /* Generate a foo_reply_t right here */
-    if (flags & NODE_FLAG_AUTOREPLY) 
+    if (flags & NODE_FLAG_AUTOREPLY)
         autoreply(np);
 
     return (a2);
@@ -1121,7 +1121,7 @@ char *fixup_input_filename(void)
 
     while (cp > tmpbuf && *cp != '.')
         cp--;
-    
+
     if (*cp == '.')
         *cp = 0;
 
@@ -1170,7 +1170,7 @@ void generate_bottom_boilerplate(FILE *fp)
         input_crc = 0;
     }
 
-    fprintf (fp, "vl_api_version(%s, 0x%08x)\n\n", 
+    fprintf (fp, "vl_api_version(%s, 0x%08x)\n\n",
              fixed_name, (unsigned int)input_crc);
 
     fprintf (fp, "#endif\n\n");
@@ -1186,7 +1186,7 @@ void generate_msg_ids(YYSTYPE a1, FILE *fp)
     while (np) {
         if (np->type == NODE_DEFINE) {
             if (!(np->flags & NODE_FLAG_TYPEONLY)) {
-                fprintf (fp, "vl_msg_id(VL_API_%s, vl_api_%s_t_handler)\n", 
+                fprintf (fp, "vl_msg_id(VL_API_%s, vl_api_%s_t_handler)\n",
                          uppercase(np->data[0]), (i8 *)np->data[0]);
             } else {
                 fprintf (fp, "/* typeonly: %s */\n", (i8 *)np->data[0]);
@@ -1210,7 +1210,7 @@ void generate_msg_names(YYSTYPE a1, FILE *fp)
         if (np->type == NODE_DEFINE) {
             if (!(np->flags & NODE_FLAG_TYPEONLY)) {
                 fprintf (fp, "vl_msg_name(vl_api_%s_t, %d)\n",
-                         (i8 *) np->data[0], 
+                         (i8 *) np->data[0],
                          (np->flags & NODE_FLAG_DONT_TRACE ? 0 : 1));
             } else {
                 fprintf (fp, "/* typeonly: %s */\n", (i8 *)np->data[0]);
@@ -1292,7 +1292,7 @@ void union_walk_one_defn(node_t *np, FILE *fp)
                     if (vblp->type == NODE_SCALAR ||
                         vblp->type == NODE_VECTOR ||
                         vblp->type == NODE_COMPLEX) {
-                        fprintf(ofp, "#define %s_", 
+                        fprintf(ofp, "#define %s_",
                                 uppercase(current_def_name));
                         fprintf(ofp, "%s_", uppercase(current_union_name));
                         fprintf(ofp, "%s %d\n",uppercase(vblp->data[0]),
@@ -1350,13 +1350,13 @@ void generate_printfun(YYSTYPE a1, FILE *fp)
     while (np) {
         if (np->type == NODE_DEFINE) {
             if (!(np->flags & NODE_FLAG_MANUAL_PRINT)) {
-                fprintf(fp, 
-       "static inline void *vl_api_%s_t_print (vl_api_%s_t *a,",
+                fprintf(fp,
+                        "static inline void *vl_api_%s_t_print (vl_api_%s_t *a,",
                         (i8 *)np->data[0], (i8 *) np->data[0]);
                 fprintf(fp, "void *handle)\n{\n");
                 /* output the message name */
-                fprintf(fp, 
-                    "    vl_print(handle, \"vl_api_%s_t:\\n\");\n",
+                fprintf(fp,
+                        "    vl_print(handle, \"vl_api_%s_t:\\n\");\n",
                         (i8 *)np->data[0]);
 
                 indent += 4;
@@ -1394,8 +1394,8 @@ void generate_endianfun(YYSTYPE a1, FILE *fp)
     while (np) {
         if (np->type == NODE_DEFINE) {
             if (!(np->flags & NODE_FLAG_MANUAL_ENDIAN)) {
-                fprintf(fp, 
-               "static inline void vl_api_%s_t_endian (vl_api_%s_t *a)\n{\n",
+                fprintf(fp,
+                        "static inline void vl_api_%s_t_endian (vl_api_%s_t *a)\n{\n",
                         (i8 *) np->data[0], (i8 *) np->data[0]);
                 indent += 4;
                 /* Yeah, this is pedantic */
@@ -1423,14 +1423,14 @@ void add_msg_ids(YYSTYPE a1)
     while (np) {
         if (np->type == NODE_DEFINE) {
             if (!(np->flags & NODE_FLAG_TYPEONLY)) {
-	        /* add the parse tree for "u16 _vl_msg_id" */
+                /* add the parse tree for "u16 _vl_msg_id" */
                 new_u16 = make_node(NODE_U16);
                 new_u16->peer = np->deeper;
                 np->deeper = new_u16;
                 new_vbl = make_node(NODE_SCALAR);
                 new_vbl->data[0] = sxerox("_vl_msg_id");
                 new_u16->deeper = new_vbl;
-	    }
+            }
         }
         np = np->peer;
     }
@@ -1457,12 +1457,12 @@ void generate_python_msg_definitions(YYSTYPE a1, FILE *fp)
     fprintf (fp, "messages = [\n");
     /* Walk the top-level node-list */
     while (np) {
-      if (np->type == NODE_DEFINE && !(np->flags & NODE_FLAG_TYPEONLY)) {
-        /* Yeah, this is pedantic */
-        vftp = the_vft[np->type];
-        vftp->generate(np, PYTHON_PASS, fp);
-      }
-      np = np->peer;
+        if (np->type == NODE_DEFINE && !(np->flags & NODE_FLAG_TYPEONLY)) {
+            /* Yeah, this is pedantic */
+            vftp = the_vft[np->type];
+            vftp->generate(np, PYTHON_PASS, fp);
+        }
+        np = np->peer;
     }
     fprintf (fp, "\n]\n");
 }
@@ -1470,8 +1470,8 @@ void generate_python_msg_definitions(YYSTYPE a1, FILE *fp)
 static bool
 is_typeonly_check(node_t *np, bool typeonly)
 {
-  bool is_typeonly = (np->flags & NODE_FLAG_TYPEONLY);
-  return (is_typeonly == typeonly);
+    bool is_typeonly = (np->flags & NODE_FLAG_TYPEONLY);
+    return (is_typeonly == typeonly);
 }
 
 static void
@@ -1481,25 +1481,25 @@ generate_json_definitions(YYSTYPE a1, FILE *fp, bool typeonly)
     node_vft_t *vftp;
     indent_me(fp);
     if (typeonly)
-      fprintf (fp, "\"types\" : [\n");
+        fprintf (fp, "\"types\" : [\n");
     else
-      fprintf (fp, "\"messages\" : [\n");
+        fprintf (fp, "\"messages\" : [\n");
 
     /* Walk the top-level node-list */
     bool comma = false;
     indent += 4;
     while (np) {
-      if (np->type == NODE_DEFINE && is_typeonly_check(np, typeonly)) {
-        /* Yeah, this is pedantic */
-        vftp = the_vft[np->type];
-	indent_me(fp);
-        vftp->generate(np, JSON_PASS, fp);
-	comma = true;
-      }
-      np = np->peer;
-      if (comma && np &&
-	  np->type == NODE_DEFINE && is_typeonly_check(np, typeonly))
-	fprintf (fp, ",\n");
+        if (np->type == NODE_DEFINE && is_typeonly_check(np, typeonly)) {
+            /* Yeah, this is pedantic */
+            vftp = the_vft[np->type];
+            indent_me(fp);
+            vftp->generate(np, JSON_PASS, fp);
+            comma = true;
+        }
+        np = np->peer;
+        if (comma && np &&
+            np->type == NODE_DEFINE && is_typeonly_check(np, typeonly))
+            fprintf (fp, ",\n");
 
     }
     indent -= 4;
@@ -1515,11 +1515,11 @@ void generate_python_typeonly_definitions(YYSTYPE a1, FILE *fp)
     fprintf (fp, "types = [\n");
     /* Walk the top-level node-list */
     while (np) {
-      if (np->type == NODE_DEFINE && (np->flags & NODE_FLAG_TYPEONLY)) {
-        vftp = the_vft[np->type];
-        vftp->generate(np, PYTHON_PASS, fp);
-      }
-      np = np->peer;
+        if (np->type == NODE_DEFINE && (np->flags & NODE_FLAG_TYPEONLY)) {
+            vftp = the_vft[np->type];
+            vftp->generate(np, PYTHON_PASS, fp);
+        }
+        np = np->peer;
     }
     fprintf (fp, "\n]\n");
 }
@@ -1547,7 +1547,7 @@ void generate_json(YYSTYPE a1, FILE *fp)
      * API CRC signature
      */
     fprintf (fp, ",\n\"vl_api_version\" :\"0x%08x\"\n",
-	     (unsigned int)input_crc);
+             (unsigned int)input_crc);
     fprintf (fp, "}\n");
 }
 
@@ -1590,13 +1590,13 @@ void generate(YYSTYPE a1)
         generate_printfun(a1, ofp);
         generate_endianfun(a1, ofp);
         generate_version_tuple(a1, ofp);
-        
+
         generate_bottom_boilerplate(ofp);
     }
     if (pythonfp) {
-      generate_python(a1, pythonfp);
+        generate_python(a1, pythonfp);
     }
     if (jsonfp) {
-      generate_json(a1, jsonfp);
+        generate_json(a1, jsonfp);
     }
 }

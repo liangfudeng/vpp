@@ -39,15 +39,12 @@ fib_entry_src_adj_path_add (fib_entry_src_t *src,
 {
     const fib_route_path_t *rpath;
 
-    if (FIB_NODE_INDEX_INVALID == src->fes_pl)
-    {
+    if (FIB_NODE_INDEX_INVALID == src->fes_pl) {
         src->fes_pl = fib_path_list_create(pl_flags, paths);
-    }
-    else
-    {
+    } else {
         src->fes_pl = fib_path_list_copy_and_path_add(src->fes_pl,
-                                                      pl_flags,
-                                                      paths);
+                      pl_flags,
+                      paths);
     }
 
     /*
@@ -58,8 +55,7 @@ fib_entry_src_adj_path_add (fib_entry_src_t *src,
     /*
      * and new extensions
      */
-    vec_foreach(rpath, paths)
-    {
+    vec_foreach(rpath, paths) {
         fib_path_ext_list_insert(&src->fes_path_exts,
                                  src->fes_pl,
                                  FIB_PATH_EXT_ADJ,
@@ -74,18 +70,16 @@ fib_entry_src_adj_path_remove (fib_entry_src_t *src,
 {
     const fib_route_path_t *rpath;
 
-    if (FIB_NODE_INDEX_INVALID != src->fes_pl)
-    {
+    if (FIB_NODE_INDEX_INVALID != src->fes_pl) {
         src->fes_pl = fib_path_list_copy_and_path_remove(src->fes_pl,
-                                                         pl_flags,
-                                                         rpaths);
+                      pl_flags,
+                      rpaths);
     }
 
     /*
      * remove the path-extension for the path
      */
-    vec_foreach(rpath, rpaths)
-    {
+    vec_foreach(rpath, rpaths) {
         fib_path_ext_list_remove(&src->fes_path_exts, FIB_PATH_EXT_ADJ, rpath);
     };
     /*
@@ -112,8 +106,7 @@ fib_entry_src_adj_path_swap (fib_entry_src_t *src,
     /*
      * and new extensions
      */
-    vec_foreach(rpath, paths)
-    {
+    vec_foreach(rpath, paths) {
         fib_path_ext_list_push_back(&src->fes_path_exts,
                                     src->fes_pl,
                                     FIB_PATH_EXT_ADJ,
@@ -139,20 +132,16 @@ fib_enty_src_adj_update_path_ext (fib_entry_src_t *src,
     fib_path_ext_t *path_ext;
 
     path_ext = fib_path_ext_list_find_by_path_index(&src->fes_path_exts,
-                                                    path_index);
+               path_index);
 
-    if (NULL != path_ext)
-    {
+    if (NULL != path_ext) {
         path_ext->fpe_adj_flags = flags;
-    }
-    else
-    {
+    } else {
         ASSERT(!"no path extension");
     }
 }
 
-typedef struct fib_entry_src_path_list_walk_cxt_t_
-{
+typedef struct fib_entry_src_path_list_walk_cxt_t_ {
     fib_entry_src_t *src;
     u32 cover_itf;
     fib_path_ext_adj_flags_t flags;
@@ -169,14 +158,11 @@ fib_entry_src_adj_path_list_walk (fib_node_index_t pl_index,
     ctx = arg;
     adj_itf = fib_path_get_resolving_interface(path_index);
 
-    if (ctx->cover_itf == adj_itf)
-    {
+    if (ctx->cover_itf == adj_itf) {
         fib_enty_src_adj_update_path_ext(ctx->src, path_index,
                                          FIB_PATH_EXT_ADJ_FLAG_REFINES_COVER);
         ctx->flags |= FIB_PATH_EXT_ADJ_FLAG_REFINES_COVER;
-    }
-    else
-    {
+    } else {
         /*
          * if the interface the adj is on is unnumbered to the
          * cover's, then allow that too.
@@ -186,14 +172,11 @@ fib_entry_src_adj_path_list_walk (fib_node_index_t pl_index,
         swif = vnet_get_sw_interface (vnet_get_main(), adj_itf);
 
         if (swif->flags & VNET_SW_INTERFACE_FLAG_UNNUMBERED &&
-            ctx->cover_itf == swif->unnumbered_sw_if_index)
-        {
+            ctx->cover_itf == swif->unnumbered_sw_if_index) {
             fib_enty_src_adj_update_path_ext(ctx->src, path_index,
                                              FIB_PATH_EXT_ADJ_FLAG_REFINES_COVER);
             ctx->flags |= FIB_PATH_EXT_ADJ_FLAG_REFINES_COVER;
-        }
-        else
-        {
+        } else {
             fib_enty_src_adj_update_path_ext(ctx->src, path_index,
                                              FIB_PATH_EXT_ADJ_FLAG_NONE);
         }
@@ -216,7 +199,7 @@ fib_entry_src_adj_activate (fib_entry_src_t *src,
      * there should always be a cover, though it may be the default route.
      */
     src->adj.fesa_cover = fib_table_get_less_specific(fib_entry->fe_fib_index,
-                                                      &fib_entry->fe_prefix);
+                          &fib_entry->fe_prefix);
 
     ASSERT(FIB_NODE_INDEX_INVALID != src->adj.fesa_cover);
     ASSERT(fib_entry_get_index(fib_entry) != src->adj.fesa_cover);
@@ -241,8 +224,7 @@ fib_entry_src_adj_activate (fib_entry_src_t *src,
      *   ip route add 10.0.0.0/24 Eth0
      * is attached. and we want adj-fibs to install on Eth0.
      */
-    if (FIB_ENTRY_FLAG_ATTACHED & fib_entry_get_flags_i(cover))
-    {
+    if (FIB_ENTRY_FLAG_ATTACHED & fib_entry_get_flags_i(cover)) {
         fib_entry_src_path_list_walk_cxt_t ctx = {
             .cover_itf = fib_entry_get_resolving_interface(src->adj.fesa_cover),
             .flags = FIB_PATH_EXT_ADJ_FLAG_NONE,
@@ -289,7 +271,7 @@ fib_entry_src_adj_deactivate (fib_entry_src_t *src,
 
 static u8*
 fib_entry_src_adj_format (fib_entry_src_t *src,
-                         u8* s)
+                          u8* s)
 {
     return (format(s, "cover:%d", src->adj.fesa_cover));
 }

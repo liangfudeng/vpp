@@ -48,29 +48,29 @@
 static clib_error_t *
 dpdk_launch_thread (void *fp, vlib_worker_thread_t * w, unsigned lcore_id)
 {
-  int r;
-  r = rte_eal_remote_launch (fp, (void *) w, lcore_id);
-  if (r)
-    return clib_error_return (0, "Failed to launch thread %u", lcore_id);
-  return 0;
+    int r;
+    r = rte_eal_remote_launch (fp, (void *) w, lcore_id);
+    if (r)
+        return clib_error_return (0, "Failed to launch thread %u", lcore_id);
+    return 0;
 }
 
 static clib_error_t *
 dpdk_thread_set_lcore (u32 thread, u16 lcore)
 {
-  return 0;
+    return 0;
 }
 
 static vlib_thread_callbacks_t callbacks = {
-  .vlib_launch_thread_cb = &dpdk_launch_thread,
-  .vlib_thread_set_lcore_cb = &dpdk_thread_set_lcore,
+    .vlib_launch_thread_cb = &dpdk_launch_thread,
+    .vlib_thread_set_lcore_cb = &dpdk_thread_set_lcore,
 };
 
 static clib_error_t *
 dpdk_thread_init (vlib_main_t * vm)
 {
-  vlib_thread_cb_register (vm, &callbacks);
-  return 0;
+    vlib_thread_cb_register (vm, &callbacks);
+    return 0;
 }
 
 VLIB_INIT_FUNCTION (dpdk_thread_init);

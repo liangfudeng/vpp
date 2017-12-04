@@ -46,15 +46,15 @@ vnet_main_t **vnet_mains;
 vnet_main_t *
 vnet_get_main (void)
 {
-  return &vnet_main;
+    return &vnet_main;
 }
 
 static uword
 vnet_local_interface_tx (vlib_main_t * vm,
-			 vlib_node_runtime_t * node, vlib_frame_t * f)
+                         vlib_node_runtime_t * node, vlib_frame_t * f)
 {
-  ASSERT (0);
-  return f->n_vectors;
+    ASSERT (0);
+    return f->n_vectors;
 }
 
 /* *INDENT-OFF* */
@@ -73,48 +73,48 @@ VNET_HW_INTERFACE_CLASS (vnet_local_interface_hw_class,static) = {
 clib_error_t *
 vnet_main_init (vlib_main_t * vm)
 {
-  vnet_main_t *vnm = vnet_get_main ();
-  clib_error_t *error;
-  u32 hw_if_index;
-  vnet_hw_interface_t *hw;
+    vnet_main_t *vnm = vnet_get_main ();
+    clib_error_t *error;
+    u32 hw_if_index;
+    vnet_hw_interface_t *hw;
 
-  if ((error = vlib_call_init_function (vm, vnet_interface_init)))
-    return error;
+    if ((error = vlib_call_init_function (vm, vnet_interface_init)))
+        return error;
 
-  if ((error = vlib_call_init_function (vm, fib_module_init)))
-    return error;
+    if ((error = vlib_call_init_function (vm, fib_module_init)))
+        return error;
 
-  if ((error = vlib_call_init_function (vm, mfib_module_init)))
-    return error;
+    if ((error = vlib_call_init_function (vm, mfib_module_init)))
+        return error;
 
-  if ((error = vlib_call_init_function (vm, ip_main_init)))
-    return error;
+    if ((error = vlib_call_init_function (vm, ip_main_init)))
+        return error;
 
-  if ((error = vlib_call_init_function (vm, ip4_lookup_init)))
-    return error;
+    if ((error = vlib_call_init_function (vm, ip4_lookup_init)))
+        return error;
 
-  if ((error = vlib_call_init_function (vm, ip6_lookup_init)))
-    return error;
+    if ((error = vlib_call_init_function (vm, ip6_lookup_init)))
+        return error;
 
-  if ((error = vlib_call_init_function (vm, mpls_init)))
-    return error;
+    if ((error = vlib_call_init_function (vm, mpls_init)))
+        return error;
 
-  vnm->vlib_main = vm;
+    vnm->vlib_main = vm;
 
-  hw_if_index = vnet_register_interface
-    (vnm, vnet_local_interface_device_class.index, /* instance */ 0,
-     vnet_local_interface_hw_class.index, /* instance */ 0);
-  hw = vnet_get_hw_interface (vnm, hw_if_index);
+    hw_if_index = vnet_register_interface
+                  (vnm, vnet_local_interface_device_class.index, /* instance */ 0,
+                   vnet_local_interface_hw_class.index, /* instance */ 0);
+    hw = vnet_get_hw_interface (vnm, hw_if_index);
 
-  vnm->local_interface_hw_if_index = hw_if_index;
-  vnm->local_interface_sw_if_index = hw->sw_if_index;
+    vnm->local_interface_hw_if_index = hw_if_index;
+    vnm->local_interface_sw_if_index = hw->sw_if_index;
 
-  /* the local interface is used as an input interface when decapping from
-   * an IPSEC tunnel. so it needs to be IP enabled */
-  ip4_sw_interface_enable_disable (hw->sw_if_index, 1);
-  ip6_sw_interface_enable_disable (hw->sw_if_index, 1);
+    /* the local interface is used as an input interface when decapping from
+     * an IPSEC tunnel. so it needs to be IP enabled */
+    ip4_sw_interface_enable_disable (hw->sw_if_index, 1);
+    ip6_sw_interface_enable_disable (hw->sw_if_index, 1);
 
-  return 0;
+    return 0;
 }
 
 VLIB_INIT_FUNCTION (vnet_main_init);

@@ -50,73 +50,72 @@ static int verbose;
 static never_inline void
 f2 (clib_longjmp_t * env)
 {
-  i++;
-  clib_longjmp (env, 1);
+    i++;
+    clib_longjmp (env, 1);
 }
 
 static never_inline void
 f1 (clib_longjmp_t * env)
 {
-  i++;
-  f2 (env);
+    i++;
+    f2 (env);
 }
 
 int
 test_longjmp_main (unformat_input_t * input)
 {
-  clib_longjmp_t env;
+    clib_longjmp_t env;
 
-  i = 0;
-  if (clib_setjmp (&env, 0) == 0)
-    {
-      if_verbose ("calling long jumper %d", i);
-      f1 (&env);
+    i = 0;
+    if (clib_setjmp (&env, 0) == 0) {
+        if_verbose ("calling long jumper %d", i);
+        f1 (&env);
     }
-  if_verbose ("back from long jump %d", i);
+    if_verbose ("back from long jump %d", i);
 
-  test_calljmp (input);
+    test_calljmp (input);
 
-  return 0;
+    return 0;
 }
 
 static uword
 f3 (uword arg)
 {
-  uword i, j, array[10];
+    uword i, j, array[10];
 
-  for (i = 0; i < ARRAY_LEN (array); i++)
-    array[i] = arg + i;
+    for (i = 0; i < ARRAY_LEN (array); i++)
+        array[i] = arg + i;
 
-  j = 0;
-  for (i = 0; i < ARRAY_LEN (array); i++)
-    j ^= array[i];
+    j = 0;
+    for (i = 0; i < ARRAY_LEN (array); i++)
+        j ^= array[i];
 
-  return j;
+    return j;
 }
 
 static void
 test_calljmp (unformat_input_t * input)
 {
-  static u8 stack[32 * 1024] __attribute__ ((aligned (16)));
-  uword v;
+    static u8 stack[32 * 1024] __attribute__ ((aligned (16)));
+    uword v;
 
-  v = clib_calljmp (f3, 0, stack + sizeof (stack));
-  ASSERT (v == f3 (0));
-  if_verbose ("calljump ok");
+    v = clib_calljmp (f3, 0, stack + sizeof (stack));
+    ASSERT (v == f3 (0));
+    if_verbose ("calljump ok");
 }
 
 #ifdef CLIB_UNIX
 int
 main (int argc, char *argv[])
 {
-  unformat_input_t i;
-  int res;
+    unformat_input_t i;
+    int res;
 
-  verbose = (argc > 1);
-  unformat_init_command_line (&i, argv);
-  res = test_longjmp_main (&i);
-  unformat_free (&i);
-  return res;
+    verbose = (argc > 1);
+    unformat_init_command_line (&i, argv);
+    res = test_longjmp_main (&i);
+    unformat_free (&i);
+    return res;
 }
 #endif
 

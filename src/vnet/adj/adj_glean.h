@@ -44,8 +44,8 @@
  *  as the source address in packets when the ARP/ND packet is sent
  */
 extern adj_index_t adj_glean_add_or_lock(fib_protocol_t proto,
-					 u32 sw_if_index,
-					 const ip46_address_t *nh_addr);
+        u32 sw_if_index,
+        const ip46_address_t *nh_addr);
 
 /**
  * @brief Format/display a glean adjacency.

@@ -120,27 +120,25 @@
 
  *
  */
-typedef struct
-{
-  u32 probe_marker1;
-  u32 probe_marker2;
-  u8 version;
-  u8 msg_type;
-  u16 flags;
-  u32 tel_req_vec;
-  u8 hop_limit;
-  u8 hop_count;
-  u16 reserve;
-  u16 max_len;
-  u16 cur_len;
-  u16 sender_handle;
-  u16 seq_no;
+typedef struct {
+    u32 probe_marker1;
+    u32 probe_marker2;
+    u8 version;
+    u8 msg_type;
+    u16 flags;
+    u32 tel_req_vec;
+    u8 hop_limit;
+    u8 hop_count;
+    u16 reserve;
+    u16 max_len;
+    u16 cur_len;
+    u16 sender_handle;
+    u16 seq_no;
 } udp_ping_data;
 
-typedef struct
-{
-  udp_header_t udp;
-  udp_ping_data ping_data;
+typedef struct {
+    udp_header_t udp;
+    udp_ping_data ping_data;
 } udp_ping_t;
 
 #endif /* PLUGINS_IOAM_PLUGIN_IOAM_UDP_PING_UDP_PING_PACKET_H_ */

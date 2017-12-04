@@ -43,43 +43,42 @@
 u8 *
 format_udp_header (u8 * s, va_list * args)
 {
-  udp_header_t *udp = va_arg (*args, udp_header_t *);
-  u32 max_header_bytes = va_arg (*args, u32);
-  u32 indent;
-  u32 header_bytes = sizeof (udp[0]);
+    udp_header_t *udp = va_arg (*args, udp_header_t *);
+    u32 max_header_bytes = va_arg (*args, u32);
+    u32 indent;
+    u32 header_bytes = sizeof (udp[0]);
 
-  /* Nothing to do. */
-  if (max_header_bytes < sizeof (udp[0]))
-    return format (s, "UDP header truncated");
+    /* Nothing to do. */
+    if (max_header_bytes < sizeof (udp[0]))
+        return format (s, "UDP header truncated");
 
-  indent = format_get_indent (s);
-  indent += 2;
+    indent = format_get_indent (s);
+    indent += 2;
 
-  s = format (s, "UDP: %d -> %d",
-	      clib_net_to_host_u16 (udp->src_port),
-	      clib_net_to_host_u16 (udp->dst_port));
+    s = format (s, "UDP: %d -> %d",
+                clib_net_to_host_u16 (udp->src_port),
+                clib_net_to_host_u16 (udp->dst_port));
 
-  s = format (s, "\n%Ulength %d, checksum 0x%04x",
-	      format_white_space, indent,
-	      clib_net_to_host_u16 (udp->length),
-	      clib_net_to_host_u16 (udp->checksum));
+    s = format (s, "\n%Ulength %d, checksum 0x%04x",
+                format_white_space, indent,
+                clib_net_to_host_u16 (udp->length),
+                clib_net_to_host_u16 (udp->checksum));
 
-  /* Recurse into next protocol layer. */
-  if (max_header_bytes != 0 && header_bytes < max_header_bytes)
-    {
-      ip_main_t *im = &ip_main;
-      tcp_udp_port_info_t *pi;
+    /* Recurse into next protocol layer. */
+    if (max_header_bytes != 0 && header_bytes < max_header_bytes) {
+        ip_main_t *im = &ip_main;
+        tcp_udp_port_info_t *pi;
 
-      pi = ip_get_tcp_udp_port_info (im, udp->dst_port);
+        pi = ip_get_tcp_udp_port_info (im, udp->dst_port);
 
-      if (pi && pi->format_header)
-	s = format (s, "\n%U%U",
-		    format_white_space, indent - 2, pi->format_header,
-		    /* next protocol header */ (udp + 1),
-		    max_header_bytes - sizeof (udp[0]));
+        if (pi && pi->format_header)
+            s = format (s, "\n%U%U",
+                        format_white_space, indent - 2, pi->format_header,
+                        /* next protocol header */ (udp + 1),
+                        max_header_bytes - sizeof (udp[0]));
     }
 
-  return s;
+    return s;
 }
 
 /*

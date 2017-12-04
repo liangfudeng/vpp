@@ -39,9 +39,9 @@
  *  The rewrite.
  */
 extern void adj_nbr_midchain_update_rewrite(adj_index_t adj_index,
-					    adj_midchain_fixup_t fixup,
-					    adj_flags_t flags,
-					    u8 *rewrite);
+        adj_midchain_fixup_t fixup,
+        adj_flags_t flags,
+        u8 *rewrite);
 
 /**
  * @brief
@@ -55,7 +55,7 @@ extern void adj_nbr_midchain_update_rewrite(adj_index_t adj_index,
  *  The parent DPO to stack onto (i.e. become a child of).
  */
 extern void adj_nbr_midchain_stack(adj_index_t adj_index,
-				   const dpo_id_t *dpo);
+                                   const dpo_id_t *dpo);
 
 /**
  * @brief

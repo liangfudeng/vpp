@@ -45,101 +45,99 @@ always_inline uword
 count_set_bits (uword x)
 {
 #if uword_bits == 64
-  const uword c1 = 0x5555555555555555;
-  const uword c2 = 0x3333333333333333;
-  const uword c3 = 0x0f0f0f0f0f0f0f0f;
+    const uword c1 = 0x5555555555555555;
+    const uword c2 = 0x3333333333333333;
+    const uword c3 = 0x0f0f0f0f0f0f0f0f;
 #else
-  const uword c1 = 0x55555555;
-  const uword c2 = 0x33333333;
-  const uword c3 = 0x0f0f0f0f;
+    const uword c1 = 0x55555555;
+    const uword c2 = 0x33333333;
+    const uword c3 = 0x0f0f0f0f;
 #endif
 
-  /* Sum 1 bit at a time. */
-  x = x - ((x >> (uword) 1) & c1);
+    /* Sum 1 bit at a time. */
+    x = x - ((x >> (uword) 1) & c1);
 
-  /* 2 bits at a time. */
-  x = (x & c2) + ((x >> (uword) 2) & c2);
+    /* 2 bits at a time. */
+    x = (x & c2) + ((x >> (uword) 2) & c2);
 
-  /* 4 bits at a time. */
-  x = (x + (x >> (uword) 4)) & c3;
+    /* 4 bits at a time. */
+    x = (x + (x >> (uword) 4)) & c3;
 
-  /* 8, 16, 32 bits at a time. */
-  x = x + (x >> (uword) 8);
-  x = x + (x >> (uword) 16);
+    /* 8, 16, 32 bits at a time. */
+    x = x + (x >> (uword) 8);
+    x = x + (x >> (uword) 16);
 #if uword_bits == 64
-  x = x + (x >> (uword) 32);
+    x = x + (x >> (uword) 32);
 #endif
 
-  return x & (2 * BITS (uword) - 1);
+    return x & (2 * BITS (uword) - 1);
 }
 
 /* Based on "Hacker's Delight" code from GLS. */
-typedef struct
-{
-  uword masks[1 + log2_uword_bits];
+typedef struct {
+    uword masks[1 + log2_uword_bits];
 } compress_main_t;
 
 always_inline void
 compress_init (compress_main_t * cm, uword mask)
 {
-  uword q, m, zm, n, i;
+    uword q, m, zm, n, i;
 
-  m = ~mask;
-  zm = mask;
+    m = ~mask;
+    zm = mask;
 
-  cm->masks[0] = mask;
-  for (i = 0; i < log2_uword_bits; i++)
-    {
-      q = m;
-      m ^= m << 1;
-      m ^= m << 2;
-      m ^= m << 4;
-      m ^= m << 8;
-      m ^= m << 16;
+    cm->masks[0] = mask;
+    for (i = 0; i < log2_uword_bits; i++) {
+        q = m;
+        m ^= m << 1;
+        m ^= m << 2;
+        m ^= m << 4;
+        m ^= m << 8;
+        m ^= m << 16;
 #if uword_bits > 32
-      m ^= m << (uword) 32;
+        m ^= m << (uword) 32;
 #endif
-      cm->masks[1 + i] = n = (m << 1) & zm;
-      m = q & ~m;
-      q = zm & n;
-      zm = zm ^ q ^ (q >> (1 << i));
+        cm->masks[1 + i] = n = (m << 1) & zm;
+        m = q & ~m;
+        q = zm & n;
+        zm = zm ^ q ^ (q >> (1 << i));
     }
 }
 
 always_inline uword
 compress_bits (compress_main_t * cm, uword x)
 {
-  uword q, r;
+    uword q, r;
 
-  r = x & cm->masks[0];
-  q = r & cm->masks[1];
-  r ^= q ^ (q >> 1);
-  q = r & cm->masks[2];
-  r ^= q ^ (q >> 2);
-  q = r & cm->masks[3];
-  r ^= q ^ (q >> 4);
-  q = r & cm->masks[4];
-  r ^= q ^ (q >> 8);
-  q = r & cm->masks[5];
-  r ^= q ^ (q >> 16);
+    r = x & cm->masks[0];
+    q = r & cm->masks[1];
+    r ^= q ^ (q >> 1);
+    q = r & cm->masks[2];
+    r ^= q ^ (q >> 2);
+    q = r & cm->masks[3];
+    r ^= q ^ (q >> 4);
+    q = r & cm->masks[4];
+    r ^= q ^ (q >> 8);
+    q = r & cm->masks[5];
+    r ^= q ^ (q >> 16);
 #if uword_bits > 32
-  q = r & cm->masks[6];
-  r ^= q ^ (q >> (uword) 32);
+    q = r & cm->masks[6];
+    r ^= q ^ (q >> (uword) 32);
 #endif
 
-  return r;
+    return r;
 }
 
 always_inline uword
 rotate_left (uword x, uword i)
 {
-  return (x << i) | (x >> (BITS (i) - i));
+    return (x << i) | (x >> (BITS (i) - i));
 }
 
 always_inline uword
 rotate_right (uword x, uword i)
 {
-  return (x >> i) | (x << (BITS (i) - i));
+    return (x >> i) | (x << (BITS (i) - i));
 }
 
 /* Returns snoob from Hacker's Delight.  Next highest number
@@ -147,25 +145,25 @@ rotate_right (uword x, uword i)
 always_inline uword
 next_with_same_number_of_set_bits (uword x)
 {
-  uword smallest, ripple, ones;
-  smallest = x & -x;
-  ripple = x + smallest;
-  ones = x ^ ripple;
-  ones = ones >> (2 + log2_first_set (x));
-  return ripple | ones;
+    uword smallest, ripple, ones;
+    smallest = x & -x;
+    ripple = x + smallest;
+    ones = x ^ ripple;
+    ones = ones >> (2 + log2_first_set (x));
+    return ripple | ones;
 }
 
-#define foreach_set_bit(var,mask,body)					\
-do {									\
-  uword _foreach_set_bit_m_##var = (mask);				\
-  uword _foreach_set_bit_f_##var;					\
-  while (_foreach_set_bit_m_##var != 0)					\
-    {									\
-      _foreach_set_bit_f_##var = first_set (_foreach_set_bit_m_##var);	\
-      _foreach_set_bit_m_##var ^= _foreach_set_bit_f_##var;		\
-      (var) = min_log2 (_foreach_set_bit_f_##var);			\
-      do { body; } while (0);						\
-    }									\
+#define foreach_set_bit(var,mask,body)                  \
+do {                                    \
+  uword _foreach_set_bit_m_##var = (mask);              \
+  uword _foreach_set_bit_f_##var;                   \
+  while (_foreach_set_bit_m_##var != 0)                 \
+    {                                   \
+      _foreach_set_bit_f_##var = first_set (_foreach_set_bit_m_##var);  \
+      _foreach_set_bit_m_##var ^= _foreach_set_bit_f_##var;     \
+      (var) = min_log2 (_foreach_set_bit_f_##var);          \
+      do { body; } while (0);                       \
+    }                                   \
 } while (0)
 
 #endif /* included_clib_bitops_h */

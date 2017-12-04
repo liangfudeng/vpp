@@ -49,131 +49,119 @@ static u8 well_known_prefix[] = {
 
 static void
 nat64_ip4_add_del_interface_address_cb (ip4_main_t * im, uword opaque,
-					u32 sw_if_index,
-					ip4_address_t * address,
-					u32 address_length,
-					u32 if_address_index, u32 is_delete)
+                                        u32 sw_if_index,
+                                        ip4_address_t * address,
+                                        u32 address_length,
+                                        u32 if_address_index, u32 is_delete)
 {
-  nat64_main_t *nm = &nat64_main;
-  int i, j;
+    nat64_main_t *nm = &nat64_main;
+    int i, j;
 
-  for (i = 0; i < vec_len (nm->auto_add_sw_if_indices); i++)
-    {
-      if (sw_if_index == nm->auto_add_sw_if_indices[i])
-	{
-	  if (!is_delete)
-	    {
-	      /* Don't trip over lease renewal, static config */
-	      for (j = 0; j < vec_len (nm->addr_pool); j++)
-		if (nm->addr_pool[j].addr.as_u32 == address->as_u32)
-		  return;
+    for (i = 0; i < vec_len (nm->auto_add_sw_if_indices); i++) {
+        if (sw_if_index == nm->auto_add_sw_if_indices[i]) {
+            if (!is_delete) {
+                /* Don't trip over lease renewal, static config */
+                for (j = 0; j < vec_len (nm->addr_pool); j++)
+                    if (nm->addr_pool[j].addr.as_u32 == address->as_u32)
+                        return;
 
-	      (void) nat64_add_del_pool_addr (address, ~0, 1);
-	      return;
-	    }
-	  else
-	    {
-	      (void) nat64_add_del_pool_addr (address, ~0, 0);
-	      return;
-	    }
-	}
+                (void) nat64_add_del_pool_addr (address, ~0, 1);
+                return;
+            } else {
+                (void) nat64_add_del_pool_addr (address, ~0, 0);
+                return;
+            }
+        }
     }
 }
 
 clib_error_t *
 nat64_init (vlib_main_t * vm)
 {
-  nat64_main_t *nm = &nat64_main;
-  clib_error_t *error = 0;
-  vlib_thread_main_t *tm = vlib_get_thread_main ();
-  ip4_add_del_interface_address_callback_t cb4;
-  ip4_main_t *im = &ip4_main;
+    nat64_main_t *nm = &nat64_main;
+    clib_error_t *error = 0;
+    vlib_thread_main_t *tm = vlib_get_thread_main ();
+    ip4_add_del_interface_address_callback_t cb4;
+    ip4_main_t *im = &ip4_main;
 
-  nm->is_disabled = 0;
+    nm->is_disabled = 0;
 
-  if (tm->n_vlib_mains > 1)
-    {
-      nm->is_disabled = 1;
-      goto error;
+    if (tm->n_vlib_mains > 1) {
+        nm->is_disabled = 1;
+        goto error;
     }
 
-  if (nat64_db_init (&nm->db))
-    {
-      error = clib_error_return (0, "NAT64 DB init failed");
-      goto error;
+    if (nat64_db_init (&nm->db)) {
+        error = clib_error_return (0, "NAT64 DB init failed");
+        goto error;
     }
 
-  /* set session timeouts to default values */
-  nm->udp_timeout = SNAT_UDP_TIMEOUT;
-  nm->icmp_timeout = SNAT_ICMP_TIMEOUT;
-  nm->tcp_trans_timeout = SNAT_TCP_TRANSITORY_TIMEOUT;
-  nm->tcp_est_timeout = SNAT_TCP_ESTABLISHED_TIMEOUT;
-  nm->tcp_incoming_syn_timeout = SNAT_TCP_INCOMING_SYN;
+    /* set session timeouts to default values */
+    nm->udp_timeout = SNAT_UDP_TIMEOUT;
+    nm->icmp_timeout = SNAT_ICMP_TIMEOUT;
+    nm->tcp_trans_timeout = SNAT_TCP_TRANSITORY_TIMEOUT;
+    nm->tcp_est_timeout = SNAT_TCP_ESTABLISHED_TIMEOUT;
+    nm->tcp_incoming_syn_timeout = SNAT_TCP_INCOMING_SYN;
 
-  /* Set up the interface address add/del callback */
-  cb4.function = nat64_ip4_add_del_interface_address_cb;
-  cb4.function_opaque = 0;
-  vec_add1 (im->add_del_interface_address_callbacks, cb4);
-  nm->ip4_main = im;
+    /* Set up the interface address add/del callback */
+    cb4.function = nat64_ip4_add_del_interface_address_cb;
+    cb4.function_opaque = 0;
+    vec_add1 (im->add_del_interface_address_callbacks, cb4);
+    nm->ip4_main = im;
 
 error:
-  return error;
+    return error;
 }
 
 int
 nat64_add_del_pool_addr (ip4_address_t * addr, u32 vrf_id, u8 is_add)
 {
-  nat64_main_t *nm = &nat64_main;
-  snat_address_t *a = 0;
-  snat_interface_t *interface;
-  int i;
+    nat64_main_t *nm = &nat64_main;
+    snat_address_t *a = 0;
+    snat_interface_t *interface;
+    int i;
 
-  /* Check if address already exists */
-  for (i = 0; i < vec_len (nm->addr_pool); i++)
-    {
-      if (nm->addr_pool[i].addr.as_u32 == addr->as_u32)
-	{
-	  a = nm->addr_pool + i;
-	  break;
-	}
+    /* Check if address already exists */
+    for (i = 0; i < vec_len (nm->addr_pool); i++) {
+        if (nm->addr_pool[i].addr.as_u32 == addr->as_u32) {
+            a = nm->addr_pool + i;
+            break;
+        }
     }
 
-  if (is_add)
-    {
-      if (a)
-	return VNET_API_ERROR_VALUE_EXIST;
+    if (is_add) {
+        if (a)
+            return VNET_API_ERROR_VALUE_EXIST;
 
-      vec_add2 (nm->addr_pool, a, 1);
-      a->addr = *addr;
-      a->fib_index = 0;
-      if (vrf_id != ~0)
-	a->fib_index =
-	  fib_table_find_or_create_and_lock (FIB_PROTOCOL_IP6, vrf_id,
-					     FIB_SOURCE_PLUGIN_HI);
+        vec_add2 (nm->addr_pool, a, 1);
+        a->addr = *addr;
+        a->fib_index = 0;
+        if (vrf_id != ~0)
+            a->fib_index =
+                fib_table_find_or_create_and_lock (FIB_PROTOCOL_IP6, vrf_id,
+                                                   FIB_SOURCE_PLUGIN_HI);
 #define _(N, i, n, s) \
       clib_bitmap_alloc (a->busy_##n##_port_bitmap, 65535);
-      foreach_snat_protocol
+        foreach_snat_protocol
 #undef _
-    }
-  else
-    {
-      if (!a)
-	return VNET_API_ERROR_NO_SUCH_ENTRY;
+    } else {
+        if (!a)
+            return VNET_API_ERROR_NO_SUCH_ENTRY;
 
-      if (a->fib_index)
-	fib_table_unlock (a->fib_index, FIB_PROTOCOL_IP6,
-			  FIB_SOURCE_PLUGIN_HI);
+        if (a->fib_index)
+            fib_table_unlock (a->fib_index, FIB_PROTOCOL_IP6,
+                              FIB_SOURCE_PLUGIN_HI);
 
 #define _(N, id, n, s) \
       clib_bitmap_free (a->busy_##n##_port_bitmap);
-      foreach_snat_protocol
+        foreach_snat_protocol
 #undef _
-	/* Delete sessions using address */
-	nat64_db_free_out_addr (&nm->db, &a->addr);
-      vec_del1 (nm->addr_pool, i);
+        /* Delete sessions using address */
+        nat64_db_free_out_addr (&nm->db, &a->addr);
+        vec_del1 (nm->addr_pool, i);
     }
 
-  /* Add/del external address to FIB */
+    /* Add/del external address to FIB */
   /* *INDENT-OFF* */
   pool_foreach (interface, nm->interfaces,
   ({
@@ -185,14 +173,14 @@ nat64_add_del_pool_addr (ip4_address_t * addr, u32 vrf_id, u8 is_add)
   }));
   /* *INDENT-ON* */
 
-  return 0;
+    return 0;
 }
 
 void
 nat64_pool_addr_walk (nat64_pool_addr_walk_fn_t fn, void *ctx)
 {
-  nat64_main_t *nm = &nat64_main;
-  snat_address_t *a = 0;
+    nat64_main_t *nm = &nat64_main;
+    snat_address_t *a = 0;
 
   /* *INDENT-OFF* */
   vec_foreach (a, nm->addr_pool)
@@ -206,53 +194,50 @@ nat64_pool_addr_walk (nat64_pool_addr_walk_fn_t fn, void *ctx)
 int
 nat64_add_interface_address (u32 sw_if_index, int is_add)
 {
-  nat64_main_t *nm = &nat64_main;
-  ip4_main_t *ip4_main = nm->ip4_main;
-  ip4_address_t *first_int_addr;
-  int i;
+    nat64_main_t *nm = &nat64_main;
+    ip4_main_t *ip4_main = nm->ip4_main;
+    ip4_address_t *first_int_addr;
+    int i;
 
-  first_int_addr = ip4_interface_first_address (ip4_main, sw_if_index, 0);
+    first_int_addr = ip4_interface_first_address (ip4_main, sw_if_index, 0);
 
-  for (i = 0; i < vec_len (nm->auto_add_sw_if_indices); i++)
-    {
-      if (nm->auto_add_sw_if_indices[i] == sw_if_index)
-	{
-	  if (is_add)
-	    return VNET_API_ERROR_VALUE_EXIST;
-	  else
-	    {
-	      /* if have address remove it */
-	      if (first_int_addr)
-		(void) nat64_add_del_pool_addr (first_int_addr, ~0, 0);
+    for (i = 0; i < vec_len (nm->auto_add_sw_if_indices); i++) {
+        if (nm->auto_add_sw_if_indices[i] == sw_if_index) {
+            if (is_add)
+                return VNET_API_ERROR_VALUE_EXIST;
+            else {
+                /* if have address remove it */
+                if (first_int_addr)
+                    (void) nat64_add_del_pool_addr (first_int_addr, ~0, 0);
 
-	      vec_del1 (nm->auto_add_sw_if_indices, i);
-	      return 0;
-	    }
-	}
+                vec_del1 (nm->auto_add_sw_if_indices, i);
+                return 0;
+            }
+        }
     }
 
-  if (!is_add)
-    return VNET_API_ERROR_NO_SUCH_ENTRY;
+    if (!is_add)
+        return VNET_API_ERROR_NO_SUCH_ENTRY;
 
-  /* add to the auto-address list */
-  vec_add1 (nm->auto_add_sw_if_indices, sw_if_index);
+    /* add to the auto-address list */
+    vec_add1 (nm->auto_add_sw_if_indices, sw_if_index);
 
-  /* If the address is already bound - or static - add it now */
-  if (first_int_addr)
-    (void) nat64_add_del_pool_addr (first_int_addr, ~0, 1);
+    /* If the address is already bound - or static - add it now */
+    if (first_int_addr)
+        (void) nat64_add_del_pool_addr (first_int_addr, ~0, 1);
 
-  return 0;
+    return 0;
 }
 
 int
 nat64_add_del_interface (u32 sw_if_index, u8 is_inside, u8 is_add)
 {
-  nat64_main_t *nm = &nat64_main;
-  snat_interface_t *interface = 0, *i;
-  snat_address_t *ap;
-  const char *feature_name, *arc_name;
+    nat64_main_t *nm = &nat64_main;
+    snat_interface_t *interface = 0, *i;
+    snat_address_t *ap;
+    const char *feature_name, *arc_name;
 
-  /* Check if interface already exists */
+    /* Check if interface already exists */
   /* *INDENT-OFF* */
   pool_foreach (i, nm->interfaces,
   ({
@@ -264,54 +249,50 @@ nat64_add_del_interface (u32 sw_if_index, u8 is_inside, u8 is_add)
   }));
   /* *INDENT-ON* */
 
-  if (is_add)
-    {
-      if (interface)
-	goto set_flags;
+    if (is_add) {
+        if (interface)
+            goto set_flags;
 
-      pool_get (nm->interfaces, interface);
-      interface->sw_if_index = sw_if_index;
-      interface->flags = 0;
+        pool_get (nm->interfaces, interface);
+        interface->sw_if_index = sw_if_index;
+        interface->flags = 0;
     set_flags:
-      if (is_inside)
-	interface->flags |= NAT_INTERFACE_FLAG_IS_INSIDE;
-      else
-	interface->flags |= NAT_INTERFACE_FLAG_IS_OUTSIDE;
-    }
-  else
-    {
-      if (!interface)
-	return VNET_API_ERROR_NO_SUCH_ENTRY;
+        if (is_inside)
+            interface->flags |= NAT_INTERFACE_FLAG_IS_INSIDE;
+        else
+            interface->flags |= NAT_INTERFACE_FLAG_IS_OUTSIDE;
+    } else {
+        if (!interface)
+            return VNET_API_ERROR_NO_SUCH_ENTRY;
 
-      if ((nat_interface_is_inside (interface)
-	   && nat_interface_is_outside (interface)))
-	interface->flags &=
-	  is_inside ? ~NAT_INTERFACE_FLAG_IS_INSIDE :
-	  ~NAT_INTERFACE_FLAG_IS_OUTSIDE;
-      else
-	pool_put (nm->interfaces, interface);
+        if ((nat_interface_is_inside (interface)
+             && nat_interface_is_outside (interface)))
+            interface->flags &=
+                    is_inside ? ~NAT_INTERFACE_FLAG_IS_INSIDE :
+                    ~NAT_INTERFACE_FLAG_IS_OUTSIDE;
+        else
+            pool_put (nm->interfaces, interface);
     }
 
-  if (!is_inside)
-    {
+    if (!is_inside) {
       /* *INDENT-OFF* */
       vec_foreach (ap, nm->addr_pool)
         snat_add_del_addr_to_fib(&ap->addr, 32, sw_if_index, is_add);
       /* *INDENT-ON* */
     }
 
-  arc_name = is_inside ? "ip6-unicast" : "ip4-unicast";
-  feature_name = is_inside ? "nat64-in2out" : "nat64-out2in";
+    arc_name = is_inside ? "ip6-unicast" : "ip4-unicast";
+    feature_name = is_inside ? "nat64-in2out" : "nat64-out2in";
 
-  return vnet_feature_enable_disable (arc_name, feature_name, sw_if_index,
-				      is_add, 0, 0);
+    return vnet_feature_enable_disable (arc_name, feature_name, sw_if_index,
+                                        is_add, 0, 0);
 }
 
 void
 nat64_interfaces_walk (nat64_interface_walk_fn_t fn, void *ctx)
 {
-  nat64_main_t *nm = &nat64_main;
-  snat_interface_t *i = 0;
+    nat64_main_t *nm = &nat64_main;
+    snat_interface_t *i = 0;
 
   /* *INDENT-OFF* */
   pool_foreach (i, nm->interfaces,
@@ -324,19 +305,17 @@ nat64_interfaces_walk (nat64_interface_walk_fn_t fn, void *ctx)
 
 int
 nat64_alloc_out_addr_and_port (u32 fib_index, snat_protocol_t proto,
-			       ip4_address_t * addr, u16 * port)
+                               ip4_address_t * addr, u16 * port)
 {
-  nat64_main_t *nm = &nat64_main;
-  snat_main_t *sm = &snat_main;
-  int i;
-  snat_address_t *a, *ga = 0;
-  u32 portnum;
+    nat64_main_t *nm = &nat64_main;
+    snat_main_t *sm = &snat_main;
+    int i;
+    snat_address_t *a, *ga = 0;
+    u32 portnum;
 
-  for (i = 0; i < vec_len (nm->addr_pool); i++)
-    {
-      a = nm->addr_pool + i;
-      switch (proto)
-	{
+    for (i = 0; i < vec_len (nm->addr_pool); i++) {
+        a = nm->addr_pool + i;
+        switch (proto) {
 #define _(N, j, n, s) \
         case SNAT_PROTOCOL_##N: \
           if (a->busy_##n##_ports < (65535-1024)) \
@@ -364,18 +343,16 @@ nat64_alloc_out_addr_and_port (u32 fib_index, snat_protocol_t proto,
                  ga = a; \
             } \
           break;
-	  foreach_snat_protocol
+                foreach_snat_protocol
 #undef _
-	default:
-	  clib_warning ("unknown protocol");
-	  return 1;
-	}
+            default:
+                clib_warning ("unknown protocol");
+                return 1;
+        }
     }
 
-  if (ga)
-    {
-      switch (proto)
-	{
+    if (ga) {
+        switch (proto) {
 #define _(N, j, n, s) \
         case SNAT_PROTOCOL_##N: \
           while (1) \
@@ -394,35 +371,33 @@ nat64_alloc_out_addr_and_port (u32 fib_index, snat_protocol_t proto,
               addr->as_u32 = a->addr.as_u32; \
               return 0; \
             }
-	  break;
-	  foreach_snat_protocol
+                break;
+                foreach_snat_protocol
 #undef _
-	default:
-	  clib_warning ("unknown protocol");
-	  return 1;
-	}
+            default:
+                clib_warning ("unknown protocol");
+                return 1;
+        }
     }
 
-  /* Totally out of translations to use... */
-  //TODO: IPFix
-  return 1;
+    /* Totally out of translations to use... */
+    //TODO: IPFix
+    return 1;
 }
 
 void
 nat64_free_out_addr_and_port (ip4_address_t * addr, u16 port,
-			      snat_protocol_t proto)
+                              snat_protocol_t proto)
 {
-  nat64_main_t *nm = &nat64_main;
-  int i;
-  snat_address_t *a;
+    nat64_main_t *nm = &nat64_main;
+    int i;
+    snat_address_t *a;
 
-  for (i = 0; i < vec_len (nm->addr_pool); i++)
-    {
-      a = nm->addr_pool + i;
-      if (addr->as_u32 != a->addr.as_u32)
-	continue;
-      switch (proto)
-	{
+    for (i = 0; i < vec_len (nm->addr_pool); i++) {
+        a = nm->addr_pool + i;
+        if (addr->as_u32 != a->addr.as_u32)
+            continue;
+        switch (proto) {
 #define _(N, j, n, s) \
         case SNAT_PROTOCOL_##N: \
           ASSERT (clib_bitmap_get_no_check (a->busy_##n##_port_bitmap, \
@@ -430,48 +405,45 @@ nat64_free_out_addr_and_port (ip4_address_t * addr, u16 port,
           clib_bitmap_set_no_check (a->busy_##n##_port_bitmap, port, 0); \
           a->busy_##n##_ports--; \
           break;
-	  foreach_snat_protocol
+                foreach_snat_protocol
 #undef _
-	default:
-	  clib_warning ("unknown protocol");
-	  return;
-	}
-      break;
+            default:
+                clib_warning ("unknown protocol");
+                return;
+        }
+        break;
     }
 }
 
 int
 nat64_add_del_static_bib_entry (ip6_address_t * in_addr,
-				ip4_address_t * out_addr, u16 in_port,
-				u16 out_port, u8 proto, u32 vrf_id, u8 is_add)
+                                ip4_address_t * out_addr, u16 in_port,
+                                u16 out_port, u8 proto, u32 vrf_id, u8 is_add)
 {
-  nat64_main_t *nm = &nat64_main;
-  nat64_db_bib_entry_t *bibe;
-  u32 fib_index = fib_table_find_or_create_and_lock (FIB_PROTOCOL_IP6, vrf_id,
-						     FIB_SOURCE_PLUGIN_HI);
-  snat_protocol_t p = ip_proto_to_snat_proto (proto);
-  ip46_address_t addr;
-  int i;
-  snat_address_t *a;
+    nat64_main_t *nm = &nat64_main;
+    nat64_db_bib_entry_t *bibe;
+    u32 fib_index = fib_table_find_or_create_and_lock (FIB_PROTOCOL_IP6, vrf_id,
+                    FIB_SOURCE_PLUGIN_HI);
+    snat_protocol_t p = ip_proto_to_snat_proto (proto);
+    ip46_address_t addr;
+    int i;
+    snat_address_t *a;
 
-  addr.as_u64[0] = in_addr->as_u64[0];
-  addr.as_u64[1] = in_addr->as_u64[1];
-  bibe =
-    nat64_db_bib_entry_find (&nm->db, &addr, clib_host_to_net_u16 (in_port),
-			     proto, fib_index, 1);
+    addr.as_u64[0] = in_addr->as_u64[0];
+    addr.as_u64[1] = in_addr->as_u64[1];
+    bibe =
+        nat64_db_bib_entry_find (&nm->db, &addr, clib_host_to_net_u16 (in_port),
+                                 proto, fib_index, 1);
 
-  if (is_add)
-    {
-      if (bibe)
-	return VNET_API_ERROR_VALUE_EXIST;
+    if (is_add) {
+        if (bibe)
+            return VNET_API_ERROR_VALUE_EXIST;
 
-      for (i = 0; i < vec_len (nm->addr_pool); i++)
-	{
-	  a = nm->addr_pool + i;
-	  if (out_addr->as_u32 != a->addr.as_u32)
-	    continue;
-	  switch (p)
-	    {
+        for (i = 0; i < vec_len (nm->addr_pool); i++) {
+            a = nm->addr_pool + i;
+            if (out_addr->as_u32 != a->addr.as_u32)
+                continue;
+            switch (p) {
 #define _(N, j, n, s) \
             case SNAT_PROTOCOL_##N: \
               if (clib_bitmap_get_no_check (a->busy_##n##_port_bitmap, \
@@ -482,287 +454,264 @@ nat64_add_del_static_bib_entry (ip6_address_t * in_addr,
               if (out_port > 1024) \
                 a->busy_##n##_ports++; \
               break;
-	      foreach_snat_protocol
+                    foreach_snat_protocol
 #undef _
-	    default:
-	      memset (&addr, 0, sizeof (addr));
-	      addr.ip4.as_u32 = out_addr->as_u32;
-	      if (nat64_db_bib_entry_find
-		  (&nm->db, &addr, 0, proto, fib_index, 0))
-		return VNET_API_ERROR_INVALID_VALUE;
-	    }
-	  break;
-	}
-      bibe =
-	nat64_db_bib_entry_create (&nm->db, in_addr, out_addr,
-				   clib_host_to_net_u16 (in_port),
-				   clib_host_to_net_u16 (out_port), fib_index,
-				   proto, 1);
-      if (!bibe)
-	return VNET_API_ERROR_UNSPECIFIED;
-    }
-  else
-    {
-      if (!bibe)
-	return VNET_API_ERROR_NO_SUCH_ENTRY;
+                default:
+                    memset (&addr, 0, sizeof (addr));
+                    addr.ip4.as_u32 = out_addr->as_u32;
+                    if (nat64_db_bib_entry_find
+                        (&nm->db, &addr, 0, proto, fib_index, 0))
+                        return VNET_API_ERROR_INVALID_VALUE;
+            }
+            break;
+        }
+        bibe =
+            nat64_db_bib_entry_create (&nm->db, in_addr, out_addr,
+                                       clib_host_to_net_u16 (in_port),
+                                       clib_host_to_net_u16 (out_port), fib_index,
+                                       proto, 1);
+        if (!bibe)
+            return VNET_API_ERROR_UNSPECIFIED;
+    } else {
+        if (!bibe)
+            return VNET_API_ERROR_NO_SUCH_ENTRY;
 
-      nat64_free_out_addr_and_port (out_addr, out_port, p);
-      nat64_db_bib_entry_free (&nm->db, bibe);
+        nat64_free_out_addr_and_port (out_addr, out_port, p);
+        nat64_db_bib_entry_free (&nm->db, bibe);
     }
 
-  return 0;
+    return 0;
 }
 
 int
 nat64_set_udp_timeout (u32 timeout)
 {
-  nat64_main_t *nm = &nat64_main;
+    nat64_main_t *nm = &nat64_main;
 
-  if (timeout == 0)
-    nm->udp_timeout = SNAT_UDP_TIMEOUT;
-  else if (timeout < SNAT_UDP_TIMEOUT_MIN)
-    return VNET_API_ERROR_INVALID_VALUE;
-  else
-    nm->udp_timeout = timeout;
+    if (timeout == 0)
+        nm->udp_timeout = SNAT_UDP_TIMEOUT;
+    else if (timeout < SNAT_UDP_TIMEOUT_MIN)
+        return VNET_API_ERROR_INVALID_VALUE;
+    else
+        nm->udp_timeout = timeout;
 
-  return 0;
+    return 0;
 }
 
 u32
 nat64_get_udp_timeout (void)
 {
-  nat64_main_t *nm = &nat64_main;
+    nat64_main_t *nm = &nat64_main;
 
-  return nm->udp_timeout;
+    return nm->udp_timeout;
 }
 
 int
 nat64_set_icmp_timeout (u32 timeout)
 {
-  nat64_main_t *nm = &nat64_main;
+    nat64_main_t *nm = &nat64_main;
 
-  if (timeout == 0)
-    nm->icmp_timeout = SNAT_ICMP_TIMEOUT;
-  else
-    nm->icmp_timeout = timeout;
+    if (timeout == 0)
+        nm->icmp_timeout = SNAT_ICMP_TIMEOUT;
+    else
+        nm->icmp_timeout = timeout;
 
-  return 0;
+    return 0;
 }
 
 u32
 nat64_get_icmp_timeout (void)
 {
-  nat64_main_t *nm = &nat64_main;
+    nat64_main_t *nm = &nat64_main;
 
-  return nm->icmp_timeout;
+    return nm->icmp_timeout;
 }
 
 int
 nat64_set_tcp_timeouts (u32 trans, u32 est, u32 incoming_syn)
 {
-  nat64_main_t *nm = &nat64_main;
+    nat64_main_t *nm = &nat64_main;
 
-  if (trans == 0)
-    nm->tcp_trans_timeout = SNAT_TCP_TRANSITORY_TIMEOUT;
-  else
-    nm->tcp_trans_timeout = trans;
+    if (trans == 0)
+        nm->tcp_trans_timeout = SNAT_TCP_TRANSITORY_TIMEOUT;
+    else
+        nm->tcp_trans_timeout = trans;
 
-  if (est == 0)
-    nm->tcp_est_timeout = SNAT_TCP_ESTABLISHED_TIMEOUT;
-  else
-    nm->tcp_est_timeout = est;
+    if (est == 0)
+        nm->tcp_est_timeout = SNAT_TCP_ESTABLISHED_TIMEOUT;
+    else
+        nm->tcp_est_timeout = est;
 
-  if (incoming_syn == 0)
-    nm->tcp_incoming_syn_timeout = SNAT_TCP_INCOMING_SYN;
-  else
-    nm->tcp_incoming_syn_timeout = incoming_syn;
+    if (incoming_syn == 0)
+        nm->tcp_incoming_syn_timeout = SNAT_TCP_INCOMING_SYN;
+    else
+        nm->tcp_incoming_syn_timeout = incoming_syn;
 
-  return 0;
+    return 0;
 }
 
 u32
 nat64_get_tcp_trans_timeout (void)
 {
-  nat64_main_t *nm = &nat64_main;
+    nat64_main_t *nm = &nat64_main;
 
-  return nm->tcp_trans_timeout;
+    return nm->tcp_trans_timeout;
 }
 
 u32
 nat64_get_tcp_est_timeout (void)
 {
-  nat64_main_t *nm = &nat64_main;
+    nat64_main_t *nm = &nat64_main;
 
-  return nm->tcp_est_timeout;
+    return nm->tcp_est_timeout;
 }
 
 u32
 nat64_get_tcp_incoming_syn_timeout (void)
 {
-  nat64_main_t *nm = &nat64_main;
+    nat64_main_t *nm = &nat64_main;
 
-  return nm->tcp_incoming_syn_timeout;
+    return nm->tcp_incoming_syn_timeout;
 }
 
 void
 nat64_session_reset_timeout (nat64_db_st_entry_t * ste, vlib_main_t * vm)
 {
-  nat64_main_t *nm = &nat64_main;
-  u32 now = (u32) vlib_time_now (vm);
+    nat64_main_t *nm = &nat64_main;
+    u32 now = (u32) vlib_time_now (vm);
 
-  switch (ip_proto_to_snat_proto (ste->proto))
-    {
-    case SNAT_PROTOCOL_ICMP:
-      ste->expire = now + nm->icmp_timeout;
-      return;
-    case SNAT_PROTOCOL_TCP:
-      {
-	switch (ste->tcp_state)
-	  {
-	  case NAT64_TCP_STATE_V4_INIT:
-	  case NAT64_TCP_STATE_V6_INIT:
-	  case NAT64_TCP_STATE_V4_FIN_RCV:
-	  case NAT64_TCP_STATE_V6_FIN_RCV:
-	  case NAT64_TCP_STATE_V6_FIN_V4_FIN_RCV:
-	  case NAT64_TCP_STATE_TRANS:
-	    ste->expire = now + nm->tcp_trans_timeout;
-	    return;
-	  case NAT64_TCP_STATE_ESTABLISHED:
-	    ste->expire = now + nm->tcp_est_timeout;
-	    return;
-	  default:
-	    return;
-	  }
-      }
-    case SNAT_PROTOCOL_UDP:
-      ste->expire = now + nm->udp_timeout;
-      return;
-    default:
-      ste->expire = now + nm->udp_timeout;
-      return;
+    switch (ip_proto_to_snat_proto (ste->proto)) {
+        case SNAT_PROTOCOL_ICMP:
+            ste->expire = now + nm->icmp_timeout;
+            return;
+        case SNAT_PROTOCOL_TCP: {
+            switch (ste->tcp_state) {
+                case NAT64_TCP_STATE_V4_INIT:
+                case NAT64_TCP_STATE_V6_INIT:
+                case NAT64_TCP_STATE_V4_FIN_RCV:
+                case NAT64_TCP_STATE_V6_FIN_RCV:
+                case NAT64_TCP_STATE_V6_FIN_V4_FIN_RCV:
+                case NAT64_TCP_STATE_TRANS:
+                    ste->expire = now + nm->tcp_trans_timeout;
+                    return;
+                case NAT64_TCP_STATE_ESTABLISHED:
+                    ste->expire = now + nm->tcp_est_timeout;
+                    return;
+                default:
+                    return;
+            }
+        }
+        case SNAT_PROTOCOL_UDP:
+            ste->expire = now + nm->udp_timeout;
+            return;
+        default:
+            ste->expire = now + nm->udp_timeout;
+            return;
     }
 }
 
 void
 nat64_tcp_session_set_state (nat64_db_st_entry_t * ste, tcp_header_t * tcp,
-			     u8 is_ip6)
+                             u8 is_ip6)
 {
-  switch (ste->tcp_state)
-    {
-    case NAT64_TCP_STATE_CLOSED:
-      {
-	if (tcp->flags & TCP_FLAG_SYN)
-	  {
-	    if (is_ip6)
-	      ste->tcp_state = NAT64_TCP_STATE_V6_INIT;
-	    else
-	      ste->tcp_state = NAT64_TCP_STATE_V4_INIT;
-	  }
-	return;
-      }
-    case NAT64_TCP_STATE_V4_INIT:
-      {
-	if (is_ip6 && (tcp->flags & TCP_FLAG_SYN))
-	  ste->tcp_state = NAT64_TCP_STATE_ESTABLISHED;
-	return;
-      }
-    case NAT64_TCP_STATE_V6_INIT:
-      {
-	if (!is_ip6 && (tcp->flags & TCP_FLAG_SYN))
-	  ste->tcp_state = NAT64_TCP_STATE_ESTABLISHED;
-	return;
-      }
-    case NAT64_TCP_STATE_ESTABLISHED:
-      {
-	if (tcp->flags & TCP_FLAG_FIN)
-	  {
-	    if (is_ip6)
-	      ste->tcp_state = NAT64_TCP_STATE_V6_FIN_RCV;
-	    else
-	      ste->tcp_state = NAT64_TCP_STATE_V4_FIN_RCV;
-	  }
-	else if (tcp->flags & TCP_FLAG_RST)
-	  {
-	    ste->tcp_state = NAT64_TCP_STATE_TRANS;
-	  }
-	return;
-      }
-    case NAT64_TCP_STATE_V4_FIN_RCV:
-      {
-	if (is_ip6 && (tcp->flags & TCP_FLAG_FIN))
-	  ste->tcp_state = NAT64_TCP_STATE_V6_FIN_V4_FIN_RCV;
-	return;
-      }
-    case NAT64_TCP_STATE_V6_FIN_RCV:
-      {
-	if (!is_ip6 && (tcp->flags & TCP_FLAG_FIN))
-	  ste->tcp_state = NAT64_TCP_STATE_V6_FIN_V4_FIN_RCV;
-	return;
-      }
-    case NAT64_TCP_STATE_TRANS:
-      {
-	if (!(tcp->flags & TCP_FLAG_RST))
-	  ste->tcp_state = NAT64_TCP_STATE_ESTABLISHED;
-	return;
-      }
-    default:
-      return;
+    switch (ste->tcp_state) {
+        case NAT64_TCP_STATE_CLOSED: {
+            if (tcp->flags & TCP_FLAG_SYN) {
+                if (is_ip6)
+                    ste->tcp_state = NAT64_TCP_STATE_V6_INIT;
+                else
+                    ste->tcp_state = NAT64_TCP_STATE_V4_INIT;
+            }
+            return;
+        }
+        case NAT64_TCP_STATE_V4_INIT: {
+            if (is_ip6 && (tcp->flags & TCP_FLAG_SYN))
+                ste->tcp_state = NAT64_TCP_STATE_ESTABLISHED;
+            return;
+        }
+        case NAT64_TCP_STATE_V6_INIT: {
+            if (!is_ip6 && (tcp->flags & TCP_FLAG_SYN))
+                ste->tcp_state = NAT64_TCP_STATE_ESTABLISHED;
+            return;
+        }
+        case NAT64_TCP_STATE_ESTABLISHED: {
+            if (tcp->flags & TCP_FLAG_FIN) {
+                if (is_ip6)
+                    ste->tcp_state = NAT64_TCP_STATE_V6_FIN_RCV;
+                else
+                    ste->tcp_state = NAT64_TCP_STATE_V4_FIN_RCV;
+            } else if (tcp->flags & TCP_FLAG_RST) {
+                ste->tcp_state = NAT64_TCP_STATE_TRANS;
+            }
+            return;
+        }
+        case NAT64_TCP_STATE_V4_FIN_RCV: {
+            if (is_ip6 && (tcp->flags & TCP_FLAG_FIN))
+                ste->tcp_state = NAT64_TCP_STATE_V6_FIN_V4_FIN_RCV;
+            return;
+        }
+        case NAT64_TCP_STATE_V6_FIN_RCV: {
+            if (!is_ip6 && (tcp->flags & TCP_FLAG_FIN))
+                ste->tcp_state = NAT64_TCP_STATE_V6_FIN_V4_FIN_RCV;
+            return;
+        }
+        case NAT64_TCP_STATE_TRANS: {
+            if (!(tcp->flags & TCP_FLAG_RST))
+                ste->tcp_state = NAT64_TCP_STATE_ESTABLISHED;
+            return;
+        }
+        default:
+            return;
     }
 }
 
 int
 nat64_add_del_prefix (ip6_address_t * prefix, u8 plen, u32 vrf_id, u8 is_add)
 {
-  nat64_main_t *nm = &nat64_main;
-  nat64_prefix_t *p = 0;
-  int i;
+    nat64_main_t *nm = &nat64_main;
+    nat64_prefix_t *p = 0;
+    int i;
 
-  /* Verify prefix length */
-  if (plen != 32 && plen != 40 && plen != 48 && plen != 56 && plen != 64
-      && plen != 96)
-    return VNET_API_ERROR_INVALID_VALUE;
+    /* Verify prefix length */
+    if (plen != 32 && plen != 40 && plen != 48 && plen != 56 && plen != 64
+        && plen != 96)
+        return VNET_API_ERROR_INVALID_VALUE;
 
-  /* Check if tenant already have prefix */
-  for (i = 0; i < vec_len (nm->pref64); i++)
-    {
-      if (nm->pref64[i].vrf_id == vrf_id)
-	{
-	  p = nm->pref64 + i;
-	  break;
-	}
+    /* Check if tenant already have prefix */
+    for (i = 0; i < vec_len (nm->pref64); i++) {
+        if (nm->pref64[i].vrf_id == vrf_id) {
+            p = nm->pref64 + i;
+            break;
+        }
     }
 
-  if (is_add)
-    {
-      if (!p)
-	{
-	  vec_add2 (nm->pref64, p, 1);
-	  p->fib_index =
-	    fib_table_find_or_create_and_lock (FIB_PROTOCOL_IP6, vrf_id,
-					       FIB_SOURCE_PLUGIN_HI);
-	  p->vrf_id = vrf_id;
-	}
+    if (is_add) {
+        if (!p) {
+            vec_add2 (nm->pref64, p, 1);
+            p->fib_index =
+                fib_table_find_or_create_and_lock (FIB_PROTOCOL_IP6, vrf_id,
+                                                   FIB_SOURCE_PLUGIN_HI);
+            p->vrf_id = vrf_id;
+        }
 
-      p->prefix.as_u64[0] = prefix->as_u64[0];
-      p->prefix.as_u64[1] = prefix->as_u64[1];
-      p->plen = plen;
-    }
-  else
-    {
-      if (!p)
-	return VNET_API_ERROR_NO_SUCH_ENTRY;
+        p->prefix.as_u64[0] = prefix->as_u64[0];
+        p->prefix.as_u64[1] = prefix->as_u64[1];
+        p->plen = plen;
+    } else {
+        if (!p)
+            return VNET_API_ERROR_NO_SUCH_ENTRY;
 
-      vec_del1 (nm->pref64, i);
+        vec_del1 (nm->pref64, i);
     }
 
-  return 0;
+    return 0;
 }
 
 void
 nat64_prefix_walk (nat64_prefix_walk_fn_t fn, void *ctx)
 {
-  nat64_main_t *nm = &nat64_main;
-  nat64_prefix_t *p = 0;
+    nat64_main_t *nm = &nat64_main;
+    nat64_prefix_t *p = 0;
 
   /* *INDENT-OFF* */
   vec_foreach (p, nm->pref64)
@@ -776,8 +725,8 @@ nat64_prefix_walk (nat64_prefix_walk_fn_t fn, void *ctx)
 void
 nat64_compose_ip6 (ip6_address_t * ip6, ip4_address_t * ip4, u32 fib_index)
 {
-  nat64_main_t *nm = &nat64_main;
-  nat64_prefix_t *p, *gp = 0, *prefix = 0;
+    nat64_main_t *nm = &nat64_main;
+    nat64_prefix_t *p, *gp = 0, *prefix = 0;
 
   /* *INDENT-OFF* */
   vec_foreach (p, nm->pref64)
@@ -793,62 +742,58 @@ nat64_compose_ip6 (ip6_address_t * ip6, ip4_address_t * ip4, u32 fib_index)
     };
   /* *INDENT-ON* */
 
-  if (!prefix)
-    prefix = gp;
+    if (!prefix)
+        prefix = gp;
 
-  if (prefix)
-    {
-      clib_memcpy (ip6, &p->prefix, sizeof (ip6_address_t));
-      switch (p->plen)
-	{
-	case 32:
-	  ip6->as_u32[1] = ip4->as_u32;
-	  break;
-	case 40:
-	  ip6->as_u8[5] = ip4->as_u8[0];
-	  ip6->as_u8[6] = ip4->as_u8[1];
-	  ip6->as_u8[7] = ip4->as_u8[2];
-	  ip6->as_u8[9] = ip4->as_u8[3];
-	  break;
-	case 48:
-	  ip6->as_u8[6] = ip4->as_u8[0];
-	  ip6->as_u8[7] = ip4->as_u8[1];
-	  ip6->as_u8[9] = ip4->as_u8[2];
-	  ip6->as_u8[10] = ip4->as_u8[3];
-	  break;
-	case 56:
-	  ip6->as_u8[7] = ip4->as_u8[0];
-	  ip6->as_u8[9] = ip4->as_u8[1];
-	  ip6->as_u8[10] = ip4->as_u8[2];
-	  ip6->as_u8[11] = ip4->as_u8[3];
-	  break;
-	case 64:
-	  ip6->as_u8[9] = ip4->as_u8[0];
-	  ip6->as_u8[10] = ip4->as_u8[1];
-	  ip6->as_u8[11] = ip4->as_u8[2];
-	  ip6->as_u8[12] = ip4->as_u8[3];
-	  break;
-	case 96:
-	  ip6->as_u32[3] = ip4->as_u32;
-	  break;
-	default:
-	  clib_warning ("invalid prefix length");
-	  break;
-	}
-    }
-  else
-    {
-      clib_memcpy (ip6, well_known_prefix, sizeof (ip6_address_t));
-      ip6->as_u32[3] = ip4->as_u32;
+    if (prefix) {
+        clib_memcpy (ip6, &p->prefix, sizeof (ip6_address_t));
+        switch (p->plen) {
+            case 32:
+                ip6->as_u32[1] = ip4->as_u32;
+                break;
+            case 40:
+                ip6->as_u8[5] = ip4->as_u8[0];
+                ip6->as_u8[6] = ip4->as_u8[1];
+                ip6->as_u8[7] = ip4->as_u8[2];
+                ip6->as_u8[9] = ip4->as_u8[3];
+                break;
+            case 48:
+                ip6->as_u8[6] = ip4->as_u8[0];
+                ip6->as_u8[7] = ip4->as_u8[1];
+                ip6->as_u8[9] = ip4->as_u8[2];
+                ip6->as_u8[10] = ip4->as_u8[3];
+                break;
+            case 56:
+                ip6->as_u8[7] = ip4->as_u8[0];
+                ip6->as_u8[9] = ip4->as_u8[1];
+                ip6->as_u8[10] = ip4->as_u8[2];
+                ip6->as_u8[11] = ip4->as_u8[3];
+                break;
+            case 64:
+                ip6->as_u8[9] = ip4->as_u8[0];
+                ip6->as_u8[10] = ip4->as_u8[1];
+                ip6->as_u8[11] = ip4->as_u8[2];
+                ip6->as_u8[12] = ip4->as_u8[3];
+                break;
+            case 96:
+                ip6->as_u32[3] = ip4->as_u32;
+                break;
+            default:
+                clib_warning ("invalid prefix length");
+                break;
+        }
+    } else {
+        clib_memcpy (ip6, well_known_prefix, sizeof (ip6_address_t));
+        ip6->as_u32[3] = ip4->as_u32;
     }
 }
 
 void
 nat64_extract_ip4 (ip6_address_t * ip6, ip4_address_t * ip4, u32 fib_index)
 {
-  nat64_main_t *nm = &nat64_main;
-  nat64_prefix_t *p, *gp = 0;
-  u8 plen = 0;
+    nat64_main_t *nm = &nat64_main;
+    nat64_prefix_t *p, *gp = 0;
+    u8 plen = 0;
 
   /* *INDENT-OFF* */
   vec_foreach (p, nm->pref64)
@@ -864,49 +809,47 @@ nat64_extract_ip4 (ip6_address_t * ip6, ip4_address_t * ip4, u32 fib_index)
     };
   /* *INDENT-ON* */
 
-  if (!plen)
-    {
-      if (gp)
-	plen = gp->plen;
-      else
-	plen = 96;
+    if (!plen) {
+        if (gp)
+            plen = gp->plen;
+        else
+            plen = 96;
     }
 
-  switch (plen)
-    {
-    case 32:
-      ip4->as_u32 = ip6->as_u32[1];
-      break;
-    case 40:
-      ip4->as_u8[0] = ip6->as_u8[5];
-      ip4->as_u8[1] = ip6->as_u8[6];
-      ip4->as_u8[2] = ip6->as_u8[7];
-      ip4->as_u8[3] = ip6->as_u8[9];
-      break;
-    case 48:
-      ip4->as_u8[0] = ip6->as_u8[6];
-      ip4->as_u8[1] = ip6->as_u8[7];
-      ip4->as_u8[2] = ip6->as_u8[9];
-      ip4->as_u8[3] = ip6->as_u8[10];
-      break;
-    case 56:
-      ip4->as_u8[0] = ip6->as_u8[7];
-      ip4->as_u8[1] = ip6->as_u8[9];
-      ip4->as_u8[2] = ip6->as_u8[10];
-      ip4->as_u8[3] = ip6->as_u8[11];
-      break;
-    case 64:
-      ip4->as_u8[0] = ip6->as_u8[9];
-      ip4->as_u8[1] = ip6->as_u8[10];
-      ip4->as_u8[2] = ip6->as_u8[11];
-      ip4->as_u8[3] = ip6->as_u8[12];
-      break;
-    case 96:
-      ip4->as_u32 = ip6->as_u32[3];
-      break;
-    default:
-      clib_warning ("invalid prefix length");
-      break;
+    switch (plen) {
+        case 32:
+            ip4->as_u32 = ip6->as_u32[1];
+            break;
+        case 40:
+            ip4->as_u8[0] = ip6->as_u8[5];
+            ip4->as_u8[1] = ip6->as_u8[6];
+            ip4->as_u8[2] = ip6->as_u8[7];
+            ip4->as_u8[3] = ip6->as_u8[9];
+            break;
+        case 48:
+            ip4->as_u8[0] = ip6->as_u8[6];
+            ip4->as_u8[1] = ip6->as_u8[7];
+            ip4->as_u8[2] = ip6->as_u8[9];
+            ip4->as_u8[3] = ip6->as_u8[10];
+            break;
+        case 56:
+            ip4->as_u8[0] = ip6->as_u8[7];
+            ip4->as_u8[1] = ip6->as_u8[9];
+            ip4->as_u8[2] = ip6->as_u8[10];
+            ip4->as_u8[3] = ip6->as_u8[11];
+            break;
+        case 64:
+            ip4->as_u8[0] = ip6->as_u8[9];
+            ip4->as_u8[1] = ip6->as_u8[10];
+            ip4->as_u8[2] = ip6->as_u8[11];
+            ip4->as_u8[3] = ip6->as_u8[12];
+            break;
+        case 96:
+            ip4->as_u32 = ip6->as_u32[3];
+            break;
+        default:
+            clib_warning ("invalid prefix length");
+            break;
     }
 }
 
@@ -917,20 +860,19 @@ nat64_extract_ip4 (ip6_address_t * ip6, ip4_address_t * ip4, u32 fib_index)
  */
 static uword
 nat64_expire_walk_fn (vlib_main_t * vm, vlib_node_runtime_t * rt,
-		      vlib_frame_t * f)
+                      vlib_frame_t * f)
 {
-  nat64_main_t *nm = &nat64_main;
+    nat64_main_t *nm = &nat64_main;
 
-  while (!nm->is_disabled)
-    {
-      vlib_process_wait_for_event_or_clock (vm, 10.0);
-      vlib_process_get_events (vm, NULL);
-      u32 now = (u32) vlib_time_now (vm);
+    while (!nm->is_disabled) {
+        vlib_process_wait_for_event_or_clock (vm, 10.0);
+        vlib_process_get_events (vm, NULL);
+        u32 now = (u32) vlib_time_now (vm);
 
-      nad64_db_st_free_expired (&nm->db, now);
+        nad64_db_st_free_expired (&nm->db, now);
     }
 
-  return 0;
+    return 0;
 }
 
 static vlib_node_registration_t nat64_expire_walk_node;

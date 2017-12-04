@@ -32,10 +32,9 @@ _(ioamSeqnoReorderedCount, 5282, u32)             \
 _(ioamSeqnoDupCount, 5283, u32)
 
 
-typedef enum
-{
+typedef enum {
 #define _(n,v,t) n = v,
-  foreach_ioam_ipfix_info_element
+    foreach_ioam_ipfix_info_element
 #undef _
 } ioam_ipfix_info_element_id_t;
 
@@ -52,28 +51,27 @@ _(seqno_data.dup_packets, 0xffffffff, ioamSeqnoDupCount, 4)
 
 clib_error_t *ioam_flow_report_init (vlib_main_t * vm);
 
-typedef struct
-{
-  u8 num_nodes;
-  u8 trace_type;
-  u16 reserve;
-  u32 mean_delay;
-  u32 pkt_counter;
-  u32 bytes_counter;
-  ioam_path_map_t path[0];
+typedef struct {
+    u8 num_nodes;
+    u8 trace_type;
+    u16 reserve;
+    u32 mean_delay;
+    u32 pkt_counter;
+    u32 bytes_counter;
+    ioam_path_map_t path[0];
 } ioam_path;
 
 clib_error_t *ioam_flow_create (u8 del);
 
 u8 *ioam_template_rewrite (flow_report_main_t * frm, flow_report_t * fr,
-			   ip4_address_t * collector_address,
-			   ip4_address_t * src_address, u16 collector_port);
+                           ip4_address_t * collector_address,
+                           ip4_address_t * src_address, u16 collector_port);
 
 u16 ioam_analyse_add_ipfix_record (flow_report_t * fr,
-				   ioam_analyser_data_t * record,
-				   vlib_buffer_t * b0, u16 offset,
-				   ip6_address_t * src, ip6_address_t * dst,
-				   u16 src_port, u16 dst_port);
+                                   ioam_analyser_data_t * record,
+                                   vlib_buffer_t * b0, u16 offset,
+                                   ip6_address_t * src, ip6_address_t * dst,
+                                   u16 src_port, u16 dst_port);
 
 #endif /* __included_ip6_ioam_flow_report_h__ */
 

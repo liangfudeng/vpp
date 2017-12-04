@@ -48,7 +48,7 @@
 #define MPLS_LABEL_INVALID (MPLS_IETF_MAX_LABEL+1)
 
 #define MPLS_LABEL_IS_REAL(_lbl) \
-    (((_lbl) > MPLS_IETF_MIN_UNRES_LABEL) &&	\
+    (((_lbl) > MPLS_IETF_MIN_UNRES_LABEL) &&    \
      ((_lbl) <= MPLS_IETF_MAX_UNRES_LABEL))
 
 /**

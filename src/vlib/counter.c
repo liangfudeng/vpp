@@ -42,96 +42,92 @@
 void
 vlib_clear_simple_counters (vlib_simple_counter_main_t * cm)
 {
-  counter_t *my_counters;
-  uword i, j;
+    counter_t *my_counters;
+    uword i, j;
 
-  for (i = 0; i < vec_len (cm->counters); i++)
-    {
-      my_counters = cm->counters[i];
+    for (i = 0; i < vec_len (cm->counters); i++) {
+        my_counters = cm->counters[i];
 
-      for (j = 0; j < vec_len (my_counters); j++)
-	{
-	  my_counters[j] = 0;
-	}
+        for (j = 0; j < vec_len (my_counters); j++) {
+            my_counters[j] = 0;
+        }
     }
 }
 
 void
 vlib_clear_combined_counters (vlib_combined_counter_main_t * cm)
 {
-  vlib_counter_t *my_counters;
-  uword i, j;
+    vlib_counter_t *my_counters;
+    uword i, j;
 
-  for (i = 0; i < vec_len (cm->counters); i++)
-    {
-      my_counters = cm->counters[i];
+    for (i = 0; i < vec_len (cm->counters); i++) {
+        my_counters = cm->counters[i];
 
-      for (j = 0; j < vec_len (my_counters); j++)
-	{
-	  my_counters[j].packets = 0;
-	  my_counters[j].bytes = 0;
-	}
+        for (j = 0; j < vec_len (my_counters); j++) {
+            my_counters[j].packets = 0;
+            my_counters[j].bytes = 0;
+        }
     }
 }
 
 void
 vlib_validate_simple_counter (vlib_simple_counter_main_t * cm, u32 index)
 {
-  vlib_thread_main_t *tm = vlib_get_thread_main ();
-  int i;
+    vlib_thread_main_t *tm = vlib_get_thread_main ();
+    int i;
 
-  vec_validate (cm->counters, tm->n_vlib_mains - 1);
-  for (i = 0; i < tm->n_vlib_mains; i++)
-    vec_validate_aligned (cm->counters[i], index, CLIB_CACHE_LINE_BYTES);
+    vec_validate (cm->counters, tm->n_vlib_mains - 1);
+    for (i = 0; i < tm->n_vlib_mains; i++)
+        vec_validate_aligned (cm->counters[i], index, CLIB_CACHE_LINE_BYTES);
 }
 
 void
 vlib_validate_combined_counter (vlib_combined_counter_main_t * cm, u32 index)
 {
-  vlib_thread_main_t *tm = vlib_get_thread_main ();
-  int i;
+    vlib_thread_main_t *tm = vlib_get_thread_main ();
+    int i;
 
-  vec_validate (cm->counters, tm->n_vlib_mains - 1);
-  for (i = 0; i < tm->n_vlib_mains; i++)
-    vec_validate_aligned (cm->counters[i], index, CLIB_CACHE_LINE_BYTES);
+    vec_validate (cm->counters, tm->n_vlib_mains - 1);
+    for (i = 0; i < tm->n_vlib_mains; i++)
+        vec_validate_aligned (cm->counters[i], index, CLIB_CACHE_LINE_BYTES);
 }
 
 u32
 vlib_combined_counter_n_counters (const vlib_combined_counter_main_t * cm)
 {
-  ASSERT (cm->counters);
-  return (vec_len (cm->counters[0]));
+    ASSERT (cm->counters);
+    return (vec_len (cm->counters[0]));
 }
 
 u32
 vlib_simple_counter_n_counters (const vlib_simple_counter_main_t * cm)
 {
-  ASSERT (cm->counters);
-  return (vec_len (cm->counters[0]));
+    ASSERT (cm->counters);
+    return (vec_len (cm->counters[0]));
 }
 
 void
 serialize_vlib_simple_counter_main (serialize_main_t * m, va_list * va)
 {
-  clib_warning ("unimplemented");
+    clib_warning ("unimplemented");
 }
 
 void
 unserialize_vlib_simple_counter_main (serialize_main_t * m, va_list * va)
 {
-  clib_warning ("unimplemented");
+    clib_warning ("unimplemented");
 }
 
 void
 serialize_vlib_combined_counter_main (serialize_main_t * m, va_list * va)
 {
-  clib_warning ("unimplemented");
+    clib_warning ("unimplemented");
 }
 
 void
 unserialize_vlib_combined_counter_main (serialize_main_t * m, va_list * va)
 {
-  clib_warning ("unimplemented");
+    clib_warning ("unimplemented");
 }
 
 /*

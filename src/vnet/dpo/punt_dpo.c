@@ -71,23 +71,19 @@ const static dpo_vft_t punt_vft = {
  * this means that these graph nodes are ones from which a punt is the
  * parent object in the DPO-graph.
  */
-const static char* const punt_ip4_nodes[] =
-{
+const static char* const punt_ip4_nodes[] = {
     "ip4-punt",
     NULL,
 };
-const static char* const punt_ip6_nodes[] =
-{
+const static char* const punt_ip6_nodes[] = {
     "ip6-punt",
     NULL,
 };
-const static char* const punt_mpls_nodes[] =
-{
+const static char* const punt_mpls_nodes[] = {
     "mpls-punt",
     NULL,
 };
-const static char* const * const punt_nodes[DPO_PROTO_NUM] =
-{
+const static char* const * const punt_nodes[DPO_PROTO_NUM] = {
     [DPO_PROTO_IP4]  = punt_ip4_nodes,
     [DPO_PROTO_IP6]  = punt_ip6_nodes,
     [DPO_PROTO_MPLS] = punt_mpls_nodes,

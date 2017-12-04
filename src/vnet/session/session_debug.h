@@ -18,16 +18,15 @@
 #include <vnet/session/transport.h>
 #include <vlib/vlib.h>
 
-#define foreach_session_dbg_evt		\
-  _(ENQ, "enqueue")			\
-  _(DEQ, "dequeue")			\
-  _(DEQ_NODE, "dequeue")		\
-  _(POLL_GAP_TRACK, "poll gap track")	\
+#define foreach_session_dbg_evt     \
+  _(ENQ, "enqueue")         \
+  _(DEQ, "dequeue")         \
+  _(DEQ_NODE, "dequeue")        \
+  _(POLL_GAP_TRACK, "poll gap track")   \
 
-typedef enum _session_evt_dbg
-{
+typedef enum _session_evt_dbg {
 #define _(sym, str) SESSION_EVT_##sym,
-  foreach_session_dbg_evt
+    foreach_session_dbg_evt
 #undef _
 } session_evt_dbg_e;
 
@@ -39,86 +38,86 @@ typedef enum _session_evt_dbg
 
 #define SESSION_DBG(_fmt, _args...) clib_warning (_fmt, ##_args)
 
-#define DEC_SESSION_ETD(_s, _e, _size)					\
-  struct								\
-  {									\
-    u32 data[_size];							\
-  } * ed;								\
-  transport_proto_vft_t *vft = 						\
-      transport_protocol_get_vft (_s->session_type);			\
-  transport_connection_t *_tc = 					\
-      vft->get_connection (_s->connection_index, _s->thread_index);	\
-  ed = ELOG_TRACK_DATA (&vlib_global_main.elog_main,			\
-			_e, _tc->elog_track)
+#define DEC_SESSION_ETD(_s, _e, _size)                  \
+  struct                                \
+  {                                 \
+    u32 data[_size];                            \
+  } * ed;                               \
+  transport_proto_vft_t *vft =                      \
+      transport_protocol_get_vft (_s->session_type);            \
+  transport_connection_t *_tc =                     \
+      vft->get_connection (_s->connection_index, _s->thread_index); \
+  ed = ELOG_TRACK_DATA (&vlib_global_main.elog_main,            \
+            _e, _tc->elog_track)
 
-#define DEC_SESSION_ED(_e, _size)					\
-  struct								\
-  {									\
-    u32 data[_size];							\
-  } * ed;								\
+#define DEC_SESSION_ED(_e, _size)                   \
+  struct                                \
+  {                                 \
+    u32 data[_size];                            \
+  } * ed;                               \
   ed = ELOG_DATA (&vlib_global_main.elog_main, _e)
 
-#define SESSION_EVT_DEQ_HANDLER(_s, _body)				\
-{									\
-  ELOG_TYPE_DECLARE (_e) =						\
-  {									\
-    .format = "deq: id %d len %d rd %d wnd %d",				\
-    .format_args = "i4i4i4i4",						\
-  };									\
-  DEC_SESSION_ETD(_s, _e, 4);						\
-  do { _body; } while (0);						\
+#define SESSION_EVT_DEQ_HANDLER(_s, _body)              \
+{                                   \
+  ELOG_TYPE_DECLARE (_e) =                      \
+  {                                 \
+    .format = "deq: id %d len %d rd %d wnd %d",             \
+    .format_args = "i4i4i4i4",                      \
+  };                                    \
+  DEC_SESSION_ETD(_s, _e, 4);                       \
+  do { _body; } while (0);                      \
 }
 
-#define SESSION_EVT_ENQ_HANDLER(_s, _body)				\
-{									\
-  ELOG_TYPE_DECLARE (_e) =						\
-  {									\
-    .format = "enq: id %d length %d",					\
-    .format_args = "i4i4",						\
-  };									\
-  DEC_SESSION_ETD(_s, _e, 2);						\
-  do { _body; } while (0);						\
+#define SESSION_EVT_ENQ_HANDLER(_s, _body)              \
+{                                   \
+  ELOG_TYPE_DECLARE (_e) =                      \
+  {                                 \
+    .format = "enq: id %d length %d",                   \
+    .format_args = "i4i4",                      \
+  };                                    \
+  DEC_SESSION_ETD(_s, _e, 2);                       \
+  do { _body; } while (0);                      \
 }
 
 #if SESSION_DEQ_NODE_EVTS && SESSION_DEBUG > 1
-#define SESSION_EVT_DEQ_NODE_HANDLER(_node_evt)				\
-{									\
-  ELOG_TYPE_DECLARE (_e) =						\
-  {									\
-    .format = "deq-node: %s",						\
-    .format_args = "t4",                                      		\
-    .n_enum_strings = 2,                                        	\
-    .enum_strings = {                                           	\
-      "start",                                             		\
-      "end",                                              		\
-    },									\
-  };									\
-  DEC_SESSION_ED(_e, 1);						\
-  ed->data[0] = _node_evt;						\
+#define SESSION_EVT_DEQ_NODE_HANDLER(_node_evt)             \
+{                                   \
+  ELOG_TYPE_DECLARE (_e) =                      \
+  {                                 \
+    .format = "deq-node: %s",                       \
+    .format_args = "t4",                                            \
+    .n_enum_strings = 2,                                            \
+    .enum_strings = {                                               \
+      "start",                                                  \
+      "end",                                                    \
+    },                                  \
+  };                                    \
+  DEC_SESSION_ED(_e, 1);                        \
+  ed->data[0] = _node_evt;                      \
 }
 #else
 #define SESSION_EVT_DEQ_NODE_HANDLER(_node_evt)
 #endif /* SESSION_DEQ_NODE_EVTS */
 
 #if SESSION_EVT_POLL_DBG && SESSION_DEBUG > 1
-#define SESSION_EVT_POLL_GAP(_smm, _my_thread_index)			\
-{									\
-  ELOG_TYPE_DECLARE (_e) =						\
-  {									\
-    .format = "nixon-gap: %d MS",					\
-    .format_args = "i4",						\
-  };									\
-  DEC_SESSION_ED(_e, 1);						\
-  ed->data[0] =	(u32) ((now -						\
-    _smm->last_event_poll_by_thread[my_thread_index])*1000.0);		\
+#define SESSION_EVT_POLL_GAP(_smm, _my_thread_index)            \
+{                                   \
+  ELOG_TYPE_DECLARE (_e) =                      \
+  {                                 \
+    .format = "nixon-gap: %d MS",                   \
+    .format_args = "i4",                        \
+  };                                    \
+  DEC_SESSION_ED(_e, 1);                        \
+  ed->data[0] = (u32) ((now -                       \
+    _smm->last_event_poll_by_thread[my_thread_index])*1000.0);      \
 }
-#define SESSION_EVT_POLL_GAP_TRACK_HANDLER(_smm, _my_thread_index)	\
-{									\
-  if (PREDICT_TRUE(							\
-	      smm->last_event_poll_by_thread[my_thread_index] != 0.0))	\
+#define SESSION_EVT_POLL_GAP_TRACK_HANDLER(_smm, _my_thread_index)  \
+{                                   \
+  if (PREDICT_TRUE(                         \
+          smm->last_event_poll_by_thread[my_thread_index] != 0.0))  \
     if (now > smm->last_event_poll_by_thread[_my_thread_index] + 500e-6)\
-	SESSION_EVT_POLL_GAP(smm, my_thread_index);			\
-  _smm->last_event_poll_by_thread[my_thread_index] = now;		\
+    SESSION_EVT_POLL_GAP(smm, my_thread_index);         \
+  _smm->last_event_poll_by_thread[my_thread_index] = now;       \
 }
 
 #else

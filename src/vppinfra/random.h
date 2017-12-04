@@ -39,8 +39,8 @@
 #define included_random_h
 
 #include <vppinfra/clib.h>
-#include <vppinfra/vec.h>	/* for vec_resize */
-#include <vppinfra/format.h>	/* for unformat_input_t */
+#include <vppinfra/vec.h>   /* for vec_resize */
+#include <vppinfra/format.h>    /* for unformat_input_t */
 
 /** \file
     Linear Congruential Random Number Generator
@@ -68,8 +68,8 @@
 always_inline u32
 random_u32 (u32 * seed)
 {
-  *seed = (1664525 * *seed) + 1013904223;
-  return *seed;
+    *seed = (1664525 * *seed) + 1013904223;
+    return *seed;
 }
 
 /* External test routine. */
@@ -79,31 +79,31 @@ int test_random_main (unformat_input_t * input);
 always_inline u32
 random_u32_max (void)
 {
-  return 0xffffffff;
+    return 0xffffffff;
 }
 
 #ifdef CLIB_UNIX
 
-#include <unistd.h>		/* for getpid */
+#include <unistd.h>     /* for getpid */
 
 /** \brief Default random seed (unix/linux user-mode) */
 always_inline uword
 random_default_seed (void)
 {
-  return getpid ();
+    return getpid ();
 }
 
 #endif
 
 #ifdef CLIB_LINUX_KERNEL
 
-#include <linux/sched.h>	/* for jiffies */
+#include <linux/sched.h>    /* for jiffies */
 
 /** \brief Default random seed (Linux kernel) */
 always_inline uword
 random_default_seed (void)
 {
-  return jiffies;
+    return jiffies;
 }
 
 #endif
@@ -114,7 +114,7 @@ extern u32 standalone_random_default_seed;
 always_inline u32
 random_default_seed (void)
 {
-  return standalone_random_default_seed;
+    return standalone_random_default_seed;
 }
 #endif
 
@@ -125,8 +125,8 @@ random_default_seed (void)
 always_inline u64
 random_u64 (u64 * seed)
 {
-  *seed = 6364136223846793005ULL * *seed + 1442695040888963407ULL;
-  return *seed;
+    *seed = 6364136223846793005ULL * *seed + 1442695040888963407ULL;
+    return *seed;
 }
 
 /** \brief machine word size random number generator */
@@ -134,17 +134,17 @@ random_u64 (u64 * seed)
 always_inline uword
 random_uword (u32 * seed)
 {
-  if (sizeof (uword) == sizeof (u64))
-    return random_u64 ((u64 *) seed);
-  else
-    return random_u32 (seed);
+    if (sizeof (uword) == sizeof (u64))
+        return random_u64 ((u64 *) seed);
+    else
+        return random_u32 (seed);
 }
 
 /** \brief Generate f64 random number in the interval [0,1] */
 always_inline f64
 random_f64 (u32 * seed)
 {
-  return (f64) random_u32 (seed) / (f64) random_u32_max ();
+    return (f64) random_u32 (seed) / (f64) random_u32_max ();
 }
 
 /** \brief Generate random character vector
@@ -156,15 +156,15 @@ random_f64 (u32 * seed)
 always_inline u8 *
 random_string (u32 * seed, uword len)
 {
-  u8 *alphabet = (u8 *) "abcdefghijklmnopqrstuvwxyz";
-  u8 *s = 0;
-  word i;
+    u8 *alphabet = (u8 *) "abcdefghijklmnopqrstuvwxyz";
+    u8 *s = 0;
+    word i;
 
-  vec_resize (s, len);
-  for (i = 0; i < len; i++)
-    s[i] = alphabet[random_u32 (seed) % 26];
+    vec_resize (s, len);
+    for (i = 0; i < len; i++)
+        s[i] = alphabet[random_u32 (seed) % 26];
 
-  return s;
+    return s;
 }
 
 #endif /* included_random_h */
